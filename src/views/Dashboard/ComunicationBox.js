@@ -1,4 +1,4 @@
-import React,{useState, useEffect  } from "react";
+import React,{useState, useEffect, useContext  } from "react";
 import axios from 'axios';
 import {
     Input,
@@ -14,7 +14,17 @@ import {
     Heading,
     Image,
   } from '@chakra-ui/react';
+
+  import {
+    FormControl,
+    FormLabel,
+    FormErrorMessage,
+    FormHelperText,
+    Select
+  } from '@chakra-ui/react'
   
+  import AppContext from "appContext";
+
   // Custom components
   import Card from "components/Card/Card";
   import CardBody from "components/Card/CardBody";
@@ -28,9 +38,15 @@ import {
   import { useDebounce } from 'use-debounce';
 
   import { MdCheckCircle,MdSettings  } from 'react-icons/md';
+
+  import CardComunication from "components/Comunication/CardComunication";
+
+  // ENUMS
+  import Enums from '../../Enums';
+
   
   
-  function SearchBox({ onSearch }) {
+  function ComunicationBox({ onSearch }) {
     
     // Chakra color mode
     const textColor = useColorModeValue("gray.700", "white");
@@ -45,6 +61,10 @@ import {
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
 
     const [datos, setDatos] = useState([]);
+
+
+    // context 
+    const {caseType,setCaseType} = useContext(AppContext)
 
     const columns = [
       {
@@ -88,7 +108,7 @@ import {
     }, [debouncedSearchValue]);
   
     return (
-      <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
+      <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px", sm:'225px' }}>
         <Flex
           direction={{ sm: "column", md: "row" }}
           mb='24px'
@@ -114,81 +134,17 @@ import {
           
 
             <Box flex="1" direction="column">
-              <InputGroup>
-                <InputLeftElement pointerEvents='none'>
-                  <SearchIcon color='gray.300' />
-                </InputLeftElement>
-                <Input
-                  type='text'
-                  w={{sm:'100%'}}
-                  placeholder='Buscar...'
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                />
-              </InputGroup>
+              {caseType == Enums.CORRECTIVO ? (
+                <CardComunication title="¿Como te contactaron?"/>
+              ):(
+                <CardComunication title="¿Como lo encontraste?"/>
+              )}
             </Box>
           </Flex>
         </Flex>
-        {debouncedSearchValue && (
-          <Grid templateColumns={{ sm: "1fr", md: "repeat(4, 1fr)", xl: "repeat(4, 1fr)" }} gap='22px'>
-            
-            {datos.map((maquina) => (
-                <CardSearch 
-                  titulo={maquina.division_name + ' ' +  maquina.linea_name + ' ' + maquina.modelo_name} 
-                  img={maquina.catalogo_img}
-                  ID={maquina.ID}
-                  infos={[
-                    {title:"Categoria",text:maquina.categoria_name},
-                    {title:"Departamento",text:maquina.subdivision_name},
-                    {title:"Marca",text:maquina.marca_name},
-                    {title:"Proyecto",text:maquina.proyecto_name},
-                    {title:"Cliene",text:maquina.cliente_name},
-                    {title:"Estado",text:maquina.estado_maquinaria},
-                    {title:"Unidad Negocio",text:maquina.unidad_negocio},
-                    {title:"Propietario",text:maquina.propietario_name},
-                    {title:"Contrato",text:maquina.contrato},
-                    {title:"Finca",text:maquina.codigo_finca},
-                  ]}
-                />
-            ))}
-            {datos.length == 0 && (
-              <>
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-                <CardSkeleton />
-              </>
-            )}
-            
-            
-          </Grid>
-        )}
+        
       </Flex>
     );
   }
 
-export default SearchBox;
+export default ComunicationBox;

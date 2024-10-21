@@ -12,6 +12,10 @@ import Formik from 'views/Dashboard/Formik';
 import SignInDash from 'views/Dashboard/SignInDash';
 import SearchBox from 'views/Dashboard/SearchBox';
 import Base64Image from 'views/Dashboard/Base64Image';
+import SelectCasoBox from 'views/Dashboard/SelectCasoBox';
+import ComunicationBox from 'views/Dashboard/ComunicationBox';
+import PreDiagnosticoBox from 'views/Dashboard/PreDiagnosticoBox';
+
 
 // - NOTE
 // - In routes active redirect:"#", is not visible en slidebar, without content only "#"
@@ -165,6 +169,33 @@ var dashRoutes = [
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
         component: SearchBox,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/selectcaso",
+        name: "Select Caso",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: SelectCasoBox,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/comunication",
+        name: "Comuniación",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: ComunicationBox,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/prediagnostico",
+        name: "Pre Diagnostico",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: PreDiagnosticoBox,
         layout: "/admin",
       },
       {
