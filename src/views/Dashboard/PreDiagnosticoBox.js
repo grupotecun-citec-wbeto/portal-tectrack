@@ -1,6 +1,7 @@
-import React,{useState, useEffect  } from "react";
+import React,{useState, useEffect,useContext  } from "react";
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
+import {v4 as uuidv4} from 'uuid' // Importa la función para generar UUID
 import {
     Input,
     InputGroup,
@@ -31,6 +32,8 @@ import {
   import { MdCheckCircle,MdSettings  } from 'react-icons/md';
 
   import { Textarea } from '@chakra-ui/react'
+
+  import AppContext from "appContext";
   
   
   function PreDiagnosticoBox({ onSearch }) {
@@ -48,6 +51,8 @@ import {
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
 
     const [datos, setDatos] = useState([]);
+
+    const {casoActivo,setCasoActivo} = useContext(AppContext)
 
     // ************************** REDUX-PRESIST ****************************
     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -84,31 +89,49 @@ import {
 
     //*********************************** SECTION useEfect ********************************* */
   
+    
+
     // setea la data local de redux-persist
     useEffect(()=>{
       getUserData()
+      if(userData != null){
+        // creando caso
+        
+        let predianostico_structure = {
+          prediagnostico:{
+            descripcion:'',
+            sistemas:{},
+          }
+        }  
+        
 
-      let base_structure = {
-        prediagnostico:{
-          descripcion:'',
-          sistemas:{},
-        }
-      }  
-      if(userData == null){
-        saveUserData(base_structure)
-      }else{
-        if(!userData.hasOwnProperty("prediagnostico")){
-          const newUserData = {...userData};
-          newUserData.prediagnostico = base_structure.prediagnostico
-          saveUserData(newUserData)
-        }else{
-          if(userData.prediagnostico.hasOwnProperty("descripcion")){
-            setDescriptionValue(decodeURIComponent(userData.prediagnostico.descripcion))
+        if(userData.hasOwnProperty("casos") && casoActivo != ''){
+          // si dado que no exista un caso con ese uuid
+          if(!userData.casos.hasOwnProperty(casoActivo)){
+            const newUserData = {...userData};
+            
+            newUserData.casos[casoActivo] = predianostico_structure
+            newUserData.casoActivo = casoActivo
+            saveUserData(newUserData)
+          }
+          
+          
+          // verificar si exite prediagnostico
+          if(!userData.casos[casoActivo].hasOwnProperty("prediagnostico")){
+            const newUserData = {...userData};
+            newUserData.casos[casoActivo].prediagnostico = base_structure.prediagnostico
+            saveUserData(newUserData)
+          }else{
+            if(userData.casos[casoActivo].prediagnostico.hasOwnProperty("descripcion")){
+              if(userData.casos[casoActivo].prediagnostico.descripcion != ''){
+                setDescriptionValue(decodeURIComponent(userData.casos[casoActivo].prediagnostico.descripcion))
+              }
+            }
           }
         }
       }
       
-    },[userData])
+    },[casoActivo])
 
     // Obtener la lista de generalmachinessystem, obtine todos los systemas
     useEffect(() => {
@@ -144,10 +167,11 @@ import {
 
     useEffect(() =>{
       if(debouncedSearchValue){
-        const newUserData = {...userData};
-        newUserData.prediagnostico.descripcion = encodeURIComponent(descriptionValue)
-        saveUserData(newUserData)
-        console.log('afasddfasdfasdf',userData)
+        if(casoActivo != ''){
+          const newUserData = {...userData};
+          newUserData.casos[casoActivo].prediagnostico.descripcion = encodeURIComponent(descriptionValue)
+          saveUserData(newUserData)
+        }
       }
     },[debouncedSearchValue])
 

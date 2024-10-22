@@ -1,5 +1,6 @@
 // AppContext.js
 import { createContext, useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 // AXIOS
 import axios from 'axios';
 // Enums
@@ -19,6 +20,50 @@ export function AppProvider({ children }) {
     const [caseType,setCaseType] = useState(Enums.CORRECTIVO) // CORRECTIVO, PREVENTIVO
     const [comunicationSelected,setComunicationSelected] = useState(Enums.WHATSAPP)
     const [serviceTypeData,setServiceTypeData] = useState(null)
+    const [casoActivo,setCasoActivo] = useState('')
+
+     // >>>>>>>>>>>>>>>>>>>>>>>>>>REDUX-PRESIST >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+     const dispatch = useDispatch();
+     
+     const saveUserData = (json) => {
+       dispatch({ type: 'SET_USER_DATA', payload: json });
+     };
+ 
+     const getUserData = () => {
+       dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+     };
+     
+     // <<<<<<<<<<<<<<<<<<<<<<<<<< REDUX-PRESIST <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+     // ---------------------------------------------------------------------
+
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>> SECTION useEfect >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    
+    useEffect(()=>{
+        getUserData()
+  
+        if(userData == null){
+            let base_structure = {
+            casos : {},
+            casoActivo:''
+            }  
+            if(userData == null){
+            saveUserData(base_structure)
+            }
+        }else{
+            if(casoActivo == ''){
+                if(userData.casoActivo != ''){
+                    setCasoActivo(userData.casoActivo)
+                }
+            }
+        }
+
+        
+
+        
+        
+    },[])
 
     useEffect(() => {
       
@@ -43,12 +88,18 @@ export function AppProvider({ children }) {
       
     }, []);
 
+    
+
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< SECTION useEfect <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    //---------------------------------------------------------------------------------
+
     return (
         <AppContext.Provider value={{ 
             sideBarAccordionActiveIndex, setSideBarAccordionActiveIndex,
             machineID, setMachineID,
             caseType,setCaseType,
-            serviceTypeData,setServiceTypeData
+            serviceTypeData,setServiceTypeData,
+            casoActivo,setCasoActivo
             }}>
             {children}
         </AppContext.Provider>

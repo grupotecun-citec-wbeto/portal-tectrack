@@ -39,7 +39,10 @@ function CheckboxPreDiagnostico(props){
     const [check,setCheck] = useState(false)
     const [selectedService,setSelectedService] = useState('')
 
-    const {serviceTypeData,setServiceTypeData} = useContext(AppContext)
+    const {
+      serviceTypeData,setServiceTypeData,
+      casoActivo,setCasoActivo
+    } = useContext(AppContext)
 
     const saveUserData = (json) => {
       dispatch({ type: 'SET_USER_DATA', payload: json });
@@ -49,25 +52,26 @@ function CheckboxPreDiagnostico(props){
       dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
     };
 
-
+    // Carga información de los servicio seleccionados
     useEffect(()=>{
       getUserData()
-      const sistemas =  userData.prediagnostico.sistemas
-      for (let sistema in sistemas) {
-        if (sistema === name) {
-          //console.log(`Encontrado: ${sistema}`, sistemas[sistema]);
-          if(sistemas[sistema].check == '1'){
-            setCheck(true)
-          }else{
-            setCheck(false)
-          }
+      if(userData != null && casoActivo != ''){
+        const sistemas =  userData.casos[casoActivo].prediagnostico.sistemas
+        for (let sistema in sistemas) {
+          if (sistema === name) {
+            if(sistemas[sistema].check == '1'){
+              setCheck(true)
+            }else{
+              setCheck(false)
+            }
 
-          setSelectedService(sistemas[sistema].servicio_tipo_ID)
-        }
-      }   
+            setSelectedService(sistemas[sistema].servicio_tipo_ID)
+          }
+        }  
+      } 
       
       
-    },[userData])
+    },[])
 
     /*useEffect(()=>{
       getUserData()
@@ -107,7 +111,7 @@ function CheckboxPreDiagnostico(props){
       getUserData()
       
       const newUserData = {...userData};
-      newUserData.prediagnostico.sistemas[name] = {
+      newUserData.casos[casoActivo].prediagnostico.sistemas[name] = {
         sistema_ID: id,
         servicio_tipo_ID:'',
         check: (check) ? '0' : '1'
@@ -119,7 +123,7 @@ function CheckboxPreDiagnostico(props){
     const actionService = (service_id) =>{
       service_id = (service_id == '') ? '' : service_id
       const newUserData = {...userData};
-      newUserData.prediagnostico.sistemas[name].servicio_tipo_ID = service_id
+      newUserData.casos[casoActivo].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
     }
