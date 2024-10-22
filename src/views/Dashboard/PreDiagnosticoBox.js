@@ -69,7 +69,7 @@ import {
     ];
   
     // Simulamos una función de búsqueda (reemplaza con tu lógica real)
-    useEffect(async() => {
+    useEffect(() => {
       
         //onSearch(debouncedSearchValue);
         setDatos([])
@@ -152,7 +152,7 @@ import {
                         </Text>
                         <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
                           {datos[key].map( (element) =>(
-                            <CheckboxPreDiagnostico name={element.system_name}/>
+                            <CheckboxPreDiagnostico name={element.system_name} id={element.ID}/>
                           ))}
                         </Grid>
                       </>

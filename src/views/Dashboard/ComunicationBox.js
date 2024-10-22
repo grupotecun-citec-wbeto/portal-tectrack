@@ -87,7 +87,7 @@ import {
     ];
   
     // Simulamos una función de búsqueda (reemplaza con tu lógica real)
-    useEffect(async() => {
+    useEffect(() => {
       if (debouncedSearchValue) {
         //onSearch(debouncedSearchValue);
         setDatos([])

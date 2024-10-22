@@ -20,7 +20,7 @@ export function AppProvider({ children }) {
     const [comunicationSelected,setComunicationSelected] = useState(Enums.WHATSAPP)
     const [serviceTypeData,setServiceTypeData] = useState(null)
 
-    useEffect(async() => {
+    useEffect(() => {
       
         //onSearch(debouncedSearchValue);
         setServiceTypeData([])

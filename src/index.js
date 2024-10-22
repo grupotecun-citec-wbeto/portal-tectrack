@@ -28,6 +28,11 @@ import Notfound404 from "layouts/Errors/Notfound404.js";
 // Custom Chakra theme
 import theme from "theme/theme.js";
 
+// REDUX
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './redux/store.js';
+
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -43,20 +48,23 @@ const UserProfile = () => {
 };
 
 ReactDOM.render(
-  <ChakraProvider theme={theme} resetCss={false} position="relative">
-    <AppProvider>
-      <HashRouter>
-        <Switch>
-          <Route path={`/auth`} component={AuthLayout} />
-          <Route path={`/admin`} component={AdminLayout} />
-          <Route path={`/user/:userId`} component={UserProfile} />
-          <Route path={`/error`} component={Notfound404} />
-          <Route path={`/rtl`} component={RTLLayout} />
-          <Redirect from={`/`} to="/admin/dashboard" />
-        </Switch>
-      </HashRouter>
-    </AppProvider>
-    
-  </ChakraProvider>,
+  <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <ChakraProvider theme={theme} resetCss={false} position="relative">
+        <AppProvider>
+          <HashRouter>
+            <Switch>
+              <Route path={`/auth`} component={AuthLayout} />
+              <Route path={`/admin`} component={AdminLayout} />
+              <Route path={`/user/:userId`} component={UserProfile} />
+              <Route path={`/error`} component={Notfound404} />
+              <Route path={`/rtl`} component={RTLLayout} />
+              <Redirect from={`/`} to="/admin/dashboard" />
+            </Switch>
+          </HashRouter>
+        </AppProvider>
+      </ChakraProvider>
+    </PersistGate>
+  </Provider>,
   document.getElementById("root")
 );
