@@ -49,12 +49,31 @@ function CheckboxPreDiagnostico(props){
       dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
     };
 
+
     useEffect(()=>{
+      getUserData()
+      const sistemas =  userData.prediagnostico.sistemas
+      for (let sistema in sistemas) {
+        if (sistema === name) {
+          //console.log(`Encontrado: ${sistema}`, sistemas[sistema]);
+          if(sistemas[sistema].check == '1'){
+            setCheck(true)
+          }else{
+            setCheck(false)
+          }
+
+          setSelectedService(sistemas[sistema].servicio_tipo_ID)
+        }
+      }   
+      
+      
+    },[userData])
+
+    /*useEffect(()=>{
       getUserData()
       if(userData == null){
         saveUserData({
           prediagnostico:{
-            descripcion:'',
             sistemas:{}
           }
         })
@@ -62,7 +81,6 @@ function CheckboxPreDiagnostico(props){
         if(!userData.hasOwnProperty("prediagnostico")){
           const newUserData = {...userData};
           newUserData.prediagnostico = {
-            descripcion:'',
             sistemas:{}
           }
           saveUserData(newUserData)
@@ -83,7 +101,7 @@ function CheckboxPreDiagnostico(props){
       
       
       
-    },[userData])
+    },[userData])*/
 
     const actionCheck = () =>{
       getUserData()
@@ -104,7 +122,6 @@ function CheckboxPreDiagnostico(props){
       newUserData.prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
-      console.log('afdasdfasdfasdfsafd',userData)
     }
 
     return(
@@ -122,11 +139,11 @@ function CheckboxPreDiagnostico(props){
         </Flex>
         { check && (
           <Flex ms={{xl:'10px'}}>
-            <FormControl maxW={{xl:'250px'}}>
+            <FormControl maxW={{xl:'250px'}} key={id}>
               <FormLabel htmlFor='country'>Tipo de servicio</FormLabel>
               <Select id='country' placeholder='Selecconar servicio' onChange={(e) => actionService(e.target.value)} value={selectedService}>
                 {serviceTypeData.map( (data) =>(
-                  <option value={data.ID}>{data.servicio_tipo_name}</option>
+                  <option key={data.ID} value={data.ID}>{data.servicio_tipo_name}</option>
                 ))}
               </Select>
             </FormControl>

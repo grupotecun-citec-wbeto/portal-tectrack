@@ -1,5 +1,6 @@
 import React,{useState, useEffect  } from "react";
 import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
 import {
     Input,
     InputGroup,
@@ -42,12 +43,25 @@ import {
     const emailColor = useColorModeValue("gray.400", "gray.300");
   
 
-    const [searchValue, setSearchValue] = useState('');
-    const [debouncedSearchValue] = useDebounce(searchValue, 500);
+    const [descriptionValue, setDescriptionValue] = useState('');
+    const [debouncedSearchValue] = useDebounce(descriptionValue, 500);
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
 
     const [datos, setDatos] = useState([]);
 
+    // ************************** REDUX-PRESIST ****************************
+    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+    const dispatch = useDispatch();
+    
+    const saveUserData = (json) => {
+      dispatch({ type: 'SET_USER_DATA', payload: json });
+    };
+
+    const getUserData = () => {
+      dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+    };
+    
+    // ************************** REDUX-PRESIST ****************************
     const columns = [
       {
         name: 'Name',
@@ -67,10 +81,38 @@ import {
       { id: 1, name: 'John Doe', age: 30 },
       { id: 2, name: 'Jane Smith', age: 25 },
     ];
+
+    //*********************************** SECTION useEfect ********************************* */
   
-    // Simulamos una función de búsqueda (reemplaza con tu lógica real)
-    useEffect(() => {
+    // setea la data local de redux-persist
+    useEffect(()=>{
+      getUserData()
+
+      let base_structure = {
+        prediagnostico:{
+          descripcion:'',
+          sistemas:{},
+        }
+      }  
+      if(userData == null){
+        saveUserData(base_structure)
+      }else{
+        if(!userData.hasOwnProperty("prediagnostico")){
+          const newUserData = {...userData};
+          newUserData.prediagnostico = base_structure.prediagnostico
+          saveUserData(newUserData)
+        }else{
+          if(userData.prediagnostico.hasOwnProperty("descripcion")){
+            setDescriptionValue(decodeURIComponent(userData.prediagnostico.descripcion))
+          }
+        }
+      }
       
+    },[userData])
+
+    // Obtener la lista de generalmachinessystem, obtine todos los systemas
+    useEffect(() => {
+
         //onSearch(debouncedSearchValue);
         setDatos([])
         const fetchData = async () => {
@@ -99,6 +141,17 @@ import {
         fetchData();
       
     }, []);
+
+    useEffect(() =>{
+      if(debouncedSearchValue){
+        const newUserData = {...userData};
+        newUserData.prediagnostico.descripcion = encodeURIComponent(descriptionValue)
+        saveUserData(newUserData)
+        console.log('afasddfasdfasdf',userData)
+      }
+    },[debouncedSearchValue])
+
+    //*********************************** SECTION useEfect ********************************* */
   
     return (
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
@@ -134,7 +187,10 @@ import {
                 <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>
               </CardHeader>
               <CardBody mt={{xl:'10px'}}>
-                <Textarea variant="dark" color='black' minH={{xl:'200px',sm:'200px'}} fontSize={{xl:'1.5em'}} placeholder='Explicación del problema' />
+                <Textarea variant="dark" color='black' minH={{xl:'200px',sm:'200px'}} fontSize={{xl:'1.5em'}} placeholder='Explicación del problema' 
+                  onChange={(e) => setDescriptionValue(e.target.value)} 
+                  value={descriptionValue}
+                  />
               </CardBody>
               
           </Card>
