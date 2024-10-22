@@ -25,6 +25,7 @@ import {
   
   // TECTRACK COMPONENTES
   import CheckboxPreDiagnostico from "components/PreDiagnostico/CheckboxPreDiagnostico";
+  import CardEspecialista from "components/PreDiagnostico/CardEspcialista";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -34,7 +35,9 @@ import {
   import { Textarea } from '@chakra-ui/react'
 
   import AppContext from "appContext";
+
   
+  //*********************************************** FIN IMPORT ***************************************************** */
   
   function PreDiagnosticoBox({ onSearch }) {
     
@@ -97,10 +100,13 @@ import {
       if(userData != null){
         // creando caso
         
+        /******************************** ESTRUCTURA DE UN PRE DIAGNOSTICO ******************************** */
         let predianostico_structure = {
           prediagnostico:{
             descripcion:'',
             sistemas:{},
+            necesitaEspecialista:'0', // 0:-> no necesita 1:-> si necesita
+            especialista_id:'', // identificador de especialista
           }
         }  
         
@@ -241,6 +247,7 @@ import {
               </CardBody>
               
           </Card>
+          <CardEspecialista />
           
         </Grid>
         

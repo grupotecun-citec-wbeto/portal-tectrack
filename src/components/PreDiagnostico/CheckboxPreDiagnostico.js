@@ -75,7 +75,7 @@ function CheckboxPreDiagnostico(props){
       } 
       
       
-    },[])
+    },[casoActivo])
 
     /*useEffect(()=>{
       getUserData()
@@ -115,6 +115,8 @@ function CheckboxPreDiagnostico(props){
       getUserData()
       
       const newUserData = {...userData};
+      
+      //*********************************** ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO ******************************* */
       newUserData.casos[casoActivo].prediagnostico.sistemas[name] = {
         sistema_ID: id,
         servicio_tipo_ID:'',
