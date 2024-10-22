@@ -26,6 +26,7 @@ import {
   // TECTRACK COMPONENTES
   import CheckboxPreDiagnostico from "components/PreDiagnostico/CheckboxPreDiagnostico";
   import CardEspecialista from "components/PreDiagnostico/CardEspcialista";
+  import CardAsistencia from "components/PreDiagnostico/CardAsistencia";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -107,6 +108,7 @@ import {
             sistemas:{},
             necesitaEspecialista:'0', // 0:-> no necesita 1:-> si necesita
             especialista_id:'', // identificador de especialista
+            asistencia_tipo_id:'', // identificador de asistencia
           }
         }  
         
@@ -248,6 +250,7 @@ import {
               
           </Card>
           <CardEspecialista />
+          <CardAsistencia />
           
         </Grid>
         
