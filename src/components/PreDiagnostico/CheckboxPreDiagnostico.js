@@ -38,6 +38,7 @@ function CheckboxPreDiagnostico(props){
 
     const [check,setCheck] = useState(false)
     const [selectedService,setSelectedService] = useState('')
+    const [selectedMarca,setSelectedMarca] = useState('')
 
     const {
       serviceTypeData,setServiceTypeData,
@@ -65,7 +66,10 @@ function CheckboxPreDiagnostico(props){
               setCheck(false)
             }
 
+
+            
             setSelectedService(sistemas[sistema].servicio_tipo_ID)
+            setSelectedMarca(sistemas[sistema].sistema_marca_ID)
           }
         }  
       } 
@@ -114,6 +118,7 @@ function CheckboxPreDiagnostico(props){
       newUserData.casos[casoActivo].prediagnostico.sistemas[name] = {
         sistema_ID: id,
         servicio_tipo_ID:'',
+        sistema_marca_ID:'',
         check: (check) ? '0' : '1'
       }
       saveUserData(newUserData)
@@ -126,6 +131,14 @@ function CheckboxPreDiagnostico(props){
       newUserData.casos[casoActivo].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
+    }
+
+    const actionMarca = (marca_id) =>{
+      marca_id = (marca_id == '') ? '' : marca_id
+      const newUserData = {...userData};
+      newUserData.casos[casoActivo].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
+      saveUserData(newUserData)
+      setSelectedMarca(marca_id)
     }
 
     return(
@@ -142,17 +155,29 @@ function CheckboxPreDiagnostico(props){
           </Text>
         </Flex>
         { check && (
-          <Flex ms={{xl:'10px'}}>
-            <FormControl maxW={{xl:'250px'}} key={id}>
-              <FormLabel htmlFor='country'>Tipo de servicio</FormLabel>
-              <Select id='country' placeholder='Selecconar servicio' onChange={(e) => actionService(e.target.value)} value={selectedService}>
-                {serviceTypeData.map( (data) =>(
-                  <option key={data.ID} value={data.ID}>{data.servicio_tipo_name}</option>
-                ))}
-              </Select>
-            </FormControl>
-            
-          </Flex>
+          <>
+            <Flex ms={{xl:'10px'}}>
+              <FormControl maxW={{xl:'250px'}} key={id}>
+                <FormLabel htmlFor='country'>Tipo de servicio</FormLabel>
+                <Select id='country' placeholder='Selecconar servicio' onChange={(e) => actionService(e.target.value)} value={selectedService}>
+                  {serviceTypeData.map( (data) =>(
+                    <option key={data.ID} value={data.ID}>{data.servicio_tipo_name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+            </Flex>
+            {(rest.section.toUpperCase() == 'TECNOLOGIA') && (
+              <Flex ms={{xl:'10px'}}>
+              <FormControl maxW={{xl:'250px'}} key={id}>
+                <FormLabel htmlFor='country'>Tipo de Marca</FormLabel>
+                <Select id='country' placeholder='Selecconar Marca' onChange={(e) => actionMarca(e.target.value)} value={selectedMarca}>
+                  <option key='1' value='1'>RAVEN</option>
+                  <option key='2' value='2'>TRIMBLE</option>
+                </Select>
+              </FormControl>
+            </Flex>
+            )}
+          </>
         )}
        
       </Flex>

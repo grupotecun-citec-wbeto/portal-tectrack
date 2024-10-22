@@ -232,7 +232,7 @@ import {
                         </Text>
                         <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
                           {datos[key].map( (element) =>(
-                            <CheckboxPreDiagnostico name={element.system_name} id={element.ID}/>
+                            <CheckboxPreDiagnostico name={element.system_name} id={element.ID} section={key}/>
                           ))}
                         </Grid>
                       </>
