@@ -29,6 +29,7 @@ import {
   import CardAsistencia from "components/PreDiagnostico/CardAsistencia";
   import CardCrearCaso from "components/PreDiagnostico/CardCrearCaso";
   import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
+  import CardHerramientas from "components/PreDiagnostico/CardHerramientas";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -104,11 +105,15 @@ import {
       if(userData != null){
         // creando caso
         
-        /******************************** ESTRUCTURA DE UN PRE DIAGNOSTICO ******************************** */
+        /*=======================================================
+         BLOQUE: ESTRUCTURA DE UN PRE DIAGNOSTICO
+         DESCRIPTION: Estructura base de un PRE-DIAGNOSTICO
+        =========================================================*/
         let predianostico_structure = {
           prediagnostico:{
             descripcion:'',
             sistemas:{},
+            herramientas:{},
             necesitaEspecialista:'0', // 0:-> no necesita 1:-> si necesita
             especialista_id:'', // identificador de especialista
             asistencia_tipo_id:'', // identificador de asistencia
@@ -267,6 +272,8 @@ import {
           </Card>
           <CardEspecialista />
           <CardAsistencia />
+          <CardHerramientas />
+          
           <CardCrearCaso openAlert={openAlert} />
           {isSuccessAlertCaso &&(
             <SuccessAlertCaso closeAlert={closeAlert}/>
