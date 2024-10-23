@@ -60,7 +60,9 @@ function CardAsistencia(props){
         if(userData != null && casoActivo != ''){
             
             // recuperando desplegable de especialista
-            setSelectedAsistencia(userData.casos[casoActivo].prediagnostico.asistencia_tipo_id)
+            if(typeof userData.casos[casoActivo] !== 'undefined' ){
+                setSelectedAsistencia(userData.casos[casoActivo].prediagnostico.asistencia_tipo_id)
+            }
         } 
         
         

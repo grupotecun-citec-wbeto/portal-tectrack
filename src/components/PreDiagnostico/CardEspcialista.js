@@ -59,11 +59,13 @@ function CardEspecialista(props){
     useEffect(()=>{
         getUserData()
         if(userData != null && casoActivo != ''){
-            
-            const needEspecialista =  userData.casos[casoActivo].prediagnostico.necesitaEspecialista
-            setNecesitaEspecialista((needEspecialista == '1') ? true : false)
-            // recuperando desplegable de especialista
-            setSelectedEspecialista(userData.casos[casoActivo].prediagnostico.especialista_id)
+            console.log('5b767b02-bbcd-4831-b73e-4c0ecdb7044f',userData,casoActivo,userData.casos[casoActivo])
+            if(typeof userData.casos[casoActivo] !== 'undefined' ){
+                const needEspecialista =  userData.casos[casoActivo].prediagnostico.necesitaEspecialista
+                setNecesitaEspecialista((needEspecialista == '1') ? true : false)
+                // recuperando desplegable de especialista
+                setSelectedEspecialista(userData.casos[casoActivo].prediagnostico.especialista_id)
+            }
         } 
         
         

@@ -27,6 +27,8 @@ import {
   import CheckboxPreDiagnostico from "components/PreDiagnostico/CheckboxPreDiagnostico";
   import CardEspecialista from "components/PreDiagnostico/CardEspcialista";
   import CardAsistencia from "components/PreDiagnostico/CardAsistencia";
+  import CardCrearCaso from "components/PreDiagnostico/CardCrearCaso";
+  import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -53,6 +55,7 @@ import {
     const [descriptionValue, setDescriptionValue] = useState('');
     const [debouncedSearchValue] = useDebounce(descriptionValue, 500);
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
+    const [isSuccessAlertCaso,setIsSuccessAlertCaso] = useState(false)
 
     const [datos, setDatos] = useState([]);
 
@@ -185,6 +188,19 @@ import {
 
     //*********************************** SECTION useEfect ********************************* */
   
+
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> FUCNTIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    const closeAlert = () => {
+      setIsSuccessAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
+    };
+
+    const openAlert = () => {
+      setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
+    };
+
+    
+
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FUNCTIONS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     return (
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
         <Flex
@@ -251,6 +267,11 @@ import {
           </Card>
           <CardEspecialista />
           <CardAsistencia />
+          <CardCrearCaso openAlert={openAlert} />
+          {isSuccessAlertCaso &&(
+            <SuccessAlertCaso closeAlert={closeAlert}/>
+          )}
+          
           
         </Grid>
         
