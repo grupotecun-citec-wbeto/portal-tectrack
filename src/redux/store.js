@@ -3,6 +3,8 @@ import { createStore } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
 //import storage from 'redux-persist/lib/storage'; // Usaremos localStorage
 import indexedDBStorage from 'redux-persist-indexeddb-storage'; // Adaptador para IndexedDB
+import compress from 'redux-persist-transform-compress';
+
 import caseReducer from './caseReducer';
 
 
@@ -10,6 +12,7 @@ import caseReducer from './caseReducer';
 const persistConfig = {
   key: 'root',
   storage: indexedDBStorage('myAppDB'), // Aquí defines tu IndexedDB
+  transforms: [compress()], // Comprime el estado antes de persistirlo
 };
 
 // Configuración de persistencia
