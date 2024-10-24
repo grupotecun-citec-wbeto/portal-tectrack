@@ -43,6 +43,7 @@
 		"react-tagsinput": "3.19.0",
 		"redux": "^5.0.1",
 		"redux-persist": "^6.0.0",
+		"redux-persist-indexeddb-storage": "^1.0.4",
 		"sass": "^1.56.1",
 		"source-map-loader": "^5.0.0",
 		"styled-components": "^6.1.13",
