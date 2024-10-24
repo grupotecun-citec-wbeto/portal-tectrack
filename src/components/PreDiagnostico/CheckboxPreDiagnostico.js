@@ -56,7 +56,7 @@ function CheckboxPreDiagnostico(props){
     // Carga información de los servicio seleccionados
     useEffect(()=>{
       getUserData()
-      if(userData != null && casoActivo.code != ''){
+      if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
         const sistemas =  userData.casos[casoActivo.code].prediagnostico.sistemas
         for (let sistema in sistemas) {
           if (sistema === name) {

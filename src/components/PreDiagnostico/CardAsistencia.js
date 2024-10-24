@@ -57,7 +57,7 @@ function CardAsistencia(props){
     // Cargando datos cuando el navegador de reinicia
     useEffect(()=>{
         getUserData()
-        if(userData != null && casoActivo.code != ''){
+        if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
             
             // recuperando desplegable de especialista
             if(typeof userData.casos[casoActivo.code] !== 'undefined' ){

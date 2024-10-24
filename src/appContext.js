@@ -43,6 +43,7 @@ export function AppProvider({ children }) {
     useEffect(()=>{
         getUserData()
   
+        console.log('ea2a2d78-9f16-40da-baa6-5743db7086ee2',casoActivo)
         if(userData == null){
             let base_structure = {
                 casos : {},
@@ -56,9 +57,10 @@ export function AppProvider({ children }) {
              BLOQUE: Recuperar datos Guardados en REDUX-PRESIST
              DESCRIPTION: Esto se ejecuta cuando useData tiene información que es estraida de REDUX-PRESIST 
             =========================================================*/
-            if(casoActivo.code == ''){
+            if(casoActivo == ''){
                 if(userData.casoActivo.code != ''){
                     // Setear caso activo obtnido de REDUX-PERSIT
+                    console.log('ea2a2d78-9f16-40da-baa6-5743db7086ee',userData.casoActivo)
                     setCasoActivo(userData.casoActivo)
                 }
             }

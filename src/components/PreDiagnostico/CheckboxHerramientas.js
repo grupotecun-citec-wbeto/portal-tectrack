@@ -55,7 +55,7 @@ function CheckboxHerramientas(props){
     // Carga información de los servicio seleccionados
     useEffect(()=>{
       getUserData()
-      if(userData != null && casoActivo.code != ''){
+      if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined' ){
         const herramientas =  userData.casos[casoActivo.code].prediagnostico.herramientas
         for (let herramienta in herramientas) {
           if (herramienta === name) {

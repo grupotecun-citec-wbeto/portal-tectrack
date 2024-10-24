@@ -36,6 +36,7 @@ import {
   import CardCrearCaso from "components/PreDiagnostico/CardCrearCaso";
   import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
   import CardHerramientas from "components/PreDiagnostico/CardHerramientas";
+  import CardCommand from "components/PreDiagnostico/CadCommand";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -300,6 +301,7 @@ import {
               {isSuccessAlertCaso &&(
                 <SuccessAlertCaso closeAlert={closeAlert}/>
               )}
+              <CardCommand />
               
               
             </Grid>
