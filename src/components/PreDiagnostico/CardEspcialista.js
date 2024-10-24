@@ -58,18 +58,18 @@ function CardEspecialista(props){
     // Cargando datos cuando el navegador de reinicia
     useEffect(()=>{
         getUserData()
-        if(userData != null && casoActivo != ''){
-            console.log('5b767b02-bbcd-4831-b73e-4c0ecdb7044f',userData,casoActivo,userData.casos[casoActivo])
-            if(typeof userData.casos[casoActivo] !== 'undefined' ){
-                const needEspecialista =  userData.casos[casoActivo].prediagnostico.necesitaEspecialista
+        if(userData != null && casoActivo.code != ''){
+            console.log('5b767b02-bbcd-4831-b73e-4c0ecdb7044f',userData,casoActivo.code,userData.casos[casoActivo.code])
+            if(typeof userData.casos[casoActivo.code] !== 'undefined' ){
+                const needEspecialista =  userData.casos[casoActivo.code].prediagnostico.necesitaEspecialista
                 setNecesitaEspecialista((needEspecialista == '1') ? true : false)
                 // recuperando desplegable de especialista
-                setSelectedEspecialista(userData.casos[casoActivo].prediagnostico.especialista_id)
+                setSelectedEspecialista(userData.casos[casoActivo.code].prediagnostico.especialista_id)
             }
         } 
         
         
-    },[casoActivo])
+    },[casoActivo.code])
 
     const actionCheckEspecialista = () =>{
         getUserData()
@@ -77,19 +77,19 @@ function CardEspecialista(props){
         const newUserData = {...userData};
         
         //*********************************** ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO ******************************* */
-        newUserData.casos[casoActivo].prediagnostico.necesitaEspecialista = (necesitaEspecialista) ? '0' : '1' // la logica esta  al revez por la rederizacion del switch
+        newUserData.casos[casoActivo.code].prediagnostico.necesitaEspecialista = (necesitaEspecialista) ? '0' : '1' // la logica esta  al revez por la rederizacion del switch
         saveUserData(newUserData)
         setNecesitaEspecialista(!necesitaEspecialista)
         if(!necesitaEspecialista){
             setSelectedEspecialista('')
         }
-        console.log('04ee9800-9817-4b69-9cda-90420576f89b',userData,casoActivo)
+        console.log('04ee9800-9817-4b69-9cda-90420576f89b',userData,casoActivo.code)
     }
 
     const actionSelectEspecialista = (especialista_id) =>{
         especialista_id = (especialista_id == '') ? '' : especialista_id
         const newUserData = {...userData};
-        newUserData.casos[casoActivo].prediagnostico.especialista_id = especialista_id
+        newUserData.casos[casoActivo.code].prediagnostico.especialista_id = especialista_id
         saveUserData(newUserData)
         setSelectedEspecialista(especialista_id)
       }

@@ -106,10 +106,12 @@ import {
         // creando caso
         
         /*=======================================================
-         BLOQUE: ESTRUCTURA DE UN PRE DIAGNOSTICO
-         DESCRIPTION: Estructura base de un PRE-DIAGNOSTICO
+         BLOQUE: ESTRUCTURA DE UN CASO
+         DESCRIPTION: Estructura base de un caso 
         =========================================================*/
-        let predianostico_structure = {
+        let caso_structure = {
+          maquina_id:casoActivo.maquina_id,
+          categoria_id:casoActivo.categoria_id,
           prediagnostico:{
             descripcion:'',
             sistemas:{},
@@ -121,33 +123,33 @@ import {
         }  
         
 
-        if(userData.hasOwnProperty("casos") && casoActivo != ''){
+        if(userData.hasOwnProperty("casos") && casoActivo.code != ''){
           // si dado que no exista un caso con ese uuid
-          if(!userData.casos.hasOwnProperty(casoActivo)){
+          if(!userData.casos.hasOwnProperty(casoActivo.code)){
             const newUserData = {...userData};
             
-            newUserData.casos[casoActivo] = predianostico_structure
-            newUserData.casoActivo = casoActivo
+            newUserData.casos[casoActivo.code] = caso_structure
+            newUserData.casoActivo.code = casoActivo.code
             saveUserData(newUserData)
           }
           
           
           // verificar si exite prediagnostico
-          if(!userData.casos[casoActivo].hasOwnProperty("prediagnostico")){
+          if(!userData.casos[casoActivo.code].hasOwnProperty("prediagnostico")){
             const newUserData = {...userData};
-            newUserData.casos[casoActivo].prediagnostico = base_structure.prediagnostico
+            newUserData.casos[casoActivo.code].prediagnostico = base_structure.prediagnostico
             saveUserData(newUserData)
           }else{
-            if(userData.casos[casoActivo].prediagnostico.hasOwnProperty("descripcion")){
-              if(userData.casos[casoActivo].prediagnostico.descripcion != ''){
-                setDescriptionValue(decodeURIComponent(userData.casos[casoActivo].prediagnostico.descripcion))
+            if(userData.casos[casoActivo.code].prediagnostico.hasOwnProperty("descripcion")){
+              if(userData.casos[casoActivo.code].prediagnostico.descripcion != ''){
+                setDescriptionValue(decodeURIComponent(userData.casos[casoActivo.code].prediagnostico.descripcion))
               }
             }
           }
         }
       }
       
-    },[casoActivo])
+    },[casoActivo.code])
 
     // Obtener la lista de generalmachinessystem, obtine todos los systemas
     useEffect(() => {
@@ -183,9 +185,9 @@ import {
 
     useEffect(() =>{
       if(debouncedSearchValue){
-        if(casoActivo != ''){
+        if(casoActivo.code != ''){
           const newUserData = {...userData};
-          newUserData.casos[casoActivo].prediagnostico.descripcion = encodeURIComponent(descriptionValue)
+          newUserData.casos[casoActivo.code].prediagnostico.descripcion = encodeURIComponent(descriptionValue)
           saveUserData(newUserData)
         }
       }

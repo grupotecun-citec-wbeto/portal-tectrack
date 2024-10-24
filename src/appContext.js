@@ -46,15 +46,15 @@ export function AppProvider({ children }) {
         if(userData == null){
             let base_structure = {
             casos : {},
-            casoActivo:''
+            casoActivo:{code:''}
             }  
             if(userData == null){
             saveUserData(base_structure)
             }
         }else{
-            if(casoActivo == ''){
-                if(userData.casoActivo != ''){
-                    setCasoActivo(userData.casoActivo)
+            if(casoActivo.code == ''){
+                if(userData.casoActivo.code != ''){
+                    setCasoActivo(userData.casoActivo.code)
                 }
             }
         }

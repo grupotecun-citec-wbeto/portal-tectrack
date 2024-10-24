@@ -55,8 +55,8 @@ function CheckboxHerramientas(props){
     // Carga información de los servicio seleccionados
     useEffect(()=>{
       getUserData()
-      if(userData != null && casoActivo != ''){
-        const herramientas =  userData.casos[casoActivo].prediagnostico.herramientas
+      if(userData != null && casoActivo.code != ''){
+        const herramientas =  userData.casos[casoActivo.code].prediagnostico.herramientas
         for (let herramienta in herramientas) {
           if (herramienta === name) {
             if(herramientas[herramienta].check == '1'){
@@ -73,7 +73,7 @@ function CheckboxHerramientas(props){
       } 
       
       
-    },[casoActivo])
+    },[casoActivo.code])
 
     const actionCheck = () =>{
       getUserData()
@@ -89,7 +89,7 @@ function CheckboxHerramientas(props){
        BLOQUE: ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO
        DESCRIPTION: Ingreso de datos al json se va guardar REDUX-PRESIST
       =========================================================*/
-      newUserData.casos[casoActivo].prediagnostico.herramientas[name] = {
+      newUserData.casos[casoActivo.code].prediagnostico.herramientas[name] = {
         herramienta_ID: id,
         check: (check) ? '0' : '1'
       }
@@ -101,7 +101,7 @@ function CheckboxHerramientas(props){
     const actionService = (service_id) =>{
       service_id = (service_id == '') ? '' : service_id
       const newUserData = {...userData};
-      newUserData.casos[casoActivo].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
+      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
     }
@@ -109,7 +109,7 @@ function CheckboxHerramientas(props){
     const actionMarca = (marca_id) =>{
       marca_id = (marca_id == '') ? '' : marca_id
       const newUserData = {...userData};
-      newUserData.casos[casoActivo].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
+      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
       saveUserData(newUserData)
       setSelectedMarca(marca_id)
     }

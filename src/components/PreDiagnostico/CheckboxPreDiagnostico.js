@@ -56,8 +56,8 @@ function CheckboxPreDiagnostico(props){
     // Carga información de los servicio seleccionados
     useEffect(()=>{
       getUserData()
-      if(userData != null && casoActivo != ''){
-        const sistemas =  userData.casos[casoActivo].prediagnostico.sistemas
+      if(userData != null && casoActivo.code != ''){
+        const sistemas =  userData.casos[casoActivo.code].prediagnostico.sistemas
         for (let sistema in sistemas) {
           if (sistema === name) {
             if(sistemas[sistema].check == '1'){
@@ -75,7 +75,7 @@ function CheckboxPreDiagnostico(props){
       } 
       
       
-    },[casoActivo])
+    },[casoActivo.code])
 
     /*useEffect(()=>{
       getUserData()
@@ -117,7 +117,7 @@ function CheckboxPreDiagnostico(props){
       const newUserData = {...userData};
       
       //*********************************** ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO ******************************* */
-      newUserData.casos[casoActivo].prediagnostico.sistemas[name] = {
+      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name] = {
         sistema_ID: id,
         servicio_tipo_ID:'',
         sistema_marca_ID:'',
@@ -130,7 +130,7 @@ function CheckboxPreDiagnostico(props){
     const actionService = (service_id) =>{
       service_id = (service_id == '') ? '' : service_id
       const newUserData = {...userData};
-      newUserData.casos[casoActivo].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
+      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
     }
@@ -138,7 +138,7 @@ function CheckboxPreDiagnostico(props){
     const actionMarca = (marca_id) =>{
       marca_id = (marca_id == '') ? '' : marca_id
       const newUserData = {...userData};
-      newUserData.casos[casoActivo].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
+      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
       saveUserData(newUserData)
       setSelectedMarca(marca_id)
     }

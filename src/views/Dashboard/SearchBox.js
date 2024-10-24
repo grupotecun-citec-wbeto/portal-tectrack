@@ -136,7 +136,8 @@ import {
                 <CardSearch 
                   titulo={maquina.division_name + ' ' +  maquina.linea_name + ' ' + maquina.modelo_name} 
                   img={maquina.catalogo_img}
-                  ID={maquina.ID}
+                  maquina_id={maquina.ID}
+                  categoria_id={maquina.categoria_id}
                   infos={[
                     {title:"Categoria",text:maquina.categoria_name},
                     {title:"Departamento",text:maquina.subdivision_name},
