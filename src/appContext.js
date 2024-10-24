@@ -45,16 +45,21 @@ export function AppProvider({ children }) {
   
         if(userData == null){
             let base_structure = {
-            casos : {},
-            casoActivo:{code:''}
+                casos : {},
+                casoActivo:{code:'',maquina_id:'',categoria_id:''}
             }  
             if(userData == null){
-            saveUserData(base_structure)
+                saveUserData(base_structure)
             }
         }else{
+            /*=======================================================
+             BLOQUE: Recuperar datos Guardados en REDUX-PRESIST
+             DESCRIPTION: Esto se ejecuta cuando useData tiene información que es estraida de REDUX-PRESIST 
+            =========================================================*/
             if(casoActivo.code == ''){
                 if(userData.casoActivo.code != ''){
-                    setCasoActivo(userData.casoActivo.code)
+                    // Setear caso activo obtnido de REDUX-PERSIT
+                    setCasoActivo(userData.casoActivo)
                 }
             }
         }

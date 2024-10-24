@@ -2,6 +2,12 @@ import React,{useState, useEffect,useContext  } from "react";
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import {v4 as uuidv4} from 'uuid' // Importa la función para generar UUID
+/*=======================================================
+ BLOQUE: rourte-dom
+ DESCRIPTION: Para navegar entre las pantallas
+=========================================================*/
+import { Link, useHistory   } from 'react-router-dom';
+
 import {
     Input,
     InputGroup,
@@ -51,7 +57,13 @@ import {
     const bgProfile = useColorModeValue("hsla(0,0%,100%,.8)", "navy.800");
     const borderProfileColor = useColorModeValue("white", "transparent");
     const emailColor = useColorModeValue("gray.400", "gray.300");
-  
+
+    
+    /*=======================================================
+     BLOQUE: variable hitory
+     DESCRIPTION: 
+    =========================================================*/
+    const history = useHistory()
 
     const [descriptionValue, setDescriptionValue] = useState('');
     const [debouncedSearchValue] = useDebounce(descriptionValue, 500);
@@ -95,8 +107,10 @@ import {
       { id: 2, name: 'Jane Smith', age: 25 },
     ];
 
-    //*********************************** SECTION useEfect ********************************* */
-  
+    /*=======================================================
+     BLOQUE: useEfect
+     DESCRIPTION: Solicitudes extenas acciones internas
+    =========================================================*/
     
 
     // setea la data local de redux-persist
@@ -123,7 +137,7 @@ import {
         }  
         
 
-        if(userData.hasOwnProperty("casos") && casoActivo.code != ''){
+        if(userData.hasOwnProperty("casos") && casoActivo.code != '' && typeof casoActivo.code !== 'undefined' ){
           // si dado que no exista un caso con ese uuid
           if(!userData.casos.hasOwnProperty(casoActivo.code)){
             const newUserData = {...userData};
@@ -193,10 +207,13 @@ import {
       }
     },[debouncedSearchValue])
 
-    //*********************************** SECTION useEfect ********************************* */
+    /*====================FIN BLOQUE: useEfect        ==============*/
   
 
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> FUCNTIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    /*=======================================================
+     BLOQUE: FUCTIONS
+     DESCRIPTION: Bloque de funciones
+    =========================================================*/
     const closeAlert = () => {
       setIsSuccessAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
@@ -205,86 +222,95 @@ import {
       setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
-    
+    /*====================FIN BLOQUE: FUNCTIONS        ==============*/
 
-    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< FUNCTIONS <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    
     return (
-      <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
-        <Flex
-          direction={{ sm: "column", md: "row" }}
-          mb='24px'
-          maxH='330px'
-          justifyContent={{ sm: "center", md: "space-between" }}
-          align='center'
-          backdropFilter='blur(21px)'
-          boxShadow='0px 2px 5.5px rgba(0, 0, 0, 0.02)'
-          border='1.5px solid'
-          borderColor={borderProfileColor}
-          bg={bgProfile}
-          p='24px'
-          borderRadius='20px'>
-          <Flex
-            align="left"
-            mb={{ sm: "10px", md: "0px" }}
-            direction={{ sm: "column", md: "row" }}
-            w={{ sm: "100%", md: "50%" }}
-            textAlign={{ sm: "center", md: "start" }}
-            p='24px'
-          >
-            <Text fontSize={{xl:'4em',sm:'3em'}}>Pre Diagnostico</Text>
-           
+      <>
+        {console.log('bb388281-e095-454a-99ed-472ba7696741',userData?.casos)}
+        { Object.keys((typeof userData?.casos === 'undefined') ? {} : userData?.casos).length !== 0 ? (
+          <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
+            <Flex
+              direction={{ sm: "column", md: "row" }}
+              mb='24px'
+              maxH='330px'
+              justifyContent={{ sm: "center", md: "space-between" }}
+              align='center'
+              backdropFilter='blur(21px)'
+              boxShadow='0px 2px 5.5px rgba(0, 0, 0, 0.02)'
+              border='1.5px solid'
+              borderColor={borderProfileColor}
+              bg={bgProfile}
+              p='24px'
+              borderRadius='20px'>
+              <Flex
+                align="left"
+                mb={{ sm: "10px", md: "0px" }}
+                direction={{ sm: "column", md: "row" }}
+                w={{ sm: "100%", md: "50%" }}
+                textAlign={{ sm: "center", md: "start" }}
+                p='24px'
+              >
+                <Text fontSize={{xl:'4em',sm:'3em'}}>Pre Diagnostico</Text>
+              
+              </Flex>
+              
+            </Flex>
+            <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
+              <Card>
+                  <CardHeader>
+                    <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>
+                  </CardHeader>
+                  <CardBody mt={{xl:'10px'}}>
+                    <Textarea variant="dark" color='black' minH={{xl:'200px',sm:'200px'}} fontSize={{xl:'1.5em'}} placeholder='Explicación del problema' 
+                      onChange={(e) => setDescriptionValue(e.target.value)} 
+                      value={descriptionValue}
+                      />
+                  </CardBody>
+                  
+              </Card>
+              <Card>
+                  <CardHeader>
+                    <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
+                  </CardHeader>
+                  <CardBody mt={{xl:'10px'}}>
+                    
+                      
+                        {Object.keys(datos).map( (key) =>(
+                          <>
+                            <Text fontSize='sm' color='gray.400' fontWeight='600' mb='20px'>
+                            {key}
+                            </Text>
+                            <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
+                              {datos[key].map( (element) =>(
+                                <CheckboxPreDiagnostico name={element.system_name} id={element.ID} section={key}/>
+                              ))}
+                            </Grid>
+                          </>
+                        ))}
+                      
+                  </CardBody>
+                  
+              </Card>
+              <CardEspecialista />
+              <CardAsistencia />
+              <CardHerramientas />
+              
+              <CardCrearCaso openAlert={openAlert} />
+              {isSuccessAlertCaso &&(
+                <SuccessAlertCaso closeAlert={closeAlert}/>
+              )}
+              
+              
+            </Grid>
+            
           </Flex>
-          
-        </Flex>
-        <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
-          <Card>
-              <CardHeader>
-                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>
-              </CardHeader>
-              <CardBody mt={{xl:'10px'}}>
-                <Textarea variant="dark" color='black' minH={{xl:'200px',sm:'200px'}} fontSize={{xl:'1.5em'}} placeholder='Explicación del problema' 
-                  onChange={(e) => setDescriptionValue(e.target.value)} 
-                  value={descriptionValue}
-                  />
-              </CardBody>
-              
-          </Card>
-          <Card>
-              <CardHeader>
-                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
-              </CardHeader>
-              <CardBody mt={{xl:'10px'}}>
-                 
-                  
-                    {Object.keys(datos).map( (key) =>(
-                      <>
-                        <Text fontSize='sm' color='gray.400' fontWeight='600' mb='20px'>
-                        {key}
-                        </Text>
-                        <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
-                          {datos[key].map( (element) =>(
-                            <CheckboxPreDiagnostico name={element.system_name} id={element.ID} section={key}/>
-                          ))}
-                        </Grid>
-                      </>
-                    ))}
-                  
-              </CardBody>
-              
-          </Card>
-          <CardEspecialista />
-          <CardAsistencia />
-          <CardHerramientas />
-          
-          <CardCrearCaso openAlert={openAlert} />
-          {isSuccessAlertCaso &&(
-            <SuccessAlertCaso closeAlert={closeAlert}/>
-          )}
-          
-          
-        </Grid>
-        
-      </Flex>
+        ) : (
+          <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
+            <>No se tiene caso activo</>
+          </Flex>
+        )}
+      </>
     );
   }
 
