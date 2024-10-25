@@ -37,6 +37,7 @@ import {
   import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
   import CardHerramientas from "components/PreDiagnostico/CardHerramientas";
   import CardCommand from "components/PreDiagnostico/CadCommand";
+  import CardPrioridad from "components/PreDiagnostico/CardPrioridad";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -134,6 +135,7 @@ import {
             necesitaEspecialista:'0', // 0:-> no necesita 1:-> si necesita
             especialista_id:'', // identificador de especialista
             asistencia_tipo_id:'', // identificador de asistencia
+            prioridad_id:'' // 1: Alta, 2: Intermedia, 3: Baja | identificador de prioridad
           }
         }  
         
@@ -228,7 +230,6 @@ import {
     
     return (
       <>
-        {console.log('bb388281-e095-454a-99ed-472ba7696741',userData?.casos)}
         { Object.keys((typeof userData?.casos === 'undefined') ? {} : userData?.casos).length !== 0 ? (
           <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
             <Flex
@@ -296,7 +297,7 @@ import {
               <CardEspecialista />
               <CardAsistencia />
               <CardHerramientas />
-              
+              <CardPrioridad />
               <CardCrearCaso openAlert={openAlert} />
               {isSuccessAlertCaso &&(
                 <SuccessAlertCaso closeAlert={closeAlert}/>

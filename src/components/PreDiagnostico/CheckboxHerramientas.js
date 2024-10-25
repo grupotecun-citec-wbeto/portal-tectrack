@@ -25,7 +25,12 @@ import {
   } from '@chakra-ui/react'
 import { column } from 'stylis';
 
+/*=======================================================
+ BLOQUE: IMPORT APP CONTEXTO
+ DESCRIPTION: Se llama al contexto de la aplicación que contiene informacion global del app
+=========================================================*/
 import AppContext from 'appContext';
+
 import { jsx } from '@emotion/react';
 
 
@@ -39,6 +44,10 @@ function CheckboxHerramientas(props){
     const [check,setCheck] = useState(false)
     const [selectedTool,setSelectedTool] = useState('')
 
+    /*=======================================================
+     BLOQUE: DESTRUCTURACION DEL APP CONTEXTO
+     DESCRIPTION: 
+    =========================================================*/
     const {
       serviceTypeData,setServiceTypeData,
       casoActivo,setCasoActivo
