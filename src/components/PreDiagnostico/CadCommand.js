@@ -26,6 +26,7 @@ import CardBody from "components/Card/CardBody";
 import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
+import SqlContext from "sqlContext";
 
 
 
@@ -40,6 +41,7 @@ function CardCommand(props){
 
     // CONTEXTO
     const {casoActivo,setCasoActivo} = useContext(AppContext)
+    const { data } = useContext(SqlContext)
 
     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
     const dispatch = useDispatch();
@@ -74,6 +76,7 @@ function CardCommand(props){
             <CardHeader>
                 <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Commanda vista temporal</Heading>
             </CardHeader>
+            {data}
             <CardBody mt={{xl:'50px', sm:'50px'}}>
                 <Code as="pre" display="block" whiteSpace="pre-wrap">
                     {JSON.stringify(userData,null, 2)}
