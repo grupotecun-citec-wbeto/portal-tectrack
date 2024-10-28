@@ -77,14 +77,81 @@ export function SqlProvider({ children }) {
         db = new SQL.Database(storedDb); // Cargar base de datos desde IndexedDB
       } else {
         db = new SQL.Database(); // Crear nueva base de datos si no hay datos guardados
-        db.run("CREATE TABLE example (id INTEGER, name TEXT)");
-        db.run("INSERT INTO example VALUES (1, 'Alice'), (2, 'Bob')");
+        db.run(`CREATE TABLE IF NOT EXISTS tipo_accion (ID INTEGER PRIMARY KEY,name TEXT);`);
+        db.run("INSERT INTO tipo_accion VALUES (1, 'Correctivo'), (2, 'Preventivo')");
+        
+        // TABLE COMUNICACION
+        db.run(`
+          CREATE TABLE IF NOT EXISTS comunicacion (
+            ID INTEGER PRIMARY KEY,
+            name TEXT,
+            tipo_accion_ID INTEGER NOT NULL,
+            
+            FOREIGN KEY (tipo_accion_ID) REFERENCES tipo_accion(ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+          );
+        `)
+        db.run(`
+          INSERT INTO comunicacion VALUES 
+          (1, 'Whatsapp', 1),
+          (2, 'Telefono', 1),
+          (3, 'Correo', 1),
+          (4, 'Solicitud comercial', 1),
+          (5, 'En sitio', 1),
+          (6, 'Whatsapp', 2),
+          (7, 'Telefono', 2),
+          (8, 'Correo', 2),
+          (9, 'Solicitud comercial', 2),
+          (10, 'En sitio', 2),
+          (11, 'Comentario', 2);
+        `);
+
+        db.run(`
+          CREATE TABLE IF NOT EXISTS caso_estado (
+            ID INTEGER PRIMARY KEY,
+            name TEXT,
+            description TEXT
+          );
+        `)
+
+        db.run(`
+          INSERT INTO caso_estado VALUES 
+          (1, 'Pendiente asignación', 'Caso nuevo que no se ha asignado ningun técnico'),
+          (2, 'Asignado', 'Caso nuevo que ya fue asignado a un técnico'),
+          (3, 'En reparación', 'Caso que el técnico ya está reparando en sitio'),
+          (4, 'Detenido', 'Caso se encuentra detenido por falta de algún material, insumo o herramienta'),
+          (5, 'OK', 'Caso terminado con éxito');
+        `)
+
+        db.run(`
+          CREATE TABLE IF NOT EXISTS caso (
+          ID INTEGER PRIMARY KEY AUTOINCREMENT,
+          fecha DATE NOT NULL,
+          start DATETIME,
+          date_end DATETIME,
+          description TEXT,
+          comunicacion_ID INTEGER NOT NULL,
+          segmento_ID INTEGER NOT NULL,
+          caso_estado_ID INTEGER NOT NULL,
+          equipo_ID INTEGER NOT NULL,
+          equipo_catalogo_ID INTEGER NOT NULL,
+          prioridad TINYINT,
+          sync TEXT,
+          cliente_name TEXT,
+          user_data TEXT,
+          
+          FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+          FOREIGN KEY (segmento_ID) REFERENCES segmento(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+          FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID) ON DELETE NO ACTION ON UPDATE NO ACTION);
+        `)
+
+        
+        
         await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
       }
       setDb(db);
 
        // Obtener y establecer los datos en el estado
-       const result = db.exec("SELECT * FROM example");
+       const result = db.exec("SELECT * FROM caso");
        setData(result[0]?.values || []); // Almacena los resultados en el estado
     };
 
@@ -93,7 +160,8 @@ export function SqlProvider({ children }) {
 
   return (
         <SqlContext.Provider value={{
-            data
+            data,
+            db,saveToIndexedDB
             }}>
             {children}
         </SqlContext.Provider>

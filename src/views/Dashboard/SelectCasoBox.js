@@ -90,8 +90,8 @@ import {
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
           <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
             
-            <CardSelectCaso title="¿Se comunicaron?" to="/admin/pages/comunication" id='1'/>
-            <CardSelectCaso title="¿Preventivo?" to="/admin/pages/comunication" id='2'/>
+            <CardSelectCaso title="¿Se comunicaron?" to="/admin/pages/searchbox" id='1'/>
+            <CardSelectCaso title="¿Preventivo?" to="/admin/pages/searchbox" id='2'/>
             
           </Grid>
       </Flex>

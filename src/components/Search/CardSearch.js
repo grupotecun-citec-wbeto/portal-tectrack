@@ -34,7 +34,7 @@ import CardBodyFlexText from './CardBodyFlexText';
 
 
 function SearchCard(props) {
-    const { maquina_id,categoria_id,titulo,img,infos, ...rest } = props;
+    const { maquina_id,categoria_id,titulo,img,cliente_name,infos, ...rest } = props;
     
     const history = useHistory();
 
@@ -52,7 +52,7 @@ function SearchCard(props) {
     } = useContext(AppContext)
 
     const btnCreateCase = () =>{
-        setCasoActivo({code:uuidv4(),maquina_id:maquina_id,categoria_id:categoria_id})
+        setCasoActivo({code:uuidv4(),maquina_id:maquina_id,categoria_id:categoria_id,cliente_name:cliente_name})
         setTimeout(() => {
             history.push('/admin/pages/prediagnostico');
         }, 800);

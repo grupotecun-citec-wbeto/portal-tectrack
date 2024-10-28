@@ -138,6 +138,7 @@ import {
                   img={maquina.catalogo_img}
                   maquina_id={maquina.ID}
                   categoria_id={maquina.categoria_id}
+                  cliente_name={maquina.cliente_name}
                   infos={[
                     {title:"Categoria",text:maquina.categoria_name},
                     {title:"Departamento",text:maquina.subdivision_name},

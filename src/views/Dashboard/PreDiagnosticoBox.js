@@ -38,6 +38,7 @@ import {
   import CardHerramientas from "components/PreDiagnostico/CardHerramientas";
   import CardCommand from "components/PreDiagnostico/CadCommand";
   import CardPrioridad from "components/PreDiagnostico/CardPrioridad";
+  import CardComunication from "components/Comunication/CardComunication";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -128,6 +129,7 @@ import {
         let caso_structure = {
           maquina_id:casoActivo.maquina_id,
           categoria_id:casoActivo.categoria_id,
+          cliente_name:casoActivo.cliente_name,
           prediagnostico:{
             descripcion:'',
             sistemas:{},
@@ -259,6 +261,7 @@ import {
               
             </Flex>
             <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
+              < CardComunication title="¿Como te contactaron?" />
               <Card>
                   <CardHeader>
                     <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>

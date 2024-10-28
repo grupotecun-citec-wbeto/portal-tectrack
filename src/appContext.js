@@ -47,7 +47,7 @@ export function AppProvider({ children }) {
         if(userData == null){
             let base_structure = {
                 casos : {},
-                casoActivo:{code:'',maquina_id:'',categoria_id:''}
+                casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:''}
             }  
             if(userData == null){
                 saveUserData(base_structure)
