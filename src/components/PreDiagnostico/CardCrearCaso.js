@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { format } from 'date-fns';
 
+import { useHistory } from "react-router-dom";
+
 import {
     Text,
     Flex,
@@ -38,6 +40,8 @@ function CardCrearCaso({openAlert}){
 
     const {casoActivo,setCasoActivo} = useContext(AppContext)
     const {db,saveToIndexedDB} = useContext(SqlContext)
+
+    const history = useHistory()
     
     /*=======================================================
      BLOQUE: REDUX-PERSIST
@@ -117,6 +121,7 @@ function CardCrearCaso({openAlert}){
             
             db.exec(sql)
             saveToIndexedDB(db)
+            history.push('/admin/pages/casos')
             saveUserData({
                 casos : {},
                 casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:''}
