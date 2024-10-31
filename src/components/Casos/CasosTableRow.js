@@ -19,7 +19,12 @@ import {
 } from '@chakra-ui/react'
 import React,{useContext, useEffect, useState} from "react";
 
+/*=======================================================
+ BLOQUE: IMPORT FECHAS
+ DESCRIPTION: 
+=========================================================*/
 import { format } from "date-fns";
+import { es } from 'date-fns/locale';
 
 /*=======================================================
  BLOQUE: CONTEXT
@@ -36,7 +41,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 
 function CasosTableRow(props) {
-  const { caso_ID,sync, cliente_name, equipo_ID, equipo_catalogo_ID, user_data, status,  date, isLast } = props;
+  const { caso_ID ,sync, cliente_name, equipo_ID, equipo_catalogo_ID, user_data, status,  date, isLast } = props;
   const textColor = useColorModeValue("gray.500", "white");
   const titleColor = useColorModeValue("gray.700", "white");
   const bgStatus = useColorModeValue("gray.400", "navy.900");
@@ -218,8 +223,8 @@ function CasosTableRow(props) {
         </Badge>
       </Td>
       <Td borderColor={borderColor} borderBottom={isLast ? "none" : null}>
-        <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
-          {date}
+        <Text fontSize="md" maxW='150px' color={textColor} fontWeight="bold" pb=".5rem">
+          {format(date, "eeee, dd 'de' MMMM 'de' yyyy", { locale: es })}
         </Text>
       </Td>
       <Td borderColor={borderColor} borderBottom={isLast ? "none" : null}>

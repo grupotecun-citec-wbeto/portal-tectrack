@@ -58,7 +58,7 @@ function Casos() {
                 </Th>
                 <Th borderColor={borderColor} color="gray.400" >Function</Th>
                 <Th borderColor={borderColor} color="gray.400" >Prioridad</Th>
-                <Th borderColor={borderColor} color="gray.400" >Employed</Th>
+                <Th borderColor={borderColor} color="gray.400" >Fecha</Th>
                 <Th borderColor={borderColor}></Th>
               </Tr>
             </Thead>
@@ -74,7 +74,7 @@ function Casos() {
                     equipo_catalogo_ID={row.equipo_catalogo_ID}
                     user_data={row.user_data}
                     status={row.prioridad}
-                    date={''}
+                    date={row.fecha}
                     isLast={false}
                     key={index}
                   />
