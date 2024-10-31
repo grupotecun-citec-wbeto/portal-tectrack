@@ -6,11 +6,27 @@ import {
   Td,
   Text,
   Tr,
-  useColorModeValue
+  useColorModeValue,
+  Select
 } from "@chakra-ui/react";
-import React,{useContext} from "react";
 
+// formularios
+import {
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  FormHelperText,
+} from '@chakra-ui/react'
+import React,{useContext, useEffect, useState} from "react";
+
+import { format } from "date-fns";
+
+/*=======================================================
+ BLOQUE: CONTEXT
+ DESCRIPTION: 
+=========================================================*/
 import AppContext from "appContext";
+import SqlContext from "sqlContext";
 // ROUTER
 import { Link, useHistory   } from 'react-router-dom';
 
@@ -20,13 +36,35 @@ import { useSelector, useDispatch } from 'react-redux';
 
 
 function CasosTableRow(props) {
-  const { sync, cliente_name, equipo_ID, equipo_catalogo_ID, user_data, status,  date, isLast } = props;
+  const { caso_ID,sync, cliente_name, equipo_ID, equipo_catalogo_ID, user_data, status,  date, isLast } = props;
   const textColor = useColorModeValue("gray.500", "white");
   const titleColor = useColorModeValue("gray.700", "white");
   const bgStatus = useColorModeValue("gray.400", "navy.900");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
   const history = useHistory()
+
+  /*=======================================================
+   BLOQUE: useState
+   DESCRIPTION: 
+  =========================================================*/
+
+  const [selectUsuario,setSelectUsuario] = useState(0)
+  const [usuarios,setUsuarios] = useState([])
+
+  /*=======================================================
+   BLOQUE: CONTEXT
+   DESCRIPTION: 
+  =========================================================*/
+  const {db,saveToIndexedDB,casos_to_json} = useContext(SqlContext)
+  
+  const {
+    casoActivo,setCasoActivo
+  } = useContext(AppContext)
+
+  /*==================== FIN ========================
+  BLOQUE: CONTEXT
+  ===================================================*/
 
   // ************************** REDUX-PRESIST ****************************
   const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -42,9 +80,85 @@ function CasosTableRow(props) {
   
   // ************************** REDUX-PRESIST ****************************
 
-  const {
-    casoActivo,setCasoActivo
-  } = useContext(AppContext)
+  /*=======================================================
+   BLOQUE: FUCNTIONS FECHA
+   DESCRIPTION: 
+  =========================================================*/
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    return format(now, 'yyyy-MM-dd HH:mm:ss');
+  }
+
+  const getCurrentDate = () => {
+    const now = new Date();
+    return format(now, 'yyyy-MM-dd');
+  }
+  /*==================== FIN ========================
+  BLOQUE: FUNCTIONS FECHA
+  ===================================================*/
+
+  const asignar = async(usuario_id) =>{
+    
+    const result = db.exec(`INSERT INTO asignacion VALUES (${usuario_id},${caso_ID},'${getCurrentDate()}','')`)
+    await saveToIndexedDB(db)
+    console.log('b962ca5f-55e9-4fb4-a27f-a713f8c5ad9c',result);
+    const resultado = db.exec(`SELECT * FROM  asignacion`)
+    console.log('c2b327f4-f921-4eca-beb4-697d7ffdd04c',resultado);
+    
+    setSelectUsuario(usuario_id)
+
+   
+  }
+  
+
+
+  useEffect( () =>{
+    const consultarAsigancion = async() =>{
+      const data = db.exec(`SELECT * FROM  asignacion WHERE caso_ID = ${caso_ID}`)
+      const result = data?.map(item => {
+        return item.values.map(valueArray => {
+            return item.columns.reduce((obj, col, index) => {
+                obj[col] = valueArray[index];
+                return obj;
+            }, {});
+        });
+      });
+      if(data.length != 0)
+        setSelectUsuario(result[0][0].usuario_ID)
+      
+    }
+
+    consultarAsigancion()
+  },[])
+  
+  
+
+  /*=======================================================
+   BLOQUE: useEfect LISTA DE USUARIOS
+   DESCRIPTION: 
+  =========================================================*/
+  useEffect(() =>{
+    const getUsuario = async() =>{
+      const data = db.exec(`SELECT * FROM usuario`)
+      const result = data.map(item => {
+        return item.values.map(valueArray => {
+            return item.columns.reduce((obj, col, index) => {
+                obj[col] = valueArray[index];
+                return obj;
+            }, {});
+        });
+      });
+
+    setUsuarios(result[0])
+      
+    }
+
+    getUsuario()
+  },[])
+
+
+  
+  
 
   const preDiagnostico = () =>{
     getUserData()
@@ -119,16 +233,17 @@ function CasosTableRow(props) {
             PreDianostico
           </Text>
         </Button>
-        <Button p="0px" bg="green.400" variant="no-effects" mr="10px">
-          <Text
-            fontSize="md"
-            color="white.400"
-            fontWeight="bold"
-            cursor="pointer"
-          >
-            Aginarme
-          </Text>
-        </Button>
+        
+        <FormControl maxW={{xl:'250px'}}>
+            {selectUsuario >= 1 ? (<FormLabel htmlFor='country'>Asigando a:</FormLabel>) : (<FormLabel htmlFor='country'>Seleccionar</FormLabel>)}
+            
+            <Select id='country' placeholder='Selecconar a especialista' onChange={(e) => asignar(e.target.value)} value={selectUsuario}>
+                {usuarios.map( (usuario) =>(
+                  <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
+                ))}
+            </Select>
+        </FormControl>
+        
       </Td>
       
     </Tr>
@@ -136,3 +251,15 @@ function CasosTableRow(props) {
 }
 
 export default CasosTableRow;
+
+
+ /*
+  CREATE TABLE IF NOT EXISTS asignacion (
+      usuario_ID INTEGER NOT NULL,
+      caso_ID INTEGER NOT NULL,
+      fecha DATE NOT NULL,
+      descripcion TEXT,
+      PRIMARY KEY (caso_ID, usuario_ID, fecha),
+      FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+      FOREIGN KEY ( 
+  */

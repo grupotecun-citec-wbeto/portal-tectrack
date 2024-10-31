@@ -67,6 +67,7 @@ function Casos() {
               {data?.map((row, index, arr) => {
                 return (
                   <CasosTableRow
+                    caso_ID={row.ID}
                     cliente_name={row.cliente_name}
                     sync={row.sync}
                     equipo_ID={row.equipo_ID}
