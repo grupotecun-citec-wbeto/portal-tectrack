@@ -262,6 +262,64 @@ export function SqlProvider({ children }) {
       `)
       await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
     }
+
+    /*=======================================================
+      BLOQUE: TABLE USUARIO
+      DESCRIPTION: 
+    =========================================================*/
+    
+    if (!checkTableExists(db, 'usuario')) {
+      db.run(`
+        CREATE TABLE IF NOT EXISTS usuario (
+          ID INTEGER PRIMARY KEY AUTOINCREMENT,
+          nombre TEXT,
+          apellido TEXT,
+          display_name TEXT,
+          password TEXT
+        );
+      `)
+
+      db.run(`
+        INSERT INTO usuario VALUES 
+      (1, 'Brandon Roberto', 'Cerrano','Brandon Roberto Cerrano',''),
+      (2, 'Billy Anderson', 'Guillen','Billy Anderson Guillen',''),
+      (3, 'Jorge David', 'Morales','Jorge David Morales',''),
+      (4, 'Jazon', 'Castillo', 'Jazon Castillo','');
+      `)
+      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    }else{
+      //db.run(`DROP TABLE usuario;`)
+    }
+
+    /*CREATE TABLE IF NOT EXISTS asignacion (
+  usuario_ID INTEGER NOT NULL,
+  caso_ID INTEGER NOT NULL,
+  fecha DATE NOT NULL,
+  descripcion TEXT,
+  PRIMARY KEY (caso_ID, usuario_ID, fecha),
+  FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+); */
+    
+  /*=======================================================
+    BLOQUE: TABLE ASIGNACION
+    DESCRIPTION: 
+  =========================================================*/
+    
+  if (!checkTableExists(db, 'asignacion')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS asignacion (
+        usuario_ID INTEGER NOT NULL,
+        caso_ID INTEGER NOT NULL,
+        fecha DATE NOT NULL,
+        descripcion TEXT,
+        PRIMARY KEY (caso_ID, usuario_ID, fecha),
+        FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+      );
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }
     
     
     
@@ -284,7 +342,9 @@ export function SqlProvider({ children }) {
       setDb(db);
 
        // Obtener y establecer los datos en el estado
-       const result = db.exec("SELECT * FROM categoria");
+       const result = db.exec("SELECT * FROM asignacion");
+       console.log('933ee18e-b8bf-49bc-9add-3ca136f7280a',result);
+       
        setData(result[0]?.values || []); // Almacena los resultados en el estado
     };
 
