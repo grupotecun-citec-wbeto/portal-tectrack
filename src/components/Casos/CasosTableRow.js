@@ -19,6 +19,9 @@ import {
 } from '@chakra-ui/react'
 import React,{useContext, useEffect, useState} from "react";
 
+import Timer from "./Timer";
+import EquipoIden from "./EquipoIden";
+
 /*=======================================================
  BLOQUE: IMPORT FECHAS
  DESCRIPTION: 
@@ -41,7 +44,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 
 function CasosTableRow(props) {
-  const { caso_ID, caso_estado_ID ,sync, cliente_name, equipo_ID, equipo_catalogo_ID, user_data, status,  date, isLast } = props;
+  const { caso_ID, caso_estado_ID ,sync, cliente_name, equipo_ID, equipo_catalogo_ID, user_data, status,  date,start, isLast } = props;
   const textColor = useColorModeValue("gray.500", "white");
   const titleColor = useColorModeValue("gray.700", "white");
   const bgStatus = useColorModeValue("gray.400", "navy.900");
@@ -233,7 +236,9 @@ function CasosTableRow(props) {
               {cliente_name}
             </Text>
             <Text fontSize="sm" color="gray.400" fontWeight="normal">
-              {equipo_ID}
+              <EquipoIden equipo_ID={equipo_ID}/>
+              <Timer startDate={start} />
+              
             </Text>
           </Flex>
         </Flex>

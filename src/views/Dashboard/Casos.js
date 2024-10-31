@@ -77,6 +77,7 @@ function Casos() {
                     user_data={row.user_data}
                     status={row.prioridad}
                     date={row.fecha}
+                    start={row.start}
                     isLast={false}
                     key={index}
                   />
