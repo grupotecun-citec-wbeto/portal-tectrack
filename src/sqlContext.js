@@ -719,24 +719,17 @@ export function SqlProvider({ children }) {
 
 
   const casos_to_json = (data) =>{
-    const json = data?.map(row => ({
-      ID: row[0],
-      fecha: row[1],
-      start: row[2],
-      date_end: row[3] || '' ,
-      description: row[4] || '',
-      comunicacion_ID: row[5],
-      segmento_ID: row[6],
-      caso_estado_ID: row[7],
-      equipo_ID: row[8],
-      equipo_catalogo_ID: row[9],
-      prioridad: row[10],
-      sync: row[11],
-      cliente_name: row[12],
-      user_data: row[13]
-    }))
-    return json
-  
+    const result = data.map(item => {
+      return item.values.map(valueArray => {
+          return item.columns.reduce((obj, col, index) => {
+              obj[col] = valueArray[index];
+              return obj;
+          }, {});
+      });
+    });
+    if(data.length != 0)
+      return result[0]
+    return []
   }
 
   return (

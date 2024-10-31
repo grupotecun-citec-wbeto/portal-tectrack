@@ -9,6 +9,7 @@ import {
   Tr,
   useColorModeValue
 } from "@chakra-ui/react";
+import { ChakraProvider, SimpleGrid, Container } from '@chakra-ui/react';
 // Custom components
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";
@@ -17,6 +18,12 @@ import TablesProjectRow from "components/Tables/TablesProjectRow";
 import CasosTableRow from "components/Casos/CasosTableRow";
 import React, { useEffect, useState, useContext} from "react";
 import { tablesProjectData, tablesTableData } from "variables/general";
+
+import { FaUserAlt,FaCheckCircle, FaTasks } from "react-icons/fa";
+
+import CasoSummary from "components/Casos/CasoSummary";
+
+import CasoDetail from "components/Casos/CasoDetail";
 
 import SqlContext from "sqlContext";
 
@@ -28,11 +35,19 @@ function Casos() {
 
   const {db,saveToIndexedDB,casos_to_json} = useContext(SqlContext)
 
+  const caseData = {
+    id: 12345,
+    status: 'Asignado',
+    createdAt: '2024-10-30T12:00:00',
+    assignedTechnician: 'Juan Pérez',
+    description: 'El dispositivo presenta fallas intermitentes de conexión.',
+  };
+
   useEffect( () =>{
     if(db != null){
       const result = db.exec("SELECT * FROM caso ORDER BY prioridad ASC");
       //setData(result[0]?.values || []); // Almacena los resultados en el estado
-      const casos_json = casos_to_json(result[0]?.values)
+      const casos_json = casos_to_json(result)
       console.log('dc83128b-7470-4710-a4b6-297f55fc3ce0',casos_json);
       
       setData(casos_json)
@@ -87,6 +102,28 @@ function Casos() {
           </Table>
         </CardBody>
       </Card>
+      <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={5}>
+        <CasoSummary title="Cantidad de casos" value="1,200" icon={FaUserAlt} colorScheme="blue" />
+        <CasoSummary title="Tareas Pendientes" value="47" icon={FaTasks} colorScheme="orange" />
+        <CasoSummary title="Casos Completados" value="305" icon={FaCheckCircle} colorScheme="green" />
+        <CasoSummary title="Casos Completados" value="305" icon={FaCheckCircle} colorScheme="green" />
+      </SimpleGrid>
+      <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
+      {data?.map((row, index, arr) => {
+        const casoData = {
+          id: 12345,
+          status: row.caso_estado_ID,
+          createdAt: '2024-10-30T12:00:00',
+          assignedTechnician: 'Juan Pérez',
+          description: row.descripcion,
+        }
+        return(
+          <CasoDetail caseData={casoData} />
+        )
+
+      })}
+        
+      </SimpleGrid>
     </Flex>
 
     

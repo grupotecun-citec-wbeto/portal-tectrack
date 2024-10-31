@@ -22,6 +22,7 @@ import React,{useContext, useEffect, useState} from "react";
 import Timer from "./Timer";
 import EquipoIden from "./EquipoIden";
 
+
 /*=======================================================
  BLOQUE: IMPORT FECHAS
  DESCRIPTION: 
@@ -296,7 +297,7 @@ function CasosTableRow(props) {
             fontWeight="bold"
             cursor="pointer"
           >
-            PreDianostico
+            Detalle
           </Text>
         </Button>
         
