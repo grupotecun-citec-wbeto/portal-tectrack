@@ -63,7 +63,8 @@ function Casos() {
               </Tr>
             </Thead>
             <Tbody>
-              {data.map((row, index, arr) => {
+              {console.log('1bfde0a0-31fd-48f1-9ef3-ecdff7e59f6a',data)}
+              {data?.map((row, index, arr) => {
                 return (
                   <CasosTableRow
                     cliente_name={row.cliente_name}

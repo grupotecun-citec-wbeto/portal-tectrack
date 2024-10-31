@@ -656,7 +656,7 @@ export function SqlProvider({ children }) {
 
 
   const casos_to_json = (data) =>{
-    const json = data.map(row => ({
+    const json = data?.map(row => ({
       ID: row[0],
       fecha: row[1],
       start: row[2],
