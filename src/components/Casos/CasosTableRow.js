@@ -41,7 +41,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 
 function CasosTableRow(props) {
-  const { caso_ID ,sync, cliente_name, equipo_ID, equipo_catalogo_ID, user_data, status,  date, isLast } = props;
+  const { caso_ID, caso_estado_ID ,sync, cliente_name, equipo_ID, equipo_catalogo_ID, user_data, status,  date, isLast } = props;
   const textColor = useColorModeValue("gray.500", "white");
   const titleColor = useColorModeValue("gray.700", "white");
   const bgStatus = useColorModeValue("gray.400", "navy.900");
@@ -54,8 +54,10 @@ function CasosTableRow(props) {
    DESCRIPTION: 
   =========================================================*/
 
-  const [selectUsuario,setSelectUsuario] = useState(0)
+  const [selectUsuario,setSelectUsuario] = useState('')
   const [usuarios,setUsuarios] = useState([])
+  const [estados,setEstados] = useState([])
+  const [selectCasoEstado,setSelectCasoEstado] = useState('1')
 
   /*=======================================================
    BLOQUE: CONTEXT
@@ -103,23 +105,36 @@ function CasosTableRow(props) {
   ===================================================*/
 
   const asignar = async(usuario_id) =>{
-    
-    const result = db.exec(`INSERT INTO asignacion VALUES (${usuario_id},${caso_ID},'${getCurrentDate()}','')`)
+    if(usuario_id != ""){
+      const result = db.exec(`INSERT INTO asignacion VALUES (${usuario_id},${caso_ID},'${getCurrentDateTime()}','')`)
+      
+      // Actualizar a estado asignado cuando se agigna un caso
+      db.exec(`UPDATE caso SET caso_estado_ID = 2 where ID = ${caso_ID}`)
+      
+
+      setSelectUsuario(usuario_id)
+      setSelectCasoEstado(2)
+    }else{
+      db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${selectUsuario} AND caso_ID = ${caso_ID}`)
+      setSelectUsuario("")
+      setSelectCasoEstado(1)
+    }
+
     await saveToIndexedDB(db)
-    console.log('b962ca5f-55e9-4fb4-a27f-a713f8c5ad9c',result);
-    const resultado = db.exec(`SELECT * FROM  asignacion`)
-    console.log('c2b327f4-f921-4eca-beb4-697d7ffdd04c',resultado);
-    
-    setSelectUsuario(usuario_id)
 
    
   }
   
 
 
+  /*=======================================================
+   BLOQUE: CONSULTAR ASIGNACION
+   DESCRIPTION: 
+  =========================================================*/
   useEffect( () =>{
     const consultarAsigancion = async() =>{
-      const data = db.exec(`SELECT * FROM  asignacion WHERE caso_ID = ${caso_ID}`)
+      const data = db.exec(`SELECT * FROM  asignacion WHERE caso_ID = ${caso_ID} ORDER BY fecha DESC LIMIT 1;`)
+      
       const result = data?.map(item => {
         return item.values.map(valueArray => {
             return item.columns.reduce((obj, col, index) => {
@@ -135,7 +150,30 @@ function CasosTableRow(props) {
 
     consultarAsigancion()
   },[])
-  
+
+  /*=======================================================
+   BLOQUE: CONSULTAR CASO ESTADO
+   DESCRIPTION: 
+  =========================================================*/
+  useEffect( () =>{
+    const consultarCasoEstado = async() =>{
+      const data = db.exec(`SELECT * FROM  caso_estado`)
+      const result = data?.map(item => {
+        return item.values.map(valueArray => {
+            return item.columns.reduce((obj, col, index) => {
+                obj[col] = valueArray[index];
+                return obj;
+            }, {});
+        });
+      });
+      if(data.length != 0)
+        setEstados(result[0])
+      
+    }
+
+    consultarCasoEstado()
+    setSelectCasoEstado(caso_estado_ID)
+  },[])
   
 
   /*=======================================================
@@ -153,8 +191,8 @@ function CasosTableRow(props) {
             }, {});
         });
       });
-
-    setUsuarios(result[0])
+    if(data.length != 0)
+      setUsuarios(result[0])
       
     }
 
@@ -212,6 +250,24 @@ function CasosTableRow(props) {
         </Flex>
       </Td>
       <Td borderColor={borderColor} borderBottom={isLast ? "none" : null}>
+          {estados.map( (estado) =>(
+            <>
+              {selectCasoEstado == estado.ID && (
+                <Badge
+                  bg={estado.ID == "1" ? "red.400" : estado.ID == "2" ? "orange.400" : estado.ID == "3" ? "yellow.400" : estado.ID == "4" ? "gray.400" : estado.ID == "5" ? "green.400" : bgStatus}
+                  color={"white"}
+                  fontSize="16px"
+                  p="3px 10px"
+                  borderRadius="8px"
+                >
+                  {estado.name}
+                </Badge>
+              )}
+            </>
+           
+          ))}
+      </Td>
+      <Td borderColor={borderColor} borderBottom={isLast ? "none" : null}>
         <Badge
           bg={status == "1" ? "red.400" : status == "2" ? "yellow.400" : status == "3" ? "green.400" :  bgStatus}
           color={"white"}
@@ -242,7 +298,7 @@ function CasosTableRow(props) {
         <FormControl maxW={{xl:'250px'}}>
             {selectUsuario >= 1 ? (<FormLabel htmlFor='country'>Asigando a:</FormLabel>) : (<FormLabel htmlFor='country'>Seleccionar</FormLabel>)}
             
-            <Select id='country' placeholder='Selecconar a especialista' onChange={(e) => asignar(e.target.value)} value={selectUsuario}>
+            <Select id='country' placeholder='Selecconar a usuario' onChange={(e) => asignar(e.target.value)} value={selectUsuario}>
                 {usuarios.map( (usuario) =>(
                   <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
                 ))}

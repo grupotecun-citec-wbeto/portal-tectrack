@@ -57,6 +57,7 @@ function Casos() {
                   Cliente
                 </Th>
                 <Th borderColor={borderColor} color="gray.400" >Function</Th>
+                <Th borderColor={borderColor} color="gray.400" >Estado</Th>
                 <Th borderColor={borderColor} color="gray.400" >Prioridad</Th>
                 <Th borderColor={borderColor} color="gray.400" >Fecha</Th>
                 <Th borderColor={borderColor}></Th>
@@ -68,6 +69,7 @@ function Casos() {
                 return (
                   <CasosTableRow
                     caso_ID={row.ID}
+                    caso_estado_ID={row.caso_estado_ID}
                     cliente_name={row.cliente_name}
                     sync={row.sync}
                     equipo_ID={row.equipo_ID}

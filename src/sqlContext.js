@@ -311,7 +311,7 @@ export function SqlProvider({ children }) {
       CREATE TABLE IF NOT EXISTS asignacion (
         usuario_ID INTEGER NOT NULL,
         caso_ID INTEGER NOT NULL,
-        fecha DATE NOT NULL,
+        fecha DATETIME NOT NULL,
         descripcion TEXT,
         PRIMARY KEY (caso_ID, usuario_ID, fecha),
         FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -319,6 +319,9 @@ export function SqlProvider({ children }) {
       );
     `)
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //db.run(`DROP TABLE asignacion;`)
+    //await saveToIndexedDB(db);
   }
     
     
