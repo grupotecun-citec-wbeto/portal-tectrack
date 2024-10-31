@@ -15,6 +15,7 @@ import Base64Image from 'views/Dashboard/Base64Image';
 import SelectCasoBox from 'views/Dashboard/SelectCasoBox';
 import ComunicationBox from 'views/Dashboard/ComunicationBox';
 import PreDiagnosticoBox from 'views/Dashboard/PreDiagnosticoBox';
+import Casos from 'views/Dashboard/Casos';
 
 
 // - NOTE
@@ -196,6 +197,15 @@ var dashRoutes = [
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
         component: PreDiagnosticoBox,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/casos",
+        name: "Casos",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: Casos,
         layout: "/admin",
       },
       {

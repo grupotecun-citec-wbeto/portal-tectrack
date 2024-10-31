@@ -158,10 +158,32 @@ export function SqlProvider({ children }) {
     loadSqlJs();
   }, []);
 
+  const casos_to_json = (data) =>{
+    const json = data.map(row => ({
+      ID: row[0],
+      fecha: row[1],
+      start: row[2],
+      date_end: row[3] || '' ,
+      description: row[4] || '',
+      comunicacion_ID: row[5],
+      segmento_ID: row[6],
+      caso_estado_ID: row[7],
+      equipo_ID: row[8],
+      equipo_catalogo_ID: row[9],
+      prioridad: row[10],
+      sync: row[11],
+      cliente_name: row[12],
+      user_data: row[13]
+    }))
+    return json
+  
+  }
+
   return (
         <SqlContext.Provider value={{
             data,
-            db,saveToIndexedDB
+            db,saveToIndexedDB,
+            casos_to_json
             }}>
             {children}
         </SqlContext.Provider>
