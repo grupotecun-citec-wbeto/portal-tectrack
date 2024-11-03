@@ -111,11 +111,12 @@ function Casos() {
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
       {data?.map((row, index, arr) => {
         const casoData = {
-          id: 12345,
-          status: row.caso_estado_ID,
-          createdAt: '2024-10-30T12:00:00',
+          id: row.ID,
+          status_ID: row.caso_estado_ID,
+          createdAt: row.start,
           assignedTechnician: 'Juan Pérez',
           description: row.descripcion,
+          prioridad: row.prioridad
         }
         return(
           <CasoDetail caseData={casoData} />
