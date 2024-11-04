@@ -76,7 +76,7 @@ function CardHerramientas(props){
     useEffect(()=>{
         getUserData()
         if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
-            console.log('5b767b02-bbcd-4831-b73e-4c0ecdb7044f',userData,casoActivo.code,userData.casos[casoActivo.code])
+            
             if(typeof userData.casos[casoActivo.code] !== 'undefined' ){
                 const needEspecialista =  userData.casos[casoActivo.code].prediagnostico.necesitaEspecialista
                 setNecesitaEspecialista((needEspecialista == '1') ? true : false)

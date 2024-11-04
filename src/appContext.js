@@ -62,7 +62,7 @@ export function AppProvider({ children }) {
             if(casoActivo == ''){
                 if(userData.casoActivo.code != ''){
                     // Setear caso activo obtnido de REDUX-PERSIT
-                    console.log('ea2a2d78-9f16-40da-baa6-5743db7086ee',userData.casoActivo)
+                    
                     setCasoActivo(userData.casoActivo)
                 }
             }

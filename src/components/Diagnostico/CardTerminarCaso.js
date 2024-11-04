@@ -193,7 +193,7 @@ function CardTerminarCaso({openAlert}){
             await saveToIndexedDB(db)
             
         }catch(err){
-            console.log('96535b88-40a5-4963-979b-ef81ffc4759e',err)
+            
         }
     }
 

@@ -59,7 +59,7 @@ function CardEspecialista(props){
     useEffect(()=>{
         getUserData()
         if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
-            console.log('5b767b02-bbcd-4831-b73e-4c0ecdb7044f',userData,casoActivo.code,userData.casos[casoActivo.code])
+            
             if(typeof userData.casos[casoActivo.code] !== 'undefined' ){
                 const needEspecialista =  userData.casos[casoActivo.code].prediagnostico.necesitaEspecialista
                 setNecesitaEspecialista((needEspecialista == '1') ? true : false)
@@ -83,7 +83,7 @@ function CardEspecialista(props){
         if(!necesitaEspecialista){
             setSelectedEspecialista('')
         }
-        console.log('04ee9800-9817-4b69-9cda-90420576f89b',userData,casoActivo.code)
+        
     }
 
     const actionSelectEspecialista = (especialista_id) =>{

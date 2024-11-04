@@ -669,14 +669,14 @@ export function SqlProvider({ children }) {
           //const zonedDate = toZonedTime(format(last_incremental_timestamp, 'yyyy-MM-dd HH:mm:ss'), 'UTC');
           //const formattedDate = formatInTimeZone(zonedDate, 'UTC', 'yyyy-MM-dd HH:mm:ss');
           
-          console.log('8b7ef66d-80d6-40c8-888b-eb4f12d51f9c',last_incremental_timestamp)
+          
           if(last_incremental_timestamp != null){
             setIncrementalDate(encodeURIComponent(last_incremental_timestamp))
           }else{
             setIncrementalDate('all')
           }
         }catch(e){
-          console.log('2be02d48-0105-4645-bfe3-bcc9684a4784',e)
+          
           setIncrementalDate('all')
         }
       }
@@ -722,7 +722,7 @@ export function SqlProvider({ children }) {
           
           
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log('7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -745,7 +745,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:', error);
         }
         const result = db.exec("SELECT * FROM categoria");
-        console.log('d925add8-6089-4725-aa5f-b83d1d56212d',result);
+        
       }
     };
     fetchData(7);
@@ -769,9 +769,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log('272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log('7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -795,7 +795,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec("SELECT * FROM modelo");
-        console.log('52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -820,9 +820,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log('272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log('7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -832,7 +832,7 @@ export function SqlProvider({ children }) {
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}')` 
           });
-          console.log('2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -847,7 +847,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log('52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -874,9 +874,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log('272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log('7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -886,7 +886,7 @@ export function SqlProvider({ children }) {
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}')` 
           });
-          console.log('2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -901,7 +901,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log('52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -928,9 +928,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log('272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log('7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -940,7 +940,7 @@ export function SqlProvider({ children }) {
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}')` 
           });
-          console.log('2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -955,7 +955,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log('52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -982,9 +982,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log('272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log('7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -995,7 +995,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.id || element.ID}, '${element.business_name}',${element.categoria_id},${element.division_ID},${element.linea_ID},${element.modelo_id},${element.marca_ID}, '${element.img}')` 
 
           });
-          console.log('2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, business_name,categoria_id,division_ID,linea_ID,modelo_id,marca_ID,img) VALUES ${values};`
             
@@ -1011,7 +1011,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log('52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1039,9 +1039,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1051,7 +1051,7 @@ export function SqlProvider({ children }) {
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}')` 
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -1066,7 +1066,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1091,9 +1091,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1103,7 +1103,7 @@ export function SqlProvider({ children }) {
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}', ${element.unidad_negocio_ID})` 
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name, unidad_negocio_ID) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name, unidad_negocio_ID) VALUES ${values};`
           db.run(insertar)
@@ -1118,7 +1118,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1143,9 +1143,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1156,7 +1156,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.ID || element.id}, '${element.name || element.nombre}', ${element.unidad_negocio_ID})` 
 
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, nombre, unidad_negocio_ID) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, nombre, unidad_negocio_ID) VALUES ${values};`
           db.run(insertar)
@@ -1171,7 +1171,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1196,9 +1196,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1213,7 +1213,7 @@ export function SqlProvider({ children }) {
             subdivision_name TEXT,
              */
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (code, country_name, subdivision_name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (code, country_name, subdivision_name) VALUES ${values};`
           db.run(insertar)
@@ -1228,7 +1228,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1253,9 +1253,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1266,7 +1266,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -1281,7 +1281,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1306,9 +1306,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1319,7 +1319,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -1334,7 +1334,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1359,9 +1359,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1372,7 +1372,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -1387,7 +1387,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1412,9 +1412,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1425,7 +1425,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -1440,7 +1440,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1465,9 +1465,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1478,7 +1478,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -1493,7 +1493,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1518,9 +1518,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1558,7 +1558,7 @@ export function SqlProvider({ children }) {
               )` 
          
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (ID,catalogo_ID,serie,serie_extra,chasis,proyecto_ID,departamento_crudo,departamento_code,estatus_maquinaria_ID,cliente_ID,estado_maquinaria_ID,codigo_finca,contrato,serial_modem_telemetria_pcm,serial_modem_telemetria_am53,fecha_inicio_afs_connect,fecha_vencimiento_afs_connect,fecha_vencimiento_file_transfer,modem_activo,img,unidad_negocio_ID,propietario_ID,departamento_negocio_ID,supervisor_ID,modelo_variante_ID,tiene_telemetria) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,catalogo_ID,serie,serie_extra,chasis,proyecto_ID,departamento_crudo,departamento_code,estatus_maquinaria_ID,cliente_ID,estado_maquinaria_ID,codigo_finca,contrato,serial_modem_telemetria_pcm,serial_modem_telemetria_am53,fecha_inicio_afs_connect,fecha_vencimiento_afs_connect,fecha_vencimiento_file_transfer,modem_activo,img,unidad_negocio_ID,propietario_ID,departamento_negocio_ID,supervisor_ID,modelo_variante_ID,tiene_telemetria) VALUES ${values};`
           db.run(insertar)
@@ -1573,7 +1573,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1599,9 +1599,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1612,7 +1612,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -1627,7 +1627,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1652,9 +1652,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1665,7 +1665,7 @@ export function SqlProvider({ children }) {
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db.run(insertar)
@@ -1680,7 +1680,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1705,9 +1705,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1725,7 +1725,7 @@ export function SqlProvider({ children }) {
             )` 
         
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, fecha,programming_date,descripcion_motivo,realization_date,confirmation_date) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, fecha,programming_date,descripcion_motivo,realization_date,confirmation_date) VALUES ${values};`
           db.run(insertar)
@@ -1740,7 +1740,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 
@@ -1765,9 +1765,9 @@ export function SqlProvider({ children }) {
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
         try {
-          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
           const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
           
           const json = JSON.parse(response.data)
           
@@ -1784,7 +1784,7 @@ export function SqlProvider({ children }) {
             )` 
 
           });
-          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (caso_ID, fecha,description,asistencia_tipo_ID,visita_ID) VALUES ${values};`);
+          
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (caso_ID, fecha,description,asistencia_tipo_ID,visita_ID) VALUES ${values};`
           db.run(insertar)
@@ -1799,7 +1799,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
-        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+        
       }
     };
 

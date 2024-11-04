@@ -48,7 +48,7 @@ function Casos() {
       const result = db.exec("SELECT * FROM caso ORDER BY prioridad ASC");
       //setData(result[0]?.values || []); // Almacena los resultados en el estado
       const casos_json = casos_to_json(result)
-      console.log('dc83128b-7470-4710-a4b6-297f55fc3ce0',casos_json);
+      
       
       setData(casos_json)
     }
@@ -79,7 +79,7 @@ function Casos() {
               </Tr>
             </Thead>
             <Tbody>
-              {console.log('1bfde0a0-31fd-48f1-9ef3-ecdff7e59f6a',data)}
+              {}
               {data?.map((row, index, arr) => {
                 return (
                   <CasosTableRow
