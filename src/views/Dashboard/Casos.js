@@ -58,7 +58,7 @@ function Casos() {
   
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-      <Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
+      {/*<Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
         <CardHeader p="6px 0px 22px 0px">
           <Text fontSize="xl" color={textColor} fontWeight="bold">
             Casos
@@ -101,7 +101,7 @@ function Casos() {
             </Tbody>
           </Table>
         </CardBody>
-      </Card>
+      </Card>*/}
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={5}>
         <CasoSummary title="Cantidad de casos" value="1,200" icon={FaUserAlt} colorScheme="blue" />
         <CasoSummary title="Tareas Pendientes" value="47" icon={FaTasks} colorScheme="orange" />
