@@ -94,6 +94,10 @@ export function SqlProvider({ children }) {
   const [intervalTimeSupervisor, setIntervalTimeSupervisor] = useState(300000);
   const [intervalTimeModeloVariante, setIntervalTimeModeloVariante] = useState(300000);
   const [intervalTimeEquipo, setIntervalTimeEquipo] = useState(300000);
+  const [intervalTimeDiagnosticoTipo, setIntervalTimeDiagnosticoTipo] = useState(300000);
+  const [intervalTimeAsistenciaTipo, setIntervalTimeAsistenciaTipo] = useState(300000);
+  const [intervalTimeVisita, setIntervalTimeVisita] = useState(300000);
+  const [intervalTimeDiagnostico, setIntervalTimeDiagnostico] = useState(300000);
   
   
   
@@ -457,6 +461,7 @@ export function SqlProvider({ children }) {
     `)
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
   }
+ 
   //=======================================================
   // SECTION: TABLE equipo
   //=======================================================
@@ -502,6 +507,73 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (departamento_negocio_ID) REFERENCES departamento_negocio(ID),
         FOREIGN KEY (supervisor_ID) REFERENCES supervisor(ID),
         FOREIGN KEY (modelo_variante_ID) REFERENCES modelo_variante(ID)
+      );
+
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }
+
+
+  //=======================================================
+  // SECTION: TABLE diagnostico_tipo
+  //=======================================================
+  if (!checkTableExists(db, 'diagnostico_tipo')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS diagnostico_tipo (
+        ID INTEGER NOT NULL PRIMARY KEY,
+        name TEXT
+      );
+
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }
+  //=======================================================
+  // SECTION: TABLE asistencia_tipo
+  //=======================================================
+  if (!checkTableExists(db, 'asistencia_tipo')) {
+    db.run(`
+     CREATE TABLE IF NOT EXISTS asistencia_tipo (
+      ID INTEGER NOT NULL PRIMARY KEY,
+      name TEXT
+    );
+
+
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }
+  //=======================================================
+  // SECTION: TABLE Visita
+  //=======================================================
+  if (!checkTableExists(db, 'visita')) {
+    db.run(`
+    CREATE TABLE IF NOT EXISTS visita (
+      ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+      fecha DATE,
+      programming_date DATETIME,
+      descripcion_motivo TEXT,
+      realization_date DATETIME,
+      confirmation_date DATETIME
+    );
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }
+  //=======================================================
+  // SECTION: TABLE diagnostico
+  //=======================================================
+  if (!checkTableExists(db, 'diagnostico')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS diagnostico (
+        caso_ID INTEGER NOT NULL,
+        fecha DATE NOT NULL,
+        diagnostico_tipo_ID INTEGER NOT NULL,
+        description TEXT,
+        asistencia_tipo_ID INTEGER NOT NULL,
+        visita_ID INTEGER,
+        PRIMARY KEY (caso_ID, fecha, diagnostico_tipo_ID),
+        FOREIGN KEY (asistencia_tipo_ID) REFERENCES asistencia_tipo(ID),
+        FOREIGN KEY (diagnostico_tipo_ID) REFERENCES diagnostico_tipo(ID),
+        FOREIGN KEY (caso_ID) REFERENCES caso(ID),
+        FOREIGN KEY (visita_ID) REFERENCES visita(ID)
       );
 
     `)
@@ -588,8 +660,29 @@ export function SqlProvider({ children }) {
       }
     }
     checkSyncControl()
-  },[syncUuid,intervalTimeCatalogo,intervalTimeCategoria,intervalTimeDivision,intervalTimeLinea,intervalTimeMarca,intervalTimeModelo])
-  
+  },[syncUuid,
+    intervalTimeCategoria, 
+    intervalTimeModelo, 
+    intervalTimeLinea, 
+    intervalTimeMarca, 
+    intervalTimeDivision, 
+    intervalTimeCatalogo, 
+    intervalTimeProyecto, 
+    intervalTimedepartamentoNegocio, 
+    intervalTimeUnidadNegocio, 
+    intervalTimeDepartamento, 
+    intervalTimeEstatusMaquina, 
+    intervalTimeEstadoMaquina, 
+    intervalTimeCliente, 
+    intervalTimeSupervisor, 
+    intervalTimeModeloVariante, 
+    intervalTimeEquipo, 
+    intervalTimeDiagnosticoTipo, 
+    intervalTimeAsistenciaTipo,
+    intervalTimeVisita,
+    intervalTimeDiagnostico
+  ])
+
 
   /**
    * 
@@ -1450,6 +1543,232 @@ export function SqlProvider({ children }) {
           // imporante simpres salvar en en indexdb
           await saveToIndexedDB(db);
           //setFinSync(true)
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data:', error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db.exec(`SELECT * FROM ${tabla}`);
+        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  },[db,incrementalDate])
+
+
+
+  /**
+   * SECTION: TABLA diagnostico_tipo
+   *
+   */
+
+  useEffect( () =>{
+    const codigo = 13, tabla = 'diagnostico_tipo', setTime = setIntervalTimeDiagnosticoTipo, time = intervalTimeDiagnosticoTipo
+
+    const fetchData = async (synctable_ID) => {
+      if(db != null && incrementalDate != ''){
+        try {
+          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
+          const json = JSON.parse(response.data)
+          
+          let values = ``
+          json.forEach((element,index) => {
+            element = JSON.parse(element)
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
+          
+          });
+          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
+          db.run(insertar)
+          // imporante simpres salvar en en indexdb
+          await saveToIndexedDB(db);
+          //setFinSync(true)
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data:', error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db.exec(`SELECT * FROM ${tabla}`);
+        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  },[db,incrementalDate])
+
+
+  /**
+   * SECTION: TABLA asistencia_tipo
+   *
+   */
+
+  useEffect( () =>{
+    const codigo = 3, tabla = 'asistencia_tipo', setTime = setIntervalTimeAsistenciaTipo, time = intervalTimeAsistenciaTipo
+
+    const fetchData = async (synctable_ID) => {
+      if(db != null && incrementalDate != ''){
+        try {
+          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
+          const json = JSON.parse(response.data)
+          
+          let values = ``
+          json.forEach((element,index) => {
+            element = JSON.parse(element)
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
+          
+          });
+          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`);
+          
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
+          db.run(insertar)
+          // imporante simpres salvar en en indexdb
+          await saveToIndexedDB(db);
+          //setFinSync(true)
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data:', error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db.exec(`SELECT * FROM ${tabla}`);
+        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  },[db,incrementalDate])
+
+
+  /**
+   * SECTION: TABLA visita
+   *
+   */
+
+  useEffect( () =>{
+    const codigo = 37, tabla = 'visita', setTime = setIntervalTimeVisita, time = intervalTimeVisita
+
+    const fetchData = async (synctable_ID) => {
+      if(db != null && incrementalDate != ''){
+        try {
+          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
+          const json = JSON.parse(response.data)
+          
+          let values = ``
+          json.forEach((element,index) => {
+            element = JSON.parse(element)
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+              ${element.id || element.ID}, 
+              '${element.fecha}',
+              '${element.programming_date}',
+              '${element.descripcion_motivo}',
+              '${element.realization_date}',
+              '${element.confirmation_date}',
+            )` 
+        
+          });
+          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (id, fecha,programming_date,descripcion_motivo,realization_date,confirmation_date) VALUES ${values};`);
+          
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (id, fecha,programming_date,descripcion_motivo,realization_date,confirmation_date) VALUES ${values};`
+          db.run(insertar)
+          // imporante simpres salvar en en indexdb
+          await saveToIndexedDB(db);
+          //setFinSync(true)
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data:', error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db.exec(`SELECT * FROM ${tabla}`);
+        console.log(tabla,'52dcd029-6c33-4d4e-b7f9-f52417462249',result);
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  },[db,incrementalDate])
+
+
+  /**
+   * SECTION: TABLA dignostico
+   *
+   */
+
+  useEffect( () =>{
+    const codigo = 12, tabla = 'diagnostico', setTime = setIntervalTimeDiagnostico, time = intervalTimeDiagnostico
+
+    const fetchData = async (synctable_ID) => {
+      if(db != null && incrementalDate != ''){
+        try {
+          console.log(tabla,'272a9e14-24ea-4e94-aa14-be77cc1d6671',`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          console.log(tabla,'7db51adb-7546-4710-99eb-3f60c527ab53',response);
+          
+          const json = JSON.parse(response.data)
+          
+          let values = ``
+          json.forEach((element,index) => {
+            element = JSON.parse(element)
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+              ${element.caso_ID}, 
+              '${element.fecha}',
+              ${element.description},
+              ${element.asistencia_tipo_ID},
+              ${element.visita_ID},
+            )` 
+
+          });
+          console.log(tabla,'2cb6a8ca-519a-49a3-bf70-2192e7e67ce7',`INSERT OR REPLACE INTO ${tabla} (caso_ID, fecha,description,asistencia_tipo_ID,visita_ID) VALUES ${values};`);
+          
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (caso_ID, fecha,description,asistencia_tipo_ID,visita_ID) VALUES ${values};`
+          db.run(insertar)
+          // imporante simpres salvar en en indexdb
+          await saveToIndexedDB(db);
+          setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
