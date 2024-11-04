@@ -116,7 +116,8 @@ function Casos() {
           createdAt: row.start,
           assignedTechnician: 'Juan Pérez',
           description: row.descripcion,
-          prioridad: row.prioridad
+          prioridad: row.prioridad,
+          fecha:row.fecha
         }
         return(
           <CasoDetail caseData={casoData} />

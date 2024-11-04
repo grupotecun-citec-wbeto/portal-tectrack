@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-
+import { IoMdTime } from "react-icons/io";
+import { MdOutlineTimelapse } from "react-icons/md";
 import {
     Avatar,
     Badge,
@@ -9,7 +10,9 @@ import {
     Text,
     Tr,
     useColorModeValue,
-    Select
+    Select,
+    Tooltip,
+    Icon
   } from "@chakra-ui/react";
 
 const Timer = ({ startDate }) => {
@@ -31,15 +34,20 @@ const Timer = ({ startDate }) => {
   }, [startDate]);
 
   return (
-    <Badge
-        bg="green.400"
-        color={"black"}
-        fontSize="16px"
-        p="3px 10px"
-        borderRadius="8px"
-    >
-        {timeElapsed.hours} : {timeElapsed.minutes}
-    </Badge>
+    <Tooltip label="Tiempo hh : mm" aria-label="A tooltip" >
+      <Badge
+          bg="green.400"
+          color={"black"}
+          fontSize="0.8em"
+          p="3px 10px"
+          borderRadius="8px"
+      >
+          <Flex align="center" direction={{sm:"row",lg:"row"}} >
+            <Icon as={MdOutlineTimelapse} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+            {timeElapsed.hours} : {timeElapsed.minutes}
+          </Flex>
+      </Badge>
+    </Tooltip>
   );
 };
 

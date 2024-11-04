@@ -13,8 +13,10 @@ import {
   Select,
   Grid,
 } from '@chakra-ui/react';
-import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave   } from 'react-icons/fa';
+import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose   } from 'react-icons/fa';
 import { FaUserPen,FaUserMinus,FaEye   } from "react-icons/fa6";
+import { BsRocketTakeoff } from "react-icons/bs";
+import { FcLowPriority } from "react-icons/fc";
 /*=======================================================
  BLOQUE: CONTEXT
  DESCRIPTION: 
@@ -56,6 +58,7 @@ const CasoDetail = ({ caseData }) => {
     createdAt,
     description,
     prioridad,
+    fecha,
   } = caseData;
 
   const textColor = useColorModeValue("gray.500", "white");
@@ -105,12 +108,18 @@ const CasoDetail = ({ caseData }) => {
      */
     const [isEditTecnico, setIsEditTecnico] = useState(false);
 
+    const [prediagnostico,setPrediagnostico] = useState({})
+
+    const [isEmpezado,setIsEmpezado] = useState(false)
+
     /**
      * Desestructurar objeto del contexto sqlContext
      * @property {Objeto} - Contiene las funciones para ejecutar sqlite
      * @property {saveToIndexedDB} - Salvar el objeto db dentro de indexdb para persistir la data
      */
     const { db, saveToIndexedDB } = useContext(SqlContext);
+
+  
 
 
   //=======================================================
@@ -175,7 +184,7 @@ const CasoDetail = ({ caseData }) => {
   const prioridadName = useMemo ( () =>{
     return {
       "1":"Alta",
-      "2":"Intermedia",
+      "2":"Inter",
       "3":"Baja"
     }[prioridad] || bgStatus
   },[prioridad])
@@ -184,20 +193,15 @@ const CasoDetail = ({ caseData }) => {
   // SECTION: useEfect
   //=======================================================
 
-  // CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
+  // 
+  /**
+   * CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
+   */
   useEffect( () =>{
     const consultarCasoEstado = async() =>{
-      const data = db.exec(`SELECT * FROM  caso_estado`)
-      const result = data?.map(item => {
-        return item.values.map(valueArray => {
-            return item.columns.reduce((obj, col, index) => {
-                obj[col] = valueArray[index];
-                return obj;
-            }, {});
-        });
-      });
-      if(data.length != 0){
-        setEstados(result[0])
+      const result = db.toArray(db.exec(`SELECT * FROM  caso_estado`))
+      if(result.length != 0){
+        setEstados(result)
       }
 
       
@@ -226,27 +230,47 @@ const CasoDetail = ({ caseData }) => {
     getUsuario()
   },[])
 
-  // CONSULTAR ASIGNACION
+  
+  /**
+   * CONSULTAR ASIGNACION
+   */
   useEffect( () =>{
     const consultarAsigancion = async() =>{
-      const data = db.exec(`SELECT * FROM  asignacion WHERE caso_ID = ${id} ORDER BY fecha DESC LIMIT 1;`)
       
-      const result = data?.map(item => {
-        return item.values.map(valueArray => {
-            return item.columns.reduce((obj, col, index) => {
-                obj[col] = valueArray[index];
-                return obj;
-            }, {});
-        });
-      });
-      if(data.length != 0){
-        setSlcUsuario(result[0][0].usuario_ID)
+      const result = db.toObject(db.exec(`SELECT * FROM  asignacion WHERE caso_ID = ${id} ORDER BY fecha DESC LIMIT 1;`) || {})
+      if(typeof result !== 'undefined'){
+        if(Object.keys(result).length != 0){
+          setSlcUsuario(result.usuario_ID)
+        }
       }
       
     }
 
     consultarAsigancion()
   },[])
+
+  useEffect( () =>{
+    const consultarDiagnostico = async() =>{
+      
+      const result = db.toObject(db.exec(`SELECT 
+        caso_ID,
+        CAST(fecha AS TEXT) AS fecha,
+        diagnostico_tipo_ID,
+        description,
+        asistencia_tipo_ID,
+        visita_ID
+        FROM  diagnostico WHERE caso_ID = ${id} AND diagnostico_tipo_ID = 1 AND fecha = '${fecha}' LIMIT 1;`) || {})
+      if(typeof result !== 'undefined'){
+        if(Object.keys(result).length != 0){
+          setPrediagnostico(result)        
+        }
+      }
+      
+    }
+
+    consultarDiagnostico()
+  },[])
+
   
 
   //=======================================================
@@ -315,7 +339,14 @@ const CasoDetail = ({ caseData }) => {
     await saveToIndexedDB(db)
   }
 
-
+  const empezar = async() =>{
+    setIsEmpezado(true)
+    const estado_a_establecer = 3
+    db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
+    setEstado(estado_a_establecer)
+    await saveToIndexedDB(db)
+    
+  }
 
   return (
     <Box
@@ -327,15 +358,21 @@ const CasoDetail = ({ caseData }) => {
       p={6}
       overflow="hidden"
     >
-      <Grid templateColumns={{ sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
-        <Flex align="center" direction={{sm:"column",lg:"row"}} mb={2}>
+      <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
+        
+          
           <Tooltip label="Estado del caso" aria-label="A tooltip" >
-            <Badge px={2} py={1} bg={statusColor} color="white" rounded="full" fontSize="0.8em">
-              {estadoName}
+            <Badge
+              bg={statusColor}
+              color={"white"}
+              fontSize="0.8em"
+              p="3px 10px"
+              borderRadius="8px"
+            >
+              {estadoName == 'Pendiente asignación' ? 'Pend Asig' : estadoName }
             </Badge>
           </Tooltip>
-        </Flex>
-        <Flex align="center" direction={{sm:"column",lg:"row"}} mb={2}>
+        
           <Tooltip label="Prioridad del caso" aria-label="A tooltip" >
             <Badge
               bg={prioridadColor}
@@ -344,17 +381,21 @@ const CasoDetail = ({ caseData }) => {
               p="3px 10px"
               borderRadius="8px"
             >
-              {prioridadName}
+              <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                <Icon as={FcLowPriority } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                {prioridadName}
+              </Flex>
+              
             </Badge>
           </Tooltip>
-        </Flex>
-        <Flex align="center" direction={{sm:"column",lg:"row"}} mb={2}>  
-          <Tooltip label="Tiempo abierto el caso" aria-label="A tooltip" >
-            <Box>
-              <Timer startDate={createdAt} />
-            </Box>
-          </Tooltip>
-        </Flex>
+        
+        
+          
+            
+          <Timer startDate={createdAt} />
+            
+          
+        
       </Grid>
       <Stack spacing={4}>
         
@@ -362,44 +403,65 @@ const CasoDetail = ({ caseData }) => {
             Caso #{id}
           </Text>
           <Grid templateColumns={{ sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
-            {isEditTecnico ? (
-              <Flex align="center" direction={{sm:"column",lg:"row"}} mb={2}>
-                <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
-                  <Button ms={{lg:"10px"}} onClick={() => asignar()}>
-                    <Icon as={FaRegSave} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                  </Button>
-                </Tooltip>
-              </Flex>
-            
-            ):(
-              <>
-                <Flex align="center" direction={{sm:"column",lg:"row"}} mb={2}>
-                  <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
-                    <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => setIsEditTecnico(!isEditTecnico)}>
-                      <Icon as={FaUserPen} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                    </Button>
-                  </Tooltip>
-                </Flex>
-                {slcUsuario && (
-                  <Flex align="center" direction={{sm:"column",lg:"row"}} mb={2}>
-                    <Tooltip label="Quitar tenico Técnico" aria-label="A tooltip" >
-                      <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => desasignar()}>
-                        <Icon as={FaUserMinus } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+            <Flex align="center" direction={{sm:"row",lg:"row"}} mb={2} >
+              {!isEmpezado && estado != 3 ? (
+                <>
+                  {isEditTecnico ? ( //BsRocketTakeoff
+                    
+                    <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
+                      <Button ms={{lg:"10px"}} onClick={() => asignar()}>
+                        <Icon as={FaRegSave} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
                       </Button>
                     </Tooltip>
-                  </Flex>
-                )}
-              </>
+                  
+                
+                  ):(
+                    <>
+                      
+                        <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
+                          <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => setIsEditTecnico(!isEditTecnico)}>
+                            <Icon as={FaUserPen} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                          </Button>
+                        </Tooltip>
+                      
+                      {slcUsuario && (
+                        
+                          <Tooltip label="Quitar tenico Técnico" aria-label="A tooltip" >
+                            <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => desasignar()}>
+                              <Icon as={FaUserMinus } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                            </Button>
+                          </Tooltip>
+                        
+                      )}
+                    </>
+                    
+                    
+                    
+                  )}
+                
+                
+                  <Tooltip label="Detalles del caso" aria-label="A tooltip" >
+                    <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
+                      <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                    </Button>
+                  </Tooltip>
+                  
+                  <Tooltip label="Empezar" aria-label="A tooltip" >
+                    <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => empezar()}>
+                      <Icon as={BsRocketTakeoff  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                    </Button>
+                  </Tooltip>
+                </>
+              ):(
+                <Tooltip label="Cerrar caso" aria-label="A tooltip" >
+                    <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
+                      <Icon as={FaRegWindowClose  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                    </Button>
+                  </Tooltip>
+              )}
+                
+
               
-              
-              
-            )}
-            <Flex align="center" direction={{sm:"column",lg:"row"}} mb={2}>
-              <Tooltip label="Detalles del caso" aria-label="A tooltip" >
-                <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
-                  <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                </Button>
-              </Tooltip>
             </Flex>
           </Grid>
          
@@ -425,7 +487,7 @@ const CasoDetail = ({ caseData }) => {
         ):(
           <>
             <Text fontSize="2xl" fontWeight="bold">
-              {description || 'Descripción del caso'}
+              {typeof prediagnostico.description !== 'undefined' ? decodeURIComponent(prediagnostico.description) : ''}
             </Text>
 
             <Stack direction="row" align="center">
