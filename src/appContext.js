@@ -21,6 +21,8 @@ export function AppProvider({ children }) {
     const [comunicationSelected,setComunicationSelected] = useState(Enums.WHATSAPP)
     const [serviceTypeData,setServiceTypeData] = useState(null)
     const [casoActivo,setCasoActivo] = useState('')
+    const [slcCasoId,setSlcCasoId] = useState(null)
+    
 
      // >>>>>>>>>>>>>>>>>>>>>>>>>>REDUX-PRESIST >>>>>>>>>>>>>>>>>>>>>>>>>>>>
      const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -106,7 +108,8 @@ export function AppProvider({ children }) {
             machineID, setMachineID,
             caseType,setCaseType,
             serviceTypeData,setServiceTypeData,
-            casoActivo,setCasoActivo
+            casoActivo,setCasoActivo,
+            slcCasoId,setSlcCasoId
             }}>
             {children}
         </AppContext.Provider>

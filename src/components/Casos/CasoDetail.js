@@ -17,6 +17,7 @@ import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose   } fr
 import { FaUserPen,FaUserMinus,FaEye   } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
+import { IoIosBusiness } from "react-icons/io";
 /*=======================================================
  BLOQUE: CONTEXT
  DESCRIPTION: 
@@ -28,6 +29,7 @@ import { format } from "date-fns";
 import { es } from 'date-fns/locale';
 
 import Timer from './Timer';
+import { useHistory } from 'react-router-dom';
 
 
 
@@ -66,6 +68,9 @@ const CasoDetail = ({ caseData }) => {
   const bgStatus = useColorModeValue("gray.400", "navy.900");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
+  const {slcCasoId,setSlcCasoId} = useContext(AppContext)
+
+  const history = useHistory()
     
   // ==========================================================
   // SECTION: Estados (useState)
@@ -249,6 +254,7 @@ const CasoDetail = ({ caseData }) => {
     consultarAsigancion()
   },[])
 
+  // CONSULTAR DIAGANOSTICO
   useEffect( () =>{
     const consultarDiagnostico = async() =>{
       
@@ -270,6 +276,10 @@ const CasoDetail = ({ caseData }) => {
 
     consultarDiagnostico()
   },[])
+
+  
+
+  
 
   
 
@@ -348,6 +358,12 @@ const CasoDetail = ({ caseData }) => {
     
   }
 
+  const terminar = async() => {
+    setSlcCasoId(id)
+    history.push('/admin/pages/diagnostico')
+   
+  }
+
   return (
     <Box
       maxW="lg"
@@ -404,61 +420,75 @@ const CasoDetail = ({ caseData }) => {
           </Text>
           <Grid templateColumns={{ sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
             <Flex align="center" direction={{sm:"row",lg:"row"}} mb={2} >
-              {!isEmpezado && estado != 3 ? (
+              {estado != 5 ?(
                 <>
-                  {isEditTecnico ? ( //BsRocketTakeoff
-                    
-                    <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
-                      <Button ms={{lg:"10px"}} onClick={() => asignar()}>
-                        <Icon as={FaRegSave} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                      </Button>
-                    </Tooltip>
-                  
-                
-                  ):(
+                      {!isEmpezado && estado != 3 ? (
                     <>
-                      
+                      {isEditTecnico ? ( //BsRocketTakeoff
+                        
                         <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
-                          <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => setIsEditTecnico(!isEditTecnico)}>
-                            <Icon as={FaUserPen} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                          <Button ms={{lg:"10px"}} onClick={() => asignar()}>
+                            <Icon as={FaRegSave} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
                           </Button>
                         </Tooltip>
                       
-                      {slcUsuario && (
+                    
+                      ):(
+                        <>
+                          
+                            <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
+                              <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => setIsEditTecnico(!isEditTecnico)}>
+                                <Icon as={FaUserPen} color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                              </Button>
+                            </Tooltip>
+                          
+                          {slcUsuario && (
+                            
+                              <Tooltip label="Quitar tenico Técnico" aria-label="A tooltip" >
+                                <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => desasignar()}>
+                                  <Icon as={FaUserMinus } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                                </Button>
+                              </Tooltip>
+                            
+                          )}
+                        </>
                         
-                          <Tooltip label="Quitar tenico Técnico" aria-label="A tooltip" >
-                            <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => desasignar()}>
-                              <Icon as={FaUserMinus } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                            </Button>
-                          </Tooltip>
+                        
                         
                       )}
+                    
+                    
+                      <Tooltip label="Detalles del caso" aria-label="A tooltip" >
+                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
+                          <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                        </Button>
+                      </Tooltip>
+                      
+                      <Tooltip label="Empezar" aria-label="A tooltip" >
+                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => empezar()}>
+                          <Icon as={BsRocketTakeoff  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                        </Button>
+                      </Tooltip>
                     </>
-                    
-                    
-                    
+                  ):(
+                    <Tooltip label="Cerrar caso" aria-label="A tooltip" >
+                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => terminar()}>
+                          <Icon as={FaRegWindowClose  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                        </Button>
+                      </Tooltip>
                   )}
-                
-                
-                  <Tooltip label="Detalles del caso" aria-label="A tooltip" >
-                    <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
-                      <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                    </Button>
-                  </Tooltip>
-                  
-                  <Tooltip label="Empezar" aria-label="A tooltip" >
-                    <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => empezar()}>
-                      <Icon as={BsRocketTakeoff  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                    </Button>
-                  </Tooltip>
                 </>
               ):(
-                <Tooltip label="Cerrar caso" aria-label="A tooltip" >
-                    <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
-                      <Icon as={FaRegWindowClose  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                    </Button>
-                  </Tooltip>
+                <Text 
+                  fontSize="lg" 
+                  fontWeight="bold" 
+                  color={"green.500"}
+                  textAlign={"Center"}
+                >
+                  {"Caso Terminado"}
+                </Text>
               )}
+              
                 
 
               

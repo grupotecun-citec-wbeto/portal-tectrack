@@ -30,12 +30,12 @@ import {
   import CardHeader from "components/Card/CardHeader";
   
   // TECTRACK COMPONENTES
-  import CheckboxPreDiagnostico from "components/PreDiagnostico/CheckboxPreDiagnostico";
+  import CheckboxDiagnostico from "components/Diagnostico/CheckboxDiagnostico";
   import CardEspecialista from "components/PreDiagnostico/CardEspcialista";
   import CardAsistencia from "components/PreDiagnostico/CardAsistencia";
-  import CardCrearCaso from "components/PreDiagnostico/CardCrearCaso";
+  import CardTerminarCaso from "components/Diagnostico/CardTerminarCaso";
   import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
-  import CardHerramientas from "components/PreDiagnostico/CardHerramientas";
+  import CardHerramientas from "components/Diagnostico/CardHerramientas";
   import CardCommand from "components/PreDiagnostico/CadCommand";
   import CardPrioridad from "components/PreDiagnostico/CardPrioridad";
   import CardComunication from "components/Comunication/CardComunication";
@@ -52,7 +52,7 @@ import {
   
   //*********************************************** FIN IMPORT ***************************************************** */
   
-  function PreDiagnosticoBox({ onSearch }) {
+  function DiagnosticoBox({ onSearch }) {
     
     // Chakra color mode
     const textColor = useColorModeValue("gray.700", "white");
@@ -139,6 +139,11 @@ import {
             especialista_id:'', // identificador de especialista
             asistencia_tipo_id:'', // identificador de asistencia
             prioridad_id:'' // 1: Alta, 2: Intermedia, 3: Baja | identificador de prioridad
+          },
+          diagnostico:{
+            descripcion:'',
+            sistemas:{},
+            herramientas:{},
           }
         }  
         
@@ -257,13 +262,12 @@ import {
                 textAlign={{ sm: "center", md: "start" }}
                 p='24px'
               >
-                <Text fontSize={{xl:'4em',sm:'3em'}}>Pre Diagnostico</Text>
+                <Text fontSize={{xl:'4em',sm:'3em'}}>Diagnostico</Text>
               
               </Flex>
               
             </Flex>
             <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
-              < CardComunication title="¿Como te contactaron?" />
               <Card>
                   <CardHeader>
                     <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>
@@ -290,7 +294,7 @@ import {
                             </Text>
                             <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
                               {datos[key].map( (element) =>(
-                                <CheckboxPreDiagnostico name={element.system_name} id={element.ID} section={key}/>
+                                <CheckboxDiagnostico name={element.system_name} id={element.ID} section={key}/>
                               ))}
                             </Grid>
                           </>
@@ -299,15 +303,14 @@ import {
                   </CardBody>
                   
               </Card>
-              <CardEspecialista />
-              <CardAsistencia />
-              <CardHerramientas title="¿Necesitas incluir a Herramientas?" />
-              <CardPrioridad />
+
+              <CardHerramientas title="¿Que herramientas utilizaste?"/>
+
               
               {isSuccessAlertCaso ?(
                 <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
               ):(
-                <CardCrearCaso openAlert={openAlert} />
+                <CardTerminarCaso openAlert={openAlert} />
               )}
               <CardCommand />
               
@@ -324,7 +327,7 @@ import {
     );
   }
 
-export default PreDiagnosticoBox;
+export default DiagnosticoBox;
 
 
 /*
