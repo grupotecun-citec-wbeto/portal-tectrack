@@ -395,7 +395,7 @@ export function SqlProvider({ children }) {
      CREATE TABLE IF NOT EXISTS departamento (
         code TEXT NOT NULL PRIMARY KEY,
         country_name TEXT,
-        subdivision_name TEXT,
+        subdivision_name TEXT
       );
     `)
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
