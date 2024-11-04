@@ -72,6 +72,7 @@ import {
     const [debouncedSearchValue] = useDebounce(descriptionValue, 500);
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
     const [isSuccessAlertCaso,setIsSuccessAlertCaso] = useState(false)
+    const [caseId,setCaseId] = useState(0)
 
     const [datos, setDatos] = useState([]);
 
@@ -223,7 +224,8 @@ import {
       setIsSuccessAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
-    const openAlert = () => {
+    const openAlert = (caseId_in) => {
+      setCaseId(caseId_in)
       setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
@@ -301,9 +303,11 @@ import {
               <CardAsistencia />
               <CardHerramientas />
               <CardPrioridad />
-              <CardCrearCaso openAlert={openAlert} />
-              {isSuccessAlertCaso &&(
-                <SuccessAlertCaso closeAlert={closeAlert}/>
+              
+              {isSuccessAlertCaso ?(
+                <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
+              ):(
+                <CardCrearCaso openAlert={openAlert} />
               )}
               <CardCommand />
               

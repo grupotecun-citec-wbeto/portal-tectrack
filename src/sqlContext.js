@@ -611,6 +611,28 @@ export function SqlProvider({ children }) {
         await DDL_UUID_SYNC(db)
         await DDL(db)
       }
+      db.toArray = (data) =>{
+        return data.flatMap(item => 
+          item.values.map(valueArray => 
+              item.columns.reduce((obj, col, index) => {
+                  obj[col] = valueArray[index];
+                  return obj;
+              }, {})
+          )
+      );
+
+      }
+
+      db.toObject = (data) =>{
+          return data.flatMap(item => 
+            item.values.map(valueArray => 
+                item.columns.reduce((obj, col, index) => {
+                    obj[col] = valueArray[index];
+                    return obj;
+                }, {})
+            )
+          )[0];
+      }
       setDb(db);
 
        // Obtener y establecer los datos en el estado
