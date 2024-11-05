@@ -52,10 +52,11 @@ function SearchCard(props) {
     } = useContext(AppContext)
 
     const btnCreateCase = () =>{
-        setCasoActivo({code:uuidv4(),maquina_id:maquina_id,categoria_id:categoria_id,cliente_name:cliente_name})
+        // ESTA FUNCIONALIAD LA VAMOS A MOVER DE LUGAR HACIA
+        /*setCasoActivo({code:uuidv4(),maquina_id:maquina_id,categoria_id:categoria_id,cliente_name:cliente_name})
         setTimeout(() => {
             history.push('/admin/pages/prediagnostico');
-        }, 800);
+        }, 800);*/
         
     }
 

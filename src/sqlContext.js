@@ -574,8 +574,6 @@ export function SqlProvider({ children }) {
         especialista_ID INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
         description TEXT NULL,
         visita_ID INTEGER NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         prioridad INTEGER NULL,
         PRIMARY KEY (equipo_ID, caso_ID),
         FOREIGN KEY (asistencia_tipo_ID) REFERENCES asistencia_tipo(ID),

@@ -1,5 +1,6 @@
-import React,{useState, useEffect  } from "react";
+import React,{useState, useEffect,useContext   } from "react";
 import axios from 'axios';
+import { useSelector, useDispatch } from 'react-redux';
 import {
     Input,
     InputGroup,
@@ -27,9 +28,40 @@ import {
   import { useDebounce } from 'use-debounce';
 
   import { MdCheckCircle,MdSettings  } from 'react-icons/md';
+
+  import {v4 as uuidv4} from 'uuid'
+  
+  // context
+  import AppContext from "appContext";
+
+  // ROUTER
+import { Link, useHistory   } from 'react-router-dom';
   
   
   function SelectCasoBox({ onSearch }) {
+    
+
+    const history = useHistory()
+
+    // context 
+    const {
+        casoActivo,setCasoActivo
+    } = useContext(AppContext)
+
+
+    // ************************** REDUX-PRESIST ****************************
+     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+     const dispatch = useDispatch();
+     
+     const saveUserData = (json) => {
+       dispatch({ type: 'SET_USER_DATA', payload: json });
+     };
+ 
+     const getUserData = () => {
+       dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+     };
+     
+     // ************************** REDUX-PRESIST ****************************
     
     // Chakra color mode
     const textColor = useColorModeValue("gray.700", "white");
@@ -44,6 +76,8 @@ import {
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
 
     const [datos, setDatos] = useState([]);
+
+    
 
     const columns = [
       {
@@ -85,13 +119,40 @@ import {
         fetchData();
       }
     }, [debouncedSearchValue]);
+
+
+  const btnCreateCase = async(comunicacion_ID) =>{
+      const uuid = uuidv4()
+      getUserData()
+      
+      const newUserData = {...userData}
+
+      const caso = {...userData.stuctures.caso}
+      
+      newUserData.casoActivo.code=uuid
+      
+      caso.comunicacion_ID = comunicacion_ID
+      
+      newUserData.casos[uuid] = caso
+      
+      // Ponerlo como caso seleccionado
+      setCasoActivo(newUserData.casoActivo)
+      console.log(casoActivo)
+      
+      saveUserData(newUserData)
+      
+      setTimeout(() => {
+          history.push('/admin/pages/searchbox');
+      }, 800);
+      
+  }
   
     return (
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
           <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
             
-            <CardSelectCaso title="¿Se comunicaron?" to="/admin/pages/searchbox" id='1'/>
-            <CardSelectCaso title="¿Preventivo?" to="/admin/pages/searchbox" id='2'/>
+            <CardSelectCaso title="¿Se comunicaron?" to="/admin/pages/searchbox" id='1' btnCreateCase={btnCreateCase} />
+            <CardSelectCaso title="¿Preventivo?" to="/admin/pages/searchbox" id='2' btnCreateCase={btnCreateCase} />
             
           </Grid>
       </Flex>

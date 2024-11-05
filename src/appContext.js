@@ -41,15 +41,54 @@ export function AppProvider({ children }) {
 
 
     // >>>>>>>>>>>>>>>>>>>>>>>>>>>> SECTION useEfect >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+    /**
+     * SECTION: useEfect
+     */
     
+    /**
+     * ESTRUCTURA BASE
+     */
+
+
     useEffect(()=>{
         getUserData()
   
-        console.log('ea2a2d78-9f16-40da-baa6-5743db7086ee2',casoActivo)
         if(userData == null){
             let base_structure = {
-                casos : {},
-                casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:''}
+                casos : {/*stuctures.caso*/}, // ARRAY
+                casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:''},
+                stuctures:{
+                  caso:{
+                    usuario_ID:0, //INTEGER NOT NULL,
+                    comunicacion_ID:0, //INTEGER NOT NULL,
+                    segmento_ID:0, //INTEGER NOT NULL,
+                    caso_estado_ID:0, //INTEGER NOT NULL,
+                    fecha:'', //DATE NOT NULL,
+                    start:'', //DATETIME NULL,
+                    date_end:'', //DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
+                    description:'', //TEXT NULL,
+                    prioridad:0, //INTEGER NULL, -- media ponderada de la prioridad
+                    pre_diagnosticos:{/*stuctures.diagnostico*/}, // Object
+                    post_diagnosticos:{/*stuctures.diagnostico*/}, // object
+                    sistemas:[]
+                  },
+                  diagnostico:{
+                    equipo_ID:0, //INTEGER NOT NULL,
+                    caso_ID:0, //INTEGER NOT NULL,
+                    diagnostico_tipo_ID:0, //INTEGER NOT NULL, 1: pre 2: post
+                    asistencia_tipo_ID:0, //INTEGER NOT NULL,
+                    especialista_ID:0, //INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
+                    description:'', //TEXT NULL,
+                    visita_ID:0, //INTEGER NULL,
+                    prioridad:0,//INTEGER NULL,
+                    equipamientos:{/*equipamiento*/} // Object
+                  },
+                  equipamiento:{
+                    herramienta_ID:0, //INTEGER NOT NULL
+                    equipo_ID:0, //INTEGER NOT NULL
+                  }
+                }
             }  
             if(userData == null){
                 saveUserData(base_structure)

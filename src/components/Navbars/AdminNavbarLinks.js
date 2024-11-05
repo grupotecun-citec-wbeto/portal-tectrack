@@ -24,14 +24,19 @@ import avatar1 from "assets/img/avatars/avatar1.png";
 import avatar2 from "assets/img/avatars/avatar2.png";
 import avatar3 from "assets/img/avatars/avatar3.png";
 // Custom Icons
-import { ArgonLogoDark, ArgonLogoLight, ChakraLogoDark, ChakraLogoLight, ProfileIcon, SettingsIcon } from "components/Icons/Icons";
+import { ArgonLogoDark, ArgonLogoLight, ChakraLogoDark, ChakraLogoLight, ProfileIcon, SettingsIcon, TecTrackCaseDark, TecTrackCaseLight  } from "components/Icons/Icons";
 // Custom Components
 import { ItemContent } from "components/Menu/ItemContent";
 import { SearchBar } from "components/Navbars/SearchBar/SearchBar";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
-import React from "react";
+import React,{useEffect, useState} from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
+
+
+
+
+import CasoListEquiposNavbar from "components/Casos/CasoListEquiposNavbar";
 
 export default function HeaderLinks(props) {
   const {
@@ -44,6 +49,10 @@ export default function HeaderLinks(props) {
     ...rest
   } = props;
 
+  
+
+  
+
   const { colorMode } = useColorMode();
 
   // Chakra Color Mode
@@ -55,6 +64,12 @@ export default function HeaderLinks(props) {
   if (secondary) {
     navbarIcon = "white";
   }
+
+
+ 
+
+  
+
   return (
     <Flex
       pe={{ sm: "0px", md: "16px" }}
@@ -113,7 +128,10 @@ export default function HeaderLinks(props) {
         routes={routes}
         {...rest}
       />
-      
+    
+
+      <CasoListEquiposNavbar props={props} />
+
       <SettingsIcon
         cursor='pointer'
         ms={{ base: "16px", xl: "0px" }}
