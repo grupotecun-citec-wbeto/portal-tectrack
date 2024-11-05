@@ -284,7 +284,7 @@ import {
                     
                       
                         {Object.keys(datos).map( (key,index) =>(
-                          <Flex key={index}>
+                          <>
                             <Text fontSize='sm' color='gray.400' fontWeight='600' mb='20px' >
                             {key}
                             </Text>
@@ -293,7 +293,7 @@ import {
                                 <CheckboxPreDiagnostico name={element.system_name} id={element.ID} section={key} key={element.ID}/>
                               ))}
                             </Grid>
-                          </Flex>
+                          </>
                         ))}
                       
                   </CardBody>

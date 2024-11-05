@@ -169,26 +169,27 @@ export function SqlProvider({ children }) {
     if (!checkTableExists(db, 'caso')) {
       db.run(`
         CREATE TABLE IF NOT EXISTS caso (
-        ID INTEGER PRIMARY KEY AUTOINCREMENT,
-        fecha DATE NOT NULL,
-        start DATETIME,
-        date_end DATETIME,
-        description TEXT,
-        comunicacion_ID INTEGER NOT NULL,
-        segmento_ID INTEGER NOT NULL,
-        caso_estado_ID INTEGER NOT NULL,
-        equipo_ID INTEGER NOT NULL,
-        equipo_catalogo_ID INTEGER NOT NULL,
-        prioridad TINYINT,
-        sync TEXT,
-        cliente_name TEXT,
-        user_data TEXT,
-        
-        FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
-        FOREIGN KEY (segmento_ID) REFERENCES segmento(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
-        FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID) ON DELETE NO ACTION ON UPDATE NO ACTION);
+          ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+          remote_sync_id INTEGER NULL,
+          usuario_ID INTEGER NOT NULL,
+          comunicacion_ID INTEGER NOT NULL,
+          segmento_ID INTEGER NOT NULL,
+          caso_estado_ID INTEGER NOT NULL,
+          fecha DATE NOT NULL,
+          start DATETIME NULL,
+          date_end DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
+          description TEXT NULL,
+          prioridad INTEGER NULL, -- media ponderada de la prioridad
+          FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID),
+          FOREIGN KEY (segmento_ID) REFERENCES segmento(ID),
+          FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID),
+          FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
+        );
       `)
       await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    }else{
+      //const result = db.run(`DROP TABLE caso;`)
+      //await saveToIndexedDB(db);
     }
 
     /*=======================================================
@@ -331,7 +332,7 @@ export function SqlProvider({ children }) {
   =========================================================*/
     
   if (!checkTableExists(db, 'asignacion')) {
-    db.run(`
+    /*db.run(`
       CREATE TABLE IF NOT EXISTS asignacion (
         usuario_ID INTEGER NOT NULL,
         caso_ID INTEGER NOT NULL,
@@ -342,10 +343,10 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB*/
   }else{
-    //db.run(`DROP TABLE asignacion;`)
-    //await saveToIndexedDB(db);
+    db.run(`DROP TABLE asignacion;`)
+    await saveToIndexedDB(db);
   }
 
   //=======================================================
@@ -359,6 +360,9 @@ export function SqlProvider({ children }) {
       );
     `)
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //db.run(`DROP TABLE proyecto;`)
+    //await saveToIndexedDB(db);
   }
   //=======================================================
   // SECTION: TABLE departamento_negocio
@@ -563,21 +567,30 @@ export function SqlProvider({ children }) {
   if (!checkTableExists(db, 'diagnostico')) {
     db.run(`
       CREATE TABLE IF NOT EXISTS diagnostico (
+        equipo_ID INTEGER NOT NULL,
         caso_ID INTEGER NOT NULL,
-        fecha DATE NOT NULL,
         diagnostico_tipo_ID INTEGER NOT NULL,
-        description TEXT,
         asistencia_tipo_ID INTEGER NOT NULL,
-        visita_ID INTEGER,
-        PRIMARY KEY (caso_ID, fecha, diagnostico_tipo_ID),
+        especialista_ID INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
+        description TEXT NULL,
+        visita_ID INTEGER NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        prioridad INTEGER NULL,
+        PRIMARY KEY (equipo_ID, caso_ID),
         FOREIGN KEY (asistencia_tipo_ID) REFERENCES asistencia_tipo(ID),
         FOREIGN KEY (diagnostico_tipo_ID) REFERENCES diagnostico_tipo(ID),
+        FOREIGN KEY (visita_ID) REFERENCES visita(ID),
+        FOREIGN KEY (equipo_ID) REFERENCES equipo(ID),
         FOREIGN KEY (caso_ID) REFERENCES caso(ID),
-        FOREIGN KEY (visita_ID) REFERENCES visita(ID)
+        FOREIGN KEY (especialista_ID) REFERENCES usuario(ID)
       );
 
     `)
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //const result = db.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db);
   }
     
     
