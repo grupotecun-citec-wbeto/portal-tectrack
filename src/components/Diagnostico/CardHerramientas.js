@@ -121,7 +121,7 @@ function CardHerramientas(props){
               <CardBody mt={{xl:'50px', sm:'50px'}}>
                 <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
                     {datos.map((data) =>(
-                    <CheckboxHerramientas name={data.name} id={data.id}/>
+                      <CheckboxHerramientas name={data.name} id={data.id} key={data.id}/>
                     ))}
                 </Grid>
                    
