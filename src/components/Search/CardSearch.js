@@ -1,4 +1,5 @@
 import React, {useContext,useEffect} from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import {
     Input,
     InputGroup,
@@ -45,6 +46,20 @@ function SearchCard(props) {
     const borderProfileColor = useColorModeValue("white", "transparent");
     const emailColor = useColorModeValue("gray.400", "gray.300");
 
+    // ************************** REDUX-PRESIST ****************************
+    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+    const dispatch = useDispatch();
+    
+    const saveUserData = (json) => {
+      dispatch({ type: 'SET_USER_DATA', payload: json });
+    };
+
+    const getUserData = () => {
+      dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+    };
+    
+    // ************************** REDUX-PRESIST ****************************
+
     // context 
     const {
         machineID, setMachineID,
@@ -57,6 +72,17 @@ function SearchCard(props) {
         setTimeout(() => {
             history.push('/admin/pages/prediagnostico');
         }, 800);*/
+        
+    }
+
+
+    const btnAgregar = async() =>{
+        getUserData()
+
+        const newUserData = {...userData}
+        newUserData.casos[casoActivo?.code].equipos.push(maquina_id)
+
+        saveUserData(newUserData)
         
     }
 
@@ -76,8 +102,8 @@ function SearchCard(props) {
             </CardBody>
             <Flex justifyContent='space-between'>
                
-                    <Button variant='dark' minW='110px' h='36px' onClick={btnCreateCase} >
-                        CREAR CASO
+                    <Button variant='dark' minW='110px' h='36px' onClick={btnAgregar} >
+                        Agregar
                     </Button>
                 
             </Flex>

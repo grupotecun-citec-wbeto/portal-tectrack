@@ -71,7 +71,8 @@ export function AppProvider({ children }) {
                     prioridad:0, //INTEGER NULL, -- media ponderada de la prioridad
                     pre_diagnosticos:{/*stuctures.diagnostico*/}, // Object
                     post_diagnosticos:{/*stuctures.diagnostico*/}, // object
-                    sistemas:[]
+                    equipos:[] // array de identificadores de equipos
+                    
                   },
                   diagnostico:{
                     equipo_ID:0, //INTEGER NOT NULL,
@@ -82,7 +83,8 @@ export function AppProvider({ children }) {
                     description:'', //TEXT NULL,
                     visita_ID:0, //INTEGER NULL,
                     prioridad:0,//INTEGER NULL,
-                    equipamientos:{/*equipamiento*/} // Object
+                    equipamientos:{/*equipamiento*/}, // Object
+                    sistemas:[]
                   },
                   equipamiento:{
                     herramienta_ID:0, //INTEGER NOT NULL
