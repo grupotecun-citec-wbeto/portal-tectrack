@@ -28,6 +28,7 @@ import {
   // TECTRACK COMPONENTES
   import CardSearch from "components/Search/CardSearch";
   import CardSkeleton from "components/Search/CardSkeleton";
+  import CardCommand from "components/PreDiagnostico/CadCommand";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -258,6 +259,7 @@ import {
             
           </Grid>
         )}
+        <CardCommand />
       </Flex>
     );
   }
