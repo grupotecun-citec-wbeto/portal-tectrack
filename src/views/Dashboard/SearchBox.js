@@ -15,6 +15,9 @@ import {
     useColorModeValue,
     Heading,
     Image,
+    IconButton,
+    Tooltip,
+    Button
   } from '@chakra-ui/react';
   
   // Custom components
@@ -30,6 +33,9 @@ import {
   import { useDebounce } from 'use-debounce';
 
   import { MdCheckCircle,MdSettings  } from 'react-icons/md';
+
+  //ICONOS
+  import { FaCheck } from "react-icons/fa"; // Icono de check
   
   
   function SearchBox({ onSearch }) {
@@ -47,11 +53,17 @@ import {
     const {casoActivo,setCasoActivo} = useContext(AppContext)
   
 
+    /**
+     * SECTION: useState
+     *
+     */
     const [searchValue, setSearchValue] = useState('');
     const [debouncedSearchValue] = useDebounce(searchValue, 500);
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
 
     const [datos, setDatos] = useState([]);
+
+    const [isBusquedaTerminada,setIsBusquedaTerminada] = useState(false)
 
      // ************************** REDUX-PRESIST ****************************
      const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -91,7 +103,7 @@ import {
   
     // Simulamos una función de búsqueda (reemplaza con tu lógica real)
     useEffect(() => {
-      if (debouncedSearchValue) {
+      if (debouncedSearchValue || isBusquedaTerminada) {
         //onSearch(debouncedSearchValue);
         setDatos([])
         const fetchData = async () => {
@@ -103,7 +115,8 @@ import {
           
           const equiposSelect = (lista_equipos != '') ? lista_equipos : 'all'
           try {
-            const response = await axios.get(`http://localhost:5000/api/v1/machine/${searchValue}/${equiposSelect}`);
+            const cad = `http://localhost:5000/api/v1/machine/${(!isBusquedaTerminada) ? searchValue : 'ALL'}/${equiposSelect}`
+            const response = await axios.get(cad);
             
             let data = JSON.parse(response.data)
             setDatos(data);
@@ -115,9 +128,12 @@ import {
         };
         fetchData();
       }
-    }, [debouncedSearchValue]);
+    }, [debouncedSearchValue,isBusquedaTerminada]);
 
-    
+  
+  
+ 
+
   
     return (
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
@@ -145,23 +161,43 @@ import {
 
           
 
-            <Box flex="1" direction="column">
-              <InputGroup>
-                <InputLeftElement pointerEvents='none'>
-                  <SearchIcon color='gray.300' />
-                </InputLeftElement>
-                <Input
-                  type='text'
-                  w={{sm:'100%'}}
-                  placeholder='Buscar...'
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                />
-              </InputGroup>
+            <Box flex="1" direction={{ sm: "column", md: "row" }}>
+            {!isBusquedaTerminada ? (
+                <>
+                  <InputGroup>
+                    <InputLeftElement pointerEvents='none'>
+                      <SearchIcon color='gray.300' />
+                    </InputLeftElement>
+                    <Input
+                      type='text'
+                      w={{sm:'100%'}}
+                      placeholder='Buscar...'
+                      value={searchValue}
+                      onChange={(e) => setSearchValue(e.target.value)}
+                    />
+                  </InputGroup>
+                  
+                  <Button
+                    colorScheme="green" // Verde para indicar que se ha completado exitosamente
+                    size="md" // Tamaño del botón
+                    onClick={() => setIsBusquedaTerminada(!isBusquedaTerminada)} // Acción al hacer clic
+                  >
+                    Búsqueda Terminada
+                  </Button>
+                </>
+              ):(
+                <Button
+                  colorScheme="blue" // Color azul para representar la acción de volver a buscar
+                  size="md" // Tamaño del botón
+                  onClick={() => setIsBusquedaTerminada(!isBusquedaTerminada)} // Acción al hacer clic
+                >
+                  Regresar a Buscar
+                </Button>
+              )}
             </Box>
           </Flex>
         </Flex>
-        {debouncedSearchValue && (
+        {(debouncedSearchValue || isBusquedaTerminada) && (
           <Grid templateColumns={{ sm: "1fr", md: "repeat(4, 1fr)", xl: "repeat(4, 1fr)" }} gap='22px'>
             
             {datos.map((maquina) => (
