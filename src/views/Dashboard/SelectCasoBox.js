@@ -136,10 +136,11 @@ import { Link, useHistory   } from 'react-router-dom';
       newUserData.casos[uuid] = caso
       
       // Ponerlo como caso seleccionado
-      setCasoActivo(newUserData.casoActivo)
-      console.log(casoActivo)
-      
       saveUserData(newUserData)
+      
+      setCasoActivo(newUserData.casoActivo)
+      
+      
       
       setTimeout(() => {
           history.push('/admin/pages/searchbox');
