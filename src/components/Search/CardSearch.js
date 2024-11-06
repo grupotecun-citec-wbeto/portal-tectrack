@@ -1,4 +1,4 @@
-import React, {useContext,useEffect} from 'react';
+import React, {useContext,useEffect, useState} from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     Input,
@@ -13,8 +13,12 @@ import {
     useColorModeValue,
     Heading,
     Image,
-    Button
+    Button,
+    IconButton,
+    Tooltip
   } from '@chakra-ui/react';
+
+  import { FaPlus,FaTimes,FaClipboardList, FaEdit } from "react-icons/fa";
 
   import {v4 as uuidv4} from 'uuid'
   
@@ -35,9 +39,42 @@ import CardBodyFlexText from './CardBodyFlexText';
 
 
 function SearchCard(props) {
-    const { maquina_id,categoria_id,titulo,img,cliente_name,infos, ...rest } = props;
+    const { 
+        maquina_id,
+        categoria_id,
+        titulo,
+        img,
+        cliente_name,
+        infos,
+        isSelected, 
+        ...rest } = props;
     
     const history = useHistory();
+
+     // ************************** REDUX-PRESIST ****************************
+     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+     const dispatch = useDispatch();
+     
+     const saveUserData = (json) => {
+       dispatch({ type: 'SET_USER_DATA', payload: json });
+     };
+ 
+     const getUserData = () => {
+       dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+     };
+     
+     // ************************** REDUX-PRESIST ****************************
+
+     /**
+      * SECTION: Contextos
+      *
+      */
+     const {
+        machineID, setMachineID,
+        casoActivo,setCasoActivo
+    } = useContext(AppContext)
+
+
 
     // Chakra color mode
     const textColor = useColorModeValue("gray.700", "white");
@@ -46,25 +83,39 @@ function SearchCard(props) {
     const borderProfileColor = useColorModeValue("white", "transparent");
     const emailColor = useColorModeValue("gray.400", "gray.300");
 
-    // ************************** REDUX-PRESIST ****************************
-    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
-    const dispatch = useDispatch();
-    
-    const saveUserData = (json) => {
-      dispatch({ type: 'SET_USER_DATA', payload: json });
-    };
+    /**
+     * SECTION: useState
+     *
+     */
+    const [isSelectedEquipo,setIsSelectedEquipo] = useState(false)
+    const [isCreatedPreDiagnostico,setIsCreatedPreDiagnostico] = useState(false)
 
-    const getUserData = () => {
-      dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
-    };
-    
-    // ************************** REDUX-PRESIST ****************************
 
-    // context 
-    const {
-        machineID, setMachineID,
-        casoActivo,setCasoActivo
-    } = useContext(AppContext)
+    /**
+     * SECTION: useEfect
+     *
+     */
+
+    useEffect( ()=>{
+        if(isSelected == 1){
+            setIsSelectedEquipo(true)
+        }else{
+            setIsSelectedEquipo(false)
+        }
+    },[])
+
+    useEffect( ()=>{
+        getUserData()
+        const equipos = userData.casos[casoActivo.code].equipos
+        if(!equipos.includes(maquina_id)){
+            setIsSelectedEquipo(false)
+        }
+    },[userData])
+    
+
+   
+
+   
 
     const btnCreateCase = () =>{
         // ESTA FUNCIONALIAD LA VAMOS A MOVER DE LUGAR HACIA
@@ -82,13 +133,32 @@ function SearchCard(props) {
         const newUserData = {...userData}
         newUserData.casos[casoActivo?.code].equipos.push(maquina_id)
 
+        setIsSelectedEquipo(true)
         saveUserData(newUserData)
         
+        
+    }
+
+    const eliminarEquipo = async() =>{
+        getUserData()
+
+        const newUserData = {...userData}
+
+        let equipos = newUserData.casos[casoActivo?.code].equipos
+
+        const updatedEquipos = equipos.filter(item => item !== maquina_id);
+
+        newUserData.casos[casoActivo?.code].equipos = updatedEquipos     
+        
+        // funcion que llama al contexto appContext
+        
+        saveUserData(newUserData)
+
     }
 
     // Pass the computed styles into the `__css` prop
     return (
-        <Card>
+        <Card border={isSelectedEquipo ? "6px solid" : ""} borderColor={isSelectedEquipo ? "green.400" : "transparent"}>
             <CardHeader>
             <Heading size='md'>{titulo}</Heading>
             </CardHeader>
@@ -102,9 +172,53 @@ function SearchCard(props) {
             </CardBody>
             <Flex justifyContent='space-between'>
                
-                    <Button variant='dark' minW='110px' h='36px' onClick={btnAgregar} >
-                        Agregar
-                    </Button>
+                    {!isSelectedEquipo ?(
+                        <IconButton
+                            icon={<FaPlus />} // Icono que quieres mostrar
+                            aria-label="Agregar" // Etiqueta accesible para lectores de pantalla
+                            colorScheme="blue" // Cambia el esquema de color
+                            size="md" // Tamaño del botón (opciones: "xs", "sm", "md", "lg")
+                            onClick={btnAgregar} // Acción al hacer clic
+                        />
+                    ):(
+                        <>
+                            <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
+                                <IconButton
+                                    icon={<FaTimes />} // Icono para quitar selección
+                                    aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
+                                    colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
+                                    size="md" // Tamaño del botón
+                                    onClick={eliminarEquipo} // Acción al hacer clic
+                                />
+                            </Tooltip>
+                            
+                            {!isCreatedPreDiagnostico ? (
+                                <Tooltip label="Agregar pre-diagnostico" aria-label="Tooltip para el botón">
+                                    <IconButton
+                                        icon={<FaPlus />} // Icono para crear diagnóstico
+                                        aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
+                                        colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
+                                        size="md" // Tamaño del botón
+                                        onClick={() => alert("Creando diagnóstico...")} // Acción al hacer clic
+                                    />
+                                </Tooltip>
+                            ):(
+                                <Tooltip label="Editar pre-diagnostico" aria-label="Tooltip para el botón">
+                                    <IconButton
+                                        icon={<FaEdit />} // Icono para crear diagnóstico
+                                        aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
+                                        colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
+                                        size="md" // Tamaño del botón
+                                        onClick={() => alert("Creando diagnóstico...")} // Acción al hacer clic
+                                    />
+                                </Tooltip>
+                            )}
+                            
+                            
+                        </>
+                        
+                    )}
+                    
                 
             </Flex>
         </Card>

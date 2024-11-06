@@ -2,12 +2,16 @@
 import { Avatar, Flex, Text, useColorModeValue, IconButton,Tooltip } from "@chakra-ui/react";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { IoAddOutline } from "react-icons/io5";
+import { FaPlus,FaTimes } from "react-icons/fa";
 import { ClockIcon } from "components/Icons/Icons";
 import { TecTrackCaseLight,TecTrackCaseDark,TecTrackTractorDark } from "components/Icons/Icons";
 import React from "react";
 
 export function ItemContent(props) {
-  const {eliminarEquipo,crearPreDiagnostico,...rest} = props
+  const {
+    eliminarEquipo,
+    crearPreDiagnostico,
+    ...rest} = props
   const navbarIcon = useColorModeValue("gray.500", "gray.200");
   const notificationColor = useColorModeValue("gray.700", "white");
   const spacing = " ";
@@ -39,9 +43,9 @@ export function ItemContent(props) {
           </Flex>
         </Flex>
       </>
-      <Tooltip label="Eliminar equipo" aria-label="Tooltip para el botón">
+      <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
         <IconButton
-            icon={<FaRegTrashCan />} // Use your TrashIcon with styling
+            icon={<FaTimes />} // Use your TrashIcon with styling
             variant="ghost" // Transparent button for consistency
             ml="auto" // Align to the right
             onClick={() => eliminarEquipo(props.id)}

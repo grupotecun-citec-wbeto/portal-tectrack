@@ -99,10 +99,20 @@ function CasoListEquiposNavbar(props){
             try{
                 // 
                 const result = db.exec(`
-                    SELECT E.ID,E.chasis,E.serie, E.serie_extra,DV.name AS division_name,CTE.name categoria_name FROM equipo E
+                    SELECT 
+                        E.ID,
+                        E.chasis,
+                        E.serie, 
+                        E.serie_extra,
+                        DV.name AS division_name,
+                        CTE.name categoria_name,
+                        M.name modelo_name,
+                        CT.business_name 
+                    FROM equipo E
                     INNER JOIN catalogo CT ON CT.ID = E.catalogo_ID
                     INNER JOIN division DV ON DV.ID = CT.division_ID
                     INNER JOIN categoria CTE ON CTE.ID = CT.categoria_id
+                    INNER JOIN modelo M ON M.ID = CT.modelo_ID
                     where E.ID in (${joinArray})`)
                 const equipos = db.toArray(result)
                 
@@ -133,6 +143,7 @@ function CasoListEquiposNavbar(props){
         saveUserData(newUserData)
 
     }
+    
     const crearPreDiagnostico = async(equipo_ID) =>{
         // aqui va funcionalidad
     }
@@ -179,8 +190,8 @@ function CasoListEquiposNavbar(props){
                             <ItemContent
                                 id={equipo.ID}
                                 time={equipo.chasis ?? equipo.serie ?? equipo.serie_extra }
-                                info={equipo.division_name}
-                                boldInfo={equipo.categoria_name}
+                                info={""}
+                                boldInfo={equipo.business_name}
                                 aName='Alicia'
                                 aSrc={tractor}
                                 eliminarEquipo={eliminarEquipo}

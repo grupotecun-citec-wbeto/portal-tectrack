@@ -1,5 +1,7 @@
-import React,{useState, useEffect  } from "react";
+import React,{useState, useEffect,useContext   } from "react";
+import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
+import AppContext from "appContext";
 import {
     Input,
     InputGroup,
@@ -38,6 +40,11 @@ import {
     const bgProfile = useColorModeValue("hsla(0,0%,100%,.8)", "navy.800");
     const borderProfileColor = useColorModeValue("white", "transparent");
     const emailColor = useColorModeValue("gray.400", "gray.300");
+
+    /**
+     * SECTION: CONTEXTOS
+     */
+    const {casoActivo,setCasoActivo} = useContext(AppContext)
   
 
     const [searchValue, setSearchValue] = useState('');
@@ -45,6 +52,22 @@ import {
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
 
     const [datos, setDatos] = useState([]);
+
+     // ************************** REDUX-PRESIST ****************************
+     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+     const dispatch = useDispatch();
+     
+     const saveUserData = (json) => {
+       dispatch({ type: 'SET_USER_DATA', payload: json });
+     };
+ 
+     const getUserData = () => {
+       dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+     };
+     
+     // ************************** REDUX-PRESIST ****************************
+
+
 
     const columns = [
       {
@@ -72,8 +95,15 @@ import {
         //onSearch(debouncedSearchValue);
         setDatos([])
         const fetchData = async () => {
+          getUserData()
+
+          const equiposSeleccionados = userData.casos[casoActivo.code].equipos
+          const lista_equipos = equiposSeleccionados.join(", ")
+
+          
+          const equiposSelect = (lista_equipos != '') ? lista_equipos : 'all'
           try {
-            const response = await axios.get(`http://localhost:5000/api/v1/machine/${searchValue}`);
+            const response = await axios.get(`http://localhost:5000/api/v1/machine/${searchValue}/${equiposSelect}`);
             
             let data = JSON.parse(response.data)
             setDatos(data);
@@ -86,6 +116,8 @@ import {
         fetchData();
       }
     }, [debouncedSearchValue]);
+
+    
   
     return (
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
@@ -139,6 +171,7 @@ import {
                   maquina_id={maquina.ID}
                   categoria_id={maquina.categoria_id}
                   cliente_name={maquina.cliente_name}
+                  isSelected={maquina.isSelected}
                   infos={[
                     {title:"Categoria",text:maquina.categoria_name},
                     {title:"Departamento",text:maquina.subdivision_name},
