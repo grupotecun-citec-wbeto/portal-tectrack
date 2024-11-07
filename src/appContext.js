@@ -55,6 +55,23 @@ export function AppProvider({ children }) {
         getUserData()
   
         if(userData == null){
+            const equipamiento= {
+              herramienta_ID:0, //INTEGER NOT NULL
+              equipo_ID:0, //INTEGER NOT NULL
+            }
+            const diagnostico = {
+              equipo_ID:0, //INTEGER NOT NULL,
+              caso_ID:0, //INTEGER NOT NULL,
+              diagnostico_tipo_ID:0, //INTEGER NOT NULL, 1: pre 2: post
+              asistencia_tipo_ID:0, //INTEGER NOT NULL,
+              especialista_ID:0, //INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
+              description:'', //TEXT NULL,
+              visita_ID:0, //INTEGER NULL,
+              prioridad:0,//INTEGER NULL,
+              equipamientos:equipamiento, // Object
+              sistemas:{}
+            }
+
             let base_structure = {
                 casos : {/*stuctures.caso*/}, // ARRAY
                 casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:''},
@@ -69,27 +86,16 @@ export function AppProvider({ children }) {
                     date_end:'', //DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
                     description:'', //TEXT NULL,
                     prioridad:0, //INTEGER NULL, -- media ponderada de la prioridad
-                    pre_diagnosticos:{/*stuctures.diagnostico*/}, // Object
-                    post_diagnosticos:{/*stuctures.diagnostico*/}, // object
-                    equipos:[] // array de identificadores de equipos
+                    equipos:{/* id*/}   // array de identificadores de equipos
                     
                   },
-                  diagnostico:{
-                    equipo_ID:0, //INTEGER NOT NULL,
-                    caso_ID:0, //INTEGER NOT NULL,
-                    diagnostico_tipo_ID:0, //INTEGER NOT NULL, 1: pre 2: post
-                    asistencia_tipo_ID:0, //INTEGER NOT NULL,
-                    especialista_ID:0, //INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
-                    description:'', //TEXT NULL,
-                    visita_ID:0, //INTEGER NULL,
-                    prioridad:0,//INTEGER NULL,
-                    equipamientos:{/*equipamiento*/}, // Object
-                    sistemas:[]
-                  },
-                  equipamiento:{
-                    herramienta_ID:0, //INTEGER NOT NULL
-                    equipo_ID:0, //INTEGER NOT NULL
+                  diagnostico:diagnostico,
+                  equipamiento:equipamiento,
+                  equipoId:{
+                    prediagnostico:diagnostico, // object
+                    diagnostico:diagnostico // object
                   }
+                  
                 }
             }  
             if(userData == null){
@@ -113,7 +119,7 @@ export function AppProvider({ children }) {
 
         
         
-    },[])
+    },[userData])
 
     useEffect(() => {
       
