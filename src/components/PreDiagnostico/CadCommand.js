@@ -62,8 +62,8 @@ function CardCommand(props){
         getUserData()
     },[userData])
     
-    const getCommand = () =>{
-       
+    const eliminarUserData = () =>{
+       saveUserData(null)
     }
 
 
@@ -73,6 +73,7 @@ function CardCommand(props){
 
     return(
         <Card>
+            <Button onClick={eliminarUserData}>Eliminar useData</Button>
             <CardHeader>
                 <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Commanda vista temporal</Heading>
             </CardHeader>

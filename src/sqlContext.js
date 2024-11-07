@@ -739,7 +739,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id}, '${element.name}')` 
           });
@@ -788,7 +788,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id}, '${element.name}')` 
           });
@@ -839,7 +839,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}')` 
           });
@@ -893,7 +893,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}')` 
           });
@@ -947,7 +947,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}')` 
           });
@@ -1001,7 +1001,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id || element.ID}, '${element.business_name}',${element.categoria_id},${element.division_ID},${element.linea_ID},${element.modelo_id},${element.marca_ID}, '${element.img}')` 
 
@@ -1058,7 +1058,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}')` 
           });
@@ -1110,7 +1110,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name}', ${element.unidad_negocio_ID})` 
           });
@@ -1162,7 +1162,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.ID || element.id}, '${element.name || element.nombre}', ${element.unidad_negocio_ID})` 
 
@@ -1215,7 +1215,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}('${element.code}', '${element.country_name}', '${element.subdivision_name}')` 
             /*
@@ -1272,7 +1272,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
@@ -1325,7 +1325,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
@@ -1378,7 +1378,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
@@ -1431,7 +1431,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
@@ -1484,7 +1484,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
@@ -1537,7 +1537,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
               ${element.id || element.ID}, 
@@ -1618,7 +1618,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
@@ -1671,7 +1671,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(${element.id || element.ID}, '${element.name}')` 
           
@@ -1724,7 +1724,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
               ${element.id || element.ID}, 
@@ -1784,7 +1784,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            element = JSON.parse(element)
+            
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
               ${element.caso_ID}, 

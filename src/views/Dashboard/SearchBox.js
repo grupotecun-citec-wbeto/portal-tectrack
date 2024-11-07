@@ -37,6 +37,8 @@ import {
 
   //ICONOS
   import { FaCheck } from "react-icons/fa"; // Icono de check
+
+  import { useHistory } from 'react-router-dom';
   
   
   function SearchBox({ onSearch }) {
@@ -48,6 +50,7 @@ import {
     const borderProfileColor = useColorModeValue("white", "transparent");
     const emailColor = useColorModeValue("gray.400", "gray.300");
 
+    const history = useHistory()
     /**
      * SECTION: CONTEXTOS
      */
@@ -104,31 +107,37 @@ import {
   
     // Simulamos una función de búsqueda (reemplaza con tu lógica real)
     useEffect(() => {
-      if (debouncedSearchValue || isBusquedaTerminada) {
+      
         //onSearch(debouncedSearchValue);
         setDatos([])
         const fetchData = async () => {
-          getUserData()
+          /*if(casoActivo == '' || userData == null){
+            history.push('/admin/pages/selectcaso');
+          }*/
+          if (debouncedSearchValue || isBusquedaTerminada) {
+            getUserData()
+            if(userData == null || casoActivo == '') return 0
+            const equipos = userData.casos[casoActivo?.code]?.equipos
+            const equiposSeleccionados = Object.keys(equipos).map(key => parseInt(key, 10))
+            const lista_equipos = equiposSeleccionados.join(", ")
 
-          const equiposSeleccionados = userData.casos[casoActivo.code].equipos
-          const lista_equipos = equiposSeleccionados.join(", ")
-
-          
-          const equiposSelect = (lista_equipos != '') ? lista_equipos : 'all'
-          try {
-            const cad = `http://localhost:5000/api/v1/machine/${(!isBusquedaTerminada) ? searchValue : 'ALL'}/${equiposSelect}`
-            const response = await axios.get(cad);
             
-            let data = JSON.parse(response.data)
-            setDatos(data);
-          } catch (error) {
-            setDatos([])
-            console.error('Error al obtener datos:', error);
-            
+            const equiposSelect = (lista_equipos != '') ? lista_equipos : 'all'
+            try {
+              const cad = `http://localhost:5000/api/v1/machine/${(!isBusquedaTerminada) ? searchValue : 'ALL'}/${equiposSelect}`
+              const response = await axios.get(cad);
+              
+              let data = JSON.parse(response.data)
+              setDatos(data);
+            } catch (error) {
+              setDatos([])
+              console.error('Error al obtener datos:', error);
+              
+            }
           }
         };
-        fetchData();
-      }
+        fetchData()
+      
     }, [debouncedSearchValue,isBusquedaTerminada]);
 
   

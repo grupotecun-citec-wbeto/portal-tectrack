@@ -82,22 +82,22 @@ function CasoListEquiposNavbar(props){
         run()
 
         return  () =>{}
-    },[])
+    },[userData])
 
     // Lista de equipo en el caso actual
     useEffect( () => {
         const run = async() => {
-            if(db == null) return 0
+            if(db == null || userData == null) return 0
             getUserData()
 
-            const equipos = {...userData.casos[casoActivo?.code].equipos}
+            const equipos = {...userData.casos[casoActivo?.code]?.equipos}
             
-            const valuesArray = Object.values(equipos);
+            const valuesArray = Object.keys(equipos);
             const joinArray = valuesArray.join(', ');
             console.log(joinArray);
             //equipo where ID in (${joinArray})
             try{
-                // 
+                if(joinArray == '') return 0  // se muere el proceso
                 const result = db.exec(`
                     SELECT 
                         E.ID,
@@ -127,23 +127,17 @@ function CasoListEquiposNavbar(props){
     },[db,userData])
 
 
-    const eliminarEquipo = async(equipo_ID) =>{
+    const eliminarEquipo = async(maquina_id) =>{
         getUserData()
 
         const newUserData = {...userData}
 
-        let equipos = newUserData.casos[casoActivo?.code].equipos
-
-        const updatedEquipos = equipos.filter(item => item !== equipo_ID);
-
-        newUserData.casos[casoActivo?.code].equipos = updatedEquipos     
-        
-        // funcion que llama al contexto appContext
+        delete newUserData.casos[casoActivo?.code]?.equipos[maquina_id];
         
         saveUserData(newUserData)
 
     }
-    
+
     const crearPreDiagnostico = async(equipo_ID) =>{
         // aqui va funcionalidad
     }

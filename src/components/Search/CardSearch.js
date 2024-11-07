@@ -106,10 +106,14 @@ function SearchCard(props) {
 
     useEffect( ()=>{
         getUserData()
-        const equipos = userData.casos[casoActivo.code].equipos
-        if(!equipos.includes(maquina_id)){
-            setIsSelectedEquipo(false)
-        }
+                
+        
+            const equipos = Object?.keys(userData?.casos[casoActivo?.code]?.equipos ?? {}).map(key => parseInt(key, 10))
+            if(!equipos.includes(maquina_id)){
+                setIsSelectedEquipo(false)
+            }
+    
+        
     },[userData])
     
 
@@ -131,7 +135,10 @@ function SearchCard(props) {
         getUserData()
 
         const newUserData = {...userData}
-        newUserData.casos[casoActivo?.code].equipos.push(maquina_id)
+        const equipoExiste = newUserData?.casos[casoActivo?.code]?.equipos?.hasOwnProperty(maquina_id);
+        if (!equipoExiste) {
+            newUserData.casos[casoActivo?.code].equipos[maquina_id] = newUserData.stuctures?.equipoId  // agregando la estructura de equipo
+        }
 
         setIsSelectedEquipo(true)
         saveUserData(newUserData)
@@ -144,13 +151,7 @@ function SearchCard(props) {
 
         const newUserData = {...userData}
 
-        let equipos = newUserData.casos[casoActivo?.code].equipos
-
-        const updatedEquipos = equipos.filter(item => item !== maquina_id);
-
-        newUserData.casos[casoActivo?.code].equipos = updatedEquipos     
-        
-        // funcion que llama al contexto appContext
+        delete newUserData.casos[casoActivo?.code]?.equipos[maquina_id];
         
         saveUserData(newUserData)
 
