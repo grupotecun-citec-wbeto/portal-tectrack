@@ -71,7 +71,7 @@ function CardAsistencia(props){
 
     const actionSelectAsistencia = (asistencia_tipo_id) =>{
         asistencia_tipo_id = (asistencia_tipo_id == '') ? '' : asistencia_tipo_id
-        const newUserData = {...userData};
+        const newUserData = structuredClone(userData);
         newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.asistencia_tipo_ID = asistencia_tipo_id
         saveUserData(newUserData)
         setSelectedAsistencia(asistencia_tipo_id)

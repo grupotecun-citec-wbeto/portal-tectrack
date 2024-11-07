@@ -130,7 +130,7 @@ function CasoListEquiposNavbar(props){
     const eliminarEquipo = async(maquina_id) =>{
         getUserData()
 
-        const newUserData = {...userData}
+        const newUserData = structuredClone(userData)
 
         delete newUserData.casos[casoActivo?.code]?.equipos[maquina_id];
         

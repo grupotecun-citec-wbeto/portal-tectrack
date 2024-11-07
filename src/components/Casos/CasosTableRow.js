@@ -213,7 +213,7 @@ function CasosTableRow(props) {
     setTimeout(() => {
         history.push('/admin/pages/prediagnostico');
     }, 800);
-    const newUseData = {...userData}
+    const newUseData = structuredClone(userData)
     newUseData.casos[sync] = JSON.parse(user_data)
     saveUserData(newUseData)
   }

@@ -64,7 +64,7 @@ function CardEspecialista(props){
                 const needEspecialista =  userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.necesitaEspecialista
                 setNecesitaEspecialista((needEspecialista == '1') ? true : false)
                 // recuperando desplegable de especialista
-                setSelectedEspecialista(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.especialista_id)
+                setSelectedEspecialista(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.especialista_ID)
             }
         } 
         
@@ -74,7 +74,7 @@ function CardEspecialista(props){
     const actionCheckEspecialista = () =>{
         getUserData()
         
-        const newUserData = {...userData};
+        const newUserData = structuredClone(userData);
         
         //*********************************** ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO ******************************* */
         newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.necesitaEspecialista = (necesitaEspecialista) ? '0' : '1' // la logica esta  al revez por la rederizacion del switch
@@ -88,8 +88,8 @@ function CardEspecialista(props){
 
     const actionSelectEspecialista = (especialista_id) =>{
         especialista_id = (especialista_id == '') ? '' : especialista_id
-        const newUserData = {...userData};
-        newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.especialista_id = especialista_id
+        const newUserData = structuredClone(userData);
+        newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.especialista_ID = especialista_id
         saveUserData(newUserData)
         setSelectedEspecialista(especialista_id)
       }

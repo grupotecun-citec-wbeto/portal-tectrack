@@ -87,7 +87,7 @@ function CheckboxDiagnostico(props){
         })
       }else{
         if(!userData.hasOwnProperty("prediagnostico")){
-          const newUserData = {...userData};
+          const newUserData = structuredClone(userData);
           newUserData.prediagnostico = {
             sistemas:{}
           }
@@ -114,7 +114,7 @@ function CheckboxDiagnostico(props){
     const actionCheck = () =>{
       getUserData()
       
-      const newUserData = {...userData};
+      const newUserData = structuredClone(userData);
       
       //*********************************** ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO ******************************* */
       newUserData.casos[casoActivo.code].prediagnostico.sistemas[name] = {
@@ -129,7 +129,7 @@ function CheckboxDiagnostico(props){
 
     const actionService = (service_id) =>{
       service_id = (service_id == '') ? '' : service_id
-      const newUserData = {...userData};
+      const newUserData = structuredClone(userData);
       newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
@@ -137,7 +137,7 @@ function CheckboxDiagnostico(props){
 
     const actionMarca = (marca_id) =>{
       marca_id = (marca_id == '') ? '' : marca_id
-      const newUserData = {...userData};
+      const newUserData = structuredClone(userData);
       newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
       saveUserData(newUserData)
       setSelectedMarca(marca_id)

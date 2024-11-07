@@ -151,7 +151,7 @@ import {
         if(userData.hasOwnProperty("casos") && casoActivo.code != '' && typeof casoActivo.code !== 'undefined' ){
           // si dado que no exista un caso con ese uuid
           if(!userData.casos.hasOwnProperty(casoActivo.code)){
-            const newUserData = {...userData};
+            const newUserData = structuredClone(userData);
             
             newUserData.casos[casoActivo.code] = caso_structure
             newUserData.casoActivo.code = casoActivo.code
@@ -161,7 +161,7 @@ import {
           
           // verificar si exite prediagnostico
           if(!userData.casos[casoActivo.code].hasOwnProperty("prediagnostico")){
-            const newUserData = {...userData};
+            const newUserData = structuredClone(userData);
             newUserData.casos[casoActivo.code].prediagnostico = base_structure.prediagnostico
             saveUserData(newUserData)
           }else{
@@ -211,7 +211,7 @@ import {
     useEffect(() =>{
       if(debouncedSearchValue){
         if(casoActivo.code != ''){
-          const newUserData = {...userData};
+          const newUserData = structuredClone(userData);
           newUserData.casos[casoActivo.code].prediagnostico.descripcion = encodeURIComponent(descriptionValue)
           saveUserData(newUserData)
         }

@@ -29,6 +29,8 @@ import {
   import CardSearch from "components/Search/CardSearch";
   import CardSkeleton from "components/Search/CardSkeleton";
   import CardCommand from "components/PreDiagnostico/CadCommand";
+  import CardCrearCaso from "components/PreDiagnostico/CardCrearCaso";
+  import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -64,6 +66,8 @@ import {
     const [searchValue, setSearchValue] = useState('');
     const [debouncedSearchValue] = useDebounce(searchValue, 500);
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
+    const [isSuccessAlertCaso,setIsSuccessAlertCaso] = useState(false)
+    const [caseId,setCaseId] = useState(0)
 
     const [datos, setDatos] = useState([]);
 
@@ -140,7 +144,39 @@ import {
       
     }, [debouncedSearchValue,isBusquedaTerminada]);
 
+    useEffect( () =>{
+      if(casoActivo.busqueda_terminada == 1){
+        setIsBusquedaTerminada(true)
+      }else{
+        setIsBusquedaTerminada(false)
+      }      
+    },[casoActivo.busqueda_terminada])
   
+    /**
+     * SECTION: FUNCTIONS
+     *
+     */
+
+    const closeAlert = () => {
+      setIsSuccessAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
+    };
+
+    const openAlert = (caseId_in) => {
+      setCaseId(caseId_in)
+      setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
+    };
+
+
+    const busquedaTerminada = (cod) =>{
+      getUserData()
+      setIsBusquedaTerminada(!isBusquedaTerminada)
+      const newUserData = structuredClone(userData)
+      newUserData.casoActivo.busqueda_terminada = cod
+      
+      setCasoActivo(newUserData.casoActivo)
+      saveUserData(newUserData)
+    }
+
   
  
 
@@ -190,19 +226,21 @@ import {
                   <Button
                     colorScheme="green" // Verde para indicar que se ha completado exitosamente
                     size="md" // Tamaño del botón
-                    onClick={() => setIsBusquedaTerminada(!isBusquedaTerminada)} // Acción al hacer clic
+                    onClick={() => busquedaTerminada(1)} // Acción al hacer clic
                   >
                     Búsqueda Terminada
                   </Button>
                 </>
               ):(
-                <Button
-                  colorScheme="blue" // Color azul para representar la acción de volver a buscar
-                  size="md" // Tamaño del botón
-                  onClick={() => setIsBusquedaTerminada(!isBusquedaTerminada)} // Acción al hacer clic
-                >
-                  Regresar a Buscar
-                </Button>
+                <>
+                  <Button
+                    colorScheme="blue" // Color azul para representar la acción de volver a buscar
+                    size="md" // Tamaño del botón
+                    onClick={() => busquedaTerminada(0)} // Acción al hacer clic
+                  >
+                    Regresar a Buscar
+                  </Button>
+                </>
               )}
             </Box>
           </Flex>
@@ -267,6 +305,11 @@ import {
             
             
           </Grid>
+        )}
+        {isSuccessAlertCaso ?(
+          <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
+        ):(
+          <CardCrearCaso openAlert={openAlert} />
         )}
         <CardCommand />
       </Flex>

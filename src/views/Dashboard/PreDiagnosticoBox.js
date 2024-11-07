@@ -8,6 +8,8 @@ import {v4 as uuidv4} from 'uuid' // Importa la función para generar UUID
 =========================================================*/
 import { Link, useHistory   } from 'react-router-dom';
 
+import { NavLink } from "react-router-dom";
+
 import {
     Input,
     InputGroup,
@@ -146,7 +148,7 @@ import {
         if(userData.hasOwnProperty("casos") && casoActivo.code != '' && typeof casoActivo.code !== 'undefined' ){
           // si dado que no exista un caso con ese uuid
           if(!userData.casos.hasOwnProperty(casoActivo.code)){
-            const newUserData = {...userData};
+            const newUserData = structuredClone(userData);
             
             newUserData.casos[casoActivo.code] = caso_structure
             newUserData.casoActivo.code = casoActivo.code
@@ -156,7 +158,7 @@ import {
           
           // verificar si exite prediagnostico
           if(!userData.casos[casoActivo.code].hasOwnProperty("prediagnostico")){
-            const newUserData = {...userData};
+            const newUserData = structuredClone(userData);
             newUserData.casos[casoActivo.code].prediagnostico = base_structure.prediagnostico
             saveUserData(newUserData)
           }else{
@@ -219,7 +221,7 @@ import {
     useEffect(() =>{
       if(debouncedSearchValue){
         if(casoActivo.code != ''){
-          const newUserData = {...userData};
+          const newUserData = structuredClone(userData);
           newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.description = encodeURIComponent(descriptionValue)
           saveUserData(newUserData)
         }
@@ -270,8 +272,16 @@ import {
                 textAlign={{ sm: "center", md: "start" }}
                 p='24px'
               >
+                <NavLink to='/admin/pages/searchbox'>
+                  <Button
+                    colorScheme="blue" // Color azul para representar la acción de volver a buscar
+                    size="md" // Tamaño del botón
+                  >
+                    Regresar
+                  </Button>
+                </NavLink>
                 <Text fontSize={{xl:'4em',sm:'3em'}}>Pre Diagnostico</Text>
-              
+                
               </Flex>
               
             </Flex>

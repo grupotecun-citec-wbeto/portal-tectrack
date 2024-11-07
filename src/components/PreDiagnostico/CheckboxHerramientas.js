@@ -92,7 +92,7 @@ function CheckboxHerramientas(props){
        BLOQUE: COPIAR OBJETO
        DESCRIPTION: copiar objeto para evitar sobre escritrura sobre el mismo objeto
       =========================================================*/
-      const newUserData = {...userData};
+      const newUserData = structuredClone(userData);
       
       /*=======================================================
        BLOQUE: ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO
@@ -109,7 +109,7 @@ function CheckboxHerramientas(props){
 
     /*const actionService = (service_id) =>{
       service_id = (service_id == '') ? '' : service_id
-      const newUserData = {...userData};
+      const newUserData = structuredClone(userData);
       newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
@@ -117,7 +117,7 @@ function CheckboxHerramientas(props){
 
     const actionMarca = (marca_id) =>{
       marca_id = (marca_id == '') ? '' : marca_id
-      const newUserData = {...userData};
+      const newUserData = structuredClone(userData);
       newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
       saveUserData(newUserData)
       setSelectedMarca(marca_id)

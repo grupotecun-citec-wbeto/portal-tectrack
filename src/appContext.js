@@ -53,7 +53,23 @@ export function AppProvider({ children }) {
 
     useEffect(()=>{
         getUserData()
-  
+
+        const deepFreeze = (obj) => {
+          // Primero congelamos el objeto principal
+          Object.freeze(obj);
+      
+          // Luego congelamos cada propiedad, si es un objeto
+          Object.keys(obj).forEach((key) => {
+              if (typeof obj[key] === "object" && obj[key] !== null && !Object.isFrozen(obj[key])) {
+                  deepFreeze(obj[key]); // Llamada recursiva para congelar propiedades anidadas
+              }
+          });
+      
+          return obj;
+        }
+      
+
+
         if(userData == null){
             const equipamiento= {
               herramienta_ID:0, //INTEGER NOT NULL
@@ -76,7 +92,7 @@ export function AppProvider({ children }) {
 
             let base_structure = {
                 casos : {/*stuctures.caso*/}, // ARRAY
-                casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:''},
+                casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:'',busqueda_terminada:0},
                 stuctures:{
                   caso:{
                     usuario_ID:0, //INTEGER NOT NULL,
@@ -104,7 +120,8 @@ export function AppProvider({ children }) {
                   
                   
                 }
-            }  
+            } 
+            //deepFreeze(base_structure.stuctures); 
             if(userData == null){
                 saveUserData(base_structure)
             }

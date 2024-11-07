@@ -65,12 +65,12 @@ function CardCrearCaso({openAlert}){
 
     const getCurrentDateTime = () => {
         const now = new Date();
-        return format(now, 'yyyy-MM-dd HH:mm:ss');
+        return format(now.toUTCString(), 'yyyy-MM-dd HH:mm:ss');
     }
 
     const getCurrentDate = () => {
         const now = new Date();
-        return format(now, 'yyyy-MM-dd');
+        return format(now.toUTCString(), 'yyyy-MM-dd');
     }
 
     const obtenerFechaUTC = (fecha) => {
@@ -78,7 +78,7 @@ function CardCrearCaso({openAlert}){
         return fechaDate.toUTCString(); // Devuelve la fecha en formato UTC
     };
 
-    const crearCaso = async() => {
+    /*const crearCaso = async() => {
         getUserData()
         const fecha = obtenerFechaUTC(getCurrentDate())
         const start = obtenerFechaUTC(getCurrentDateTime())
@@ -93,16 +93,7 @@ function CardCrearCaso({openAlert}){
         const user_data = JSON.stringify(userData?.casos[casoActivo.code] || {})
         const result = db.toObject(db.exec(`SELECT count(*) as caseSize FROM caso WHERE sync = '${sync}' `))
         
-        /*
-        prediagnostico:{
-            descripcion:'',
-            sistemas:{},
-            herramientas:{},
-            necesitaEspecialista:'0', // 0:-> no necesita 1:-> si necesita
-            especialista_id:'', // identificador de especialista
-            asistencia_tipo_id:'', // identificador de asistencia
-            prioridad_id:'' // 1: Alta, 2: Intermedia, 3: Baja | identificador de prioridad
-         */
+       
 
         if(result.caseSize == 0){
             let caseId = 0
@@ -179,6 +170,172 @@ function CardCrearCaso({openAlert}){
         }
         
         
+    }*/
+
+    const crearCaso = async() => {
+        getUserData()
+        // verificar si esta completo los predianostios
+
+        // lista de equipos del caso
+        const equiposArray = Object.keys(userData?.casos[casoActivo?.code]?.equipos).map(Number)
+        let casoCompelto = true
+        let suma_prioridad = 0
+        equiposArray.forEach((maquina_id) =>{
+            // indica cuando un pre-diagnostico no esta completo de la lista de maquinas
+            suma_prioridad += parseInt(userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad)
+            if( Object.keys(userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.sistemas) == 0 
+                || Object.keys(userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.herramientas) == 0) 
+                casoCompelto = false
+        })
+        if(!casoCompelto){
+            alert('Profavor terminar de llenar sus predianosticos, verificar equipos')
+            return 0
+        }
+        
+        const usuario_ID = 1
+        const comunicacion_ID = userData?.casos[casoActivo.code]?.comunicacion_ID || 'NULL'
+        const segmento_ID = 1
+        const caso_estado_ID = 1 // caso nuevo
+        const fecha = getCurrentDate()
+        const start = getCurrentDateTime()
+        const date_end = 'NULL'
+        const description = ''
+        const uuid = casoActivo.code // uuid del caso es el que nos va servir para ver si ya esta sincronizado con mysql
+        
+        const sizeEquipos = equiposArray.length
+        const prioridad = Math.ceil(suma_prioridad / sizeEquipos) // promedio ponderado de la prioridad de todos las maquinas
+        
+        
+        const result = db.toObject(db.exec(`SELECT count(*) as caseSize FROM caso WHERE uuid = '${uuid}' `))
+        if(result.caseSize == 0){
+            let caseId = 0
+            try {
+                await db.exec('BEGIN TRANSACTION');
+                const sql = `
+                    INSERT INTO caso (
+                        remote_sync_id,
+                        usuario_ID,
+                        comunicacion_ID,
+                        segmento_ID,
+                        caso_estado_ID,
+                        fecha,
+                        start,
+                        date_end,
+                        description,
+                        prioridad,
+                        uuid
+                    )
+                    VALUES(
+                        NULL,
+                        ${usuario_ID},
+                        ${comunicacion_ID},
+                        ${segmento_ID},
+                        ${caso_estado_ID},
+                        '${fecha}',
+                        '${start}',
+                        NULL,
+                        NULL,
+                        ${prioridad},
+                        '${uuid}'
+                    )
+                `
+                
+                
+                const result = db.exec(sql)
+                
+                const resultInsert = await db.toObject(db.exec('SELECT last_insert_rowid() AS caseId'));
+
+                caseId = resultInsert.caseId
+
+                equiposArray.forEach((maquina_id) =>{
+                    //userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
+                    const diagnostico_tipo_ID = 1 // dianostico pre
+                    const asistencia_tipo_ID = userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.asistencia_tipo_ID
+                    const especialista_ID = userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.especialista_ID
+                    const description = decodeURIComponent(userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.description)
+                    const prioridad = userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
+                   
+                    const sql = `
+                        INSERT INTO diagnostico
+                        VALUES
+                            (
+                                ${maquina_id},
+                                ${caseId},
+                                ${diagnostico_tipo_ID},
+                                ${asistencia_tipo_ID},
+                                ${especialista_ID},
+                                '${description}',
+                                NULL,
+                                ${prioridad}
+                            )
+                    `
+            
+                    db.exec(sql)
+
+                   
+                })
+                
+                
+
+                /*
+                    equipo_ID INTEGER NOT NULL,
+                    caso_ID INTEGER NOT NULL,
+                    diagnostico_tipo_ID INTEGER NOT NULL,
+                    asistencia_tipo_ID INTEGER NOT NULL,
+                    especialista_ID INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
+                    description TEXT NULL,
+                    visita_ID INTEGER NULL,
+                    prioridad INTEGER NULL,
+                    */
+                
+                
+                
+                
+                
+                await db.exec('COMMIT');
+
+                await saveToIndexedDB(db)
+            }catch(err){
+                console.error('ebeafbf7-4a90-43f2-bcc3-76bd5578c31c',err)
+                await db.exec("ROLLBACK");
+                
+            }
+
+            try{
+                openAlert(caseId)
+            }catch(err){
+                console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
+            }
+        }else{
+            alert('el caso ya existe')
+        }
+
+        
+
+        
+
+        /*
+        
+        ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+          remote_sync_id INTEGER NULL,
+          usuario_ID INTEGER NOT NULL,
+          comunicacion_ID INTEGER NOT NULL,
+          segmento_ID INTEGER NOT NULL,
+          caso_estado_ID INTEGER NOT NULL,
+          fecha DATE NOT NULL,
+          start DATETIME NULL,
+          date_end DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
+          description TEXT NULL,
+          prioridad INTEGER NULL, -- media ponderada de la prioridad
+          FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID),
+          FOREIGN KEY (segmento_ID) REFERENCES segmento(ID),
+          FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID),
+          FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
+        
+        */
+
+
+        
     }
 
     return(
@@ -188,7 +345,7 @@ function CardCrearCaso({openAlert}){
               </CardHeader>
               <CardBody mt={{xl:'50px', sm:'50px'}}>
                   <Button variant='dark' minW='145px' h='36px' fontSize={{xl:'2em',sm:'1em'}} onClick={crearCaso}>
-                    Crear
+                    Crear caso
                   </Button>
                   
               </CardBody>

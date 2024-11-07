@@ -105,7 +105,7 @@ function RadioCard(props) {
 
     const setPrioridad = (prioridad) =>{
         getUserData()
-        const newUserData = {...userData}
+        const newUserData = structuredClone(userData)
         const prioridadMap = { 'Alta': '1', 'Media': '2', 'Baja': '3' };
         const prioridad_id = prioridadMap?.[prioridad] || '3';  // Usa '3' como valor por defecto
         

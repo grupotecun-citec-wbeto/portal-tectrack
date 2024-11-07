@@ -180,6 +180,7 @@ export function SqlProvider({ children }) {
           date_end DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
           description TEXT NULL,
           prioridad INTEGER NULL, -- media ponderada de la prioridad
+          uuid TEXT NULL,
           FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID),
           FOREIGN KEY (segmento_ID) REFERENCES segmento(ID),
           FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID),
@@ -189,7 +190,7 @@ export function SqlProvider({ children }) {
       await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
     }else{
       //const result = db.run(`DROP TABLE caso;`)
-      //await saveToIndexedDB(db);
+      //saveToIndexedDB(db);
     }
 
     /*=======================================================

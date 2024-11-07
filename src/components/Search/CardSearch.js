@@ -96,6 +96,19 @@ function SearchCard(props) {
      *
      */
 
+    useEffect( () =>{
+        getUserData()
+        const run = async() =>{
+            if(casoActivo.code != '' && maquina_id){
+                
+                if(Object.keys(userData?.casos[casoActivo?.code]?.equipos[maquina_id]?.prediagnostico?.sistemas || {}).length != 0){
+                    setIsCreatedPreDiagnostico(true)
+                }
+            }
+        }
+        run()
+    },[])
+
     useEffect( ()=>{
         if(isSelected == 1){
             setIsSelectedEquipo(true)
@@ -134,10 +147,11 @@ function SearchCard(props) {
     const btnAgregar = async() =>{
         getUserData()
 
-        const newUserData = {...userData}
+        const newUserData = structuredClone(userData)
         const equipoExiste = newUserData?.casos[casoActivo?.code]?.equipos?.hasOwnProperty(maquina_id);
         if (!equipoExiste) {
-            newUserData.casos[casoActivo?.code].equipos[maquina_id] = newUserData.stuctures?.equipoId  // agregando la estructura de equipo
+            const equipoId = structuredClone(newUserData.stuctures?.equipoId);
+            newUserData.casos[casoActivo?.code].equipos[maquina_id] = equipoId  // agregando la estructura de equipo
         }
 
         setIsSelectedEquipo(true)
@@ -149,7 +163,7 @@ function SearchCard(props) {
     const eliminarEquipo = async() =>{
         getUserData()
 
-        const newUserData = {...userData}
+        const newUserData = structuredClone(userData)
 
         delete newUserData.casos[casoActivo?.code]?.equipos[maquina_id];
         
@@ -157,10 +171,10 @@ function SearchCard(props) {
 
     }
 
-    const agregar_prediganostico = () =>{
+    const ir_prediganostico = () =>{
         getUserData()
 
-        const newUserData = {...userData}
+        const newUserData = structuredClone(userData)
 
         newUserData.casoActivo.maquina_id = maquina_id
 
@@ -169,6 +183,7 @@ function SearchCard(props) {
 
         history.push('/admin/pages/prediagnostico')
     }
+
 
     // Pass the computed styles into the `__css` prop
     return (
@@ -213,7 +228,7 @@ function SearchCard(props) {
                                         aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
                                         colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
                                         size="md" // Tamaño del botón
-                                        onClick={agregar_prediganostico} // Acción al hacer clic
+                                        onClick={ir_prediganostico} // Acción al hacer clic
                                     />
                                 </Tooltip>
                             ):(
@@ -223,7 +238,7 @@ function SearchCard(props) {
                                         aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
                                         colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
                                         size="md" // Tamaño del botón
-                                        onClick={() => alert("Creando diagnóstico...")} // Acción al hacer clic
+                                        onClick={ir_prediganostico} // Acción al hacer clic
                                     />
                                 </Tooltip>
                             )}

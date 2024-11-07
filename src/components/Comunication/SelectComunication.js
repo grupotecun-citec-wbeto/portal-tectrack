@@ -53,7 +53,7 @@ function SelectComunication(props){
 
     const handleComunicacion = (comunicacion_ID) =>{
         getUserData()
-        const newUserData = {...userData}
+        const newUserData = structuredClone(userData)
         newUserData.casos[casoActivo.code] && (newUserData.casos[casoActivo.code].comunicacion_ID = comunicacion_ID )
         saveUserData(newUserData)
         setComunicacionValue(comunicacion_ID)
