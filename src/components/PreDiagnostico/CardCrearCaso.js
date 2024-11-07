@@ -227,7 +227,7 @@ function CardCrearCaso({openAlert}){
                     )
                     VALUES(
                         NULL,
-                        ${usuario_ID},
+                        NULL,
                         ${comunicacion_ID},
                         ${segmento_ID},
                         ${caso_estado_ID},

@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
+//redux
+import { useSelector, useDispatch } from 'react-redux';
 import {
   Box,
   Flex,
@@ -71,6 +73,23 @@ const CasoDetail = ({ caseData }) => {
   const {slcCasoId,setSlcCasoId} = useContext(AppContext)
 
   const history = useHistory()
+
+  /*=======================================================
+     BLOQUE: REDUX-PERSIST
+     DESCRIPTION: 
+    =========================================================*/
+    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+    const dispatch = useDispatch();
+
+    const saveUserData = (json) => {
+        dispatch({ type: 'SET_USER_DATA', payload: json });
+      };
+  
+    const getUserData = () => {
+        dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+    };
+
+    /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
     
   // ==========================================================
   // SECTION: Estados (useState)
@@ -242,7 +261,13 @@ const CasoDetail = ({ caseData }) => {
   useEffect( () =>{
     const consultarAsigancion = async() =>{
       
-      const result = db.toObject(db.exec(`SELECT * FROM  asignacion WHERE caso_ID = ${id} ORDER BY fecha DESC LIMIT 1;`) || {})
+      /*const result = db.toObject(db.exec(`SELECT * FROM  asignacion WHERE caso_ID = ${id} ORDER BY fecha DESC LIMIT 1;`) || {})
+      if(typeof result !== 'undefined'){
+        if(Object.keys(result).length != 0){
+          setSlcUsuario(result.usuario_ID)
+        }
+      }*/
+      const result = db.toObject(db.exec(`SELECT usuario_ID FROM caso WHERE ID = ${id}`) || {})
       if(typeof result !== 'undefined'){
         if(Object.keys(result).length != 0){
           setSlcUsuario(result.usuario_ID)
@@ -257,19 +282,24 @@ const CasoDetail = ({ caseData }) => {
   // CONSULTAR DIAGANOSTICO
   useEffect( () =>{
     const consultarDiagnostico = async() =>{
-      
-      const result = db.toObject(db.exec(`SELECT 
-        caso_ID,
-        CAST(fecha AS TEXT) AS fecha,
-        diagnostico_tipo_ID,
-        description,
-        asistencia_tipo_ID,
-        visita_ID
-        FROM  diagnostico WHERE caso_ID = ${id} AND diagnostico_tipo_ID = 1 AND fecha = '${fecha}' LIMIT 1;`) || {})
-      if(typeof result !== 'undefined'){
-        if(Object.keys(result).length != 0){
-          setPrediagnostico(result)        
+      try{
+        const sql = `SELECT 
+          caso_ID,
+          diagnostico_tipo_ID,
+          description,
+          asistencia_tipo_ID,
+          visita_ID
+          FROM  diagnostico WHERE caso_ID = ${id}`
+          console.log('96467964-1702-46e7-9dd8-5048009ff197',sql);
+          
+        const result = db.toArray(db.exec(sql) || [])
+        if(typeof result !== 'undefined'){
+          if(Object.keys(result).length != 0){
+            setPrediagnostico(result)        
+          }
         }
+      }catch(err){
+        console.error('c5a8827b-7fa0-4572-88db-e52326aed799',err)
       }
       
     }
@@ -318,10 +348,11 @@ const CasoDetail = ({ caseData }) => {
        */
       const estado_a_asignar = 2
       // Insertar asignacion de usuario al caso, para establecer que usuario que resolver el caso
-      const result = await db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},${id},'${getCurrentDateTime()}','')`)
+      //const result = await db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},${id},'${getCurrentDateTime()}','')`)
+      //db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},${id},'${getCurrentDateTime()}','')`)
       
       // Actualizar a estado asignado cuando se agigna un caso hacia estado 2: Asignado
-      db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_asignar} where ID = ${id}`)
+      db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_asignar},usuario_ID = ${slcUsuario}  where ID = ${id}`)
       
       // Establecer el usuario que va resolver el caso
       setEstado(estado_a_asignar)
@@ -338,10 +369,10 @@ const CasoDetail = ({ caseData }) => {
     // 
     const estado_a_establecer = 1
     // Se elimina el usuario que estaba seleccionado
-    db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = ${id}`)
+    //db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = ${id}`)
 
     // actualizar el estado en el caso
-    db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
+    db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer}, usuario_ID = NULL where ID = ${id}`)
     
     setSlcUsuario(null)
     setEstado(estado_a_establecer)
@@ -360,6 +391,7 @@ const CasoDetail = ({ caseData }) => {
 
   const terminar = async() => {
     setSlcCasoId(id)
+    
     history.push('/admin/pages/diagnostico')
    
   }

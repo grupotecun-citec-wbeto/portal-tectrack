@@ -127,7 +127,7 @@ import { Link, useHistory   } from 'react-router-dom';
       
       const newUserData = structuredClone(userData)
 
-      const caso = structuredClone(newUserData.stuctures.caso);
+      const caso = structuredClone(userData.stuctures.caso);
       
       newUserData.casoActivo.code=uuid
       

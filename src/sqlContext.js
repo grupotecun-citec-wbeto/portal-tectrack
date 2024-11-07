@@ -171,7 +171,7 @@ export function SqlProvider({ children }) {
         CREATE TABLE IF NOT EXISTS caso (
           ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
           remote_sync_id INTEGER NULL,
-          usuario_ID INTEGER NOT NULL,
+          usuario_ID INTEGER NULL,
           comunicacion_ID INTEGER NOT NULL,
           segmento_ID INTEGER NOT NULL,
           caso_estado_ID INTEGER NOT NULL,
