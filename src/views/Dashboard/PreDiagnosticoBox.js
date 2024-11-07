@@ -118,15 +118,15 @@ import {
     
 
     // setea la data local de redux-persist
-    useEffect(()=>{
+    /*useEffect(()=>{
       getUserData()
       if(userData != null){
         // creando caso
         
-        /*=======================================================
-         BLOQUE: ESTRUCTURA DE UN CASO
-         DESCRIPTION: Estructura base de un caso 
-        =========================================================*/
+        //=======================================================
+        // BLOQUE: ESTRUCTURA DE UN CASO
+        // DESCRIPTION: Estructura base de un caso 
+        //=========================================================
         let caso_structure = {
           maquina_id:casoActivo.maquina_id,
           categoria_id:casoActivo.categoria_id,
@@ -169,8 +169,20 @@ import {
         }
       }
       
-    },[casoActivo.code])
+    },[casoActivo.code])*/
 
+    useEffect (() =>{
+      const run = async() =>{
+        if(casoActivo.code){
+          if(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.hasOwnProperty("description")){
+            if(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.description != ''){
+              setDescriptionValue(decodeURIComponent(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.description))
+            }
+          }
+        }
+      }
+      run()
+    },[casoActivo.code])
     // Obtener la lista de generalmachinessystem, obtine todos los systemas
     useEffect(() => {
 
@@ -203,11 +215,12 @@ import {
       
     }, []);
 
+    // Ingresar la descripcion del prediagnostico en redux
     useEffect(() =>{
       if(debouncedSearchValue){
         if(casoActivo.code != ''){
           const newUserData = {...userData};
-          newUserData.casos[casoActivo.code].prediagnostico.descripcion = encodeURIComponent(descriptionValue)
+          newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.description = encodeURIComponent(descriptionValue)
           saveUserData(newUserData)
         }
       }

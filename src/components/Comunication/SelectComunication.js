@@ -1,4 +1,4 @@
-import React,{useContext } from 'react'
+import React,{useContext,useEffect } from 'react'
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -10,6 +10,7 @@ import {
   } from '@chakra-ui/react'
 
 import AppContext from 'appContext'
+import { useState } from 'react';
 
 
 function SelectComunication(props){
@@ -35,16 +36,32 @@ function SelectComunication(props){
     };
     /*====================FIN BLOQUE: REDUX-PRESIST        ==============*/
 
+    const [comunicacionValue,setComunicacionValue] = useState(null)
+
+    useEffect(() =>{
+        const run = async() =>{
+            getUserData()
+            if(casoActivo.code){
+                const comunicacion_ID = userData.casos[casoActivo.code].comunicacion_ID
+                console.log(comunicacion_ID);
+                setComunicacionValue(comunicacion_ID)
+            }
+        }
+        run()
+        return () =>{}
+    },[casoActivo.code])
+
     const handleComunicacion = (comunicacion_ID) =>{
         getUserData()
         const newUserData = {...userData}
         newUserData.casos[casoActivo.code] && (newUserData.casos[casoActivo.code].comunicacion_ID = comunicacion_ID )
         saveUserData(newUserData)
+        setComunicacionValue(comunicacion_ID)
     }
 
     return(
         <FormControl>
-            <Select id='country' placeholder='Seleccionar comunicación' fontSize={{xl:'1em',sm:'1em'}} onChange={(e) => handleComunicacion(e.target.value)}>
+            <Select id='country' placeholder='Seleccionar comunicación' fontSize={{xl:'1em',sm:'1em'}} value={comunicacionValue} onChange={(e) => handleComunicacion(e.target.value)}>
                 {comunicaciones?.map((comunicacion) =>(
                     <option value={comunicacion.value}>{comunicacion.text}</option>
                 ))}

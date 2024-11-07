@@ -65,7 +65,7 @@ function CheckboxHerramientas(props){
     useEffect(()=>{
       getUserData()
       if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined' ){
-        const herramientas =  userData.casos[casoActivo.code].prediagnostico.herramientas
+        const herramientas =  userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.herramientas
         for (let herramienta in herramientas) {
           if (herramienta === name) {
             if(herramientas[herramienta].check == '1'){
@@ -98,19 +98,19 @@ function CheckboxHerramientas(props){
        BLOQUE: ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO
        DESCRIPTION: Ingreso de datos al json se va guardar REDUX-PRESIST
       =========================================================*/
-      newUserData.casos[casoActivo.code].prediagnostico.herramientas[name] = {
-        herramienta_ID: id,
-        check: (check) ? '0' : '1'
-      }
+      const equipamiento = {...newUserData.stuctures.equipamiento}
+      equipamiento.herramienta_ID = id
+      equipamiento.check = (check) ? '0' : '1'
+      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.herramientas[name] = equipamiento
 
       saveUserData(newUserData)
       setCheck(!check)
     }
 
-    const actionService = (service_id) =>{
+    /*const actionService = (service_id) =>{
       service_id = (service_id == '') ? '' : service_id
       const newUserData = {...userData};
-      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
+      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
     }
@@ -118,10 +118,10 @@ function CheckboxHerramientas(props){
     const actionMarca = (marca_id) =>{
       marca_id = (marca_id == '') ? '' : marca_id
       const newUserData = {...userData};
-      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
+      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
       saveUserData(newUserData)
       setSelectedMarca(marca_id)
-    }
+    }*/
 
     return(
       <>

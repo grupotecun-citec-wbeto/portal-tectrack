@@ -61,7 +61,7 @@ function CardAsistencia(props){
             
             // recuperando desplegable de especialista
             if(typeof userData.casos[casoActivo.code] !== 'undefined' ){
-                setSelectedAsistencia(userData.casos[casoActivo.code].prediagnostico.asistencia_tipo_id)
+                setSelectedAsistencia(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.asistencia_tipo_ID)
             }
         } 
         
@@ -72,7 +72,7 @@ function CardAsistencia(props){
     const actionSelectAsistencia = (asistencia_tipo_id) =>{
         asistencia_tipo_id = (asistencia_tipo_id == '') ? '' : asistencia_tipo_id
         const newUserData = {...userData};
-        newUserData.casos[casoActivo.code].prediagnostico.asistencia_tipo_id = asistencia_tipo_id
+        newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.asistencia_tipo_ID = asistencia_tipo_id
         saveUserData(newUserData)
         setSelectedAsistencia(asistencia_tipo_id)
     }

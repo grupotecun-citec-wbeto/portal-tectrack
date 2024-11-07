@@ -61,10 +61,10 @@ function CardEspecialista(props){
         if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
             
             if(typeof userData.casos[casoActivo.code] !== 'undefined' ){
-                const needEspecialista =  userData.casos[casoActivo.code].prediagnostico.necesitaEspecialista
+                const needEspecialista =  userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.necesitaEspecialista
                 setNecesitaEspecialista((needEspecialista == '1') ? true : false)
                 // recuperando desplegable de especialista
-                setSelectedEspecialista(userData.casos[casoActivo.code].prediagnostico.especialista_id)
+                setSelectedEspecialista(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.especialista_id)
             }
         } 
         
@@ -77,7 +77,7 @@ function CardEspecialista(props){
         const newUserData = {...userData};
         
         //*********************************** ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO ******************************* */
-        newUserData.casos[casoActivo.code].prediagnostico.necesitaEspecialista = (necesitaEspecialista) ? '0' : '1' // la logica esta  al revez por la rederizacion del switch
+        newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.necesitaEspecialista = (necesitaEspecialista) ? '0' : '1' // la logica esta  al revez por la rederizacion del switch
         saveUserData(newUserData)
         setNecesitaEspecialista(!necesitaEspecialista)
         if(!necesitaEspecialista){
@@ -89,7 +89,7 @@ function CardEspecialista(props){
     const actionSelectEspecialista = (especialista_id) =>{
         especialista_id = (especialista_id == '') ? '' : especialista_id
         const newUserData = {...userData};
-        newUserData.casos[casoActivo.code].prediagnostico.especialista_id = especialista_id
+        newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.especialista_id = especialista_id
         saveUserData(newUserData)
         setSelectedEspecialista(especialista_id)
       }

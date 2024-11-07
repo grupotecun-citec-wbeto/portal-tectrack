@@ -57,7 +57,8 @@ export function AppProvider({ children }) {
         if(userData == null){
             const equipamiento= {
               herramienta_ID:0, //INTEGER NOT NULL
-              equipo_ID:0, //INTEGER NOT NULL
+              equipo_ID:0, //INTEGER NOT NULL,
+              check:0, // INTEGER NOT NULL
             }
             const diagnostico = {
               equipo_ID:0, //INTEGER NOT NULL,
@@ -65,11 +66,12 @@ export function AppProvider({ children }) {
               diagnostico_tipo_ID:0, //INTEGER NOT NULL, 1: pre 2: post
               asistencia_tipo_ID:0, //INTEGER NOT NULL,
               especialista_ID:0, //INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
+              necesitaEspecialista:0, // verificar si necesita especialista
               description:'', //TEXT NULL,
               visita_ID:0, //INTEGER NULL,
               prioridad:0,//INTEGER NULL,
-              equipamientos:equipamiento, // Object
-              sistemas:{}
+              herramientas:{/*equipamiento*/}, // Object
+              sistemas:{/*servicio */}
             }
 
             let base_structure = {
@@ -94,7 +96,12 @@ export function AppProvider({ children }) {
                   equipoId:{
                     prediagnostico:diagnostico, // object
                     diagnostico:diagnostico // object
+                  },
+                  servicio:{
+                    servicio_tipo_ID:0,
+                    sistema_marca_ID:0,
                   }
+                  
                   
                 }
             }  

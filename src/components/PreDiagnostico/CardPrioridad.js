@@ -109,8 +109,8 @@ function RadioCard(props) {
         const prioridadMap = { 'Alta': '1', 'Media': '2', 'Baja': '3' };
         const prioridad_id = prioridadMap?.[prioridad] || '3';  // Usa '3' como valor por defecto
         
-        newUserData?.casos?.[casoActivo.code]?.prediagnostico && 
-            (newUserData.casos[casoActivo.code].prediagnostico.prioridad_id = prioridad_id)
+        newUserData?.casos?.[casoActivo.code]?.equipos[casoActivo.maquina_id].prediagnostico && 
+            (newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.prioridad = prioridad_id)
         
         
         saveUserData(newUserData)
@@ -129,7 +129,7 @@ function RadioCard(props) {
     =========================================================*/
     useEffect(() => {
         getUserData()
-        setValorSeleccionado({ '1': 'Alta', '2': 'Media', '3': 'Baja' }?.[userData?.casos?.[casoActivo.code]?.prediagnostico?.prioridad_id] || valorSeleccionado);
+        setValorSeleccionado({ '1': 'Alta', '2': 'Media', '3': 'Baja' }?.[userData?.casos?.[casoActivo.code]?.equipos[casoActivo.maquina_id].prediagnostico?.prioridad] || valorSeleccionado);
         
     }, [casoActivo.code,userData]);
 

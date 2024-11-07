@@ -157,6 +157,19 @@ function SearchCard(props) {
 
     }
 
+    const agregar_prediganostico = () =>{
+        getUserData()
+
+        const newUserData = {...userData}
+
+        newUserData.casoActivo.maquina_id = maquina_id
+
+        saveUserData(newUserData)
+        setCasoActivo(newUserData.casoActivo)
+
+        history.push('/admin/pages/prediagnostico')
+    }
+
     // Pass the computed styles into the `__css` prop
     return (
         <Card border={isSelectedEquipo ? "6px solid" : ""} borderColor={isSelectedEquipo ? "green.400" : "transparent"}>
@@ -200,7 +213,7 @@ function SearchCard(props) {
                                         aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
                                         colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
                                         size="md" // Tamaño del botón
-                                        onClick={() => alert("Creando diagnóstico...")} // Acción al hacer clic
+                                        onClick={agregar_prediganostico} // Acción al hacer clic
                                     />
                                 </Tooltip>
                             ):(
