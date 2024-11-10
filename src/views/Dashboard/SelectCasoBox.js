@@ -45,7 +45,8 @@ import { Link, useHistory   } from 'react-router-dom';
 
     // context 
     const {
-        casoActivo,setCasoActivo
+        casoActivo,setCasoActivo,
+        baseStructure,setBaseStructure
     } = useContext(AppContext)
 
 
@@ -120,10 +121,10 @@ import { Link, useHistory   } from 'react-router-dom';
       }
     }, [debouncedSearchValue]);
 
-
+  // creando un caso nuevo 
   const btnCreateCase = async(comunicacion_ID) =>{
       const uuid = uuidv4()
-      getUserData()
+      await getUserData()
       
       const newUserData = structuredClone(userData)
 
@@ -135,6 +136,10 @@ import { Link, useHistory   } from 'react-router-dom';
       
       newUserData.casos[uuid] = caso
       
+      const caso_activo = structuredClone(userData.stuctures.casoActivo)
+      newUserData.casoActivo = caso_activo
+      newUserData.casoActivo.code = uuid
+
       // Ponerlo como caso seleccionado
       saveUserData(newUserData)
       

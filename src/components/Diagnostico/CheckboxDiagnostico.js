@@ -57,7 +57,7 @@ function CheckboxDiagnostico(props){
     useEffect(()=>{
       getUserData()
       if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
-        const sistemas =  userData.casos[casoActivo.code].prediagnostico.sistemas
+        const sistemas =  userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.sistemas
         for (let sistema in sistemas) {
           if (sistema === name) {
             if(sistemas[sistema].check == '1'){
@@ -117,7 +117,7 @@ function CheckboxDiagnostico(props){
       const newUserData = structuredClone(userData);
       
       //*********************************** ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO ******************************* */
-      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name] = {
+      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.sistemas[name] = {
         sistema_ID: id,
         servicio_tipo_ID:'',
         sistema_marca_ID:'',
@@ -130,7 +130,7 @@ function CheckboxDiagnostico(props){
     const actionService = (service_id) =>{
       service_id = (service_id == '') ? '' : service_id
       const newUserData = structuredClone(userData);
-      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
+      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
     }
@@ -138,7 +138,7 @@ function CheckboxDiagnostico(props){
     const actionMarca = (marca_id) =>{
       marca_id = (marca_id == '') ? '' : marca_id
       const newUserData = structuredClone(userData);
-      newUserData.casos[casoActivo.code].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
+      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.sistemas[name].sistema_marca_ID = marca_id
       saveUserData(newUserData)
       setSelectedMarca(marca_id)
     }

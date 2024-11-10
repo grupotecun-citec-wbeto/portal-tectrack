@@ -10,6 +10,8 @@ import { Link, useHistory   } from 'react-router-dom';
 
 import { NavLink } from "react-router-dom";
 
+import CardGuardarDiagnostico from "components/Diagnostico/CardGuardarDiagnostico";
+
 import {
     Input,
     InputGroup,
@@ -272,14 +274,6 @@ import {
                 textAlign={{ sm: "center", md: "start" }}
                 p='24px'
               >
-                <NavLink to='/admin/pages/searchbox'>
-                  <Button
-                    colorScheme="blue" // Color azul para representar la acción de volver a buscar
-                    size="md" // Tamaño del botón
-                  >
-                    Regresar
-                  </Button>
-                </NavLink>
                 <Text fontSize={{xl:'4em',sm:'3em'}}>Pre Diagnostico</Text>
                 
               </Flex>
@@ -327,11 +321,7 @@ import {
               <CardHerramientas title="¿Necesitas incluir a Herramientas?" />
               <CardPrioridad />
               
-              {isSuccessAlertCaso ?(
-                <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
-              ):(
-                <CardCrearCaso openAlert={openAlert} />
-              )}
+              <CardGuardarDiagnostico />
               <CardCommand />
               
               

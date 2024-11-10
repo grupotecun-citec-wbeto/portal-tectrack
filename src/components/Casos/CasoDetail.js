@@ -70,7 +70,8 @@ const CasoDetail = ({ caseData }) => {
   const bgStatus = useColorModeValue("gray.400", "navy.900");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
-  const {slcCasoId,setSlcCasoId} = useContext(AppContext)
+  //const {slcCasoId,setSlcCasoId} = useContext(AppContext)
+  const {casoActivo,setCasoActivo} = useContext(AppContext)
 
   const history = useHistory()
 
@@ -381,18 +382,54 @@ const CasoDetail = ({ caseData }) => {
   }
 
   const empezar = async() =>{
-    setIsEmpezado(true)
+    const verificar = () =>{
+      // verificar si ya tiene asignado a un tecnico el caso
+      const result = db.toObject(db.exec(`SELECT usuario_ID FROM caso where ID = ${id}`))
+      console.log(result);
+    }
+
+    verificar()
+
+    /*setIsEmpezado(true)
     const estado_a_establecer = 3
     db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
     setEstado(estado_a_establecer)
-    await saveToIndexedDB(db)
+    // gurdar en base de datos sqlite
+    await saveToIndexedDB(db)*/
     
   }
 
   const terminar = async() => {
-    setSlcCasoId(id)
+    getUserData()
+    //setSlcCasoId(id)
     
-    history.push('/admin/pages/diagnostico')
+
+    const newUserData = structuredClone(userData)
+    
+    const result = db.toObject(db.exec(`SELECT uuid FROM caso WHERE ID = ${id}`) || {})
+    newUserData.casoActivo.caso_id = id
+    newUserData.casoActivo.code = result.uuid
+    newUserData.casoActivo.busqueda_terminada = 1
+
+    // creacion de caso
+    const caso = structuredClone(newUserData.stuctures.caso)
+    newUserData.casos[result.uuid] = caso
+
+    const equipos = db.toArray(db.exec(`SELECT equipo_ID FROM diagnostico WHERE caso_ID = ${id}`) || {})
+    
+    equipos.forEach(element => {
+      const equipoId = structuredClone(newUserData.stuctures.equipoId)
+      newUserData.casos[result.uuid].equipos[element.equipo_ID] = equipoId
+    });
+    
+
+    saveUserData(newUserData)
+    setCasoActivo(newUserData.casoActivo)
+    
+    
+
+
+    history.push('/admin/pages/searchbox')
    
   }
 

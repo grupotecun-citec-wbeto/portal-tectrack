@@ -47,6 +47,7 @@ function SearchCard(props) {
         cliente_name,
         infos,
         isSelected, 
+        isPost,
         ...rest } = props;
     
     const history = useHistory();
@@ -104,6 +105,11 @@ function SearchCard(props) {
                 if(Object.keys(userData?.casos[casoActivo?.code]?.equipos[maquina_id]?.prediagnostico?.sistemas || {}).length != 0){
                     setIsCreatedPreDiagnostico(true)
                 }
+
+                if(Object.keys(userData?.casos[casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas || {}).length != 0){
+                    setIsCreatedPreDiagnostico(true)
+                }
+
             }
         }
         run()
@@ -184,6 +190,19 @@ function SearchCard(props) {
         history.push('/admin/pages/prediagnostico')
     }
 
+    const ir_diagnostico = () =>{
+        getUserData()
+        
+        const newUserData = structuredClone(userData)
+
+        newUserData.casoActivo.maquina_id = maquina_id
+
+        saveUserData(newUserData)
+        setCasoActivo(newUserData.casoActivo)
+
+        history.push('/admin/pages/diagnostico')
+    }
+
 
     // Pass the computed styles into the `__css` prop
     return (
@@ -211,34 +230,37 @@ function SearchCard(props) {
                         />
                     ):(
                         <>
-                            <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
-                                <IconButton
-                                    icon={<FaTimes />} // Icono para quitar selección
-                                    aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
-                                    colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
-                                    size="md" // Tamaño del botón
-                                    onClick={eliminarEquipo} // Acción al hacer clic
-                                />
-                            </Tooltip>
+                            {!isPost && (
+                                <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
+                                    <IconButton
+                                        icon={<FaTimes />} // Icono para quitar selección
+                                        aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
+                                        colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
+                                        size="md" // Tamaño del botón
+                                        onClick={eliminarEquipo} // Acción al hacer clic
+                                    />
+                                </Tooltip>
+                            )}
+                            
                             
                             {!isCreatedPreDiagnostico ? (
-                                <Tooltip label="Agregar pre-diagnostico" aria-label="Tooltip para el botón">
+                                <Tooltip label={(!isPost) ? "Agregar pre-diagnostico" : "Agregar diagnostico" } aria-label="Tooltip para el botón">
                                     <IconButton
                                         icon={<FaPlus />} // Icono para crear diagnóstico
                                         aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
                                         colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
                                         size="md" // Tamaño del botón
-                                        onClick={ir_prediganostico} // Acción al hacer clic
+                                        onClick={(!isPost) ? ir_prediganostico : ir_diagnostico} // Acción al hacer clic
                                     />
                                 </Tooltip>
                             ):(
-                                <Tooltip label="Editar pre-diagnostico" aria-label="Tooltip para el botón">
+                                <Tooltip label={(!isPost) ? "Editar pre-diagnostico" : "Editar Diagnostico"} aria-label="Tooltip para el botón">
                                     <IconButton
                                         icon={<FaEdit />} // Icono para crear diagnóstico
                                         aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
                                         colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
                                         size="md" // Tamaño del botón
-                                        onClick={ir_prediganostico} // Acción al hacer clic
+                                        onClick={(!isPost) ? ir_prediganostico : ir_diagnostico} // Acción al hacer clic
                                     />
                                 </Tooltip>
                             )}

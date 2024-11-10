@@ -27,10 +27,10 @@ const SuccessAlertCaso = ({ onClose,caseId }) => {
 
     const redirigir = () =>{
       history.push('/admin/pages/casos')
-      saveUserData({
+      /*saveUserData({
           casos : {},
           casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:''}
-      })
+      })*/
     }
   return (
     <Box>

@@ -8,6 +8,8 @@ import {v4 as uuidv4} from 'uuid' // Importa la función para generar UUID
 =========================================================*/
 import { Link, useHistory   } from 'react-router-dom';
 
+import CardGuardarDiagnostico from "components/Diagnostico/CardGuardarDiagnostico";
+
 import {
     Input,
     InputGroup,
@@ -33,7 +35,7 @@ import {
   import CheckboxDiagnostico from "components/Diagnostico/CheckboxDiagnostico";
   import CardEspecialista from "components/PreDiagnostico/CardEspcialista";
   import CardAsistencia from "components/PreDiagnostico/CardAsistencia";
-  import CardTerminarCaso from "components/Diagnostico/CardTerminarCaso";
+  //import CardTerminarCaso from "components/Diagnostico/CardTerminarCaso";
   import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
   import CardHerramientas from "components/Diagnostico/CardHerramientas";
   import CardCommand from "components/PreDiagnostico/CadCommand";
@@ -118,15 +120,15 @@ import {
     
 
     // setea la data local de redux-persist
-    useEffect(()=>{
+    /*useEffect(()=>{
       getUserData()
       if(userData != null){
         // creando caso
         
-        /*=======================================================
-         BLOQUE: ESTRUCTURA DE UN CASO
-         DESCRIPTION: Estructura base de un caso 
-        =========================================================*/
+        //=======================================================
+        // BLOQUE: ESTRUCTURA DE UN CASO
+        // DESCRIPTION: Estructura base de un caso 
+        //=========================================================
         let caso_structure = {
           maquina_id:casoActivo.maquina_id,
           categoria_id:casoActivo.categoria_id,
@@ -162,18 +164,31 @@ import {
           // verificar si exite prediagnostico
           if(!userData.casos[casoActivo.code].hasOwnProperty("prediagnostico")){
             const newUserData = structuredClone(userData);
-            newUserData.casos[casoActivo.code].prediagnostico = base_structure.prediagnostico
+            newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico = base_structure.prediagnostico
             saveUserData(newUserData)
           }else{
-            if(userData.casos[casoActivo.code].prediagnostico.hasOwnProperty("descripcion")){
-              if(userData.casos[casoActivo.code].prediagnostico.descripcion != ''){
-                setDescriptionValue(decodeURIComponent(userData.casos[casoActivo.code].prediagnostico.descripcion))
+            if(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.hasOwnProperty("descripcion")){
+              if(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.description != ''){
+                setDescriptionValue(decodeURIComponent(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.description))
               }
             }
           }
         }
       }
       
+    },[casoActivo.code])*/
+
+    useEffect (() =>{
+      const run = async() =>{
+        if(casoActivo.code){
+          if(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.hasOwnProperty("description")){
+            if(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.description != ''){
+              setDescriptionValue(decodeURIComponent(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.description))
+            }
+          }
+        }
+      }
+      run()
     },[casoActivo.code])
 
     // Obtener la lista de generalmachinessystem, obtine todos los systemas
@@ -212,7 +227,7 @@ import {
       if(debouncedSearchValue){
         if(casoActivo.code != ''){
           const newUserData = structuredClone(userData);
-          newUserData.casos[casoActivo.code].prediagnostico.descripcion = encodeURIComponent(descriptionValue)
+          newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.description = encodeURIComponent(descriptionValue)
           saveUserData(newUserData)
         }
       }
@@ -307,11 +322,13 @@ import {
               <CardHerramientas title="¿Que herramientas utilizaste?"/>
 
               
-              {isSuccessAlertCaso ?(
+              {// Esto eliminado para solo apilcar un boton de guardar
+              /*isSuccessAlertCaso ?(
                 <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
               ):(
                 <CardTerminarCaso openAlert={openAlert} />
-              )}
+              )*/}
+              <CardGuardarDiagnostico />
               <CardCommand />
               
               

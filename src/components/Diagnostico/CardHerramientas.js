@@ -78,10 +78,10 @@ function CardHerramientas(props){
         if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
             
             if(typeof userData.casos[casoActivo.code] !== 'undefined' ){
-                const needEspecialista =  userData.casos[casoActivo.code].prediagnostico.necesitaEspecialista
+                const needEspecialista =  userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.necesitaEspecialista
                 setNecesitaEspecialista((needEspecialista == '1') ? true : false)
                 // recuperando desplegable de especialista
-                setSelectedEspecialista(userData.casos[casoActivo.code].prediagnostico.especialista_id)
+                setSelectedEspecialista(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].diagnostico.especialista_id)
             }
         } 
         

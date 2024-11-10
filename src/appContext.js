@@ -22,6 +22,7 @@ export function AppProvider({ children }) {
     const [serviceTypeData,setServiceTypeData] = useState(null)
     const [casoActivo,setCasoActivo] = useState('')
     const [slcCasoId,setSlcCasoId] = useState(null)
+    const [baseStructure,setBaseStructure] = useState({})
     
 
      // >>>>>>>>>>>>>>>>>>>>>>>>>>REDUX-PRESIST >>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -92,7 +93,7 @@ export function AppProvider({ children }) {
 
             let base_structure = {
                 casos : {/*stuctures.caso*/}, // ARRAY
-                casoActivo:{code:'',maquina_id:'',categoria_id:'',cliente_name:'',busqueda_terminada:0},
+                casoActivo:{code:'',caso_id:'',maquina_id:'',categoria_id:'',cliente_name:'',busqueda_terminada:0},
                 stuctures:{
                   caso:{
                     usuario_ID:0, //INTEGER NOT NULL,
@@ -116,12 +117,14 @@ export function AppProvider({ children }) {
                   servicio:{
                     servicio_tipo_ID:0,
                     sistema_marca_ID:0,
-                  }
+                  },
+                  casoActivo:{code:'',caso_id:'',maquina_id:'',categoria_id:'',cliente_name:'',busqueda_terminada:0}
                   
                   
                 }
-            } 
-            //deepFreeze(base_structure.stuctures); 
+            }
+
+            deepFreeze(base_structure.stuctures); 
             if(userData == null){
                 saveUserData(base_structure)
             }
@@ -130,11 +133,18 @@ export function AppProvider({ children }) {
              BLOQUE: Recuperar datos Guardados en REDUX-PRESIST
              DESCRIPTION: Esto se ejecuta cuando useData tiene información que es estraida de REDUX-PRESIST 
             =========================================================*/
+            console.log(userData)
             if(casoActivo == ''){
-                if(userData.casoActivo.code != ''){
-                    // Setear caso activo obtnido de REDUX-PERSIT
-                    
-                    setCasoActivo(userData.casoActivo)
+                if(userData.casoActivo){  
+                  if(userData.casoActivo.code != ''){
+                      // Setear caso activo obtnido de REDUX-PERSIT
+                      setCasoActivo(userData.casoActivo)
+                  }
+                }else{
+                  // Esto es el caso que contenga nada de estructura de casoActivo
+                  const newUserData = structuredClone(userData)
+                  newUserData.casoActivo = structuredClone(userData.stuctures.casoActivo)
+                  saveUserData(newUserData)
                 }
             }
         }
@@ -180,7 +190,7 @@ export function AppProvider({ children }) {
             caseType,setCaseType,
             serviceTypeData,setServiceTypeData,
             casoActivo,setCasoActivo,
-            slcCasoId,setSlcCasoId
+            slcCasoId,setSlcCasoId,
             }}>
             {children}
         </AppContext.Provider>

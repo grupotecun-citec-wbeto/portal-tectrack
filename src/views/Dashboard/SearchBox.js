@@ -1,5 +1,5 @@
 import React,{useState, useEffect,useContext   } from "react";
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, useStore } from 'react-redux';
 import axios from 'axios';
 import AppContext from "appContext";
 import {
@@ -69,6 +69,8 @@ import {
     const [isSuccessAlertCaso,setIsSuccessAlertCaso] = useState(false)
     const [caseId,setCaseId] = useState(0)
 
+    const [isPost,setIsPost] = useState(false)
+
     const [datos, setDatos] = useState([]);
 
     const [isBusquedaTerminada,setIsBusquedaTerminada] = useState(false)
@@ -108,6 +110,18 @@ import {
       { id: 1, name: 'John Doe', age: 30 },
       { id: 2, name: 'Jane Smith', age: 25 },
     ];
+
+
+    useEffect(() =>{
+      const run = () =>{
+        if(userData != null){
+          if(userData.casoActivo.caso_id != ''){
+            setIsPost(true)
+          }
+        }
+      }
+      run()
+    },[])
   
     // Simulamos una función de búsqueda (reemplaza con tu lógica real)
     useEffect(() => {
@@ -121,7 +135,7 @@ import {
           if (debouncedSearchValue || isBusquedaTerminada) {
             getUserData()
             if(userData == null || casoActivo == '') return 0
-            const equipos = userData.casos[casoActivo?.code]?.equipos
+            const equipos = userData.casos[casoActivo?.code]?.equipos || {}
             const equiposSeleccionados = Object.keys(equipos).map(key => parseInt(key, 10))
             const lista_equipos = equiposSeleccionados.join(", ")
 
@@ -233,13 +247,16 @@ import {
                 </>
               ):(
                 <>
-                  <Button
-                    colorScheme="blue" // Color azul para representar la acción de volver a buscar
-                    size="md" // Tamaño del botón
-                    onClick={() => busquedaTerminada(0)} // Acción al hacer clic
-                  >
-                    Regresar a Buscar
-                  </Button>
+                  {!isPost && (
+                    <Button
+                      colorScheme="blue" // Color azul para representar la acción de volver a buscar
+                      size="md" // Tamaño del botón
+                      onClick={() => busquedaTerminada(0)} // Acción al hacer clic
+                    >
+                      Regresar a Buscar
+                    </Button>
+                  )}
+                  
                 </>
               )}
             </Box>
@@ -256,6 +273,7 @@ import {
                   categoria_id={maquina.categoria_id}
                   cliente_name={maquina.cliente_name}
                   isSelected={maquina.isSelected}
+                  isPost={isPost}
                   infos={[
                     {title:"Categoria",text:maquina.categoria_name},
                     {title:"Departamento",text:maquina.subdivision_name},
@@ -306,11 +324,16 @@ import {
             
           </Grid>
         )}
-        {isSuccessAlertCaso ?(
-          <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
-        ):(
-          <CardCrearCaso openAlert={openAlert} />
+        {!isPost && (
+          <>
+            {isSuccessAlertCaso ?(
+              <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
+            ):(
+              <CardCrearCaso openAlert={openAlert} />
+            )}
+          </>
         )}
+       
         <CardCommand />
       </Flex>
     );
