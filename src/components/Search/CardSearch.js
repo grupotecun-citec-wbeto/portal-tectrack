@@ -70,10 +70,10 @@ function SearchCard(props) {
       * SECTION: Contextos
       *
       */
-     const {
+    /*const {
         machineID, setMachineID,
         casoActivo,setCasoActivo
-    } = useContext(AppContext)
+    } = useContext(AppContext)*/
 
 
 
@@ -100,13 +100,13 @@ function SearchCard(props) {
     useEffect( () =>{
         getUserData()
         const run = async() =>{
-            if(casoActivo.code != '' && maquina_id){
+            if(userData.casoActivo.code != '' && maquina_id){
                 
-                if(Object.keys(userData?.casos[casoActivo?.code]?.equipos[maquina_id]?.prediagnostico?.sistemas || {}).length != 0){
+                if(Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.prediagnostico?.sistemas || {}).length != 0){
                     setIsCreatedPreDiagnostico(true)
                 }
 
-                if(Object.keys(userData?.casos[casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas || {}).length != 0){
+                if(Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas || {}).length != 0){
                     setIsCreatedPreDiagnostico(true)
                 }
 
@@ -123,17 +123,17 @@ function SearchCard(props) {
         }
     },[])
 
-    useEffect( ()=>{
+    /*useEffect( ()=>{
         getUserData()
                 
         
-            const equipos = Object?.keys(userData?.casos[casoActivo?.code]?.equipos ?? {}).map(key => parseInt(key, 10))
+            const equipos = Object?.keys(userData?.casos[userData?.casoActivo?.code]?.equipos ?? {}).map(key => parseInt(key, 10))
             if(!equipos.includes(maquina_id)){
                 setIsSelectedEquipo(false)
             }
     
         
-    },[userData])
+    },[userData])*/
     
 
    
@@ -151,13 +151,16 @@ function SearchCard(props) {
 
 
     const btnAgregar = async() =>{
-        getUserData()
 
-        const newUserData = structuredClone(userData)
-        const equipoExiste = newUserData?.casos[casoActivo?.code]?.equipos?.hasOwnProperty(maquina_id);
-        if (!equipoExiste) {
-            const equipoId = structuredClone(newUserData.stuctures?.equipoId);
-            newUserData.casos[casoActivo?.code].equipos[maquina_id] = equipoId  // agregando la estructura de equipo
+        const newUserData = {...userData}
+        const { casoActivo, stuctures, casos } = newUserData;
+        
+        const casoActivoCode = casoActivo?.code || ''
+        const equipos = casos?.[casoActivoCode]?.equipos || {};
+
+        if (!equipos.hasOwnProperty(maquina_id) && casoActivoCode != '') {
+            equipos[maquina_id] = structuredClone(stuctures?.equipoId);
+            casos[casoActivoCode].equipos = equipos
         }
 
         setIsSelectedEquipo(true)
@@ -167,38 +170,34 @@ function SearchCard(props) {
     }
 
     const eliminarEquipo = async() =>{
-        getUserData()
 
-        const newUserData = structuredClone(userData)
+        const newUserData = {...userData}
 
-        delete newUserData.casos[casoActivo?.code]?.equipos[maquina_id];
+        delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
         
+        setIsSelectedEquipo(false)
         saveUserData(newUserData)
 
     }
 
     const ir_prediganostico = () =>{
-        getUserData()
 
         const newUserData = structuredClone(userData)
 
         newUserData.casoActivo.maquina_id = maquina_id
 
         saveUserData(newUserData)
-        setCasoActivo(newUserData.casoActivo)
 
         history.push('/admin/pages/prediagnostico')
     }
 
     const ir_diagnostico = () =>{
-        getUserData()
         
         const newUserData = structuredClone(userData)
 
         newUserData.casoActivo.maquina_id = maquina_id
 
         saveUserData(newUserData)
-        setCasoActivo(newUserData.casoActivo)
 
         history.push('/admin/pages/diagnostico')
     }

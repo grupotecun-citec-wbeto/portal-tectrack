@@ -56,7 +56,7 @@ import {
     /**
      * SECTION: CONTEXTOS
      */
-    const {casoActivo,setCasoActivo} = useContext(AppContext)
+    /*const {casoActivo,setCasoActivo} = useContext(AppContext)*/
   
 
     /**
@@ -125,17 +125,13 @@ import {
   
     // Simulamos una función de búsqueda (reemplaza con tu lógica real)
     useEffect(() => {
-      
-        //onSearch(debouncedSearchValue);
+    
         setDatos([])
         const fetchData = async () => {
-          /*if(casoActivo == '' || userData == null){
-            history.push('/admin/pages/selectcaso');
-          }*/
           if (debouncedSearchValue || isBusquedaTerminada) {
             getUserData()
-            if(userData == null || casoActivo == '') return 0
-            const equipos = userData.casos[casoActivo?.code]?.equipos || {}
+            if(userData == null) return 0
+            const equipos = userData.casos[userData.casoActivo?.code]?.equipos || {}
             const equiposSeleccionados = Object.keys(equipos).map(key => parseInt(key, 10))
             const lista_equipos = equiposSeleccionados.join(", ")
 
@@ -159,12 +155,12 @@ import {
     }, [debouncedSearchValue,isBusquedaTerminada]);
 
     useEffect( () =>{
-      if(casoActivo.busqueda_terminada == 1){
+      if(userData.casoActivo.busqueda_terminada == 1){
         setIsBusquedaTerminada(true)
       }else{
         setIsBusquedaTerminada(false)
       }      
-    },[casoActivo.busqueda_terminada])
+    },[userData.casoActivo.busqueda_terminada])
   
     /**
      * SECTION: FUNCTIONS
@@ -186,8 +182,7 @@ import {
       setIsBusquedaTerminada(!isBusquedaTerminada)
       const newUserData = structuredClone(userData)
       newUserData.casoActivo.busqueda_terminada = cod
-      
-      setCasoActivo(newUserData.casoActivo)
+
       saveUserData(newUserData)
     }
 
@@ -237,13 +232,16 @@ import {
                     />
                   </InputGroup>
                   
-                  <Button
-                    colorScheme="green" // Verde para indicar que se ha completado exitosamente
-                    size="md" // Tamaño del botón
-                    onClick={() => busquedaTerminada(1)} // Acción al hacer clic
-                  >
-                    Búsqueda Terminada
-                  </Button>
+                  {Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos || {}).length >= 1 && (
+                      <Button
+                        colorScheme="green" // Verde para indicar que se ha completado exitosamente
+                        size="md" // Tamaño del botón
+                        onClick={() => busquedaTerminada(1)} // Acción al hacer clic
+                      >
+                        Búsqueda Terminada
+                      </Button>
+                  )}
+                   
                 </>
               ):(
                 <>

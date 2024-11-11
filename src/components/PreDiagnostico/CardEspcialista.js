@@ -38,7 +38,8 @@ function CardEspecialista(props){
     const [selectedEspecialista,setSelectedEspecialista] = useState('')
 
     // CONTEXTO
-    const {casoActivo,setCasoActivo} = useContext(AppContext)
+    // Esta quitando el contexto de casoActivo, si se va utilizar otro contexto crear otra linea
+    /*const {casoActivo,setCasoActivo} = useContext(AppContext)*/
 
     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
     const dispatch = useDispatch();
@@ -57,19 +58,18 @@ function CardEspecialista(props){
 
     // Cargando datos cuando el navegador de reinicia
     useEffect(()=>{
-        getUserData()
-        if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
+        if(userData != null && userData.casoActivo.code != '' && typeof userData.casoActivo.code !== 'undefined'){
             
-            if(typeof userData.casos[casoActivo.code] !== 'undefined' ){
-                const needEspecialista =  userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.necesitaEspecialista
+            if(typeof userData.casos[userData.casoActivo.code] !== 'undefined' ){
+                const needEspecialista =  userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.necesitaEspecialista
                 setNecesitaEspecialista((needEspecialista == '1') ? true : false)
                 // recuperando desplegable de especialista
-                setSelectedEspecialista(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.especialista_ID)
+                setSelectedEspecialista(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.especialista_ID)
             }
         } 
         
         
-    },[casoActivo.code])
+    },[userData.casoActivo.code])
 
     const actionCheckEspecialista = () =>{
         getUserData()
@@ -77,7 +77,7 @@ function CardEspecialista(props){
         const newUserData = structuredClone(userData);
         
         //*********************************** ESTRUCTURA DE CADA SISTEMA AGREGADO COMO SERVCIO ******************************* */
-        newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.necesitaEspecialista = (necesitaEspecialista) ? '0' : '1' // la logica esta  al revez por la rederizacion del switch
+        newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.necesitaEspecialista = (necesitaEspecialista) ? '0' : '1' // la logica esta  al revez por la rederizacion del switch
         saveUserData(newUserData)
         setNecesitaEspecialista(!necesitaEspecialista)
         if(!necesitaEspecialista){
@@ -89,7 +89,7 @@ function CardEspecialista(props){
     const actionSelectEspecialista = (especialista_id) =>{
         especialista_id = (especialista_id == '') ? '' : especialista_id
         const newUserData = structuredClone(userData);
-        newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.especialista_ID = especialista_id
+        newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.especialista_ID = especialista_id
         saveUserData(newUserData)
         setSelectedEspecialista(especialista_id)
       }
