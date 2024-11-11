@@ -41,9 +41,9 @@ function CasoListEquiposNavbar(props){
       } = props;
 
     // context 
-    const {
+    /*const {
         casoActivo,setCasoActivo
-    } = useContext(AppContext)
+    } = useContext(AppContext)*/
 
     const { db, saveToIndexedDB } = useContext(SqlContext);
 
@@ -72,7 +72,7 @@ function CasoListEquiposNavbar(props){
     useEffect(() =>{
         
         const run = async() =>{
-          if(casoActivo.code){
+          if(userData?.casoActivo?.code){
             setIsCasoActivo(true)
           }else{
             setIsCasoActivo(false)
@@ -90,7 +90,7 @@ function CasoListEquiposNavbar(props){
             if(db == null || userData == null) return 0
             getUserData()
 
-            const equipos = {...userData.casos[casoActivo?.code]?.equipos}
+            const equipos = {...userData.casos[userData?.casoActivo?.code]?.equipos}
             
             const valuesArray = Object.keys(equipos);
             const joinArray = valuesArray.join(', ');
@@ -130,9 +130,9 @@ function CasoListEquiposNavbar(props){
     const eliminarEquipo = async(maquina_id) =>{
         getUserData()
 
-        const newUserData = structuredClone(userData)
+        const newUserData = {...userData}
 
-        delete newUserData.casos[casoActivo?.code]?.equipos[maquina_id];
+        delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
         
         saveUserData(newUserData)
 
@@ -174,10 +174,17 @@ function CasoListEquiposNavbar(props){
                 )}
                 
             <MenuList p='16px 8px' bg={menuBg}>
-                <Flex flexDirection='column'>
-                    <Text fontFamily={"mono"}>Caso ...{casoActivo?.code?.slice(0, Math.ceil(casoActivo.code.length / 2))}</Text>
-                    <Text fontFamily={"mono"}>Lista de equipos</Text>
-                </Flex>
+                {userData?.casoActivo?.code != '' ?(
+                    <Flex flexDirection='column'>
+                        <Text fontFamily={"mono"}>Caso ...{userData?.casoActivo?.code?.slice(0, Math.ceil(userData?.casoActivo?.code?.length / 2))}</Text>
+                        <Text fontFamily={"mono"}>Lista de equipos</Text>
+                    </Flex>
+                ):(
+                    <Flex flexDirection='column'>
+                        <Text fontFamily={"mono"}>Elegir equipos....</Text>
+                    </Flex>
+                )}
+               
                 <Flex flexDirection='column'>
                     {casoEquipos.map( (equipo,index) =>(
                         <MenuItem borderRadius='8px' mb='10px' key={index}>

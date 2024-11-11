@@ -55,23 +55,25 @@ export function AppProvider({ children }) {
     useEffect(()=>{
         getUserData()
 
-        const deepFreeze = (obj) => {
-          // Primero congelamos el objeto principal
-          Object.freeze(obj);
-      
-          // Luego congelamos cada propiedad, si es un objeto
-          Object.keys(obj).forEach((key) => {
-              if (typeof obj[key] === "object" && obj[key] !== null && !Object.isFrozen(obj[key])) {
-                  deepFreeze(obj[key]); // Llamada recursiva para congelar propiedades anidadas
-              }
-          });
-      
-          return obj;
-        }
+        
       
 
 
         if(userData == null){
+            const deepFreeze = (obj) => {
+              // Primero congelamos el objeto principal
+              Object.freeze(obj);
+          
+              // Luego congelamos cada propiedad, si es un objeto
+              Object.keys(obj).forEach((key) => {
+                  if (typeof obj[key] === "object" && obj[key] !== null && !Object.isFrozen(obj[key])) {
+                      deepFreeze(obj[key]); // Llamada recursiva para congelar propiedades anidadas
+                  }
+              });
+          
+              return obj;
+            }
+
             const equipamiento= {
               herramienta_ID:0, //INTEGER NOT NULL
               equipo_ID:0, //INTEGER NOT NULL,
@@ -133,7 +135,6 @@ export function AppProvider({ children }) {
              BLOQUE: Recuperar datos Guardados en REDUX-PRESIST
              DESCRIPTION: Esto se ejecuta cuando useData tiene información que es estraida de REDUX-PRESIST 
             =========================================================*/
-            console.log(userData)
             if(casoActivo == ''){
                 if(userData.casoActivo){  
                   if(userData.casoActivo.code != ''){
