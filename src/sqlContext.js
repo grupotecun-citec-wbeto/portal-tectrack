@@ -557,22 +557,77 @@ export function SqlProvider({ children }) {
     `)
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
   }
+
+  
+  //=======================================================
+  // SECTION: TABLE vehiculo
+  //=======================================================
+  if (!checkTableExists(db, 'vehiculo')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS vehiculo (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT,
+        placa TEXT,
+        year TEXT,
+        name TEXT
+      );
+    `)
+    db.run(`
+      INSERT INTO vehiculo (ID,code,placa,year,name) VALUES 
+    (1, '112', 'P102JBC','2020','Mazda BT 50'),
+    (2, 'AGRI02', 'P397GLD','2017','Mazda BT 50'),
+    (3, 'AGRI03', 'P752JLP','2023','Mazda BT 50')
+  `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //const result = db.run(`DROP TABLE vehiculo;`)
+    //await saveToIndexedDB(db);
+  }
   //=======================================================
   // SECTION: TABLE Visita
   //=======================================================
   if (!checkTableExists(db, 'visita')) {
     db.run(`
-    CREATE TABLE IF NOT EXISTS visita (
-      ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      fecha DATE,
-      programming_date DATETIME,
-      descripcion_motivo TEXT,
-      realization_date DATETIME,
-      confirmation_date DATETIME
-    );
+      CREATE TABLE IF NOT EXISTS visita (
+        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+        vehiculo_ID INTEGER NOT NULL,
+        usuario_ID INTEGER NOT NULL,
+        fecha DATE,
+        programming_date DATETIME,
+        descripcion_motivo TEXT,
+        realization_date DATETIME,
+        confirmation_date DATETIME,
+        km_inicial INTEGER NULL,
+        km_final INTEGER NULL,
+        FOREIGN KEY (vehiculo_ID) REFERENCES vehiculo (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+      );
     `)
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //const result = db.run(`DROP TABLE visita;`)
+    //await saveToIndexedDB(db);
   }
+
+  //=======================================================
+  // SECTION: TABLE caso_visita
+  //=======================================================
+  if (!checkTableExists(db, 'visita')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS caso_visita (
+        caso_ID INTEGER NOT NULL,
+        visita_ID INTEGER NOT NULL,
+        PRIMARY KEY (caso_ID, visita_ID),
+        FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (visita_ID) REFERENCES visita (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+      );
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //const result = db.run(`DROP TABLE caso_visita;`)
+    //await saveToIndexedDB(db);
+  }
+  
   //=======================================================
   // SECTION: TABLE diagnostico
   //=======================================================
