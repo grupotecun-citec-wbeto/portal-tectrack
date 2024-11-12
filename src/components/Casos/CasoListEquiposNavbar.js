@@ -88,17 +88,19 @@ function CasoListEquiposNavbar(props){
     useEffect( () => {
         const run = async() => {
             if(db == null || userData == null) return 0
-            getUserData()
 
             const equipos = {...userData.casos[userData?.casoActivo?.code]?.equipos}
             
+
             const valuesArray = Object.keys(equipos);
             const joinArray = valuesArray.join(', ');
-            console.log(joinArray);
             //equipo where ID in (${joinArray})
             try{
-                if(joinArray == '') return 0  // se muere el proceso
-                const result = db.exec(`
+                if(joinArray == '') {
+                    setCasoEquipos([])
+                    return 0
+                }  // se muere el proceso
+                const equipos = db.exec(`
                     SELECT 
                         E.ID,
                         E.chasis,
@@ -113,8 +115,7 @@ function CasoListEquiposNavbar(props){
                     INNER JOIN division DV ON DV.ID = CT.division_ID
                     INNER JOIN categoria CTE ON CTE.ID = CT.categoria_id
                     INNER JOIN modelo M ON M.ID = CT.modelo_ID
-                    where E.ID in (${joinArray})`)
-                const equipos = db.toArray(result)
+                    where E.ID in (${joinArray})`).toArray()
                 
                 setCasoEquipos(equipos)
             }catch(err){

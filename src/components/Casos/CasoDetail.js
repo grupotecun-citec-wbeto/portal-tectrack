@@ -71,7 +71,9 @@ const CasoDetail = ({ caseData }) => {
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
   //const {slcCasoId,setSlcCasoId} = useContext(AppContext)
-  const {casoActivo,setCasoActivo} = useContext(AppContext)
+  
+  // Se esta elimiando para utilizar redux-persist directamente
+    //const {casoActivo,setCasoActivo} = useContext(AppContext)
 
   const history = useHistory()
 
@@ -224,12 +226,10 @@ const CasoDetail = ({ caseData }) => {
    */
   useEffect( () =>{
     const consultarCasoEstado = async() =>{
-      const result = db.toArray(db.exec(`SELECT * FROM  caso_estado`))
-      if(result.length != 0){
-        setEstados(result)
+      const casoEstados = db.exec(`SELECT * FROM  caso_estado`).toArray()
+      if(casoEstados.length != 0){
+        setEstados(casoEstados)
       }
-
-      
     }
 
     consultarCasoEstado()
@@ -238,18 +238,9 @@ const CasoDetail = ({ caseData }) => {
   // LISTA DE USUARIOS - obtener la lista de usuarios
   useEffect(() =>{
     const getUsuario = async() =>{
-      const data = db.exec(`SELECT * FROM usuario`)
-      const result = data.map(item => {
-        return item.values.map(valueArray => {
-            return item.columns.reduce((obj, col, index) => {
-                obj[col] = valueArray[index];
-                return obj;
-            }, {});
-        });
-      });
-    if(data.length != 0)
-      setUsuarios(result[0])
-      
+      const usuarios = db.exec(`SELECT * FROM usuario`).toArray()
+    if(usuarios.length != 0)
+      setUsuarios(usuarios)
     }
 
     getUsuario()
@@ -268,12 +259,11 @@ const CasoDetail = ({ caseData }) => {
           setSlcUsuario(result.usuario_ID)
         }
       }*/
-      const result = db.toObject(db.exec(`SELECT usuario_ID FROM caso WHERE ID = ${id}`) || {})
-      if(typeof result !== 'undefined'){
-        if(Object.keys(result).length != 0){
-          setSlcUsuario(result.usuario_ID)
-        }
+      const caso = db.exec(`SELECT usuario_ID FROM caso WHERE ID = ${id}`).toObject()
+      if(Object.keys(caso || {}).length != 0){
+        setSlcUsuario(caso.usuario_ID)
       }
+      
       
     }
 
@@ -291,14 +281,11 @@ const CasoDetail = ({ caseData }) => {
           asistencia_tipo_ID,
           visita_ID
           FROM  diagnostico WHERE caso_ID = ${id}`
-          console.log('96467964-1702-46e7-9dd8-5048009ff197',sql);
           
-        const result = db.toArray(db.exec(sql) || [])
-        if(typeof result !== 'undefined'){
-          if(Object.keys(result).length != 0){
-            setPrediagnostico(result)        
+        const diagnosticos = db.exec(sql).toArray()
+          if(diagnosticos.length != 0){
+            setPrediagnostico(diagnosticos)        
           }
-        }
       }catch(err){
         console.error('c5a8827b-7fa0-4572-88db-e52326aed799',err)
       }
@@ -384,47 +371,51 @@ const CasoDetail = ({ caseData }) => {
   const empezar = async() =>{
     const verificar = () =>{
       // verificar si ya tiene asignado a un tecnico el caso
-      const result = db.toObject(db.exec(`SELECT usuario_ID FROM caso where ID = ${id}`))
-      console.log(result);
+      const caso = db.exec(`SELECT usuario_ID FROM caso where ID = ${id}`).toObject()
+      return caso.usuario_ID == null ? false : true
     }
 
-    verificar()
+    if(verificar()){
+      setIsEmpezado(true)
+      const estado_a_establecer = 3
+      db.run(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
+      setEstado(estado_a_establecer)
+      // gurdar en base de datos sqlite
+      await saveToIndexedDB(db)
+    }else{
+      alert('Asignar tecnico al caso')
+    }
 
-    /*setIsEmpezado(true)
-    const estado_a_establecer = 3
-    db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
-    setEstado(estado_a_establecer)
-    // gurdar en base de datos sqlite
-    await saveToIndexedDB(db)*/
+    /**/
     
   }
 
   const terminar = async() => {
-    getUserData()
-    //setSlcCasoId(id)
-    
 
     const newUserData = structuredClone(userData)
     
-    const result = db.toObject(db.exec(`SELECT uuid FROM caso WHERE ID = ${id}`) || {})
+    const caso = db.exec(`SELECT * FROM caso WHERE ID = ${id}`).toObject()
     newUserData.casoActivo.caso_id = id
-    newUserData.casoActivo.code = result.uuid
+    newUserData.casoActivo.code = caso.uuid
     newUserData.casoActivo.busqueda_terminada = 1
 
     // creacion de caso
-    const caso = structuredClone(newUserData.stuctures.caso)
-    newUserData.casos[result.uuid] = caso
+    //const caso = structuredClone(newUserData.stuctures.caso)
+  
+    newUserData.casos[caso.uuid] = caso
 
-    const equipos = db.toArray(db.exec(`SELECT equipo_ID FROM diagnostico WHERE caso_ID = ${id}`) || {})
+    const equipos = JSON.parse(newUserData.casos[caso.uuid].equipos)
+    newUserData.casos[caso.uuid].equipos = equipos
+    
+    /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico WHERE caso_ID = ${id}`).toArray()
     
     equipos.forEach(element => {
       const equipoId = structuredClone(newUserData.stuctures.equipoId)
       newUserData.casos[result.uuid].equipos[element.equipo_ID] = equipoId
-    });
+    });*/
     
 
     saveUserData(newUserData)
-    setCasoActivo(newUserData.casoActivo)
     
     
 

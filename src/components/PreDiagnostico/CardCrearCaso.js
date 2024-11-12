@@ -82,15 +82,15 @@ function CardCrearCaso({openAlert}){
         getUserData()
         const fecha = obtenerFechaUTC(getCurrentDate())
         const start = obtenerFechaUTC(getCurrentDateTime())
-        const equipo_ID = userData?.casos[casoActivo.code]?.maquina_id || 'NULL'
-        const equipo_catalogo_ID = userData?.casos[casoActivo.code]?.categoria_id || 'NULL'
-        const comunicacion_ID = userData?.casos[casoActivo.code]?.comunicacion_ID || 'NULL'
-        const prioridad = userData?.casos[casoActivo.code]?.prediagnostico.prioridad_id || 'NULL'
-        const descripcion = userData?.casos[casoActivo.code]?.prediagnostico.descripcion || 'NULL'
-        const asistencia_tipo_id = userData?.casos[casoActivo.code]?.prediagnostico.asistencia_tipo_id || 'NULL'
-        const cliente_name = userData?.casos[casoActivo.code]?.cliente_name || 'NULL'
-        const sync = casoActivo.code // uuid del caso es el que nos va servir para ver si ya esta sincronizado con mysql
-        const user_data = JSON.stringify(userData?.casos[casoActivo.code] || {})
+        const equipo_ID = userData?.casos[userData.casoActivo.code]?.maquina_id || 'NULL'
+        const equipo_catalogo_ID = userData?.casos[userData.casoActivo.code]?.categoria_id || 'NULL'
+        const comunicacion_ID = userData?.casos[userData.casoActivo.code]?.comunicacion_ID || 'NULL'
+        const prioridad = userData?.casos[userData.casoActivo.code]?.prediagnostico.prioridad_id || 'NULL'
+        const descripcion = userData?.casos[userData.casoActivo.code]?.prediagnostico.descripcion || 'NULL'
+        const asistencia_tipo_id = userData?.casos[userData.casoActivo.code]?.prediagnostico.asistencia_tipo_id || 'NULL'
+        const cliente_name = userData?.casos[userData.casoActivo.code]?.cliente_name || 'NULL'
+        const sync = userData.casoActivo.code // uuid del caso es el que nos va servir para ver si ya esta sincronizado con mysql
+        const user_data = JSON.stringify(userData?.casos[userData.casoActivo.code] || {})
         const result = db.toObject(db.exec(`SELECT count(*) as caseSize FROM caso WHERE sync = '${sync}' `))
         
        
@@ -177,14 +177,14 @@ function CardCrearCaso({openAlert}){
         // verificar si esta completo los predianostios
 
         // lista de equipos del caso
-        const equiposArray = Object.keys(userData?.casos[casoActivo?.code]?.equipos).map(Number)
+        const equiposArray = Object.keys(userData?.casos[userData.casoActivo?.code]?.equipos).map(Number)
         let casoCompelto = true
         let suma_prioridad = 0
         equiposArray.forEach((maquina_id) =>{
             // indica cuando un pre-diagnostico no esta completo de la lista de maquinas
-            suma_prioridad += parseInt(userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad)
-            if( Object.keys(userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.sistemas) == 0 
-                || Object.keys(userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.herramientas) == 0) 
+            suma_prioridad += parseInt(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad)
+            if( Object.keys(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.sistemas) == 0 
+                || Object.keys(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.herramientas) == 0) 
                 casoCompelto = false
         })
         if(!casoCompelto){
@@ -193,21 +193,22 @@ function CardCrearCaso({openAlert}){
         }
         
         const usuario_ID = 1
-        const comunicacion_ID = userData?.casos[casoActivo.code]?.comunicacion_ID || 'NULL'
+        const comunicacion_ID = userData?.casos[userData.casoActivo.code]?.comunicacion_ID || 'NULL'
         const segmento_ID = 1
         const caso_estado_ID = 1 // caso nuevo
         const fecha = getCurrentDate()
         const start = getCurrentDateTime()
         const date_end = 'NULL'
         const description = ''
-        const uuid = casoActivo.code // uuid del caso es el que nos va servir para ver si ya esta sincronizado con mysql
+        const uuid = userData.casoActivo.code // uuid del caso es el que nos va servir para ver si ya esta sincronizado con mysql
+        const equiposIfy = JSON.stringify(userData?.casos[userData?.casoActivo?.code]?.equipos) 
         
         const sizeEquipos = equiposArray.length
         const prioridad = Math.ceil(suma_prioridad / sizeEquipos) // promedio ponderado de la prioridad de todos las maquinas
         
         
-        const result = db.toObject(db.exec(`SELECT count(*) as caseSize FROM caso WHERE uuid = '${uuid}' `))
-        if(result.caseSize == 0){
+        const caso = db.exec(`SELECT count(*) as Size FROM caso WHERE uuid = '${uuid}' `).toObject()
+        if(caso.Size == 0){
             let caseId = 0
             try {
                 await db.exec('BEGIN TRANSACTION');
@@ -223,7 +224,8 @@ function CardCrearCaso({openAlert}){
                         date_end,
                         description,
                         prioridad,
-                        uuid
+                        uuid,
+                        equipos
                     )
                     VALUES(
                         NULL,
@@ -236,24 +238,26 @@ function CardCrearCaso({openAlert}){
                         NULL,
                         NULL,
                         ${prioridad},
-                        '${uuid}'
+                        '${uuid}',
+                        '${equiposIfy}'
+                        
                     )
                 `
                 
                 
-                const result = db.exec(sql)
+                db.run(sql)
                 
-                const resultInsert = await db.toObject(db.exec('SELECT last_insert_rowid() AS caseId'));
+                const resultInsert = await db.exec('SELECT last_insert_rowid() AS caseId').toObject()
 
                 caseId = resultInsert.caseId
 
                 equiposArray.forEach((maquina_id) =>{
-                    //userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
+                    //userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
                     const diagnostico_tipo_ID = 1 // dianostico pre
-                    const asistencia_tipo_ID = userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.asistencia_tipo_ID
-                    const especialista_ID = userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.especialista_ID
-                    const description = decodeURIComponent(userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.description)
-                    const prioridad = userData.casos[casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
+                    const asistencia_tipo_ID = userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.asistencia_tipo_ID
+                    const especialista_ID = userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.especialista_ID
+                    const description = decodeURIComponent(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.description)
+                    const prioridad = userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
                    
                     const sql = `
                         INSERT INTO diagnostico

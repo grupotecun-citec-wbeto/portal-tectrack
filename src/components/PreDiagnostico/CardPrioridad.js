@@ -109,8 +109,8 @@ function RadioCard(props) {
         const prioridadMap = { 'Alta': '1', 'Media': '2', 'Baja': '3' };
         const prioridad_id = prioridadMap?.[prioridad] || '3';  // Usa '3' como valor por defecto
         
-        newUserData?.casos?.[casoActivo.code]?.equipos[casoActivo.maquina_id].prediagnostico && 
-            (newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.prioridad = prioridad_id)
+        newUserData?.casos?.[userData.casoActivo.code]?.equipos[userData.casoActivo.maquina_id].prediagnostico && 
+            (newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.prioridad = prioridad_id)
         
         
         saveUserData(newUserData)
@@ -122,16 +122,16 @@ function RadioCard(props) {
 
     /*=======================================================
      BLOQUE: CARGAR ESTADO REDUX
-     DESCRIPTION: Si cambia el casoActivo.code este efecto se va ejecutar para seleccionar la prioridad del prediagnotico del caso
+     DESCRIPTION: Si cambia el userData.casoActivo.code este efecto se va ejecutar para seleccionar la prioridad del prediagnotico del caso
      - Si userData es es null
-     - Si casoActivo.code no es vacio
-     - Si  casoActivo.code no es undefined
+     - Si userData.casoActivo.code no es vacio
+     - Si  userData.casoActivo.code no es undefined
     =========================================================*/
     useEffect(() => {
         getUserData()
-        setValorSeleccionado({ '1': 'Alta', '2': 'Media', '3': 'Baja' }?.[userData?.casos?.[casoActivo.code]?.equipos[casoActivo.maquina_id].prediagnostico?.prioridad] || valorSeleccionado);
+        setValorSeleccionado({ '1': 'Alta', '2': 'Media', '3': 'Baja' }?.[userData?.casos?.[userData.casoActivo.code]?.equipos[userData.casoActivo.maquina_id].prediagnostico?.prioridad] || valorSeleccionado);
         
-    }, [casoActivo.code,userData]);
+    }, [userData.casoActivo.code,userData]);
 
     /*====================FIN BLOQUE: CARGAR ESTADO REDUX ==============*/
 

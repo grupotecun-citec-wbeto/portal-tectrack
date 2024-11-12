@@ -124,7 +124,6 @@ import { Link, useHistory   } from 'react-router-dom';
   // creando un caso nuevo 
   const btnCreateCase = async(comunicacion_ID) =>{
       const uuid = uuidv4()
-      await getUserData()
       
       const newUserData = structuredClone(userData)
 
@@ -143,13 +142,9 @@ import { Link, useHistory   } from 'react-router-dom';
       // Ponerlo como caso seleccionado
       saveUserData(newUserData)
       
-      setCasoActivo(newUserData.casoActivo)
       
       
-      
-      setTimeout(() => {
-          history.push('/admin/pages/searchbox');
-      }, 800);
+      history.push('/admin/pages/searchbox')
       
   }
   

@@ -64,8 +64,8 @@ function CheckboxHerramientas(props){
     // Carga información de los servicio seleccionados
     useEffect(()=>{
       getUserData()
-      if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined' ){
-        const herramientas =  userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.herramientas
+      if(userData != null && userData.casoActivo.code != '' && typeof userData.casoActivo.code !== 'undefined' ){
+        const herramientas =  userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.herramientas
         for (let herramienta in herramientas) {
           if (herramienta === name) {
             if(herramientas[herramienta].check == '1'){
@@ -82,7 +82,7 @@ function CheckboxHerramientas(props){
       } 
       
       
-    },[casoActivo.code])
+    },[userData.casoActivo.code])
 
     const actionCheck = () =>{
       getUserData()
@@ -101,7 +101,7 @@ function CheckboxHerramientas(props){
       const equipamiento = {...newUserData.stuctures.equipamiento}
       equipamiento.herramienta_ID = id
       equipamiento.check = (check) ? '0' : '1'
-      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.herramientas[name] = equipamiento
+      newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.herramientas[name] = equipamiento
 
       saveUserData(newUserData)
       setCheck(!check)
@@ -110,7 +110,7 @@ function CheckboxHerramientas(props){
     /*const actionService = (service_id) =>{
       service_id = (service_id == '') ? '' : service_id
       const newUserData = structuredClone(userData);
-      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
+      newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.sistemas[name].servicio_tipo_ID = service_id
       saveUserData(newUserData)
       setSelectedService(service_id)
     }
@@ -118,7 +118,7 @@ function CheckboxHerramientas(props){
     const actionMarca = (marca_id) =>{
       marca_id = (marca_id == '') ? '' : marca_id
       const newUserData = structuredClone(userData);
-      newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
+      newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.sistemas[name].sistema_marca_ID = marca_id
       saveUserData(newUserData)
       setSelectedMarca(marca_id)
     }*/

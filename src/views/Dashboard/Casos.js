@@ -33,7 +33,7 @@ function Casos() {
 
   const [data, setData] = useState([])
 
-  const {db,saveToIndexedDB,casos_to_json} = useContext(SqlContext)
+  const {db,saveToIndexedDB} = useContext(SqlContext)
 
   const caseData = {
     id: 12345,
@@ -45,12 +45,8 @@ function Casos() {
 
   useEffect( () =>{
     if(db != null){
-      const result = db.exec("SELECT * FROM caso ORDER BY prioridad ASC");
-      //setData(result[0]?.values || []); // Almacena los resultados en el estado
-      const casos_json = casos_to_json(result)
-      
-      
-      setData(casos_json)
+      const casosData = db.exec("SELECT * FROM caso ORDER BY prioridad ASC").toArray();
+      setData(casosData)
     }
   },[db])
 

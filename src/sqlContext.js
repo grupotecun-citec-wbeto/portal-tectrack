@@ -102,8 +102,8 @@ export function SqlProvider({ children }) {
   
   
   const checkTableExists = (db, tableName) => {
-    const result = db.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`);
-    return result.length > 0 && result[0].values.length > 0;
+    const result = db.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`).toObject();
+    return Object.keys(result || {}).length > 0
   };
 
   const DDL = async(db) =>{
@@ -181,6 +181,7 @@ export function SqlProvider({ children }) {
           description TEXT NULL,
           prioridad INTEGER NULL, -- media ponderada de la prioridad
           uuid TEXT NULL,
+          equipos TEXT NULL,
           FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID),
           FOREIGN KEY (segmento_ID) REFERENCES segmento(ID),
           FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID),
@@ -189,6 +190,16 @@ export function SqlProvider({ children }) {
       `)
       await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
     }else{
+      const tableInfo = db.exec(`PRAGMA table_info(caso)`).toArray()
+      const columna = 'equipos'
+      const columnExists = tableInfo.some(column => column.name === columna);
+      if(!columnExists){
+        db.run(`ALTER TABLE caso ADD COLUMN ${columna} TEXT NULL;`)
+        saveToIndexedDB(db);
+      }
+      
+
+      
       //const result = db.run(`DROP TABLE caso;`)
       //saveToIndexedDB(db);
     }
@@ -607,36 +618,84 @@ export function SqlProvider({ children }) {
 
 
   useEffect(() => {
-    const loadSqlJs = async () => {
-      const SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
-      const storedDb = await loadFromIndexedDB();
-
-      let db;
-      if (storedDb) {
-        db = new SQL.Database(storedDb); // Cargar base de datos desde IndexedDB
-        // Crear la version de sqlite en MYSQL: crear la tabla que va guardar el codigo unico de base de datos sqlite
-        await DDL_UUID_SYNC(db)
-        await DDL(db)
-      } else {
-        db = new SQL.Database(); // Crear nueva base de datos si no hay datos guardados
-        // Crear la version de sqlite en MYSQL: crear la tabla que va guardar el codigo unico de base de datos sqlite
-        await DDL_UUID_SYNC(db)
-        await DDL(db)
+    const extendFunctions = (db) =>{
+      /**
+       * Convertir los resultados de respuesta sqlite hacia Array(Es un array de objetos) y Object(consultas de una una sola respuesta)
+       * @param {*} result 
+       * @returns 
+       */
+      const enhanceResult = (result) => {
+        return {
+            ...result,
+            
+            // Método para convertir el resultado a un array de objetos
+            toObject() {
+              return result.flatMap(item => 
+                item.values.map(valueArray => 
+                    item.columns.reduce((obj, col, index) => {
+                        obj[col] = valueArray[index];
+                        return obj;
+                    }, {})
+                )
+              )[0];
+            },
+    
+            // Método para convertir el resultado a un array de arrays (si es necesario)
+            toArray() {
+              return result.flatMap(item => 
+                item.values.map(valueArray => 
+                    item.columns.reduce((obj, col, index) => {
+                        obj[col] = valueArray[index];
+                        return obj;
+                    }, {})
+                )
+              );
+            },
+            
+            result(){
+              return result
+            }
+        };
       }
+      
+      // EXEC
+      const originalExec = db.exec.bind(db);
+      /**
+       * Extencion de funcion exec de sqlite para para poder obtener datos en Array o Object
+       * @param {*} query 
+       * @returns 
+       */
+      db.exec = (query) =>{
+        const result = originalExec(query);
+        return enhanceResult(result);
+      }
+      
+      /**
+       * Convertir respuesta de exec hacia array
+       * @param {*} data
+       * @deprecated 
+       * @returns 
+       */
       db.toArray = (data) =>{
-        return data.flatMap(item => 
+        return data.result.flatMap(item => 
           item.values.map(valueArray => 
               item.columns.reduce((obj, col, index) => {
                   obj[col] = valueArray[index];
                   return obj;
               }, {})
           )
-      );
+        );
 
       }
 
+      /**
+       * Convertir respuesa exec hacia object
+       * @param {*} data 
+       * @deprecated
+       * @returns 
+       */
       db.toObject = (data) =>{
-          return data.flatMap(item => 
+          return data.result.flatMap(item => 
             item.values.map(valueArray => 
                 item.columns.reduce((obj, col, index) => {
                     obj[col] = valueArray[index];
@@ -645,22 +704,39 @@ export function SqlProvider({ children }) {
             )
           )[0];
       }
-      setDb(db);
+    }
+    
+    const loadSqlJs = async () => {
+      try{  
+        const SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
+        const storedDb = await loadFromIndexedDB();
 
-       // Obtener y establecer los datos en el estado
-       ///api/v1/synctable/<uuid_sqlite>
-        const data = db.exec("SELECT uuid FROM version_sync");
-       
-        const result = data.map(item => {
-            return item.values.map(valueArray => {
-                return item.columns.reduce((obj, col, index) => {
-                    obj[col] = valueArray[index];
-                    return obj;
-                }, {});
-            });
-        });
-        setSyncUuid(result[0][0].uuid)
+        let db;
+        if (storedDb) {
+          db = new SQL.Database(storedDb); // Cargar base de datos desde IndexedDB
+          extendFunctions(db)
+          // Crear la version de sqlite en MYSQL: crear la tabla que va guardar el codigo unico de base de datos sqlite
+          await DDL_UUID_SYNC(db)
+          await DDL(db)
+        } else {
+          db = new SQL.Database(); // Crear nueva base de datos si no hay datos guardados
+          extendFunctions(db)
+          // Crear la version de sqlite en MYSQL: crear la tabla que va guardar el codigo unico de base de datos sqlite
+          await DDL_UUID_SYNC(db)
+          await DDL(db)
+        }
+      
         
+        setDb(db);
+
+        // Obtener y establecer los datos en el estado
+        ///api/v1/synctable/<uuid_sqlite>
+        const data = db.exec("SELECT uuid FROM version_sync LIMIT 1").toObject();
+        
+        setSyncUuid(data.uuid)
+      }catch(err){
+        console.error('21f5595e-16fb-4a34-8a0e-8f076e2546da',err)
+      }
     }
        
 
@@ -1848,7 +1924,12 @@ export function SqlProvider({ children }) {
     fetchData()
   },[finSync])
 
-
+  /**
+   * Convertir la respuesta de base de datos en array
+   * @param {*} data 
+   * @deprecated
+   * @returns array
+   */
   const casos_to_json = (data) =>{
     const result = data.map(item => {
       return item.values.map(valueArray => {

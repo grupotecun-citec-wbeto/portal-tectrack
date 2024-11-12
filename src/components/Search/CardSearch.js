@@ -90,6 +90,7 @@ function SearchCard(props) {
      */
     const [isSelectedEquipo,setIsSelectedEquipo] = useState(false)
     const [isCreatedPreDiagnostico,setIsCreatedPreDiagnostico] = useState(false)
+    const [isCreatedDiagnostico,setIsCreatedDiagnostico] = useState(false)
 
 
     /**
@@ -98,7 +99,6 @@ function SearchCard(props) {
      */
 
     useEffect( () =>{
-        getUserData()
         const run = async() =>{
             if(userData.casoActivo.code != '' && maquina_id){
                 
@@ -106,8 +106,11 @@ function SearchCard(props) {
                     setIsCreatedPreDiagnostico(true)
                 }
 
+                const sistemas = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas
+                console.log(sistemas);
+                
                 if(Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas || {}).length != 0){
-                    setIsCreatedPreDiagnostico(true)
+                    setIsCreatedDiagnostico(true)
                 }
 
             }
@@ -242,7 +245,7 @@ function SearchCard(props) {
                             )}
                             
                             
-                            {!isCreatedPreDiagnostico ? (
+                            {( (!isCreatedPreDiagnostico && !isPost) || (!isCreatedDiagnostico && isPost) ) ? (
                                 <Tooltip label={(!isPost) ? "Agregar pre-diagnostico" : "Agregar diagnostico" } aria-label="Tooltip para el botón">
                                     <IconButton
                                         icon={<FaPlus />} // Icono para crear diagnóstico

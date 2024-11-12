@@ -132,9 +132,9 @@ import {
         // DESCRIPTION: Estructura base de un caso 
         //=========================================================
         let caso_structure = {
-          maquina_id:casoActivo.maquina_id,
-          categoria_id:casoActivo.categoria_id,
-          cliente_name:casoActivo.cliente_name,
+          maquina_id:userData.casoActivo.maquina_id,
+          categoria_id:userData.casoActivo.categoria_id,
+          cliente_name:userData.casoActivo.cliente_name,
           prediagnostico:{
             descripcion:'',
             sistemas:{},
@@ -147,46 +147,47 @@ import {
         }  
         
 
-        if(userData.hasOwnProperty("casos") && casoActivo.code != '' && typeof casoActivo.code !== 'undefined' ){
+        if(userData.hasOwnProperty("casos") && userData.casoActivo.code != '' && typeof userData.casoActivo.code !== 'undefined' ){
           // si dado que no exista un caso con ese uuid
-          if(!userData.casos.hasOwnProperty(casoActivo.code)){
+          if(!userData.casos.hasOwnProperty(userData.casoActivo.code)){
             const newUserData = structuredClone(userData);
             
-            newUserData.casos[casoActivo.code] = caso_structure
-            newUserData.casoActivo.code = casoActivo.code
+            newUserData.casos[userData.casoActivo.code] = caso_structure
+            newUserData.userData.casoActivo.code = userData.casoActivo.code
             saveUserData(newUserData)
           }
           
           
           // verificar si exite prediagnostico
-          if(!userData.casos[casoActivo.code].hasOwnProperty("prediagnostico")){
+          if(!userData.casos[userData.casoActivo.code].hasOwnProperty("prediagnostico")){
             const newUserData = structuredClone(userData);
-            newUserData.casos[casoActivo.code].prediagnostico = base_structure.prediagnostico
+            newUserData.casos[userData.casoActivo.code].prediagnostico = base_structure.prediagnostico
             saveUserData(newUserData)
           }else{
-            if(userData.casos[casoActivo.code].prediagnostico.hasOwnProperty("descripcion")){
-              if(userData.casos[casoActivo.code].prediagnostico.descripcion != ''){
-                setDescriptionValue(decodeURIComponent(userData.casos[casoActivo.code].prediagnostico.descripcion))
+            if(userData.casos[userData.casoActivo.code].prediagnostico.hasOwnProperty("descripcion")){
+              if(userData.casos[userData.casoActivo.code].prediagnostico.descripcion != ''){
+                setDescriptionValue(decodeURIComponent(userData.casos[userData.casoActivo.code].prediagnostico.descripcion))
               }
             }
           }
         }
       }
       
-    },[casoActivo.code])*/
+    },[userData.casoActivo.code])*/
 
     useEffect (() =>{
+      getUserData()
       const run = async() =>{
-        if(casoActivo.code){
-          if(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.hasOwnProperty("description")){
-            if(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.description != ''){
-              setDescriptionValue(decodeURIComponent(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.description))
+        if(userData.casoActivo.code){
+          if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.hasOwnProperty("description")){
+            if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.description != ''){
+              setDescriptionValue(decodeURIComponent(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.description))
             }
           }
         }
       }
       run()
-    },[casoActivo.code])
+    },[userData.casoActivo.code])
     // Obtener la lista de generalmachinessystem, obtine todos los systemas
     useEffect(() => {
 
@@ -221,10 +222,11 @@ import {
 
     // Ingresar la descripcion del prediagnostico en redux
     useEffect(() =>{
+      getUserData()
       if(debouncedSearchValue){
-        if(casoActivo.code != ''){
+        if(userData.casoActivo.code != ''){
           const newUserData = structuredClone(userData);
-          newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.description = encodeURIComponent(descriptionValue)
+          newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.description = encodeURIComponent(descriptionValue)
           saveUserData(newUserData)
         }
       }

@@ -56,23 +56,22 @@ function CardAsistencia(props){
 
     // Cargando datos cuando el navegador de reinicia
     useEffect(()=>{
-        getUserData()
-        if(userData != null && casoActivo.code != '' && typeof casoActivo.code !== 'undefined'){
+        if(userData != null && userData.casoActivo.code != '' && typeof userData.casoActivo.code !== 'undefined'){
             
             // recuperando desplegable de especialista
-            if(typeof userData.casos[casoActivo.code] !== 'undefined' ){
-                setSelectedAsistencia(userData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.asistencia_tipo_ID)
+            if(typeof userData.casos[userData.casoActivo.code] !== 'undefined' ){
+                setSelectedAsistencia(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.asistencia_tipo_ID)
             }
         } 
         
         
-    },[casoActivo.code])
+    },[userData.casoActivo.code])
 
 
     const actionSelectAsistencia = (asistencia_tipo_id) =>{
         asistencia_tipo_id = (asistencia_tipo_id == '') ? '' : asistencia_tipo_id
         const newUserData = structuredClone(userData);
-        newUserData.casos[casoActivo.code].equipos[casoActivo.maquina_id].prediagnostico.asistencia_tipo_ID = asistencia_tipo_id
+        newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.asistencia_tipo_ID = asistencia_tipo_id
         saveUserData(newUserData)
         setSelectedAsistencia(asistencia_tipo_id)
     }

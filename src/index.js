@@ -34,6 +34,8 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store.js';
 
+import { Spinner } from '@chakra-ui/react'
+
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -48,9 +50,10 @@ const UserProfile = () => {
   return <h2>Perfil del usuario con ID: {userId}</h2>;
 };
 
+
 ReactDOM.render(
   <Provider store={store}>
-    <PersistGate loading={null} persistor={persistor}>
+    <PersistGate loading={<Spinner />} persistor={persistor}>
       <ChakraProvider theme={theme} resetCss={false} position="relative">
         <AppProvider>
           <SqlProvider>

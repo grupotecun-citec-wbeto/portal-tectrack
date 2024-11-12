@@ -31,6 +31,7 @@ import {
   import CardCommand from "components/PreDiagnostico/CadCommand";
   import CardCrearCaso from "components/PreDiagnostico/CardCrearCaso";
   import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
+  import CardTerminarCaso from "components/Diagnostico/CardTerminarCaso";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -113,6 +114,7 @@ import {
 
 
     useEffect(() =>{
+      getUserData()
       const run = () =>{
         if(userData != null){
           if(userData.casoActivo.caso_id != ''){
@@ -121,7 +123,9 @@ import {
         }
       }
       run()
-    },[])
+
+      return () =>{}
+    },[userData])
   
     // Simulamos una función de búsqueda (reemplaza con tu lógica real)
     useEffect(() => {
@@ -155,12 +159,12 @@ import {
     }, [debouncedSearchValue,isBusquedaTerminada]);
 
     useEffect( () =>{
-      if(userData.casoActivo.busqueda_terminada == 1){
+      if(userData?.casoActivo?.busqueda_terminada == 1){
         setIsBusquedaTerminada(true)
       }else{
         setIsBusquedaTerminada(false)
       }      
-    },[userData.casoActivo.busqueda_terminada])
+    },[userData?.casoActivo?.busqueda_terminada])
   
     /**
      * SECTION: FUNCTIONS
@@ -322,7 +326,7 @@ import {
             
           </Grid>
         )}
-        {!isPost && (
+        {!isPost ? (
           <>
             {isSuccessAlertCaso ?(
               <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
@@ -330,6 +334,8 @@ import {
               <CardCrearCaso openAlert={openAlert} />
             )}
           </>
+        ):(
+          <CardTerminarCaso />
         )}
        
         <CardCommand />
