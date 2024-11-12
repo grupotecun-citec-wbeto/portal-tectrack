@@ -77,39 +77,6 @@ function CheckboxDiagnostico(props){
       
     },[userData.casoActivo.code])
 
-    /*useEffect(()=>{
-      getUserData()
-      if(userData == null){
-        saveUserData({
-          prediagnostico:{
-            sistemas:{}
-          }
-        })
-      }else{
-        if(!userData.hasOwnProperty("prediagnostico")){
-          const newUserData = structuredClone(userData);
-          newUserData.prediagnostico = {
-            sistemas:{}
-          }
-          saveUserData(newUserData)
-        }else{
-          const sistemas =  userData.prediagnostico.sistemas
-          for (let sistema in sistemas) {
-            if (sistema === name) {
-              //console.log(`Encontrado: ${sistema}`, sistemas[sistema]);
-              if(sistemas[sistema].check == '1'){
-                setCheck(true)
-              }else{
-                setCheck(false)
-              }
-            }
-          }
-        }
-      }
-      
-      
-      
-    },[userData])*/
 
     const actionCheck = () =>{
       getUserData()

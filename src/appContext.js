@@ -90,7 +90,8 @@ export function AppProvider({ children }) {
               visita_ID:0, //INTEGER NULL,
               prioridad:0,//INTEGER NULL,
               herramientas:{/*equipamiento*/}, // Object
-              sistemas:{/*servicio */}
+              sistemas:{/*servicio */},
+              isEqualPreDiagnostico:false // indica si un dianostico es igual a una predianostico
             }
 
             let base_structure = {
@@ -112,6 +113,7 @@ export function AppProvider({ children }) {
                   },
                   diagnostico:diagnostico,
                   equipamiento:equipamiento,
+                  diagnostico_cpy:{}, // solo es la copia del diagnostico
                   equipoId:{
                     prediagnostico:diagnostico, // object
                     diagnostico:diagnostico // object

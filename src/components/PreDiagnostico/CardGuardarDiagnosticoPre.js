@@ -37,7 +37,7 @@ import SqlContext from "sqlContext";
 
 //******************************************* FIN IMPORTS ************************** */
 
-function CardGuardarDiagnostico({openAlert,guardar}){
+function CardGuardarDiagnosticoPre({openAlert}){
 
     
 
@@ -47,19 +47,18 @@ function CardGuardarDiagnostico({openAlert,guardar}){
                 <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
               </CardHeader>
                 <CardBody mt={{xl:'50px', sm:'50px'}}>
-                    
+                    <NavLink to='/admin/pages/searchbox'>
                         <Button
                             colorScheme="blue" // Color azul para representar la acción de volver a buscar
                             size="md" // Tamaño del botón
-                            onClick={guardar}
                         >
                             Guardar
                         </Button>
-                                 
+                    </NavLink>                
                 </CardBody>
               
           </Card>
     )
 }
 
-export default CardGuardarDiagnostico
+export default CardGuardarDiagnosticoPre

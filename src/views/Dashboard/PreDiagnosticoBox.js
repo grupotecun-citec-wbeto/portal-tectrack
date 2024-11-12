@@ -10,7 +10,7 @@ import { Link, useHistory   } from 'react-router-dom';
 
 import { NavLink } from "react-router-dom";
 
-import CardGuardarDiagnostico from "components/Diagnostico/CardGuardarDiagnostico";
+//import CardGuardarDiagnostico from "components/Diagnostico/CardGuardarDiagnostico";
 
 import {
     Input,
@@ -43,6 +43,7 @@ import {
   import CardCommand from "components/PreDiagnostico/CadCommand";
   import CardPrioridad from "components/PreDiagnostico/CardPrioridad";
   import CardComunication from "components/Comunication/CardComunication";
+  import CardGuardarDiagnosticoPre from "components/PreDiagnostico/CardGuardarDiagnosticoPre";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -323,7 +324,7 @@ import {
               <CardHerramientas title="¿Necesitas incluir a Herramientas?" />
               <CardPrioridad />
               
-              <CardGuardarDiagnostico />
+              <CardGuardarDiagnosticoPre />
               <CardCommand />
               
               

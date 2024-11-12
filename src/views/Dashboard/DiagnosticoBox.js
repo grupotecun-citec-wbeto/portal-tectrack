@@ -78,6 +78,9 @@ import {
 
     const [datos, setDatos] = useState([]);
 
+    const [check,setCheck] = useState(false)
+    const [changeReady,setChangeReady] = useState(false)
+
     const {casoActivo,setCasoActivo} = useContext(AppContext)
 
     // ************************** REDUX-PRESIST ****************************
@@ -119,119 +122,95 @@ import {
     =========================================================*/
     
 
-    // setea la data local de redux-persist
-    /*useEffect(()=>{
-      getUserData()
-      if(userData != null){
-        // creando caso
-        
-        //=======================================================
-        // BLOQUE: ESTRUCTURA DE UN CASO
-        // DESCRIPTION: Estructura base de un caso 
-        //=========================================================
-        let caso_structure = {
-          maquina_id:userData.casoActivo.maquina_id,
-          categoria_id:userData.casoActivo.categoria_id,
-          cliente_name:userData.casoActivo.cliente_name,
-          prediagnostico:{
-            descripcion:'',
-            sistemas:{},
-            herramientas:{},
-            necesitaEspecialista:'0', // 0:-> no necesita 1:-> si necesita
-            especialista_id:'', // identificador de especialista
-            asistencia_tipo_id:'', // identificador de asistencia
-            prioridad_id:'' // 1: Alta, 2: Intermedia, 3: Baja | identificador de prioridad
-          },
-          diagnostico:{
-            descripcion:'',
-            sistemas:{},
-            herramientas:{},
-          }
-        }  
-        
-
-        if(userData.hasOwnProperty("casos") && userData.casoActivo.code != '' && typeof userData.casoActivo.code !== 'undefined' ){
-          // si dado que no exista un caso con ese uuid
-          if(!userData.casos.hasOwnProperty(userData.casoActivo.code)){
-            const newUserData = structuredClone(userData);
-            
-            newUserData.casos[userData.casoActivo.code] = caso_structure
-            newUserData.userData.casoActivo.code = userData.casoActivo.code
-            saveUserData(newUserData)
-          }
-          
-          
-          // verificar si exite prediagnostico
-          if(!userData.casos[userData.casoActivo.code].hasOwnProperty("prediagnostico")){
-            const newUserData = structuredClone(userData);
-            newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico = base_structure.prediagnostico
-            saveUserData(newUserData)
-          }else{
-            if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.hasOwnProperty("descripcion")){
+    useEffect (() =>{
+      if(!check){
+        const run = async() =>{
+          if(userData.casoActivo.code){
+            if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.hasOwnProperty("description")){
               if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description != ''){
                 setDescriptionValue(decodeURIComponent(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description))
               }
             }
           }
         }
+        run()
       }
-      
-    },[userData.casoActivo.code])*/
-
-    useEffect (() =>{
-      const run = async() =>{
-        if(userData.casoActivo.code){
-          if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.hasOwnProperty("description")){
-            if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description != ''){
-              setDescriptionValue(decodeURIComponent(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description))
-            }
-          }
-        }
-      }
-      run()
-    },[userData.casoActivo.code])
+    },[userData.casoActivo.code,changeReady])
 
     // Obtener la lista de generalmachinessystem, obtine todos los systemas
     useEffect(() => {
+        if(!check) {
+          //onSearch(debouncedSearchValue);
+          setDatos([])
+          const fetchData = async () => {
+            try {
+              const response = await axios.get(`http://localhost:5000/api/v1/generalmachinesystem`);
+              
+              let data = JSON.parse(response.data)
+              
+              const groupedData = {};
 
-        //onSearch(debouncedSearchValue);
-        setDatos([])
-        const fetchData = async () => {
-          try {
-            const response = await axios.get(`http://localhost:5000/api/v1/generalmachinesystem`);
-            
-            let data = JSON.parse(response.data)
-            
-            const groupedData = {};
+              data.forEach(item => {
+                const { area_name, ID, system_name } = item;
+                if (!groupedData[area_name]) {
+                  groupedData[area_name] = [];
+                }
+                groupedData[area_name].push({ID:ID, system_name:system_name} );
+              });
 
-            data.forEach(item => {
-              const { area_name, ID, system_name } = item;
-              if (!groupedData[area_name]) {
-                groupedData[area_name] = [];
-              }
-              groupedData[area_name].push({ID:ID, system_name:system_name} );
-            });
-
-            setDatos(groupedData);
-          } catch (error) {
-            setDatos([])
-            console.error('Error al obtener datos:', error);
-            
-          }
-        };
-        fetchData();
+              setDatos(groupedData);
+            } catch (error) {
+              setDatos([])
+              console.error('Error al obtener datos:', error);
+              
+            }
+          };
+          fetchData();
+        }else{
+          setDatos([])
+        }
       
-    }, []);
+    }, [changeReady]);
 
     useEffect(() =>{
-      if(debouncedSearchValue){
-        if(userData.casoActivo.code != ''){
-          const newUserData = structuredClone(userData);
-          newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description = encodeURIComponent(descriptionValue)
-          saveUserData(newUserData)
+      if(!check){
+        if(debouncedSearchValue){
+          if(userData.casoActivo.code != ''){
+            const newUserData = structuredClone(userData);
+            newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description = encodeURIComponent(descriptionValue)
+            saveUserData(newUserData)
+          }
         }
       }
-    },[debouncedSearchValue])
+    },[debouncedSearchValue,changeReady])
+
+    useEffect( () =>{
+      const isEqualPreDiagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico?.isEqualPreDiagnostico || false
+      if(isEqualPreDiagnostico){
+        setCheck(true)
+      }else{
+        setCheck(false)
+      }
+    },[])
+
+    useEffect( () =>{
+      
+      if(check){
+        const newUserData = structuredClone(userData)
+        newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico = newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].prediagnostico
+        newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico.isEqualPreDiagnostico = true
+        saveUserData(newUserData)
+        setChangeReady(!changeReady)
+      }else{
+        const assingDianostico = (Object.keys(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id]?.diagnostico_cpy || {}).length == 0 ) 
+          ? structuredClone(userData.stuctures.diagnostico)
+          : userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id]?.diagnostico_cpy
+        const newUserData = structuredClone(userData)
+        newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico = assingDianostico
+        saveUserData(newUserData)
+        setChangeReady(!changeReady)
+      }
+    },[check])
 
     /*====================FIN BLOQUE: useEfect        ==============*/
   
@@ -248,6 +227,16 @@ import {
       setCaseId(caseId_in)
       setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
+
+    const guardar = () =>{
+      if(!check){
+        const diagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico
+        const newUserData = structuredClone(userData)
+        newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico_cpy = diagnostico
+        saveUserData(newUserData)
+      }
+      history.push('/admin/pages/searchbox')
+   }
 
     /*====================FIN BLOQUE: FUNCTIONS        ==============*/
 
@@ -285,50 +274,75 @@ import {
             <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
               <Card>
                   <CardHeader>
-                    <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>
+                    <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>¿El prediagnóstico fue atinado?</Heading>
                   </CardHeader>
                   <CardBody mt={{xl:'10px'}}>
-                    <Textarea variant="dark" color='black' minH={{xl:'200px',sm:'200px'}} fontSize={{xl:'1.5em'}} placeholder='Explicación del problema' 
-                      onChange={(e) => setDescriptionValue(e.target.value)} 
-                      value={descriptionValue}
-                      />
+                    <Flex>
+                      <Text
+                        noOfLines={1}
+                        fontSize='md'
+                        color='gray.400'
+                        fontWeight='400'>
+                        NO
+                      </Text>
+                      <Switch colorScheme='blue' me='10px'  size="lg" isChecked={check} onChange={() => setCheck(!check)} />
+                      <Text
+                        noOfLines={1}
+                        fontSize='md'
+                        color='gray.400'
+                        fontWeight='400'>
+                        SI
+                      </Text>
+                    </Flex>
                   </CardBody>
                   
               </Card>
-              <Card>
-                  <CardHeader>
-                    <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
-                  </CardHeader>
-                  <CardBody mt={{xl:'10px'}}>
-                    
+              {!check && (
+                <>
+                  <Card>
+                      <CardHeader>
+                        <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>
+                      </CardHeader>
+                      <CardBody mt={{xl:'10px'}}>
+                        <Textarea variant="dark" color='black' minH={{xl:'200px',sm:'200px'}} fontSize={{xl:'1.5em'}} placeholder='Explicación del problema' 
+                          onChange={(e) => setDescriptionValue(e.target.value)} 
+                          value={descriptionValue}
+                          />
+                      </CardBody>
                       
-                        {Object.keys(datos).map( (key) =>(
-                          <>
-                            <Text fontSize='sm' color='gray.400' fontWeight='600' mb='20px'>
-                            {key}
-                            </Text>
-                            <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
-                              {datos[key].map( (element) =>(
-                                <CheckboxDiagnostico name={element.system_name} id={element.ID} section={key}/>
-                              ))}
-                            </Grid>
-                          </>
-                        ))}
+                  </Card>
+                  <Card>
+                      <CardHeader>
+                        <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
+                      </CardHeader>
+                      <CardBody mt={{xl:'10px'}}>
+                        
+                          
+                            {Object.keys(datos).map( (key) =>(
+                              <>
+                                <Text fontSize='sm' color='gray.400' fontWeight='600' mb='20px'>
+                                {key}
+                                </Text>
+                                <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
+                                  {datos[key].map( (element) =>(
+                                    <CheckboxDiagnostico name={element.system_name} id={element.ID} section={key}/>
+                                  ))}
+                                </Grid>
+                              </>
+                            ))}
+                          
+                      </CardBody>
                       
-                  </CardBody>
-                  
-              </Card>
+                  </Card>
 
-              <CardHerramientas title="¿Que herramientas utilizaste?"/>
+                  <CardHerramientas title="¿Que herramientas utilizaste?"/>
+                </>
+              )}
+              
 
               
-              {// Esto eliminado para solo apilcar un boton de guardar
-              /*isSuccessAlertCaso ?(
-                <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
-              ):(
-                <CardTerminarCaso openAlert={openAlert} />
-              )*/}
-              <CardGuardarDiagnostico />
+
+              <CardGuardarDiagnostico guardar={guardar} />
               <CardCommand />
               
               
