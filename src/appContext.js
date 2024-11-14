@@ -183,7 +183,7 @@ export function AppProvider({ children }) {
             setServiceTypeData(data);
           } catch (error) {
             setServiceTypeData([])
-            console.error('Error al obtener datos:', error);
+            console.error('df0e005d-089c-48dd-be86-33d956b2d20f', error);
             
           }
         };
