@@ -71,6 +71,7 @@ const CasoDetail = ({ caseData }) => {
     createdAt,
     description,
     prioridad,
+    segmento_ID,
     fecha,
   } = caseData;
 
@@ -230,6 +231,14 @@ const CasoDetail = ({ caseData }) => {
       "3":"Baja"
     }[prioridad] || bgStatus
   },[prioridad])
+  
+  const segmentoName = useMemo ( () =>{
+    return {
+      "1":"Soporte",
+      "2":"Proyectos",
+      "3":"Capacitación"
+    }[segmento_ID] || bgStatus
+  },[segmento_ID])
 
   //=======================================================
   // SECTION: useEfect
@@ -506,6 +515,21 @@ const CasoDetail = ({ caseData }) => {
               <Flex align="center" direction={{sm:"row",lg:"row"}}>
                 <Icon as={FcLowPriority } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
                 {prioridadName}
+              </Flex>
+              
+            </Badge>
+          </Tooltip>
+          <Tooltip label="Segmento del caso" aria-label="A tooltip" >
+            <Badge
+              bg="yellow.400"
+              color={"black"}
+              fontSize="0.8em"
+              p="3px 10px"
+              borderRadius="8px"
+            >
+              <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                <Icon as={FcLowPriority } color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                {segmentoName}
               </Flex>
               
             </Badge>

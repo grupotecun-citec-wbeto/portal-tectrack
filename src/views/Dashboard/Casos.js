@@ -113,6 +113,7 @@ function Casos() {
           assignedTechnician: 'Juan Pérez',
           description: row.descripcion,
           prioridad: row.prioridad,
+          segmento_ID: row.segmento_ID,
           fecha:row.fecha
         }
         return(
