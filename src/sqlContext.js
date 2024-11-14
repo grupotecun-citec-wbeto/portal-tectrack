@@ -612,7 +612,7 @@ export function SqlProvider({ children }) {
   //=======================================================
   // SECTION: TABLE caso_visita
   //=======================================================
-  if (!checkTableExists(db, 'visita')) {
+  if (!checkTableExists(db, 'caso_visita')) {
     db.run(`
       CREATE TABLE IF NOT EXISTS caso_visita (
         caso_ID INTEGER NOT NULL,

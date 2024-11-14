@@ -15,11 +15,20 @@ import {
   Select,
   Grid,
 } from '@chakra-ui/react';
+
+import {
+  FormControl,
+  FormLabel,
+  FormErrorMessage,
+  FormHelperText,
+} from '@chakra-ui/react'
 import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose   } from 'react-icons/fa';
 import { FaUserPen,FaUserMinus,FaEye   } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
 import { IoIosBusiness } from "react-icons/io";
+
+import InputKm from './InputKm';
 /*=======================================================
  BLOQUE: CONTEXT
  DESCRIPTION: 
@@ -139,6 +148,12 @@ const CasoDetail = ({ caseData }) => {
 
     const [isEmpezado,setIsEmpezado] = useState(false)
 
+    const [vehiculos,setVehiculos] = useState([])
+
+    const [isVehiculoSelected,setIsVehiculoSelected] = useState('')
+
+    const [kmInicial,setKmInicial] = useState('')
+
     /**
      * Desestructurar objeto del contexto sqlContext
      * @property {Objeto} - Contiene las funciones para ejecutar sqlite
@@ -244,6 +259,18 @@ const CasoDetail = ({ caseData }) => {
     }
 
     getUsuario()
+  },[])
+
+  // LISTA DE VEHICULOS
+  useEffect(() =>{
+    const run = async() =>{
+      const vehiculos = db.exec(`SELECT * FROM vehiculo`).toArray()
+      
+      if(vehiculos.length != 0)
+        setVehiculos(vehiculos)
+    }
+
+    run()
   },[])
 
   
@@ -372,18 +399,37 @@ const CasoDetail = ({ caseData }) => {
     const verificar = () =>{
       // verificar si ya tiene asignado a un tecnico el caso
       const caso = db.exec(`SELECT usuario_ID FROM caso where ID = ${id}`).toObject()
-      return caso.usuario_ID == null ? false : true
+      const isUsuario = (caso.usuario_ID == null) ? false : true
+      if(!isUsuario) return 'Ingresar tecnico'
+      // Verificar que tenga vehiculo asignado
+      const isVehiculo = (isVehiculoSelected != '') ? true : false
+      if(!isVehiculo) return 'Selecccioanr vehiculo'
+      // Verificar que tenga kilometros
+      const isKmInicial = (kmInicial != '') ? true : false
+      if(!isKmInicial) return 'Ingresar kilometraje inicial'
+      
+      return ''
     }
-
-    if(verificar()){
+    const message = verificar()
+    if(message == ''){
       setIsEmpezado(true)
       const estado_a_establecer = 3
       db.run(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
+      try{
+        db.run(`INSERT INTO visita (vehiculo_ID,usuario_ID,km_inicial) VALUES (${isVehiculoSelected},1,${kmInicial})`)
+        const result = db.exec(`SELECT last_insert_rowid() AS id`).toObject();
+        const visita_ID = result.id
+        db.run(`INSERT INTO caso_visita (caso_ID,visita_ID) VALUES (${id},${visita_ID})`)
+        
+      }catch(err){
+        console.log('df786fcc-c360-46be-b332-0f96c7fcd358',err)
+      }
+
       setEstado(estado_a_establecer)
       // gurdar en base de datos sqlite
       await saveToIndexedDB(db)
     }else{
-      alert('Asignar tecnico al caso')
+      alert(message)
     }
 
     /**/
@@ -482,7 +528,7 @@ const CasoDetail = ({ caseData }) => {
             <Flex align="center" direction={{sm:"row",lg:"row"}} mb={2} >
               {estado != 5 ?(
                 <>
-                      {!isEmpezado && estado != 3 ? (
+                  {!isEmpezado && estado != 3 ? (
                     <>
                       {isEditTecnico ? ( //BsRocketTakeoff
                         
@@ -531,11 +577,16 @@ const CasoDetail = ({ caseData }) => {
                       </Tooltip>
                     </>
                   ):(
-                    <Tooltip label="Cerrar caso" aria-label="A tooltip" >
-                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => terminar()}>
-                          <Icon as={FaRegWindowClose  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                        </Button>
-                      </Tooltip>
+                    <>
+                      
+
+                        <Tooltip label="Cerrar caso" aria-label="A tooltip" >
+                          <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => terminar()}>
+                            <Icon as={FaRegWindowClose  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                          </Button>
+                        </Tooltip>
+                      
+                    </>
                   )}
                 </>
               ):(
@@ -553,7 +604,29 @@ const CasoDetail = ({ caseData }) => {
 
               
             </Flex>
+            
           </Grid>
+          {!isEmpezado && estado != 3 && estado != 5 && !isEditTecnico && (
+            <>
+            <Flex direction={'columns'} >
+                <FormControl maxW={{xl:'250px'}} key={id}>
+                  <Select id='country' placeholder='Selecconar Vehiculo' onChange={(e) => setIsVehiculoSelected(e.target.value)} value={isVehiculoSelected}>
+                    {console.log('f141a898-3ca1-4d9f-980b-84cefb69e1e9',vehiculos)}
+                    {vehiculos.map( (vehiculo) => (
+                      <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
+                    ))}
+                    
+                  </Select>
+                </FormControl>
+                
+            </Flex>
+            {isVehiculoSelected != '' && (
+              <InputKm kmInicial={kmInicial} setKmInicial={setKmInicial}/>
+            )} 
+            
+            </>
+            
+          )}
          
           
         
