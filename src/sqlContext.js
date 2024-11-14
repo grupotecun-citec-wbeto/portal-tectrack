@@ -702,7 +702,7 @@ export function SqlProvider({ children }) {
   const DDL_UUID_SYNC = async(db) =>{
     if (!checkTableExists(db, 'version_sync')) {
       const uuid = uuidv4()
-      const response = await axios.get(`http://localhost:5000/api/v1/synctable_create/${uuid}`);
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_create/${uuid}`);
       db.run(`CREATE TABLE IF NOT EXISTS version_sync ( uuid TEXT);`)
       db.run(`INSERT INTO version_sync VALUES ('${uuid}');`)
       await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
@@ -844,7 +844,7 @@ export function SqlProvider({ children }) {
     const checkSyncControl = async() => {
       if(syncUuid != ''){
         try{
-          const response = await axios.get(`http://localhost:5000/api/v1/synctable/${syncUuid}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}`);
           
           const last_incremental_timestamp =  JSON.parse(JSON.parse(response.data)[0]).last_incremental_timestamp
           //const zonedDate = toZonedTime(format(last_incremental_timestamp, 'yyyy-MM-dd HH:mm:ss'), 'UTC');
@@ -903,7 +903,7 @@ export function SqlProvider({ children }) {
         try {
           
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -952,7 +952,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1003,7 +1003,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1057,7 +1057,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1111,7 +1111,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1165,7 +1165,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1222,7 +1222,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1274,7 +1274,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1326,7 +1326,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1379,7 +1379,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1436,7 +1436,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1489,7 +1489,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1542,7 +1542,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1595,7 +1595,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1648,7 +1648,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1701,7 +1701,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1782,7 +1782,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1835,7 +1835,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1888,7 +1888,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -1948,7 +1948,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -2007,7 +2007,7 @@ export function SqlProvider({ children }) {
       if(db != null && incrementalDate != ''){
         try {
           
-          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
           const json = JSON.parse(response.data)
@@ -2067,7 +2067,7 @@ export function SqlProvider({ children }) {
       if (finSync && retryCount < maxRetries) {
         syncUuid
         try{
-          const response = await axios.get(`http://localhost:5000/api/v1/synctable_terminate/${syncUuid}`);
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}`);
         }catch(e){
           setRetryCount(prevCount => prevCount + 1);
           setTimeout(fetchData, 5000);

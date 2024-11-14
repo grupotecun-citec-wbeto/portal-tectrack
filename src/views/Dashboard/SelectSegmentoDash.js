@@ -107,7 +107,7 @@ import { Link, useHistory   } from 'react-router-dom';
         setDatos([])
         const fetchData = async () => {
           try {
-            const response = await axios.get(`http://localhost:5000/api/v1/machine/${searchValue}`);
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/machine/${searchValue}`);
             
             let data = JSON.parse(response.data)
             setDatos(data);

@@ -142,7 +142,7 @@ import {
             
             const equiposSelect = (lista_equipos != '') ? lista_equipos : 'all'
             try {
-              const cad = `http://localhost:5000/api/v1/machine/${(!isBusquedaTerminada) ? searchValue : 'ALL'}/${equiposSelect}`
+              const cad = `${process.env.REACT_APP_API_URL}/api/v1/machine/${(!isBusquedaTerminada) ? searchValue : 'ALL'}/${equiposSelect}`
               const response = await axios.get(cad);
               
               let data = JSON.parse(response.data)
