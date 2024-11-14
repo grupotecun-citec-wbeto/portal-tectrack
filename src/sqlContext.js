@@ -98,6 +98,7 @@ export function SqlProvider({ children }) {
   const [intervalTimeAsistenciaTipo, setIntervalTimeAsistenciaTipo] = useState(300000);
   const [intervalTimeVisita, setIntervalTimeVisita] = useState(300000);
   const [intervalTimeDiagnostico, setIntervalTimeDiagnostico] = useState(300000);
+  const [intervalTimePrograma, setIntervalTimePrograma] = useState(300000);
   
   
   
@@ -657,9 +658,37 @@ export function SqlProvider({ children }) {
     //const result = db.run(`DROP TABLE diagnostico;`)
     //await saveToIndexedDB(db);
   }
+  //=======================================================
+  // SECTION: TABLE programa
+  //=======================================================
+  if (!checkTableExists(db, 'programa')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS programa (
+        caso_ID INTEGER NOT NULL,
+        asistencia_tipo_ID INTEGER NOT NULL,
+        catalogo_ID INTEGER NOT NULL,
+        prioridad INTEGER,
+        name TEXT,
+        type TEXT CHECK(type IN ('capacitacion', 'proyecto')) DEFAULT 'capacitacion',
+        PRIMARY KEY (caso_ID, asistencia_tipo_ID),
+        FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (asistencia_tipo_ID) REFERENCES asistencia_tipo (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (catalogo_ID) REFERENCES catalogo (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+      );
+
+    `)
     
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    const info_tabla = db.exec(`PRAGMA table_info(programa);`)
+    console.log(info_tabla);
     
+    //const result = db.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db);
   }
+    
+    
+}
 
   const DDL_UUID_SYNC = async(db) =>{
     if (!checkTableExists(db, 'version_sync')) {
@@ -845,7 +874,8 @@ export function SqlProvider({ children }) {
     intervalTimeDiagnosticoTipo, 
     intervalTimeAsistenciaTipo,
     intervalTimeVisita,
-    intervalTimeDiagnostico
+    intervalTimeDiagnostico,
+    intervalTimePrograma
   ])
 
 
@@ -1925,6 +1955,66 @@ export function SqlProvider({ children }) {
               ${element.asistencia_tipo_ID},
               ${element.visita_ID},
             )` 
+
+          });
+          
+          
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (caso_ID, fecha,description,asistencia_tipo_ID,visita_ID) VALUES ${values};`
+          db.run(insertar)
+          // imporante simpres salvar en en indexdb
+          await saveToIndexedDB(db);
+          setFinSync(true)
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data:', error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db.exec(`SELECT * FROM ${tabla}`);
+        
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  },[db,incrementalDate])
+  
+  
+  /**
+   * SECTION: TABLA programa
+   *
+   */
+
+  useEffect( () =>{
+    const codigo = 12, tabla = 'diagnostico', setTime = setIntervalTimePrograma, time = intervalTimePrograma
+
+    const fetchData = async (synctable_ID) => {
+      if(db != null && incrementalDate != ''){
+        try {
+          
+          const response = await axios.get(`http://localhost:5000/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
+          
+          const json = JSON.parse(response.data)
+          
+          let values = ``
+          json.forEach((element,index) => {
+            
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+              ${element.caso_ID}, // INTEGER
+              ${element.asistencia_tipo_ID}, // INTEGER
+              ${element.catalogo_ID}, // INTEGER
+              '${element.prioridad}', // TEXT
+              '${element.name}', // TEXT
+              '${element.type}',//'capacitacion', 'proyecto' TEXT
+            )`
 
           });
           
