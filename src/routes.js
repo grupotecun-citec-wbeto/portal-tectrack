@@ -17,6 +17,7 @@ import ComunicationBox from 'views/Dashboard/ComunicationBox';
 import PreDiagnosticoBox from 'views/Dashboard/PreDiagnosticoBox';
 import DiagnosticoBox from 'views/Dashboard/DiagnosticoBox';
 import Casos from 'views/Dashboard/Casos';
+import SelectSegmentoDash from 'views/Dashboard/SelectSegmentoDash';
 
 
 // - NOTE
@@ -180,6 +181,15 @@ var dashRoutes = [
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
         component: SelectCasoBox,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/selectsegmento",
+        name: "Select Segmento",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: SelectSegmentoDash,
         layout: "/admin",
       },
       {

@@ -38,7 +38,7 @@ import {
 import { Link, useHistory   } from 'react-router-dom';
   
   
-  function SelectCasoBox({ onSearch }) {
+  function SelectSegmentoDash({ onSearch }) {
     
 
     const history = useHistory()
@@ -122,29 +122,38 @@ import { Link, useHistory   } from 'react-router-dom';
     }, [debouncedSearchValue]);
 
   // creando un caso nuevo 
-  const btnCreateCase = async(comunicacion_ID) =>{
-      //const uuid = uuidv4()
+  const btnCreateCase = async(segmento_ID) =>{
+      const uuid = uuidv4()
       
       const newUserData = structuredClone(userData)
 
-      //const caso = structuredClone(userData.stuctures.caso);
+      const caso = structuredClone(userData.stuctures.caso);
       
-      //newUserData.casoActivo.code=uuid
+      newUserData.casoActivo.code=uuid
       
-      newUserData.casos[newUserData.casoActivo.code].comunicacion_ID = comunicacion_ID
+      caso.segmento_ID = segmento_ID
       
-      //newUserData.casos[uuid] = caso
+      newUserData.casos[uuid] = caso
       
-      //const caso_activo = structuredClone(userData.stuctures.casoActivo)
-      //newUserData.casoActivo = caso_activo
-      //newUserData.casoActivo.code = uuid
+      const caso_activo = structuredClone(userData.stuctures.casoActivo)
+      newUserData.casoActivo = caso_activo
+      newUserData.casoActivo.code = uuid
 
       // Ponerlo como caso seleccionado
       saveUserData(newUserData)
       
       
+      switch(segmento_ID){
+        case '1':
+          history.push('/admin/pages/selectcaso')
+          break;
+        case '2':
+          break;
+        case '3':
+          break;
+      }
       
-      history.push('/admin/pages/searchbox')
+      //history.push('/admin/pages/searchbox')
       
   }
   
@@ -152,12 +161,13 @@ import { Link, useHistory   } from 'react-router-dom';
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
           <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
             
-            <CardSelectCaso title="¿Se comunicaron?" botonTitle="Seleccionar" to="/admin/pages/searchbox" id='1' btnCreateCase={btnCreateCase} />
-            <CardSelectCaso title="¿Preventivo?" botonTitle="Seleccionar" to="/admin/pages/searchbox" id='2' btnCreateCase={btnCreateCase} />
+            <CardSelectCaso title="Soporte" to="" id='1' btnCreateCase={btnCreateCase} />
+            <CardSelectCaso title="Proyecto" to="" id='2' btnCreateCase={btnCreateCase} />
+            <CardSelectCaso title="Capacitación" to="" id='3' btnCreateCase={btnCreateCase} />
             
           </Grid>
       </Flex>
     );
   }
 
-export default SelectCasoBox;
+export default SelectSegmentoDash;

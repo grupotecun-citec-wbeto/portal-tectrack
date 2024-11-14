@@ -46,11 +46,11 @@ function CardSelectCaso(props) {
             </CardHeader>
             <CardBody>
                 <Box flex='1'  mt={{xl:'75px',md:'75px',sm:'75px'}} align='center'>
-                    <Link to={to} key={rest.id}>
+                    {/*<Link to={to} key={rest.id}>*/}
                         <Button variant='dark' minW={{xl:'500px',sm:'250px'}} h={{xl:'100px',sm:'100px'}} fontSize={{xl:'1em'}} key={rest.id} onClick={() =>btnCreateCase(rest.id)}>
-                            Crear Caso
+                            {rest.botonTitle || "Crear Caso"}
                         </Button>
-                    </Link>
+                    {/*</Link>*/}
                 </Box>
             </CardBody>
         </Card>
