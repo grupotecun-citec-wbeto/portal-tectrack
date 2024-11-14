@@ -27,6 +27,7 @@ import { FaUserPen,FaUserMinus,FaEye   } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
 import { IoIosBusiness } from "react-icons/io";
+import { MdWorkspaces } from "react-icons/md";
 
 import InputKm from './InputKm';
 /*=======================================================
@@ -528,7 +529,7 @@ const CasoDetail = ({ caseData }) => {
               borderRadius="8px"
             >
               <Flex align="center" direction={{sm:"row",lg:"row"}}>
-                <Icon as={FcLowPriority } color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                <Icon as={MdWorkspaces } color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
                 {segmentoName}
               </Flex>
               
