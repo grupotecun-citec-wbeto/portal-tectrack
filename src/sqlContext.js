@@ -198,6 +198,15 @@ export function SqlProvider({ children }) {
         db.run(`ALTER TABLE caso ADD COLUMN ${columna} TEXT NULL;`)
         saveToIndexedDB(db);
       }
+
+      /*const iden = '8'
+      const resgistro = db.exec(`SELECT ID FROM caso WHERE ID = ${iden}`).toObject()
+      if(resgistro?.ID || '' == iden){
+        db.run(`DELETE FROM caso WHERE ID = ${iden}`)
+      }else{
+        console.log('131a5455-705d-4dfa-8f68-40ff96694416');
+        
+      }*/
       
 
       
