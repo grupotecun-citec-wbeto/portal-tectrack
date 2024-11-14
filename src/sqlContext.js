@@ -680,8 +680,8 @@ export function SqlProvider({ children }) {
     
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
   }else{
-    const info_tabla = db.exec(`PRAGMA table_info(programa);`)
-    console.log(info_tabla);
+    //const info_tabla = db.exec(`PRAGMA table_info(programa);`)
+    //console.log(info_tabla);
     
     //const result = db.run(`DROP TABLE diagnostico;`)
     //await saveToIndexedDB(db);

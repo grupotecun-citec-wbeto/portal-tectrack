@@ -94,6 +94,15 @@ export function AppProvider({ children }) {
               isEqualPreDiagnostico:false // indica si un dianostico es igual a una predianostico
             }
 
+            const programa = {
+              caso_ID: 0, //INTEGER NOT NULL,
+              asistencia_tipo_ID: 0, // INTEGER NOT NULL,
+              catalogo_ID:0, //INTEGER NOT NULL,
+              prioridad:0, //INTEGER,
+              name:'', //TEXT,
+              sistemas:{/*servicio */},
+            }
+
             let base_structure = {
                 casos : {/*stuctures.caso*/}, // ARRAY
                 casoActivo:{code:'',caso_id:'',maquina_id:'',categoria_id:'',cliente_name:'',busqueda_terminada:0},
@@ -108,7 +117,8 @@ export function AppProvider({ children }) {
                     date_end:'', //DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
                     description:'', //TEXT NULL,
                     prioridad:0, //INTEGER NULL, -- media ponderada de la prioridad
-                    equipos:{/* id*/}   // array de identificadores de equipos
+                    equipos:{/* id*/},  // array de identificadores de equipos
+                    programa: programa
                     
                   },
                   diagnostico:diagnostico,

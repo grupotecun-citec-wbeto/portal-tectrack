@@ -32,6 +32,7 @@ import {
   RocketIcon,
   SupportIcon,
 } from "components/Icons/Icons";
+import CapacitacionDash from 'views/Dashboard/CapacitacionDash';
 
 var dashRoutes = [
   {
@@ -190,6 +191,24 @@ var dashRoutes = [
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
         component: SelectSegmentoDash,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/programa/capacitacion",
+        name: "Capacitacion",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: CapacitacionDash,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/programa/proyecto",
+        name: "Proyecto",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: CapacitacionDash,
         layout: "/admin",
       },
       {

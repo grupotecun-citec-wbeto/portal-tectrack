@@ -148,8 +148,10 @@ import { Link, useHistory   } from 'react-router-dom';
           history.push('/admin/pages/selectcaso')
           break;
         case '2':
+          history.push('/admin/pages/programa/proyecto')
           break;
         case '3':
+          history.push('/admin/pages/programa/capacitacion')
           break;
       }
       
