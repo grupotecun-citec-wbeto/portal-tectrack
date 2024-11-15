@@ -21,10 +21,10 @@ FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Copia la configuración personalizada de Nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+#COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exponer el puerto en el que Nginx sirve la aplicación
-EXPOSE 8080
+EXPOSE 80
 
 # Comando por defecto para iniciar Nginx
 CMD ["nginx", "-g", "daemon off;"]
