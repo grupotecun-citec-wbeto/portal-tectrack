@@ -12,7 +12,7 @@ COPY . .
 
 # Instala las dependencias y genera el build
 RUN npm install --force
-RUN npm run build
+RUN npm run deploy
 
 # Usa una imagen ligera de Nginx para servir los archivos estáticos
 FROM nginx:alpine
