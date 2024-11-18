@@ -32,6 +32,10 @@ function Casos() {
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
   const [data, setData] = useState([])
+  const [casosCant,setCasosCant] = useState(0)
+  const [casosCompletados,setCasosCompletados] = useState(0)
+  const [casosPendientes,setCasosPendientes] = useState(0)
+  const [casosEnProceso,setCasosEnProceso] = useState(0)
 
   const {db,saveToIndexedDB} = useContext(SqlContext)
 
@@ -49,6 +53,39 @@ function Casos() {
       setData(casosData)
     }
   },[db])
+
+
+  useEffect( () =>{
+    if(db != null){
+      const casos = db.exec("SELECT count(*) AS cantidad FROM caso").toObject();
+      setCasosCant(casos.cantidad)
+    }
+  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
+  
+  
+  useEffect( () =>{
+    if(db != null){
+      const casos = db.exec("SELECT count(*) AS completados FROM caso where caso_estado_ID = 5").toObject();
+      setCasosCompletados(casos.completados)
+    }
+  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
+ 
+  useEffect( () =>{
+    if(db != null){
+      const casos = db.exec("SELECT count(*) AS pendientes FROM caso where caso_estado_ID = 1").toObject();
+      setCasosPendientes(casos.pendientes)
+    }
+  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
+  
+  
+  useEffect( () =>{
+    if(db != null){
+      const casos = db.exec("SELECT count(*) AS enproceso FROM caso where caso_estado_ID = 3").toObject();
+      setCasosEnProceso(casos.enproceso)
+    }
+  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
+
+  
 
   
   
@@ -99,10 +136,10 @@ function Casos() {
         </CardBody>
       </Card>*/}
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={5}>
-        <CasoSummary title="Cantidad de casos" value="1,200" icon={FaUserAlt} colorScheme="blue" />
-        <CasoSummary title="Tareas Pendientes" value="47" icon={FaTasks} colorScheme="orange" />
-        <CasoSummary title="Casos Completados" value="305" icon={FaCheckCircle} colorScheme="green" />
-        <CasoSummary title="Casos Completados" value="305" icon={FaCheckCircle} colorScheme="green" />
+        <CasoSummary title="Cantidad de casos" value={casosCant} icon={FaUserAlt} colorScheme="blue" />
+        <CasoSummary title="Tareas Pendientes" value={casosPendientes} icon={FaTasks} colorScheme="orange" />
+        <CasoSummary title="Casos Completados" value={casosCompletados} icon={FaCheckCircle} colorScheme="green" />
+        <CasoSummary title="Casos EnProceso" value={casosEnProceso} icon={FaCheckCircle} colorScheme="green" />
       </SimpleGrid>
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
       {data?.map((row, index, arr) => {
