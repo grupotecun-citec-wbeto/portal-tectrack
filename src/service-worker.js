@@ -1,6 +1,12 @@
 import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate, CacheFirst } from 'workbox-strategies';
 
+import { precacheAndRoute } from 'workbox-precaching';
+
+// Declara self.__WB_MANIFEST (inyectado automáticamente por Workbox)
+precacheAndRoute(self.__WB_MANIFEST);
+
+
 registerRoute(
   ({ request }) => request.destination === 'image',
   new CacheFirst({
@@ -17,21 +23,6 @@ registerRoute(
 
 
 // Cache JavaScript files with StaleWhileRevalidate strategy
-registerRoute(
-    ({ request }) => request.destination === 'script',
-    new StaleWhileRevalidate({
-      cacheName: 'js-cache',
-      plugins: [
-        new ExpirationPlugin({   
-  
-          maxEntries: 60,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
-        }),
-      ],
-    })
-);
-
-// Cache sql-wasm.wasm files with StaleWhileRevalidate strategy
 registerRoute(
     ({ request }) => request.destination === 'script',
     new StaleWhileRevalidate({

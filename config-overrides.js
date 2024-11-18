@@ -1,10 +1,12 @@
-const WorkboxPlugin = require('workbox-webpack-plugin');
+
 const pathBrowserify = require('path-browserify');
 
-
+/* Ya no se utilizar porque con solo power el service-worker.js empezo a funcionar y por eso me decia que yo llamaba dos veces
+//const {GenerateSW} = require('workbox-webpack-plugin');*/
 
 
 module.exports = function override(config, env) {
+  config.devtool = false; // Desactiva los mapas de origen globalmente
   // Agregar alias
   config.resolve.alias = {
     ...config.resolve.alias,
@@ -21,13 +23,6 @@ module.exports = function override(config, env) {
     stream: require.resolve("stream-browserify"),
     vm: require.resolve("vm-browserify"),
   };
-
-  // Add Workbox plugin to the configuration
-  config.plugins.push(new WorkboxPlugin.GenerateSW({
-    clientsClaim: true,
-    skipWaiting: true,
-    // Other Workbox configurations can be added here
-  }));
 
 
   return config;
