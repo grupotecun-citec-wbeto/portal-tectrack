@@ -5,6 +5,7 @@ const pathBrowserify = require('path-browserify');
 //const {GenerateSW} = require('workbox-webpack-plugin');*/
 
 
+
 module.exports = function override(config, env) {
   config.devtool = false; // Desactiva los mapas de origen globalmente
   // Agregar alias
@@ -23,6 +24,19 @@ module.exports = function override(config, env) {
     stream: require.resolve("stream-browserify"),
     vm: require.resolve("vm-browserify"),
   };
+
+  // Aquí puedes agregar la configuración de Workbox como un plugin de Webpack
+  if(process.env.NODE_ENV == "production"){
+    const WorkboxPlugin = require('workbox-webpack-plugin');
+    config.plugins.push(
+      new WorkboxPlugin.InjectManifest({
+        swSrc: './src/sw.js', // Fuente de tu archivo sw.js //service-worker.js
+        swDest: 'build/sw.js', // Destino donde se generará el archivo sw.js
+        //globDirectory: 'build', // Directorio donde buscar los archivos a cachear
+        mode: 'production',       // You can specify 'development' or 'production'
+      })
+    );
+  }
 
 
   return config;

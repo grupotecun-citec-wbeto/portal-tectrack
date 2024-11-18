@@ -68,11 +68,11 @@
 		"react-error-overlay": "6.0.9"
 	},
 	"scripts": {
-		"start": "react-app-rewired start",
+		"start": "cross-env NODE_ENV=development react-app-rewired start",
 		"build": "cross-env CI=false;cross-env PUBLIC_URL=/ react-app-rewired build && gulp licenses",
 		"test": "react-app-rewired test --env=jsdom",
 		"eject": "react-scripts eject",
-		"deploy": "cross-env CI=false PUBLIC_URL=/ REACT_APP_API_URL=https://apirest-tectrack-58928188038.us-central1.run.app react-app-rewired build && gulp licenses",
+		"deploy": "cross-env CI=false PUBLIC_URL=/ NODE_ENV=production REACT_APP_API_URL=https://apirest-tectrack-58928188038.us-central1.run.app react-app-rewired build && gulp licenses",
 		"lint:check": "eslint . --ext=js,jsx;  exit 0",
 		"lint:fix": "eslint . --ext=js,jsx --fix;  exit 0",
 		"install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start"

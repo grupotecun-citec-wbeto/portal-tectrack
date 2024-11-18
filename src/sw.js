@@ -1,10 +1,12 @@
 import { registerRoute } from 'workbox-routing';
 import { StaleWhileRevalidate, CacheFirst } from 'workbox-strategies';
-
 import { precacheAndRoute } from 'workbox-precaching';
 
-// Declara self.__WB_MANIFEST (inyectado automáticamente por Workbox)
-precacheAndRoute(self.__WB_MANIFEST);
+
+if (process.env.NODE_ENV === 'production') {
+  // Declara self.__WB_MANIFEST (inyectado automáticamente por Workbox)
+  precacheAndRoute(self.__WB_MANIFEST);
+}
 
 
 registerRoute(
