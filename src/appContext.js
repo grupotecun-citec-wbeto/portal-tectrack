@@ -106,6 +106,7 @@ export function AppProvider({ children }) {
             let base_structure = {
                 casos : {/*stuctures.caso*/}, // ARRAY
                 casoActivo:{code:'',caso_id:'',maquina_id:'',categoria_id:'',cliente_name:'',busqueda_terminada:0},
+                login:{},
                 stuctures:{
                   caso:{
                     usuario_ID:0, //INTEGER NOT NULL,

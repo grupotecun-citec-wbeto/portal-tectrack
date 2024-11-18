@@ -1,4 +1,5 @@
-import React from "react";
+import React,{useEffect, useState} from "react";
+import { useSelector, useDispatch } from 'react-redux';
 // Chakra imports
 import {
   Box,
@@ -18,6 +19,16 @@ import {
 import signInImage from "assets/img/signInImage.png";
 import { FaApple, FaFacebook, FaGoogle } from "react-icons/fa";
 
+import axios from "axios";
+
+import { useHistory } from "react-router-dom";
+
+
+
+
+
+
+
 function SignIn() {
   // Chakra color mode
   const textColor = useColorModeValue("gray.700", "white");
@@ -26,6 +37,67 @@ function SignIn() {
   const colorIcons = useColorModeValue("gray.700", "white");
   const bgIcons = useColorModeValue("trasnparent", "navy.700");
   const bgIconsHover = useColorModeValue("gray.50", "whiteAlpha.100");
+
+  const history = useHistory()
+  /*=======================================================
+     BLOQUE: REDUX-PERSIST
+     DESCRIPTION: 
+    =========================================================*/
+    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+    const dispatch = useDispatch();
+
+    const saveUserData = (json) => {
+        dispatch({ type: 'SET_USER_DATA', payload: json });
+      };
+  
+    const getUserData = () => {
+        dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+    };
+
+    /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+
+
+  const [formData, setFormData] = useState({
+    nickname: '',
+    password: '',
+  });
+
+  useEffect( () =>{
+    if(Object.keys(userData.login || {}).length != 0){ 
+      history.push('/admin/pages/selectsegmento')
+    }
+  },[userData])
+
+  const handleLogin = async() =>{
+      if(Object.keys(userData.login || {}).length == 0){ 
+        try {
+          const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/login`, formData);
+          console.log(response.data[0]); // Manejar la respuesta del servidor
+          const newUserData = structuredClone(userData)
+          newUserData.login = response.data[0]
+          saveUserData(newUserData)
+
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+              alert("No coincide el usuario o la contraseña")
+            }else{
+              console.error(error);
+            }
+        }
+      }else{
+        history.push('/admin/pages/selectsegmento')
+      }
+  };
+
+  const handleChange = (event) => {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value,
+    });
+  };
+  
+
+
   return (
     <Flex position='relative' mb='40px'>
       <Flex
@@ -64,7 +136,7 @@ function SignIn() {
               fontWeight='bold'
               textAlign='center'
               mb='22px'>
-              Register With
+              Iniciar Sessión
             </Text>
             <HStack spacing='15px' justify='center' mb='22px'>
               <Flex
@@ -141,6 +213,9 @@ function SignIn() {
                 Name
               </FormLabel>
               <Input
+                name="nickname"
+                value={formData.nickname}
+                onChange={handleChange}
                 variant='auth'
                 fontSize='sm'
                 ms='4px'
@@ -153,6 +228,9 @@ function SignIn() {
                 Password
               </FormLabel>
               <Input
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 variant='auth'
                 fontSize='sm'
                 ms='4px'
@@ -168,13 +246,14 @@ function SignIn() {
                 </FormLabel>
               </FormControl>
               <Button
+                onClick={handleLogin}
                 fontSize='10px'
                 variant='dark'
                 fontWeight='bold'
                 w='100%'
                 h='45'
                 mb='24px'>
-                SIGN UP
+                LOGIN
               </Button>
             </FormControl>
             <Flex
