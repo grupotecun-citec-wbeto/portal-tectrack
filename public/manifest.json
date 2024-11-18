@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "TECTRACK",
+  "name": "TECTRACK PWA",
+  "description": "A Progressive Web App built with Argon Chakra Dashboard",
   "icons": [
     {
       "src": "favicon.png",
