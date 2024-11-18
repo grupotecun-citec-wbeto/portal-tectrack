@@ -115,7 +115,7 @@ export default function Configurator(props) {
                       variant="no-effects"
                       px="30px"
                     >
-                      Free Download
+                      Free Download2
                     </Button>
                   </Link>
                   <Link

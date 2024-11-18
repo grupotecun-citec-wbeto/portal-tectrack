@@ -5,6 +5,7 @@ import {
   Stack,
   Box,
   useColorMode,
+  Image,
 } from "@chakra-ui/react";
 import Configurator from "components/Configurator/Configurator";
 import Footer from "components/Footer/Footer.js";
@@ -27,6 +28,12 @@ import MainPanel from "../components/Layout/MainPanel";
 import PanelContainer from "../components/Layout/PanelContainer";
 import PanelContent from "../components/Layout/PanelContent";
 import bgAdmin from "assets/img/admin-background.png";
+
+// imagenes
+import citec_png from "assets/img/CITEC.png";
+import tecun_png from "assets/img/TECUN_isotipo.png";
+import medallon_naranja from "assets/img/Medallones Tecun-04.png" // color naranja
+
 
 export default function Dashboard(props) {
   const { ...rest } = props;
@@ -130,9 +137,19 @@ export default function Dashboard(props) {
         logo={
           <Stack direction='row' spacing='12px' align='center' justify='center'>
             {colorMode === "dark" ? (
-              <ArgonLogoLight w='74px' h='27px' />
+                <Image
+                  src={citec_png}
+                  alt="Imagen de ejemplo"
+                  borderRadius="lg"
+                  w={{sm:"50px",md:"75px"}}
+                />
             ) : (
-              <ArgonLogoDark w='74px' h='27px' />
+                <Image
+                  src={citec_png}
+                  alt="Imagen de ejemplo"
+                  borderRadius="lg"
+                  w={{sm:"50px",md:"75px"}}
+                />
             )}
             <Box
               w='1px'
@@ -140,9 +157,19 @@ export default function Dashboard(props) {
               bg={colorMode === "dark" ? "white" : "gray.700"}
             />
             {colorMode === "dark" ? (
-              <ChakraLogoLight w='82px' h='21px' />
+              <Image
+                src={tecun_png}
+                alt="Imagen de ejemplo"
+                borderRadius="lg"
+                w={{sm:"50px",md:"75px"}}
+              />
             ) : (
-              <ChakraLogoDark w='82px' h='21px' />
+              <Image
+                src={medallon_naranja}
+                alt="Imagen de ejemplo"
+                borderRadius="lg"
+                w={{sm:"50px",md:"75px"}}
+              />
             )}
           </Stack>
         }

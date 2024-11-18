@@ -4,7 +4,8 @@ import {
   Button,
   Flex,
   HStack,
-  Link, Stack, Text, useColorMode, useColorModeValue
+  Link, Stack, Text, useColorMode, useColorModeValue,
+  Image,
 } from "@chakra-ui/react";
 import {
   ArgonLogoDark,
@@ -15,6 +16,11 @@ import {
   PersonIcon,
   RocketIcon
 } from "components/Icons/Icons";
+
+// imagenes
+import citec_png from "assets/img/CITEC.png";
+import tecun_png from "assets/img/TECUN_isotipo.png";
+
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
 import React from "react";
 import { NavLink } from "react-router-dom";
@@ -49,9 +55,19 @@ export default function AuthNavbar(props) {
       color={mainText}
     >
       <Stack direction="row" spacing="12px" align="center" justify="center">
-        <ArgonLogoLight w="74px" h="27px" />
+        <Image
+          src={citec_png}
+          alt="Imagen de ejemplo"
+          borderRadius="lg"
+          w={{sm:"50px",md:"75px"}}
+        />
         <Box w="1px" h="20px" bg={"white"} />
-        <ChakraLogoBlue w="82px" h="21px" />
+        <Image
+          src={tecun_png}
+          alt="Imagen de ejemplo"
+          borderRadius="lg"
+          w={{sm:"50px",md:"75px"}}
+        />
       </Stack>
       <Text fontsize="sm" mt="3px">
         {logoText}
@@ -183,21 +199,6 @@ export default function AuthNavbar(props) {
           />
         </Box>
         {linksAuth}
-        <Link href="https://creative-tim.com/product/argon-dashboard-chakra">
-          <Button
-            bg={bgButton}
-            color={colorButton}
-            fontSize="xs"
-            variant="no-hover"
-            px="30px"
-            display={{
-              sm: "none",
-              lg: "flex",
-            }}
-          >
-            Free Download
-          </Button>
-        </Link>
       </Flex>
     </Flex>
   );
