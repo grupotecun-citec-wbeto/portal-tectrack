@@ -1,5 +1,7 @@
 // Chakra Icons
 import { BellIcon } from "@chakra-ui/icons";
+//redux
+import { useSelector, useDispatch } from 'react-redux';
 // Chakra Imports
 import {
   Box, Button,
@@ -27,11 +29,14 @@ import avatar3 from "assets/img/avatars/avatar3.png";
 import { ArgonLogoDark, ArgonLogoLight, ChakraLogoDark, ChakraLogoLight, ProfileIcon, SettingsIcon, TecTrackCaseDark, TecTrackCaseLight  } from "components/Icons/Icons";
 // Custom Components
 import { ItemContent } from "components/Menu/ItemContent";
+import { LoginItemContent } from "components/MenuLogin/LoginItemContent";
 import { SearchBar } from "components/Navbars/SearchBar/SearchBar";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
 import React,{useEffect, useState} from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
+
+import { useHistory } from "react-router-dom";
 
 
 
@@ -49,9 +54,30 @@ export default function HeaderLinks(props) {
     ...rest
   } = props;
 
-  
+  /*=======================================================
+     BLOQUE: REDUX-PERSIST
+     DESCRIPTION: 
+    =========================================================*/
+    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+    const dispatch = useDispatch();
 
+    const saveUserData = (json) => {
+        dispatch({ type: 'SET_USER_DATA', payload: json });
+      };
   
+    const getUserData = () => {
+        dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+    };
+
+    /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+
+    const history = useHistory()
+  
+    const display_perfil = {
+      '1': 'Técnio',
+      '2': 'Especialista',
+      '3': 'admin'
+    }[userData?.login?.perfil_ID || '1']
 
   const { colorMode } = useColorMode();
 
@@ -66,6 +92,24 @@ export default function HeaderLinks(props) {
   }
 
 
+  useEffect( () =>{
+    if(Object.keys(userData.login || {}).length == 0){ 
+      history.push('/auth/signin')
+    }
+  },[userData])
+
+
+  const handleLogout = async() =>{
+    const newUserData = structuredClone(userData)
+
+    newUserData.login = {}
+
+    saveUserData(newUserData)
+
+    if(Object.keys(userData.login || {}).length == 0){ 
+      history.push('/auth/login')
+    }
+  }
  
 
   
@@ -77,30 +121,88 @@ export default function HeaderLinks(props) {
       alignItems='center'
       flexDirection='row'>
       <SearchBar me='18px' />
-      <NavLink to='/auth/signin'>
-        <Button
-          ms='0px'
-          px='0px'
-          me={{ sm: "2px", md: "16px" }}
-          color={navbarIcon}
-          variant='no-effects'
-          rightIcon={
-            document.documentElement.dir ? (
-              ""
-            ) : (
-              <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
-            )
-          }
-          leftIcon={
-            document.documentElement.dir ? (
-              <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
-            ) : (
-              ""
-            )
-          }>
-          <Text display={{ sm: "none", md: "flex" }}>Sign In</Text>
-        </Button>
-      </NavLink>
+      
+      {
+        Object.keys(userData.login).length == 0 ? (
+          <NavLink to='/auth/signin'>
+            <Button
+              ms='0px'
+              px='0px'
+              me={{ sm: "2px", md: "16px" }}
+              color={navbarIcon}
+              variant='no-effects'
+              rightIcon={
+                document.documentElement.dir ? (
+                  ""
+                ) : (
+                  <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
+                )
+              }
+              leftIcon={
+                document.documentElement.dir ? (
+                  <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
+                ) : (
+                  ""
+                )
+              }>
+              <Text display={{ sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
+            </Button>
+          </NavLink>
+        ):(
+          <Menu>
+            <MenuButton>
+              <Button
+                ms='0px'
+                px='0px'
+                me={{ sm: "2px", md: "16px" }}
+                color={navbarIcon}
+                variant='no-effects'
+                rightIcon={
+                  document.documentElement.dir ? (
+                    ""
+                  ) : (
+                    <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
+                  )
+                }
+                leftIcon={
+                  document.documentElement.dir ? (
+                    <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
+                  ) : (
+                    ""
+                  )
+                }>
+                <Text display={{ sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
+              </Button>
+            </MenuButton>
+            <MenuList p='16px 8px' bg={menuBg}>
+              <Flex flexDirection='column'>
+                <MenuItem borderRadius='8px' mb='10px'>
+                  <LoginItemContent
+                    time={userData?.login?.display_name || ''}
+                    info= {`Codigo: ${userData.login.ID}`} 
+                    boldInfo={display_perfil}
+                    aName='Alicia'
+                    aSrc={avatar1}
+                  />
+                </MenuItem>
+                <MenuItem borderRadius='8px'>
+                  <LoginItemContent
+                    time='3 days ago'
+                    info='Payment succesfully completed!2'
+                    boldInfo=''
+                    aName='Kara'
+                    aSrc={avatar3}
+                    type="buttom"
+                    handleLogout={handleLogout}
+                  />
+                </MenuItem>
+              </Flex>
+            </MenuList>
+          </Menu>
+        )
+      }
+      
+      
       
       <SidebarResponsive
         hamburgerColor={"white"}
