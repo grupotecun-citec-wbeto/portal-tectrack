@@ -85,6 +85,7 @@ import ClienteCapacitacion from "components/Capacitacion/ClienteCapacitacion";
     const [caseId,setCaseId] = useState(0)
 
     const [datos, setDatos] = useState([]);
+    const [caseUuid,setCaseUuid] = useState('')
 
     const [check,setCheck] = useState(false)
     const [changeReady,setChangeReady] = useState(false)
@@ -298,8 +299,9 @@ import ClienteCapacitacion from "components/Capacitacion/ClienteCapacitacion";
       setIsSuccessAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
-    const openAlert = (caseId_in) => {
+    const openAlert = (caseId_in,uuid) => {
       setCaseId(caseId_in)
+      setCaseUuid(uuid)
       setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
@@ -385,7 +387,7 @@ import ClienteCapacitacion from "components/Capacitacion/ClienteCapacitacion";
               
 
             {isSuccessAlertCaso ?(
-              <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
+              <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid}/>
             ):(
               <CardCrearCasoPrograma openAlert={openAlert} />
             )}
