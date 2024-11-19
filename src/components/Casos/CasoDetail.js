@@ -74,6 +74,8 @@ const CasoDetail = ({ caseData }) => {
     prioridad,
     segmento_ID,
     fecha,
+    usuario_ID,
+    caso_uuid
   } = caseData;
 
   const textColor = useColorModeValue("gray.500", "white");
@@ -296,9 +298,9 @@ const CasoDetail = ({ caseData }) => {
           setSlcUsuario(result.usuario_ID)
         }
       }*/
-      const caso = db.exec(`SELECT usuario_ID FROM caso WHERE ID = ${id}`).toObject()
+      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso WHERE ID = ${id}`).toObject()
       if(Object.keys(caso || {}).length != 0){
-        setSlcUsuario(caso.usuario_ID)
+        setSlcUsuario(caso.usuario_ID_assigned)
       }
       
       
@@ -377,7 +379,7 @@ const CasoDetail = ({ caseData }) => {
       //db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},${id},'${getCurrentDateTime()}','')`)
       
       // Actualizar a estado asignado cuando se agigna un caso hacia estado 2: Asignado
-      db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_asignar},usuario_ID = ${slcUsuario}  where ID = ${id}`)
+      db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}  where ID = ${id}`)
       
       // Establecer el usuario que va resolver el caso
       setEstado(estado_a_asignar)
@@ -397,7 +399,7 @@ const CasoDetail = ({ caseData }) => {
     //db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = ${id}`)
 
     // actualizar el estado en el caso
-    db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer}, usuario_ID = NULL where ID = ${id}`)
+    db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer}, usuario_ID_assigned = NULL where ID = ${id}`)
     
     setSlcUsuario(null)
     setEstado(estado_a_establecer)
@@ -408,8 +410,8 @@ const CasoDetail = ({ caseData }) => {
   const empezar = async() =>{
     const verificar = () =>{
       // verificar si ya tiene asignado a un tecnico el caso
-      const caso = db.exec(`SELECT usuario_ID FROM caso where ID = ${id}`).toObject()
-      const isUsuario = (caso.usuario_ID == null) ? false : true
+      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso where ID = ${id}`).toObject()
+      const isUsuario = (caso.usuario_ID_assigned == null) ? false : true
       if(!isUsuario) return 'Ingresar tecnico'
       // Verificar que tenga vehiculo asignado
       const isVehiculo = (isVehiculoSelected != '') ? true : false
@@ -426,7 +428,7 @@ const CasoDetail = ({ caseData }) => {
       const estado_a_establecer = 3
       db.run(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
       try{
-        db.run(`INSERT INTO visita (vehiculo_ID,usuario_ID,km_inicial) VALUES (${isVehiculoSelected},1,${kmInicial})`)
+        db.run(`INSERT INTO visita (vehiculo_ID,usuario_ID,km_inicial) VALUES (${isVehiculoSelected},${userData?.login?.ID},${kmInicial})`)
         const result = db.exec(`SELECT last_insert_rowid() AS id`).toObject();
         const visita_ID = result.id
         db.run(`INSERT INTO caso_visita (caso_ID,visita_ID) VALUES (${id},${visita_ID})`)
@@ -547,7 +549,7 @@ const CasoDetail = ({ caseData }) => {
       <Stack spacing={4}>
         
           <Text fontSize="lg" color="gray.500" ml={3}>
-            Caso #{id}
+            Caso #: {usuario_ID}-{id}-{caso_uuid.split('-')[0]}
           </Text>
           <Grid templateColumns={{ sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
             <Flex align="center" direction={{sm:"row",lg:"row"}} mb={2} >

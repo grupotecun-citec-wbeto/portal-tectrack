@@ -151,7 +151,9 @@ function Casos() {
           description: row.descripcion,
           prioridad: row.prioridad,
           segmento_ID: row.segmento_ID,
-          fecha:row.fecha
+          fecha:row.fecha,
+          usuario_ID: row.usuario_ID,
+          caso_uuid: row.uuid
         }
         return(
           <CasoDetail caseData={casoData} />

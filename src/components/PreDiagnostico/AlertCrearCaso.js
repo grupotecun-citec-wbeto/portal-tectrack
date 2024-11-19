@@ -4,7 +4,7 @@ import { Link,useHistory } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Alert, AlertIcon, AlertTitle, AlertDescription, Box, CloseButton,Text,Flex,Button } from '@chakra-ui/react';
 
-const SuccessAlertCaso = ({ onClose,caseId }) => {
+const SuccessAlertCaso = ({ onClose,caseId,uuid }) => {
 
     const history = useHistory()
 
@@ -39,7 +39,7 @@ const SuccessAlertCaso = ({ onClose,caseId }) => {
         <Box flex="1">
           <AlertTitle>¡Caso creado con éxito!</AlertTitle>
           <AlertDescription>
-            El caso se ha creado correctamente y está listo para ser gestionado.  <Text fontSize="25px">caso: #{caseId}</Text>
+            El caso se ha creado correctamente y está listo para ser gestionado.  <Text fontSize="25px">caso: # {userData?.login?.ID}-{caseId}-{uuid.split('-')[0]}</Text>
           </AlertDescription>
           <Flex justifyContent='space-between' mt='15px'>
               

@@ -198,6 +198,12 @@ export function SqlProvider({ children }) {
         db.run(`ALTER TABLE caso ADD COLUMN ${columna} TEXT NULL;`)
         saveToIndexedDB(db);
       }
+      const columna2 = 'usuario_ID_assigned'
+      const columnExists2 = tableInfo.some(column => column.name === columna2);
+      if(!columnExists2){
+        db.run(`ALTER TABLE caso ADD COLUMN ${columna2} INTEGER NULL;`)
+        saveToIndexedDB(db);
+      }
 
       /*const iden = '8'
       const resgistro = db.exec(`SELECT ID FROM caso WHERE ID = ${iden}`).toObject()

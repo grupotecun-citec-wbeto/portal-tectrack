@@ -192,9 +192,10 @@ function CardCrearCaso({openAlert}){
             return 0
         }
         
-        const usuario_ID = 1
+        const usuario_ID = userData?.login?.ID || 1
+        const usuario_ID_assigned = usuario_ID;
         const comunicacion_ID = userData?.casos[userData.casoActivo.code]?.comunicacion_ID || 'NULL'
-        const segmento_ID = 1
+        const segmento_ID = 1 // segmento de soporte
         const caso_estado_ID = 1 // caso nuevo
         const fecha = getCurrentDate()
         const start = getCurrentDateTime()
@@ -216,6 +217,7 @@ function CardCrearCaso({openAlert}){
                     INSERT INTO caso (
                         remote_sync_id,
                         usuario_ID,
+                        usuario_ID_assigned,
                         comunicacion_ID,
                         segmento_ID,
                         caso_estado_ID,
@@ -229,7 +231,8 @@ function CardCrearCaso({openAlert}){
                     )
                     VALUES(
                         NULL,
-                        NULL,
+                        ${usuario_ID},
+                        ${usuario_ID_assigned},
                         ${comunicacion_ID},
                         ${segmento_ID},
                         ${caso_estado_ID},
@@ -306,7 +309,7 @@ function CardCrearCaso({openAlert}){
             }
 
             try{
-                openAlert(caseId)
+                openAlert(caseId,uuid)
             }catch(err){
                 console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
             }

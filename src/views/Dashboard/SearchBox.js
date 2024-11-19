@@ -69,6 +69,7 @@ import {
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
     const [isSuccessAlertCaso,setIsSuccessAlertCaso] = useState(false)
     const [caseId,setCaseId] = useState(0)
+    const [caseUuid,setCaseUuid] = useState('')
 
     const [isPost,setIsPost] = useState(false)
 
@@ -175,8 +176,9 @@ import {
       setIsSuccessAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
-    const openAlert = (caseId_in) => {
+    const openAlert = (caseId_in,uuid) => {
       setCaseId(caseId_in)
+      setCaseUuid(uuid)
       setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
@@ -329,7 +331,7 @@ import {
         {!isPost ? (
           <>
             {isSuccessAlertCaso ?(
-              <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId}/>
+              <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid}/>
             ):(
               <CardCrearCaso openAlert={openAlert} />
             )}
