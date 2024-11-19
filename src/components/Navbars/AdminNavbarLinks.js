@@ -93,7 +93,7 @@ export default function HeaderLinks(props) {
 
 
   useEffect( () =>{
-    if(Object.keys(userData.login || {}).length == 0){ 
+    if(Object.keys(userData?.login || {}).length == 0){ 
       history.push('/auth/signin')
     }
   },[userData])
@@ -106,7 +106,7 @@ export default function HeaderLinks(props) {
 
     saveUserData(newUserData)
 
-    if(Object.keys(userData.login || {}).length == 0){ 
+    if(Object.keys(userData?.login || {}).length == 0){ 
       history.push('/auth/login')
     }
   }
@@ -123,7 +123,7 @@ export default function HeaderLinks(props) {
       <SearchBar me='18px' />
       
       {
-        Object.keys(userData.login).length == 0 ? (
+        Object.keys(userData?.login || {}).length == 0 ? (
           <NavLink to='/auth/signin'>
             <Button
               ms='0px'

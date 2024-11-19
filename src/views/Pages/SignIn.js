@@ -63,13 +63,13 @@ function SignIn() {
   });
 
   useEffect( () =>{
-    if(Object.keys(userData.login || {}).length != 0){ 
+    if(Object.keys(userData?.login || {}).length != 0){ 
       history.push('/admin/pages/selectsegmento')
     }
   },[userData])
 
   const handleLogin = async() =>{
-      if(Object.keys(userData.login || {}).length == 0){ 
+      if(Object.keys(userData?.login || {}).length == 0){ 
         try {
           const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/login`, formData);
           console.log(response.data[0]); // Manejar la respuesta del servidor
