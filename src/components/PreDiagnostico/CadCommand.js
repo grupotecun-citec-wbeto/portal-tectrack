@@ -72,19 +72,26 @@ function CardCommand(props){
 
 
     return(
-        <Card>
-            <Button onClick={eliminarUserData}>Eliminar useData</Button>
-            <CardHeader>
-                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Commanda vista temporal</Heading>
-            </CardHeader>
-            {data}
-            <CardBody mt={{xl:'50px', sm:'50px'}}>
-                <Code as="pre" display="block" whiteSpace="pre-wrap">
-                    {JSON.stringify(userData,null, 2)}
-                </Code>
-            </CardBody>
-              
-        </Card>
+        <>
+            {process.env.NODE_ENV== 'development' ? (
+                <Card>
+                    <Button onClick={eliminarUserData}>Eliminar useData</Button>
+                    <CardHeader>
+                        <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Commanda vista temporal</Heading>
+                    </CardHeader>
+                    {data}
+                    <CardBody mt={{xl:'50px', sm:'50px'}}>
+                        <Code as="pre" display="block" whiteSpace="pre-wrap">
+                            {JSON.stringify(userData,null, 2)}
+                        </Code>
+                    </CardBody>
+                    
+                </Card>
+            ):(
+                <></>
+            )}
+        </>
+        
     )
 }
 
