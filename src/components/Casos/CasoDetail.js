@@ -478,35 +478,42 @@ const CasoDetail = ({ caseData }) => {
   const terminar = async() => {
     
     try{
-      if(cantEquipos != 0){
-        const newUserData = structuredClone(userData)
+      if((cantEquipos != 0 && segmento_ID == 1) || segmento_ID != 1){
         
-        const caso = db.exec(`SELECT * FROM caso WHERE ID = ${id}`).toObject()
-        newUserData.casoActivo.caso_id = id
-        newUserData.casoActivo.code = caso.uuid
-        newUserData.casoActivo.busqueda_terminada = 1
+        if(segmento_ID == 1){
+          const newUserData = structuredClone(userData)
+          
+          const caso = db.exec(`SELECT * FROM caso WHERE ID = ${id}`).toObject()
+          newUserData.casoActivo.caso_id = id
+          newUserData.casoActivo.code = caso.uuid
+          newUserData.casoActivo.busqueda_terminada = 1
 
-        // creacion de caso
-        //const caso = structuredClone(newUserData.stuctures.caso)
-      
-        newUserData.casos[caso.uuid] = caso
+          // creacion de caso
+          //const caso = structuredClone(newUserData.stuctures.caso)
+        
+          newUserData.casos[caso.uuid] = caso
 
-        const equipos = JSON.parse(newUserData.casos[caso.uuid].equipos)
-        console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
-        
-        newUserData.casos[caso.uuid].equipos = equipos
-        
+          const equipos = JSON.parse(newUserData.casos[caso.uuid].equipos)
+          console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
+          
+          newUserData.casos[caso.uuid].equipos = equipos
+          
 
-        /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico WHERE caso_ID = ${id}`).toArray()
-        
-        equipos.forEach(element => {
-          const equipoId = structuredClone(newUserData.stuctures.equipoId)
-          newUserData.casos[result.uuid].equipos[element.equipo_ID] = equipoId
-        });*/
-        
+          /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico WHERE caso_ID = ${id}`).toArray()
+          
+          equipos.forEach(element => {
+            const equipoId = structuredClone(newUserData.stuctures.equipoId)
+            newUserData.casos[result.uuid].equipos[element.equipo_ID] = equipoId
+          });*/
+          
 
-        saveUserData(newUserData)
-        history.push('/admin/pages/searchbox')
+          saveUserData(newUserData)
+          history.push('/admin/pages/searchbox')
+        }else{
+          const estado_a_establecer = 5
+          db.run(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
+          setEstado(estado_a_establecer)
+        } 
       }else{
         alert('No tiene equipos procesar, por favor contactar al administrador para revisar el caso')
       }
