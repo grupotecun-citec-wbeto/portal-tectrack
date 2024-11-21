@@ -28,6 +28,7 @@ import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
 import { IoIosBusiness } from "react-icons/io";
 import { MdWorkspaces } from "react-icons/md";
+import { LiaTractorSolid } from "react-icons/lia"; 
 
 import InputKm from './InputKm';
 /*=======================================================
@@ -157,6 +158,8 @@ const CasoDetail = ({ caseData }) => {
     const [isVehiculoSelected,setIsVehiculoSelected] = useState('')
 
     const [kmInicial,setKmInicial] = useState('')
+
+    const [cantEquipos,setCantEquipos] = useState(0)
 
     /**
      * Desestructurar objeto del contexto sqlContext
@@ -334,6 +337,28 @@ const CasoDetail = ({ caseData }) => {
     consultarDiagnostico()
   },[])
 
+  useEffect( () =>{
+    if(typeof id !== 'undefined'){
+      
+
+
+      const caso = db.exec(`SELECT * FROM caso WHERE ID = ${id}`).toObject()
+            
+      const equipos = JSON.parse(caso.equipos)
+
+      const areKeysNumbers = Object.keys(equipos || {}).every(key => !isNaN(Number(key)));
+      
+      if(areKeysNumbers){
+        const cantKeys = Object.keys(equipos).length
+        setCantEquipos(cantKeys)
+      }else{
+        setCantEquipos(0)
+      }
+    }
+    
+    
+  },[id])
+
   
 
   
@@ -448,37 +473,52 @@ const CasoDetail = ({ caseData }) => {
     
   }
 
-  const terminar = async() => {
-
-    const newUserData = structuredClone(userData)
-    
-    const caso = db.exec(`SELECT * FROM caso WHERE ID = ${id}`).toObject()
-    newUserData.casoActivo.caso_id = id
-    newUserData.casoActivo.code = caso.uuid
-    newUserData.casoActivo.busqueda_terminada = 1
-
-    // creacion de caso
-    //const caso = structuredClone(newUserData.stuctures.caso)
   
-    newUserData.casos[caso.uuid] = caso
 
-    const equipos = JSON.parse(newUserData.casos[caso.uuid].equipos)
-    newUserData.casos[caso.uuid].equipos = equipos
+  const terminar = async() => {
     
-    /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico WHERE caso_ID = ${id}`).toArray()
+    try{
+      if(cantEquipos != 0){
+        const newUserData = structuredClone(userData)
+        
+        const caso = db.exec(`SELECT * FROM caso WHERE ID = ${id}`).toObject()
+        newUserData.casoActivo.caso_id = id
+        newUserData.casoActivo.code = caso.uuid
+        newUserData.casoActivo.busqueda_terminada = 1
+
+        // creacion de caso
+        //const caso = structuredClone(newUserData.stuctures.caso)
+      
+        newUserData.casos[caso.uuid] = caso
+
+        const equipos = JSON.parse(newUserData.casos[caso.uuid].equipos)
+        console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
+        
+        newUserData.casos[caso.uuid].equipos = equipos
+        
+
+        /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico WHERE caso_ID = ${id}`).toArray()
+        
+        equipos.forEach(element => {
+          const equipoId = structuredClone(newUserData.stuctures.equipoId)
+          newUserData.casos[result.uuid].equipos[element.equipo_ID] = equipoId
+        });*/
+        
+
+        saveUserData(newUserData)
+        history.push('/admin/pages/searchbox')
+      }else{
+        alert('No tiene equipos procesar, por favor contactar al administrador para revisar el caso')
+      }
+    }catch(err){
+      console.log(err);
+      
+    }
     
-    equipos.forEach(element => {
-      const equipoId = structuredClone(newUserData.stuctures.equipoId)
-      newUserData.casos[result.uuid].equipos[element.equipo_ID] = equipoId
-    });*/
     
 
-    saveUserData(newUserData)
-    
-    
 
-
-    history.push('/admin/pages/searchbox')
+    
    
   }
 
@@ -542,6 +582,23 @@ const CasoDetail = ({ caseData }) => {
           
             
           <Timer startDate={createdAt} />
+
+          <Tooltip label="Cantidad de equipos" aria-label="A tooltip" >
+            <Badge
+              bg="yellow.400"
+              color={"black"}
+              fontSize="0.8em"
+              p="3px 10px"
+              borderRadius="8px"
+            >
+              <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                <Icon as={LiaTractorSolid } color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                {cantEquipos}     
+                
+              </Flex>
+              
+            </Badge>
+          </Tooltip>
             
           
         
