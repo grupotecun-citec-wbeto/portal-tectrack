@@ -6,6 +6,10 @@ import {v4 as uuidv4} from 'uuid'
 import { format } from 'date-fns';
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
+
+
+
+
 async function saveToIndexedDB(db) {
   const dbData = db.export(); // Export the database to a Uint8Array
   const request = indexedDB.open("sqlite_db", 2); // Incremented version
@@ -204,7 +208,8 @@ export function SqlProvider({ children }) {
         db.run(`ALTER TABLE caso ADD COLUMN ${columna2} INTEGER NULL;`)
         saveToIndexedDB(db);
       }
-
+      //const iden = '27'
+      //db.run(`UPDATE caso SET usuario_ID=1 WHERE usuario_ID is NULL AND ID = ${iden}`)
       /*const iden = '8'
       const resgistro = db.exec(`SELECT ID FROM caso WHERE ID = ${iden}`).toObject()
       if(resgistro?.ID || '' == iden){
@@ -715,7 +720,6 @@ export function SqlProvider({ children }) {
     }
   }
 
-
   useEffect(() => {
     const extendFunctions = (db) =>{
       /**
@@ -825,7 +829,6 @@ export function SqlProvider({ children }) {
           await DDL(db)
         }
       
-        
         setDb(db);
 
         // Obtener y establecer los datos en el estado

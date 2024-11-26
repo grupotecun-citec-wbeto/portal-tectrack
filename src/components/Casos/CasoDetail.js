@@ -76,7 +76,8 @@ const CasoDetail = ({ caseData }) => {
     segmento_ID,
     fecha,
     usuario_ID,
-    caso_uuid
+    caso_uuid,
+    remote_sync_id
   } = caseData;
 
   const textColor = useColorModeValue("gray.500", "white");
@@ -613,8 +614,9 @@ const CasoDetail = ({ caseData }) => {
       <Stack spacing={4}>
         
           <Text fontSize="lg" color="gray.500" ml={3}>
-            Caso #: {usuario_ID}-{id}-{caso_uuid.split('-')[0]}
+            Caso #: {usuario_ID}-{id}-{caso_uuid.split('-')[0]}:{remote_sync_id}
           </Text>
+          
           <Grid templateColumns={{ sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
             <Flex align="center" direction={{sm:"row",lg:"row"}} mb={2} >
               {estado != 5 ?(
@@ -702,7 +704,6 @@ const CasoDetail = ({ caseData }) => {
             <Flex direction={'columns'} >
                 <FormControl maxW={{xl:'250px'}} key={id}>
                   <Select id='country' placeholder='Selecconar Vehiculo' onChange={(e) => setIsVehiculoSelected(e.target.value)} value={isVehiculoSelected}>
-                    {console.log('f141a898-3ca1-4d9f-980b-84cefb69e1e9',vehiculos)}
                     {vehiculos.map( (vehiculo) => (
                       <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
                     ))}

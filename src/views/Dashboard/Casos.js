@@ -27,15 +27,22 @@ import CasoDetail from "components/Casos/CasoDetail";
 
 import SqlContext from "sqlContext";
 
+import useCargarCaso from "hookDB/cargarCaso";
+
 function Casos() {
+ 
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
+
+  const[casoRefresh,setCasoRefresh] = useState(false)
 
   const [data, setData] = useState([])
   const [casosCant,setCasosCant] = useState(0)
   const [casosCompletados,setCasosCompletados] = useState(0)
   const [casosPendientes,setCasosPendientes] = useState(0)
   const [casosEnProceso,setCasosEnProceso] = useState(0)
+
+  const cargarCasdo = useCargarCaso(casoRefresh,setCasoRefresh)
 
   const {db,saveToIndexedDB} = useContext(SqlContext)
 
@@ -153,7 +160,8 @@ function Casos() {
           segmento_ID: row.segmento_ID,
           fecha:row.fecha,
           usuario_ID: row.usuario_ID,
-          caso_uuid: row.uuid
+          caso_uuid: row.uuid,
+          remote_sync_id: row.remote_sync_id
         }
         return(
           <CasoDetail caseData={casoData} />
