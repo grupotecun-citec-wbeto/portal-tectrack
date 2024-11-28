@@ -28,6 +28,7 @@ import CasoDetail from "components/Casos/CasoDetail";
 import SqlContext from "sqlContext";
 
 import useCargarCaso from "hookDB/cargarCaso";
+import useTransladoDb from "hookDB/transladoDB";
 
 function Casos() {
  
@@ -43,6 +44,7 @@ function Casos() {
   const [casosEnProceso,setCasosEnProceso] = useState(0)
 
   const cargarCasdo = useCargarCaso(casoRefresh,setCasoRefresh)
+  useTransladoDb()
 
   const {db,saveToIndexedDB} = useContext(SqlContext)
 

@@ -26,7 +26,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
           //IFNULL(remote_sync_id,0) AS ID,
           const casosNoSincronizados = db.exec(`
             SELECT
-              ID AS local_sync_id,
+              uuid AS ID,
               usuario_ID ,
               comunicacion_ID,
               segmento_ID,

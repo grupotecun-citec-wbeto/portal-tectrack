@@ -103,6 +103,7 @@ export function SqlProvider({ children }) {
   const [intervalTimeVisita, setIntervalTimeVisita] = useState(300000);
   const [intervalTimeDiagnostico, setIntervalTimeDiagnostico] = useState(300000);
   const [intervalTimePrograma, setIntervalTimePrograma] = useState(300000);
+  const [intervalTimeCaso, setIntervalTimeCaso] = useState(300000);
   
   
   
@@ -223,6 +224,40 @@ export function SqlProvider({ children }) {
       
       //const result = db.run(`DROP TABLE caso;`)
       //saveToIndexedDB(db);
+    }
+
+
+    /*=======================================================
+      BLOQUE: TABLE CASO_V2
+      DESCRIPTION: 
+    =========================================================*/
+
+    if (!checkTableExists(db, 'caso_v2')) {
+      db.run(`
+        CREATE TABLE IF NOT EXISTS caso_v2 (
+          ID CHAR(36) NOT NULL PRIMARY KEY,
+          syncStatus INTEGER NULL DEFAULT 0,
+          usuario_ID INTEGER NULL,
+          usuario_ID_assigned INTEGER NULL,
+          comunicacion_ID INTEGER NOT NULL,
+          segmento_ID INTEGER NOT NULL,
+          caso_estado_ID INTEGER NOT NULL,
+          fecha DATE NOT NULL,
+          start DATETIME NULL,
+          date_end DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
+          description TEXT NULL,
+          prioridad INTEGER NULL, -- media ponderada de la prioridad
+          uuid TEXT NULL,
+          equipos TEXT NULL,
+          FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID),
+          FOREIGN KEY (segmento_ID) REFERENCES segmento(ID),
+          FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID),
+          FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
+        );
+      `)
+      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    }else{
+
     }
 
     /*=======================================================
@@ -361,7 +396,7 @@ export function SqlProvider({ children }) {
     
   /*=======================================================
     BLOQUE: TABLE ASIGNACION
-    DESCRIPTION: 
+    DESCRIPTION: @deprecated
   =========================================================*/
     
   if (!checkTableExists(db, 'asignacion')) {
@@ -626,6 +661,39 @@ export function SqlProvider({ children }) {
     `)
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
   }else{
+    const tableInfo = db.exec(`PRAGMA table_info(visita)`).toArray()
+    const columna = 'uuid'
+    const columnExists = tableInfo.some(column => column.name === columna);
+    if(!columnExists){
+      db.run(`ALTER TABLE visita ADD COLUMN ${columna} CHAR(36) NULL;`)
+      saveToIndexedDB(db);
+    }
+    //const result = db.run(`DROP TABLE visita;`)
+    //await saveToIndexedDB(db);
+  }
+
+  //=======================================================
+  // SECTION: TABLE Visita_v2
+  //=======================================================
+  if (!checkTableExists(db, 'visita_v2')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS visita_v2 (
+        ID CHAR(36) PRIMARY KEY,
+        vehiculo_ID INTEGER NOT NULL,
+        usuario_ID INTEGER NOT NULL,
+        fecha DATE,
+        programming_date DATETIME,
+        descripcion_motivo TEXT,
+        realization_date DATETIME,
+        confirmation_date DATETIME,
+        km_inicial INTEGER NULL,
+        km_final INTEGER NULL,
+        FOREIGN KEY (vehiculo_ID) REFERENCES vehiculo (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+      );
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
     //const result = db.run(`DROP TABLE visita;`)
     //await saveToIndexedDB(db);
   }
@@ -640,6 +708,25 @@ export function SqlProvider({ children }) {
         visita_ID INTEGER NOT NULL,
         PRIMARY KEY (caso_ID, visita_ID),
         FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (visita_ID) REFERENCES visita (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+      );
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //const result = db.run(`DROP TABLE caso_visita;`)
+    //await saveToIndexedDB(db);
+  }
+
+  //=======================================================
+  // SECTION: TABLE caso_visita
+  //=======================================================
+  if (!checkTableExists(db, 'caso_visita_v2')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS caso_visita_v2 (
+        caso_ID CHAR(36) NOT NULL,
+        visita_ID CHAR(36) NOT NULL,
+        PRIMARY KEY (caso_ID, visita_ID),
+        FOREIGN KEY (caso_ID) REFERENCES caso_v2 (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
         FOREIGN KEY (visita_ID) REFERENCES visita (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
@@ -678,6 +765,35 @@ export function SqlProvider({ children }) {
     //const result = db.run(`DROP TABLE diagnostico;`)
     //await saveToIndexedDB(db);
   }
+
+  //=======================================================
+  // SECTION: TABLE diagnostico_v2
+  //=======================================================
+  if (!checkTableExists(db, 'diagnostico_v2')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS diagnostico_v2 (
+        equipo_ID INTEGER NOT NULL,
+        caso_ID CHAR(36) NOT NULL,
+        diagnostico_tipo_ID INTEGER NOT NULL,
+        asistencia_tipo_ID INTEGER NOT NULL,
+        especialista_ID INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
+        description TEXT NULL,
+        PRIMARY KEY (equipo_ID, caso_ID),
+        FOREIGN KEY (asistencia_tipo_ID) REFERENCES asistencia_tipo(ID),
+        FOREIGN KEY (diagnostico_tipo_ID) REFERENCES diagnostico_tipo(ID),
+        FOREIGN KEY (equipo_ID) REFERENCES equipo(ID),
+        FOREIGN KEY (caso_ID) REFERENCES caso_v2(ID),
+        FOREIGN KEY (especialista_ID) REFERENCES usuario(ID)
+      );
+
+    `)
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //const result = db.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db);
+  }
+
+
   //=======================================================
   // SECTION: TABLE programa
   //=======================================================
@@ -692,6 +808,35 @@ export function SqlProvider({ children }) {
         type TEXT CHECK(type IN ('capacitacion', 'proyecto')) DEFAULT 'capacitacion',
         PRIMARY KEY (caso_ID, asistencia_tipo_ID),
         FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (asistencia_tipo_ID) REFERENCES asistencia_tipo (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+        FOREIGN KEY (catalogo_ID) REFERENCES catalogo (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+      );
+
+    `)
+    
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //const info_tabla = db.exec(`PRAGMA table_info(programa);`)
+    //console.log(info_tabla);
+    
+    //const result = db.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db);
+  }
+
+  //=======================================================
+  // SECTION: TABLE programa_v2
+  //=======================================================
+  if (!checkTableExists(db, 'programa_v2')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS programa_v2 (
+        caso_ID CHAR(36) NOT NULL,
+        asistencia_tipo_ID INTEGER NOT NULL,
+        catalogo_ID INTEGER NOT NULL,
+        prioridad INTEGER,
+        name TEXT,
+        type TEXT CHECK(type IN ('capacitacion', 'proyecto')) DEFAULT 'capacitacion',
+        PRIMARY KEY (caso_ID, asistencia_tipo_ID),
+        FOREIGN KEY (caso_ID) REFERENCES caso_v2 (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
         FOREIGN KEY (asistencia_tipo_ID) REFERENCES asistencia_tipo (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
         FOREIGN KEY (catalogo_ID) REFERENCES catalogo (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
@@ -933,7 +1078,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setIntervalTimeCategoria((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
         const result = db.exec("SELECT * FROM categoria");
         
@@ -982,7 +1127,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setIntervalTimeModelo((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec("SELECT * FROM modelo");
@@ -1034,7 +1179,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setIntervalTimeLinea((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1088,7 +1233,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1142,7 +1287,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1198,7 +1343,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1253,7 +1398,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1305,7 +1450,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1358,7 +1503,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1415,7 +1560,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1468,7 +1613,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1521,7 +1666,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1574,7 +1719,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1627,7 +1772,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1680,7 +1825,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1760,7 +1905,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1814,7 +1959,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1867,7 +2012,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1927,7 +2072,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -1986,7 +2131,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -2046,7 +2191,77 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:', error);
+          console.error('Error fetching data:' + tabla, error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db.exec(`SELECT * FROM ${tabla}`).toArray();
+        
+        
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  },[db,incrementalDate])
+
+
+
+  /*useEffect( () =>{
+    const codigo = 4, tabla = 'caso', setTime = setIntervalTimeCaso, time = intervalTimeCaso
+
+    const fetchData = async (synctable_ID) => {
+      if(db != null && incrementalDate != ''){
+        try {
+          
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
+          
+          const json = JSON.parse(response.data)
+          console.log('73dfb6ce-8ff5-4446-b914-ba3571a8545c',response.data);
+          
+          let values = ``
+          json.forEach((element,index) => {
+            
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+              ${element.local_sync_id}, 
+              ${element.ID}, 
+              ${element.usuario_ID}, 
+              ${element.comunicacion_ID}, 
+              ${element.segmento_ID}, 
+              ${element.caso_estado_ID}, 
+              '${element.fecha}',
+              '${element.start}',
+              '${element.date_end}',
+              '${element.description}',
+              ${element.prioridad},
+              '${element.uuid}',
+              '${element.equipos}'
+            )`
+
+          });
+
+          
+
+          
+          
+          
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,remote_sync_id,usuario_ID,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,uuid,equipos) VALUES ${values};`
+          db.run(insertar)
+          // imporante simpres salvar en en indexdb
+          
+          await saveToIndexedDB(db);
+          setFinSync(true)
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data:  + tabla451d9079-fdfa-41f8-984a-e7bc64ccda59', error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
@@ -2061,7 +2276,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db,incrementalDate])*/
   
   
 

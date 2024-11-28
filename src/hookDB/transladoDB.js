@@ -1,0 +1,347 @@
+import { useState,useContext,useEffect } from 'react';
+import SqlContext from 'sqlContext';
+import axios from 'axios';
+
+import {v4 as uuidv4} from 'uuid'
+
+function useTransladoDb() {
+  
+  const {db,saveToIndexedDB,} = useContext(SqlContext)
+
+  const [casos,setCasos] = useState([])
+  const [stateDiagnosticos,setStateDiagnosticos] = useState([])
+  const [stateVisitas,setStateVisitas] = useState([])
+  const [stateTerminateVisitas,setStateTerminateVisitas] = useState(false)
+  const [stateCasoVisitas,setStateCasoVisitas] = useState([])
+  const [stateProgramas,setStateProgramas] = useState([])
+
+
+
+
+
+  /**
+   * Obtener lista de casos no sincronizados
+   */
+  useEffect( () =>{
+    if(!db) return;
+    const run = async() => {
+        const casos = await db.exec(`
+            SELECT 
+                uuid AS ID,
+                usuario_ID,
+                comunicacion_ID,
+                segmento_ID,
+                caso_estado_ID,
+                fecha,
+                start,
+                date_end,
+                description,
+                prioridad
+            FROM caso `).toArray()
+        
+            setCasos(casos)
+
+        const diagnosticos = await db.exec(`
+            SELECT 
+                D.equipo_ID,
+                C.uuid AS caso_ID,
+                D.diagnostico_tipo_ID,
+                D.asistencia_tipo_ID,
+                CASE 
+                    WHEN D.especialista_ID <> 0 THEN D.especialista_ID 
+                    ELSE NULL 
+                END AS especialista_ID,
+                D.description
+            FROM caso C
+            INNER JOIN diagnostico D ON D.caso_ID = C.ID 
+        `).toArray()
+        setStateDiagnosticos(diagnosticos)
+        
+        const visitas = await db.exec(`
+            SELECT
+                ID,
+                vehiculo_ID,
+                usuario_ID,
+                fecha,
+                programming_date,
+                descripcion_motivo,
+                realization_date,
+                confirmation_date,
+                km_inicial,
+                km_final,
+                uuid
+            FROM 
+                visita
+        `).toArray()
+
+        setStateVisitas(visitas)
+       
+        const programas = db.exec(`
+            SELECT
+                C.uuid AS caso_ID,
+                P.asistencia_tipo_ID,
+                P.catalogo_ID,
+                P.prioridad,
+                P.name,
+                P.type
+            FROM 
+                caso C
+                INNER JOIN programa P ON P.caso_ID = C.ID
+        `).toArray()
+
+        setStateProgramas(programas)
+        
+       
+    }
+    run();
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => {}
+  },[db])
+
+
+    useEffect( () =>{
+        if(!db) return;
+        if(stateTerminateVisitas) return;
+
+        const run = async() =>{
+            const casoVisitas = db.exec(`
+                SELECT
+                    C.uuid AS caso_ID,
+                    V.uuid AS visita_ID
+                FROM
+                    caso_visita CV
+                    INNER JOIN caso C ON C.ID = CV.caso_ID
+                    INNER JOIN visita V ON V.ID = CV.visita_ID 
+                    
+            `).toArray()
+
+            setStateCasoVisitas(casoVisitas)
+        }
+
+        run()
+
+    },[db,stateTerminateVisitas])
+
+
+    useEffect (() =>{
+        if(casos.length == 0) return;
+        
+        
+        
+        let values = ``
+        casos.forEach((element,index) => {
+        
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+                '${element.ID}', 
+                ${element.usuario_ID},
+                ${element.comunicacion_ID},
+                ${element.segmento_ID},
+                ${element.caso_estado_ID},
+                '${element.fecha}',
+                '${element.start}',
+                '${element.date_end}',
+                '${element.description}',
+                ${element.prioridad}
+
+            )` 
+        });
+        
+        try{
+            db.run(`INSERT OR REPLACE INTO caso_v2 (ID,usuario_ID,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad) VALUES ${values}`)
+        }catch(err){
+            console.error('9ec00f74-f9d3-4dd9-bb29-96992702fbbf',err)
+        }
+    },[casos])
+
+    useEffect( () =>{
+        if(stateDiagnosticos.length == 0) return;
+        
+        try{
+            let values = ``
+            stateDiagnosticos.forEach((element,index) => {
+                if(element.equipo_ID <= 404){
+                    //const coma = (index == 0 ) ? '' : ','
+                    values +=  `,(
+                        ${element.equipo_ID}, 
+                        '${element.caso_ID}',
+                        ${element.diagnostico_tipo_ID},
+                        ${element.asistencia_tipo_ID},
+                        ${element.especialista_ID},
+                        '${element.description}'
+                    )` 
+                }
+            });
+            const newValues = values.replace(',','')
+            //console.log(newValues);
+            
+            
+            const data = db.run(`INSERT OR REPLACE INTO diagnostico_v2 (equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description) VALUES ${newValues}`)
+
+            //console.log(data);
+            
+
+        }catch(err){
+            console.error('c2bf1777-1aac-4f96-b0bb-1bb68d6bc8fd',err)
+        }
+        
+        
+    },[stateDiagnosticos])
+    
+    
+    
+    useEffect( () =>{
+        if(stateVisitas.length == 0) return;
+        
+        const run = async() =>{
+
+        
+            try{
+                
+                
+                const values = stateVisitas.reduce( (acc,element) =>{
+                    db.run(`UPDATE visita set uuid='${uuidv4()}' WHERE uuid IS NULL AND ID = ${element.ID}`)
+                    //db.run(`UPDATE visita set uuid=null`)
+                    return acc + `,(
+                        '${element.uuid}', 
+                        ${element.vehiculo_ID},
+                        ${element.usuario_ID},
+                        '${element.fecha}',
+                        '${element.programming_date}',
+                        '${element.descripcion_motivo}',
+                        '${element.realization_date}',
+                        '${element.confirmation_date}',
+                        ${element.km_inicial},
+                        ${element.km_final}
+                    )`
+                },'')
+
+                await saveToIndexedDB(db)
+
+                const newValues = values.replace(',','')
+                //console.log('5f5b232b-5099-4942-8fff-5d89a287597d',newValues);
+                
+                const query = `INSERT OR REPLACE INTO visita_v2 (ID,vehiculo_ID,usuario_ID,fecha,programming_date,descripcion_motivo,realization_date,confirmation_date,km_inicial,km_final) VALUES ${newValues}`
+                console.log('cb318eb7-b203-4fae-a22f-463ed5b4dc3a',query);
+                
+                const data = db.run(query)
+                setStateTerminateVisitas(true) // reportar que ya se termino con visitas
+                saveToIndexedDB(db)
+                
+                
+
+            }catch(err){
+                console.error('2650dcd3-88d4-402f-af1b-ba44f0c3af01',err)
+            }
+        }
+
+        run()
+        
+        
+    },[stateVisitas])
+    
+    
+    
+    useEffect( () =>{
+        if(stateCasoVisitas.length == 0) return;
+        
+        const run = async() =>{
+
+        
+            try{
+                
+                
+                const values = stateCasoVisitas.reduce( (acc,element) =>{
+                    return acc + `,(
+                        '${element.caso_ID}', 
+                        '${element.visita_ID}'
+                    )`
+                },'').replace(',','')
+
+                
+                const query = `INSERT OR REPLACE INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ${values}`
+                
+                const data = db.run(query)
+                saveToIndexedDB(db)
+                
+                
+
+            }catch(err){
+                console.error('2650dcd3-88d4-402f-af1b-ba44f0c3af01',err)
+            }
+        }
+
+        run()
+        
+        
+    },[stateCasoVisitas])
+
+
+
+    useEffect( () =>{
+        if(stateProgramas.length == 0) return;
+        
+        const run = async() =>{
+
+        
+            try{
+
+                const values = stateProgramas.reduce( (acc,element) =>{
+                    return acc + `,(
+                        '${element.caso_ID}', 
+                        ${element.asistencia_tipo_ID},
+                        ${element.catalogo_ID},
+                        ${element.prioridad},
+                        '${element.name}',
+                        '${element.type}'
+
+                    )`
+                },'').replace(',','')
+
+                
+                
+                const query = `INSERT OR REPLACE INTO programa_v2 (caso_ID,asistencia_tipo_ID,catalogo_ID,prioridad,name,type) VALUES ${values}`
+                console.log('c6071a02-e6c9-465e-9ed9-e0d94c49db5b',query);
+                const data = db.run(query)
+                saveToIndexedDB(db)
+                
+                
+
+            }catch(err){
+                console.error('01fc5cd8-879f-4395-9291-c2aa721ee5e0',err)
+            }
+        }
+
+        run()
+        
+        
+    },[stateProgramas])
+    
+    
+    
+
+
+  
+
+}
+
+export default useTransladoDb
+
+
+
+/**
+ * 
+ * const handleChange = (event) => {
+    setValues({
+      ...values,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    // Lógica para enviar el formulario
+    console.log(values);
+  };
+ */

@@ -6,6 +6,8 @@ import { precacheAndRoute } from 'workbox-precaching';
 if (process.env.NODE_ENV === 'production') {
   // Declara self.__WB_MANIFEST (inyectado automáticamente por Workbox)
   precacheAndRoute(self.__WB_MANIFEST);
+}else{
+  precacheAndRoute(self.__WB_MANIFEST);
 }
 
 

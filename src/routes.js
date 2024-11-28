@@ -18,6 +18,7 @@ import PreDiagnosticoBox from 'views/Dashboard/PreDiagnosticoBox';
 import DiagnosticoBox from 'views/Dashboard/DiagnosticoBox';
 import Casos from 'views/Dashboard/Casos';
 import SelectSegmentoDash from 'views/Dashboard/SelectSegmentoDash';
+import ResultTableSqlite from 'views/Pages/ResultTableSqlite';
 
 
 // - NOTE
@@ -272,6 +273,15 @@ var dashRoutes = [
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
         component: SignInDash,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/resultable",
+        name: "Result Table",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: ResultTableSqlite,
         layout: "/admin",
       },
       {
