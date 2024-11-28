@@ -23,11 +23,11 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     const fetchData = async (synctable_ID) => {
       if(db != null){
         try {
-          //IFNULL(remote_sync_id,0) AS ID,
           const casosNoSincronizados = db.exec(`
             SELECT
-              uuid AS ID,
-              usuario_ID ,
+              ID,
+              usuario_ID,
+              usuario_ID_assigned,
               comunicacion_ID,
               segmento_ID,
               caso_estado_ID,
@@ -37,11 +37,12 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
               description,
               prioridad,
               uuid,
-              equipos 
+              equipos
             FROM 
-              caso where remote_sync_id is NULL`).toArray()
+              caso_v2 WHERE length(ID) = 36
+              `).toArray()
 
-          
+            // syncStatus = 0 AND 
             if(Object.keys(formData).length == 0){
               setFormData(casosNoSincronizados)
             }
@@ -86,7 +87,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
           const data = response.data
           setDataCasoSync(data)
           Object.keys(data).map( (uuid) => {
-            db.run(`UPDATE caso SET remote_sync_id = ${data[uuid]} WHERE uuid = '${uuid}'`);
+            db.run(`UPDATE caso_v2 SET syncStatus = 1 WHERE ID = '${uuid}'`);
           })
     
           // recordar de activar este procedimiento
@@ -134,7 +135,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
         const diagnosticos = db.exec(`
           SELECT
             D.equipo_ID,
-            C.remote_sync_id AS caso_ID,
+            C.syncStatus AS caso_ID,
             D.diagnostico_tipo_ID,
             D.asistencia_tipo_ID,
             CASE 

@@ -44,7 +44,7 @@ function Casos() {
   const [casosEnProceso,setCasosEnProceso] = useState(0)
 
   const cargarCasdo = useCargarCaso(casoRefresh,setCasoRefresh)
-  useTransladoDb()
+  
 
   const {db,saveToIndexedDB} = useContext(SqlContext)
 
@@ -58,7 +58,7 @@ function Casos() {
 
   useEffect( () =>{
     if(db != null){
-      const casosData = db.exec("SELECT * FROM caso ORDER BY prioridad ASC").toArray();
+      const casosData = db.exec("SELECT * FROM caso_v2 WHERE length(ID) = 36 ORDER BY prioridad ASC").toArray();
       setData(casosData)
     }
   },[db])
@@ -66,7 +66,7 @@ function Casos() {
 
   useEffect( () =>{
     if(db != null){
-      const casos = db.exec("SELECT count(*) AS cantidad FROM caso").toObject();
+      const casos = db.exec("SELECT count(*) AS cantidad FROM caso_v2").toObject();
       setCasosCant(casos.cantidad)
     }
   },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
@@ -74,14 +74,14 @@ function Casos() {
   
   useEffect( () =>{
     if(db != null){
-      const casos = db.exec("SELECT count(*) AS completados FROM caso where caso_estado_ID = 5").toObject();
+      const casos = db.exec("SELECT count(*) AS completados FROM caso_v2 where caso_estado_ID = 5").toObject();
       setCasosCompletados(casos.completados)
     }
   },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
  
   useEffect( () =>{
     if(db != null){
-      const casos = db.exec("SELECT count(*) AS pendientes FROM caso where caso_estado_ID = 1").toObject();
+      const casos = db.exec("SELECT count(*) AS pendientes FROM caso_v2 where caso_estado_ID = 1").toObject();
       setCasosPendientes(casos.pendientes)
     }
   },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
@@ -89,7 +89,7 @@ function Casos() {
   
   useEffect( () =>{
     if(db != null){
-      const casos = db.exec("SELECT count(*) AS enproceso FROM caso where caso_estado_ID = 3").toObject();
+      const casos = db.exec("SELECT count(*) AS enproceso FROM caso_v2 where caso_estado_ID = 3").toObject();
       setCasosEnProceso(casos.enproceso)
     }
   },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
@@ -163,7 +163,7 @@ function Casos() {
           fecha:row.fecha,
           usuario_ID: row.usuario_ID,
           caso_uuid: row.uuid,
-          remote_sync_id: row.remote_sync_id
+          syncStatus: row.syncStatus
         }
         return(
           <CasoDetail caseData={casoData} />

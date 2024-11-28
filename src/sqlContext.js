@@ -210,7 +210,7 @@ export function SqlProvider({ children }) {
         saveToIndexedDB(db);
       }
       //const iden = '27'
-      //db.run(`UPDATE caso SET usuario_ID=1 WHERE usuario_ID is NULL AND ID = ${iden}`)
+      //db.run(`UPDATE caso_v2 SET usuario_ID=1 WHERE usuario_ID is NULL AND ID = ${iden}`)
       /*const iden = '8'
       const resgistro = db.exec(`SELECT ID FROM caso WHERE ID = ${iden}`).toObject()
       if(resgistro?.ID || '' == iden){
@@ -1078,7 +1078,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setIntervalTimeCategoria((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:' + tabla, error);
+          console.error('Error fetching data:' + 'categoria', error);
         }
         const result = db.exec("SELECT * FROM categoria");
         
@@ -1127,7 +1127,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setIntervalTimeModelo((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:' + tabla, error);
+          console.error('Error fetching data:' + 'modelo', error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec("SELECT * FROM modelo");

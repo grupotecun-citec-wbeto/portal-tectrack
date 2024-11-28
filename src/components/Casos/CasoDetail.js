@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from 'react';
 //redux
 import { useSelector, useDispatch } from 'react-redux';
+import {v4 as uuidv4} from 'uuid'
 import {
   Box,
   Flex,
@@ -77,7 +78,7 @@ const CasoDetail = ({ caseData }) => {
     fecha,
     usuario_ID,
     caso_uuid,
-    remote_sync_id
+    syncStatus
   } = caseData;
 
   const textColor = useColorModeValue("gray.500", "white");
@@ -296,13 +297,13 @@ const CasoDetail = ({ caseData }) => {
   useEffect( () =>{
     const consultarAsigancion = async() =>{
       
-      /*const result = db.toObject(db.exec(`SELECT * FROM  asignacion WHERE caso_ID = ${id} ORDER BY fecha DESC LIMIT 1;`) || {})
+      /*const result = db.toObject(db.exec(`SELECT * FROM  asignacion WHERE caso_ID = '${id}' ORDER BY fecha DESC LIMIT 1;`) || {})
       if(typeof result !== 'undefined'){
         if(Object.keys(result).length != 0){
           setSlcUsuario(result.usuario_ID)
         }
       }*/
-      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso WHERE ID = ${id}`).toObject()
+      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso_v2 WHERE ID = '${id}'`).toObject()
       if(Object.keys(caso || {}).length != 0){
         setSlcUsuario(caso.usuario_ID_assigned)
       }
@@ -323,7 +324,7 @@ const CasoDetail = ({ caseData }) => {
           description,
           asistencia_tipo_ID,
           visita_ID
-          FROM  diagnostico WHERE caso_ID = ${id}`
+          FROM  diagnostico WHERE caso_ID = '${id}'`
           
         const diagnosticos = db.exec(sql).toArray()
           if(diagnosticos.length != 0){
@@ -343,7 +344,7 @@ const CasoDetail = ({ caseData }) => {
       
 
 
-      const caso = db.exec(`SELECT * FROM caso WHERE ID = ${id}`).toObject()
+      const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
             
       const equipos = JSON.parse(caso.equipos)
 
@@ -394,26 +395,28 @@ const CasoDetail = ({ caseData }) => {
    */
   const asignar = async() =>{
     
-    if(slcUsuario != null && slcUsuario != ""){
-      /**
-       * Estado el caso que se va colocar cuando el usuario es asignado a un caso
-       * @type {number}
-       */
-      const estado_a_asignar = 2
-      // Insertar asignacion de usuario al caso, para establecer que usuario que resolver el caso
-      //const result = await db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},${id},'${getCurrentDateTime()}','')`)
-      //db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},${id},'${getCurrentDateTime()}','')`)
-      
-      // Actualizar a estado asignado cuando se agigna un caso hacia estado 2: Asignado
-      db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}  where ID = ${id}`)
-      
-      // Establecer el usuario que va resolver el caso
-      setEstado(estado_a_asignar)
-      setIsEditTecnico(!isEditTecnico)
-      await saveToIndexedDB(db)
+    try{
+      if(slcUsuario != null && slcUsuario != ""){
+        /**
+         * Estado el caso que se va colocar cuando el usuario es asignado a un caso
+         * @type {number}
+         */
+        const estado_a_asignar = 2
+        // Insertar asignacion de usuario al caso, para establecer que usuario que resolver el caso
+        //const result = await db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},'${id}','${getCurrentDateTime()}','')`)
+        //db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},'${id}','${getCurrentDateTime()}','')`)
+        
+        // Actualizar a estado asignado cuando se agigna un caso hacia estado 2: Asignado
+        db.exec(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}  where ID = '${id}'`)
+        
+        // Establecer el usuario que va resolver el caso
+        setEstado(estado_a_asignar)
+        setIsEditTecnico(!isEditTecnico)
+        saveToIndexedDB(db)
+      }
+    }catch(err){
+      console.error('6ac889ae-bcee-41a8-a848-dfd7ac3c0f47',err)
     }
-    // Persistir la informacion de db
-   
 
    
   }
@@ -422,21 +425,21 @@ const CasoDetail = ({ caseData }) => {
     // 
     const estado_a_establecer = 1
     // Se elimina el usuario que estaba seleccionado
-    //db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = ${id}`)
+    //db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = '${id}'`)
 
     // actualizar el estado en el caso
-    db.exec(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer}, usuario_ID_assigned = NULL where ID = ${id}`)
+    db.exec(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, usuario_ID_assigned = NULL where ID = '${id}'`)
     
     setSlcUsuario(null)
     setEstado(estado_a_establecer)
     // persistir db
-    await saveToIndexedDB(db)
+    saveToIndexedDB(db)
   }
 
   const empezar = async() =>{
     const verificar = () =>{
       // verificar si ya tiene asignado a un tecnico el caso
-      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso where ID = ${id}`).toObject()
+      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso_v2 where ID = '${id}'`).toObject()
       const isUsuario = (caso.usuario_ID_assigned == null) ? false : true
       if(!isUsuario) return 'Ingresar tecnico'
       // Verificar que tenga vehiculo asignado
@@ -450,22 +453,27 @@ const CasoDetail = ({ caseData }) => {
     }
     const message = verificar()
     if(message == ''){
-      setIsEmpezado(true)
-      const estado_a_establecer = 3
-      db.run(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
       try{
-        db.run(`INSERT INTO visita (vehiculo_ID,usuario_ID,km_inicial) VALUES (${isVehiculoSelected},${userData?.login?.ID},${kmInicial})`)
-        const result = db.exec(`SELECT last_insert_rowid() AS id`).toObject();
-        const visita_ID = result.id
-        db.run(`INSERT INTO caso_visita (caso_ID,visita_ID) VALUES (${id},${visita_ID})`)
+        await db.exec('BEGIN TRANSACTION');
+          setIsEmpezado(true)
+          const estado_a_establecer = 3
+          db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer} where ID = '${id}'`)
+
+          const visita_ID = uuidv4()
+          db.run(`INSERT INTO visita_v2 (ID,vehiculo_ID,usuario_ID,km_inicial) VALUES ('${visita_ID}',${isVehiculoSelected},${userData?.login?.ID},${kmInicial})`)
+          
+          db.run(`INSERT INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ('${id}',${visita_ID})`)
+          await db.exec('COMMIT');
+
+          setEstado(estado_a_establecer)
+          // gurdar en base de datos sqlite
+          saveToIndexedDB(db)
         
       }catch(err){
-        console.log('df786fcc-c360-46be-b332-0f96c7fcd358',err)
+        await db.exec('ROLLBACK');
+        console.log('f45ebaa5-8d54-4634-a2cd-efda1cb2a8bd',err)
       }
-
-      setEstado(estado_a_establecer)
-      // gurdar en base de datos sqlite
-      await saveToIndexedDB(db)
+      
     }else{
       alert(message)
     }
@@ -484,7 +492,7 @@ const CasoDetail = ({ caseData }) => {
         if(segmento_ID == 1){
           const newUserData = structuredClone(userData)
           
-          const caso = db.exec(`SELECT * FROM caso WHERE ID = ${id}`).toObject()
+          const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
           newUserData.casoActivo.caso_id = id
           newUserData.casoActivo.code = caso.uuid
           newUserData.casoActivo.busqueda_terminada = 1
@@ -500,7 +508,7 @@ const CasoDetail = ({ caseData }) => {
           newUserData.casos[caso.uuid].equipos = equipos
           
 
-          /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico WHERE caso_ID = ${id}`).toArray()
+          /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID = '${id}'`).toArray()
           
           equipos.forEach(element => {
             const equipoId = structuredClone(newUserData.stuctures.equipoId)
@@ -512,7 +520,7 @@ const CasoDetail = ({ caseData }) => {
           history.push('/admin/pages/searchbox')
         }else{
           const estado_a_establecer = 5
-          db.run(`UPDATE caso SET caso_estado_ID = ${estado_a_establecer} where ID = ${id}`)
+          db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer} where ID = '${id}'`)
           setEstado(estado_a_establecer)
         } 
       }else{
@@ -614,7 +622,7 @@ const CasoDetail = ({ caseData }) => {
       <Stack spacing={4}>
         
           <Text fontSize="lg" color="gray.500" ml={3}>
-            Caso #: {usuario_ID}-{id}-{caso_uuid.split('-')[0]}:{remote_sync_id}
+            Caso #: {usuario_ID}-{id?.split('-')[0]}
           </Text>
           
           <Grid templateColumns={{ sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>

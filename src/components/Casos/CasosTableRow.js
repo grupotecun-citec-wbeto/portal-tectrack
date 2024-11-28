@@ -113,7 +113,7 @@ function CasosTableRow(props) {
       const result = db.exec(`INSERT INTO asignacion VALUES (${usuario_id},${caso_ID},'${getCurrentDateTime()}','')`)
       
       // Actualizar a estado asignado cuando se agigna un caso
-      db.exec(`UPDATE caso SET caso_estado_ID = 2 where ID = ${caso_ID}`)
+      db.exec(`UPDATE caso_v2 SET caso_estado_ID = 2 where ID = ${caso_ID}`)
       
 
       setSelectUsuario(usuario_id)

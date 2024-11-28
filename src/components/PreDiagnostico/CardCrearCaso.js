@@ -208,14 +208,15 @@ function CardCrearCaso({openAlert}){
         const prioridad = Math.ceil(suma_prioridad / sizeEquipos) // promedio ponderado de la prioridad de todos las maquinas
         
         
-        const caso = db.exec(`SELECT count(*) as Size FROM caso WHERE uuid = '${uuid}' `).toObject()
+        const caso = db.exec(`SELECT count(*) as Size FROM caso_v2 WHERE uuid = '${uuid}' `).toObject()
         if(caso.Size == 0){
             let caseId = 0
             try {
                 await db.exec('BEGIN TRANSACTION');
                 const sql = `
-                    INSERT INTO caso (
-                        remote_sync_id,
+                    INSERT INTO caso_v2 (
+                        ID,
+                        syncStatus,
                         usuario_ID,
                         usuario_ID_assigned,
                         comunicacion_ID,
@@ -226,10 +227,10 @@ function CardCrearCaso({openAlert}){
                         date_end,
                         description,
                         prioridad,
-                        uuid,
                         equipos
                     )
                     VALUES(
+                        '${uuid}',
                         NULL,
                         ${usuario_ID},
                         ${usuario_ID_assigned},
@@ -241,7 +242,6 @@ function CardCrearCaso({openAlert}){
                         NULL,
                         NULL,
                         ${prioridad},
-                        '${uuid}',
                         '${equiposIfy}'
                         
                     )
@@ -263,7 +263,7 @@ function CardCrearCaso({openAlert}){
                     const prioridad = userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
                    
                     const sql = `
-                        INSERT INTO diagnostico
+                        INSERT INTO diagnostico_v2
                         VALUES
                             (
                                 ${maquina_id},
@@ -321,25 +321,7 @@ function CardCrearCaso({openAlert}){
 
         
 
-        /*
-        
-        ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-          remote_sync_id INTEGER NULL,
-          usuario_ID INTEGER NOT NULL,
-          comunicacion_ID INTEGER NOT NULL,
-          segmento_ID INTEGER NOT NULL,
-          caso_estado_ID INTEGER NOT NULL,
-          fecha DATE NOT NULL,
-          start DATETIME NULL,
-          date_end DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
-          description TEXT NULL,
-          prioridad INTEGER NULL, -- media ponderada de la prioridad
-          FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID),
-          FOREIGN KEY (segmento_ID) REFERENCES segmento(ID),
-          FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID),
-          FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
-        
-        */
+    
 
 
         

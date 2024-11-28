@@ -209,14 +209,15 @@ function CardCrearCasoPrograma({openAlert}){
         const prioridad = 3
         
         
-        const caso = db.exec(`SELECT count(*) as Size FROM caso WHERE uuid = '${uuid}' `).toObject()
+        const caso = db.exec(`SELECT count(*) as Size FROM caso_v2 WHERE uuid = '${uuid}' `).toObject()
         if(caso.Size == 0){
             let caseId = 0
             try {
                 await db.exec('BEGIN TRANSACTION');
                 const sql = `
-                    INSERT INTO caso (
-                        remote_sync_id,
+                    INSERT INTO caso_v2 (
+                        ID
+                        syncStatus,
                         usuario_ID,
                         usuario_ID_assigned,
                         comunicacion_ID,
@@ -227,10 +228,10 @@ function CardCrearCasoPrograma({openAlert}){
                         date_end,
                         description,
                         prioridad,
-                        uuid,
                         equipos
                     )
                     VALUES(
+                        '${uuid}',
                         NULL,
                         ${usuario_ID},
                         ${usuario_ID_assigned},
@@ -242,7 +243,6 @@ function CardCrearCasoPrograma({openAlert}){
                         NULL,
                         NULL,
                         ${prioridad},
-                        '${uuid}',
                         '${programaSistemasIfy}'
                         
                     )
@@ -255,7 +255,7 @@ function CardCrearCasoPrograma({openAlert}){
 
                 caseId = resultInsert.caseId
 
-                db.run(`INSERT INTO programa (caso_ID,asistencia_tipo_ID,catalogo_ID,prioridad,name) 
+                db.run(`INSERT INTO programa_v2 (caso_ID,asistencia_tipo_ID,catalogo_ID,prioridad,name) 
                         VALUES (${caseId},1,${catalogo_ID},${prioridad},'${name}')`)
                 
                 
@@ -309,25 +309,7 @@ function CardCrearCasoPrograma({openAlert}){
 
         
 
-        /*
         
-        ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-          remote_sync_id INTEGER NULL,
-          usuario_ID INTEGER NOT NULL,
-          comunicacion_ID INTEGER NOT NULL,
-          segmento_ID INTEGER NOT NULL,
-          caso_estado_ID INTEGER NOT NULL,
-          fecha DATE NOT NULL,
-          start DATETIME NULL,
-          date_end DATETIME NULL, -- Fecha y hora en que el caso es terminado en formato ISO 8601
-          description TEXT NULL,
-          prioridad INTEGER NULL, -- media ponderada de la prioridad
-          FOREIGN KEY (comunicacion_ID) REFERENCES comunicacion(ID),
-          FOREIGN KEY (segmento_ID) REFERENCES segmento(ID),
-          FOREIGN KEY (caso_estado_ID) REFERENCES caso_estado(ID),
-          FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
-        
-        */
 
 
         

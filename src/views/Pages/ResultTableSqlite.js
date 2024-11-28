@@ -23,6 +23,7 @@ const ResultTableSqlite = () => {
   const {db,saveToIndexedDB} = useContext(SqlContext)
   const [query, setQuery] = useState('select * from caso');
   const [consult, setConsult] = useState('');
+  const [ejecucion, setEjecucion] = useState(false);
   //const [debouncedQuery] = useDebounce(query, 500);
   const [data, setData] = useState([]);
   const [columns,setColumns] = useState([])
@@ -56,6 +57,37 @@ const ResultTableSqlite = () => {
     }
   }, [consult, toast]);
 
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        db.exec(query).toArray()
+        saveToIndexedDB(db)
+        toast({
+          title: 'Successs',
+          description: 'Corrcto',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+        });
+        
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Ocurrió un error al ejecutar la consulta.' + error,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    };
+
+    if (ejecucion) {
+      fetchData();
+      
+    }
+  }, [ejecucion, toast]);
+
   return (
     <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
       <Flex
@@ -80,18 +112,23 @@ const ResultTableSqlite = () => {
             p='24px'
             flex={1}
           >
-            <Input
-              placeholder="Ingrese su consulta SQL"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              size="lg"
-              variant="filled"
-            />
-            <Button colorScheme="blue" variant="solid" onClick={() => setConsult(!consult)} >
-              CONSULTAR
-            </Button>
+            
             
               <Box overflowY="auto" height="300px">
+              <Input
+                placeholder="Ingrese su consulta SQL"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                size="lg"
+                color="black"
+                variant="solid"
+              />
+              <Button colorScheme="blue" variant="solid" onClick={() => setConsult(!consult)} >
+                CONSULTAR
+              </Button>
+              <Button colorScheme="blue" variant="solid" onClick={() => setEjecucion(!ejecucion)} >
+                  EJECUTAR
+              </Button>
                 <Table variant="striped" colorScheme="teal" flex={1}>
                   <Thead flex={1}>
                     {/* Aquí puedes agregar los encabezados de la tabla dinámicamente */}
@@ -116,6 +153,10 @@ const ResultTableSqlite = () => {
                   </Tbody>
                 </Table>
               </Box>
+          
+              
+
+
             
           </Flex>
         </Flex>

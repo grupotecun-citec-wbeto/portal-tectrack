@@ -7,6 +7,11 @@ import {
   useColorMode,
   Image,
 } from "@chakra-ui/react";
+
+// TECTRACK CUSTOM
+import useTransladoDb from "hookDB/transladoDB";
+
+
 import Configurator from "components/Configurator/Configurator";
 import Footer from "components/Footer/Footer.js";
 import {
@@ -37,6 +42,9 @@ import medallon_naranja from "assets/img/Medallones Tecun-04.png" // color naran
 
 export default function Dashboard(props) {
   const { ...rest } = props;
+
+  useTransladoDb() // cargar correción de base de datos hacia base de datos distribuidas
+
   // states and functions
   const [fixed, setFixed] = useState(false);
   const { colorMode } = useColorMode();
