@@ -2239,7 +2239,7 @@ export function SqlProvider({ children }) {
 
 
 
-  /*useEffect( () =>{
+  useEffect( () =>{
     const codigo = 4, tabla = 'caso', setTime = setIntervalTimeCaso, time = intervalTimeCaso
 
     const fetchData = async (synctable_ID) => {
@@ -2255,10 +2255,7 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            const fecha = !element.fecha?.includes('null') ? `'${format(element.fecha, 'yyyy-MM-dd')}'` : null;
-            const start = !element.start?.includes('null') ? `'${format(element.start, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-            const date_end = !element.date_end?.includes('null') ? `'${format(element.date_end, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-            const description = !element.description?.includes('null')  ? `'${element.description}'` : `''`;
+           
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
               '${element.ID}',
@@ -2268,13 +2265,13 @@ export function SqlProvider({ children }) {
               ${element.comunicacion_ID}, 
               ${element.segmento_ID}, 
               ${element.caso_estado_ID}, 
-              ${fecha},
-              ${start},
-              ${date_end},
-              ${description},
+              ${element.fecha ? `'${element.fecha}'` : null},
+              ${element.start ? `'${element.start}'` : null},
+              ${element.date_end  ? `'${element.date_end}'` : null},
+              ${element.description ? `'${element.description}'` : null},
               ${element.prioridad},
-              '${element.uuid}',
-              '${element.equipos}'
+              ${element.uuid ? `'${element.uuid}'` : null},
+              ${element.equipos ? `'${element.equipos}'` : null}
             )`
 
           });
@@ -2306,7 +2303,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])*/
+  },[db,incrementalDate])
   
   
 
