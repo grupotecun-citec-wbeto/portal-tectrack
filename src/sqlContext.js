@@ -2247,6 +2247,7 @@ export function SqlProvider({ children }) {
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          console.log(response);
           
           
           const json = JSON.parse(response.data)
@@ -2254,32 +2255,33 @@ export function SqlProvider({ children }) {
           
           let values = ``
           json.forEach((element,index) => {
-            
+            const fecha = !element.fecha?.includes('null') ? `'${format(element.fecha, 'yyyy-MM-dd')}'` : null;
+            const start = !element.start?.includes('null') ? `'${format(element.start, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+            const date_end = !element.date_end?.includes('null') ? `'${format(element.date_end, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+            const description = !element.description?.includes('null')  ? `'${element.description}'` : `''`;
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
-              ${element.local_sync_id}, 
-              ${element.ID}, 
+              '${element.ID}',
+              1, 
               ${element.usuario_ID}, 
+              ${element.usuario_ID_assigned}, 
               ${element.comunicacion_ID}, 
               ${element.segmento_ID}, 
               ${element.caso_estado_ID}, 
-              '${element.fecha}',
-              '${element.start}',
-              '${element.date_end}',
-              '${element.description}',
+              ${fecha},
+              ${start},
+              ${date_end},
+              ${description},
               ${element.prioridad},
               '${element.uuid}',
               '${element.equipos}'
             )`
 
           });
-
           
-
+          console.log(values);
           
-          
-          
-          const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,remote_sync_id,usuario_ID,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,uuid,equipos) VALUES ${values};`
+          const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (ID,syncStatus,usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,uuid,equipos) VALUES ${values};`
           db.run(insertar)
           // imporante simpres salvar en en indexdb
           
@@ -2289,7 +2291,7 @@ export function SqlProvider({ children }) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:  + tabla451d9079-fdfa-41f8-984a-e7bc64ccda59', error);
+          console.error(`Error fetching data: ${tabla} 451d9079-fdfa-41f8-984a-e7bc64ccda59`, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
