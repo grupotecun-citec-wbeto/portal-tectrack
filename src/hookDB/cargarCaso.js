@@ -11,6 +11,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
   const [dataCasoSync,setDataCasoSync] = useState({})
   const [formDatadiagnosticos,setFormDataDiagnosticos] = useState({})
   const [formDataProgramas,setFormDataProgramas] = useState({})
+  const [formDataVisitas,setFormDataVisitas] = useState({})
   const [listaCasos,setListaCasos] = useState([])
 
 
@@ -85,6 +86,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     if (formData.length == 0) return;
     if (formDatadiagnosticos.length == 0) return;
     if (formDataProgramas.length == 0) return;
+    if (formDataVisitas.length == 0) return;
 
     const fetchData = async(url,retries = 3,delay = 100) =>{
       let attempts = 0;
@@ -96,7 +98,8 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
           const formDataMerge = {
             "casos":formData,
             "diagnosticos":formDatadiagnosticos,
-            "programas": formDataProgramas
+            "programas": formDataProgramas,
+            "visitas": formDataVisitas
           };
           
           const response = await axios.post(url, formDataMerge);
@@ -130,7 +133,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     
     
     
-  },[formData,formDatadiagnosticos,formDataProgramas])
+  },[formData,formDatadiagnosticos,formDataProgramas,formDataVisitas])
 
   // Obtner la lista diagnosticos segun la lista de casos sincronizados
   useEffect( () =>{
@@ -179,14 +182,29 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
             `).toArray()
           setFormDataProgramas(programas)
 
-          /**
-           * caso_ID CHAR(36) NOT NULL,
-        asistencia_tipo_ID INTEGER NOT NULL,
-        catalogo_ID INTEGER NOT NULL,
-        prioridad INTEGER,
-        name TEXT,
-        type TEXT CHECK(type IN ('capacitacion', 'proyecto')) DEFAULT 'capacitacion',
-           */
+          const visitas = db.exec(`
+            SELECT
+              V.ID,
+              V.vehiculo_ID,
+              V.usuario_ID,
+              V.fecha,
+              V.programming_date,
+              V.descripcion_motivo,
+              V.realization_date,
+              V.confirmation_date,
+              V.km_inicial,
+              V.km_final
+            FROM 
+              caso_v2 C
+              INNER JOIN caso_visita_v2 CV ON CV.caso_ID = C.ID
+              INNER JOIN visita_v2 V ON V.ID = CV.visita_ID
+            WHERE
+              C.ID IN (${uuids})
+            
+            `).toArray()
+          setFormDataVisitas(visitas)
+
+    
       
       }catch(err){
         console.warn('bdd2c366-e099-4a5c-bc71-d2aa7e3de3ac',err)
