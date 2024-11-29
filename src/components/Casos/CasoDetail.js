@@ -462,7 +462,7 @@ const CasoDetail = ({ caseData }) => {
           const visita_ID = uuidv4()
           db.run(`INSERT INTO visita_v2 (ID,vehiculo_ID,usuario_ID,km_inicial) VALUES ('${visita_ID}',${isVehiculoSelected},${userData?.login?.ID},${kmInicial})`)
           
-          db.run(`INSERT INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ('${id}',${visita_ID})`)
+          db.run(`INSERT INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ('${id}','${visita_ID}')`)
           await db.exec('COMMIT');
 
           setEstado(estado_a_establecer)

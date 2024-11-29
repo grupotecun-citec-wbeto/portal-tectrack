@@ -12,6 +12,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
   const [formDatadiagnosticos,setFormDataDiagnosticos] = useState({})
   const [formDataProgramas,setFormDataProgramas] = useState({})
   const [formDataVisitas,setFormDataVisitas] = useState({})
+  const [formDataCasoVisitas,setFormDataCasoVisitas] = useState({})
   const [listaCasos,setListaCasos] = useState([])
 
 
@@ -87,6 +88,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     if (formDatadiagnosticos.length == 0) return;
     if (formDataProgramas.length == 0) return;
     if (formDataVisitas.length == 0) return;
+    if (formDataCasoVisitas.length == 0) return;
 
     const fetchData = async(url,retries = 3,delay = 100) =>{
       let attempts = 0;
@@ -99,7 +101,8 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
             "casos":formData,
             "diagnosticos":formDatadiagnosticos,
             "programas": formDataProgramas,
-            "visitas": formDataVisitas
+            "visitas": formDataVisitas,
+            "caso_visitas":formDataCasoVisitas
           };
           
           const response = await axios.post(url, formDataMerge);
@@ -133,7 +136,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     
     
     
-  },[formData,formDatadiagnosticos,formDataProgramas,formDataVisitas])
+  },[formData,formDatadiagnosticos,formDataProgramas,formDataVisitas,formDataCasoVisitas])
 
   // Obtner la lista diagnosticos segun la lista de casos sincronizados
   useEffect( () =>{
@@ -203,6 +206,22 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
             
             `).toArray()
           setFormDataVisitas(visitas)
+
+          const casoVisitas = db.exec(`
+            SELECT
+              CV.caso_ID,
+              CV.visita_ID
+            FROM 
+              caso_v2 C
+              INNER JOIN caso_visita_v2 CV ON CV.caso_ID = C.ID
+            WHERE
+              C.ID IN (${uuids})
+            
+            `).toArray()
+          setFormDataCasoVisitas(casoVisitas)
+
+          /** caso_ID CHAR(36) NOT NULL,
+        visita_ID CHAR(36) NOT NULL, */
 
     
       
