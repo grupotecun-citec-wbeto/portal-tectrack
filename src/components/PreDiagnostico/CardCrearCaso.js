@@ -206,11 +206,10 @@ function CardCrearCaso({openAlert}){
         
         const sizeEquipos = equiposArray.length
         const prioridad = Math.ceil(suma_prioridad / sizeEquipos) // promedio ponderado de la prioridad de todos las maquinas
-        
+        let caseId = 0
         
         const caso = db.exec(`SELECT count(*) as Size FROM caso_v2 WHERE uuid = '${uuid}' `).toObject()
         if(caso.Size == 0){
-            let caseId = 0
             try {
                 await db.exec('BEGIN TRANSACTION');
                 const sql = `
