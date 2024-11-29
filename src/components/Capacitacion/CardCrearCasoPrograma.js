@@ -251,12 +251,12 @@ function CardCrearCasoPrograma({openAlert}){
                 
                 db.run(sql)
                 
-                const resultInsert = await db.exec('SELECT last_insert_rowid() AS caseId').toObject()
+                //const resultInsert = await db.exec('SELECT last_insert_rowid() AS caseId').toObject()
 
-                caseId = resultInsert.caseId
+                caseId = uuid
 
                 db.run(`INSERT INTO programa_v2 (caso_ID,asistencia_tipo_ID,catalogo_ID,prioridad,name) 
-                        VALUES (${caseId},1,${catalogo_ID},${prioridad},'${name}')`)
+                        VALUES ('${caseId}',1,${catalogo_ID},${prioridad},'${name}')`)
                 
                 
                 

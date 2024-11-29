@@ -250,9 +250,9 @@ function CardCrearCaso({openAlert}){
                 
                 db.run(sql)
                 
-                const resultInsert = await db.exec('SELECT last_insert_rowid() AS caseId').toObject()
+                //const resultInsert = await db.exec('SELECT last_insert_rowid() AS caseId').toObject()
 
-                caseId = resultInsert.caseId
+                caseId = uuid
 
                 equiposArray.forEach((maquina_id) =>{
                     //userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
@@ -267,15 +267,20 @@ function CardCrearCaso({openAlert}){
                         VALUES
                             (
                                 ${maquina_id},
-                                ${caseId},
+                                '${caseId}',
                                 ${diagnostico_tipo_ID},
                                 ${asistencia_tipo_ID},
                                 ${especialista_ID},
-                                '${description}',
-                                NULL,
-                                ${prioridad}
+                                '${description}'
                             )
                     `
+
+                    /**equipo_ID INTEGER NOT NULL,
+        caso_ID CHAR(36) NOT NULL,
+        diagnostico_tipo_ID INTEGER NOT NULL,
+        asistencia_tipo_ID INTEGER NOT NULL,
+        especialista_ID INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
+        description TEXT NULL, */
             
                     db.exec(sql)
 
@@ -303,7 +308,7 @@ function CardCrearCaso({openAlert}){
 
                 await saveToIndexedDB(db)
             }catch(err){
-                console.error('ebeafbf7-4a90-43f2-bcc3-76bd5578c31c',err)
+                console.error('0b6bc4bd-62ac-457c-97d7-6dc450e58fa9',err)
                 await db.exec("ROLLBACK");
                 
             }
