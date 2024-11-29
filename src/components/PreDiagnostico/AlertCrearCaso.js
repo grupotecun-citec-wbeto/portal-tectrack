@@ -39,7 +39,7 @@ const SuccessAlertCaso = ({ onClose,caseId,uuid }) => {
         <Box flex="1">
           <AlertTitle>¡Caso creado con éxito!</AlertTitle>
           <AlertDescription>
-            El caso se ha creado correctamente y está listo para ser gestionado.  <Text fontSize="25px">caso: # {userData?.login?.ID}-{caseId}-{uuid.split('-')[0]}</Text>
+            El caso se ha creado correctamente y está listo para ser gestionado.  <Text fontSize="25px">caso: # {userData?.login?.ID}-{caseId.split('-')[0]}</Text>
           </AlertDescription>
           <Flex justifyContent='space-between' mt='15px'>
               
