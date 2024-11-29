@@ -6,10 +6,12 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
   
   const {db,saveToIndexedDB,} = useContext(SqlContext)
   
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState([]);
   const [times,setTimes] = useState({'caso':300000})
   const [dataCasoSync,setDataCasoSync] = useState({})
   const [formDatadiagnosticos,setFormDataDiagnosticos] = useState({})
+  const [formDataProgramas,setFormDataProgramas] = useState({})
+  const [listaCasos,setListaCasos] = useState([])
 
 
 
@@ -42,9 +44,13 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
               caso_v2 WHERE length(ID) = 36
               `).toArray()
 
+
             // syncStatus = 0 AND 
             if(Object.keys(formData).length == 0){
               setFormData(casosNoSincronizados)
+              const uuids = casosNoSincronizados.map(objeto => objeto.ID);
+              setListaCasos(uuids)
+              
             }
           //const json = JSON.parse(response.data)
           //const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,catalogo_ID,serie,serie_extra,chasis,proyecto_ID,departamento_crudo,departamento_code,estatus_maquinaria_ID,cliente_ID,estado_maquinaria_ID,codigo_finca,contrato,serial_modem_telemetria_pcm,serial_modem_telemetria_am53,fecha_inicio_afs_connect,fecha_vencimiento_afs_connect,fecha_vencimiento_file_transfer,modem_activo,img,unidad_negocio_ID,propietario_ID,departamento_negocio_ID,supervisor_ID,modelo_variante_ID,tiene_telemetria) VALUES ${values};`
@@ -76,6 +82,10 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
    * Cargar Casos hacia MYSQL
    */
   useEffect( () =>{
+    if (formData.length == 0) return;
+    if (formDatadiagnosticos.length == 0) return;
+    if (formDataProgramas.length == 0) return;
+
     const fetchData = async(url,retries = 3,delay = 100) =>{
       let attempts = 0;
 
@@ -83,7 +93,13 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
 
       while (attempts < retries) {
         try{  
-          const response = await axios.post(url, formData);
+          const formDataMerge = {
+            "casos":formData,
+            "diagnosticos":formDatadiagnosticos,
+            "programas": formDataProgramas
+          };
+          
+          const response = await axios.post(url, formDataMerge);
           const data = response.data
           setDataCasoSync(data)
           Object.keys(data).map( (uuid) => {
@@ -108,52 +124,69 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
   
     }
 
-    if(Object.keys(formData).length > 0){
-      fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/casos`,5,100)
-    }
+    
+    fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/casos`,5,100)
     
     
     
-  },[formData])
+    
+  },[formData,formDatadiagnosticos,formDataProgramas])
 
   // Obtner la lista diagnosticos segun la lista de casos sincronizados
   useEffect( () =>{
     if (!db) return;
-    if( Object.keys(dataCasoSync).length == 0) return;
+    if( Object.keys(listaCasos).length == 0) return;
 
     const fetchData = async() => {
     
       try{
-        /*const json = {
-          "3cec7555-0729-435d-8296-29a3d796f53d": 15011,
-        }*/
-        const json = dataCasoSync
-        const uuids = Object.keys(json)
-          .map(key => `'${key}'`) // Agrega comillas simples a cada clave
-          .join(", "); // Une los elementos con comas y espacios
-
+        const uuids = listaCasos.map(key => `'${key}'`).join(",")
         const diagnosticos = db.exec(`
           SELECT
             D.equipo_ID,
-            C.syncStatus AS caso_ID,
+            D.caso_ID,
             D.diagnostico_tipo_ID,
             D.asistencia_tipo_ID,
             CASE 
               WHEN D.especialista_ID <> 0 THEN D.especialista_ID 
               ELSE NULL 
             END AS especialista_ID,
-            D.description,
-            D.prioridad
+            D.description
           FROM 
-            caso C
-            INNER JOIN diagnostico D ON D.caso_ID = C.ID
+            caso_v2 C
+            INNER JOIN diagnostico_v2 D ON D.caso_ID = C.ID
           WHERE
-            C.uuid IN (${uuids})
+            C.ID IN (${uuids})
           
           `).toArray()
           setFormDataDiagnosticos(diagnosticos)
-          console.log('bf9e4b75-3952-4745-9181-82d0f325e099',diagnosticos);
+
           
+          const programas = db.exec(`
+            SELECT
+              P.asistencia_tipo_ID,
+              P.caso_ID,
+              P.catalogo_ID,
+              P.prioridad,
+              P.name,
+              P.type
+            FROM 
+              caso_v2 C
+              INNER JOIN programa_v2 P ON P.caso_ID = C.ID
+            WHERE
+              C.ID IN (${uuids})
+            
+            `).toArray()
+          setFormDataProgramas(programas)
+
+          /**
+           * caso_ID CHAR(36) NOT NULL,
+        asistencia_tipo_ID INTEGER NOT NULL,
+        catalogo_ID INTEGER NOT NULL,
+        prioridad INTEGER,
+        name TEXT,
+        type TEXT CHECK(type IN ('capacitacion', 'proyecto')) DEFAULT 'capacitacion',
+           */
       
       }catch(err){
         console.warn('bdd2c366-e099-4a5c-bc71-d2aa7e3de3ac',err)
@@ -161,8 +194,10 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     }
 
     fetchData()
+
+    return () => {}
     
-  },[db,dataCasoSync])
+  },[db,listaCasos]) //dataCasoSync
 
   useEffect( () =>{
     const fetchData = async(url,retries = 3,delay = 100) =>{
@@ -194,7 +229,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     }
 
     if(Object.keys(formDatadiagnosticos).length > 0){
-      fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/diagnosticos`,5,100)
+      //fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/diagnosticos`,5,100)
     }
     
     
