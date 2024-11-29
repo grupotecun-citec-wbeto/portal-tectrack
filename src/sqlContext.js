@@ -662,10 +662,38 @@ export function SqlProvider({ children }) {
     await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
   }else{
     const tableInfo = db.exec(`PRAGMA table_info(visita)`).toArray()
-    const columna = 'uuid'
-    const columnExists = tableInfo.some(column => column.name === columna);
+    let columna = 'uuid'
+    let columnExists = tableInfo.some(column => column.name === columna);
     if(!columnExists){
       db.run(`ALTER TABLE visita ADD COLUMN ${columna} CHAR(36) NULL;`)
+      saveToIndexedDB(db);
+    }
+
+    columna = 'usuario_ID'
+    columnExists = tableInfo.some(column => column.name === columna);
+    if(!columnExists){
+      db.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NOT NULL;`)
+      saveToIndexedDB(db);
+    }
+
+    columna = 'km_inicial'
+    columnExists = tableInfo.some(column => column.name === columna);
+    if(!columnExists){
+      db.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NULL;`)
+      saveToIndexedDB(db);
+    }
+    
+    columna = 'km_final'
+    columnExists = tableInfo.some(column => column.name === columna);
+    if(!columnExists){
+      db.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NULL;`)
+      saveToIndexedDB(db);
+    }
+
+    const columna2 = 'vehiculo_ID'
+    const columnExists2 = tableInfo.some(column => column.name === columna2);
+    if(!columnExists2){
+      db.run(`ALTER TABLE visita ADD COLUMN ${columna2} INTEGER NOT NULL;`)
       saveToIndexedDB(db);
     }
     //const result = db.run(`DROP TABLE visita;`)

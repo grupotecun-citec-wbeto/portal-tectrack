@@ -135,10 +135,10 @@ function useTransladoDb() {
         casos.forEach((element,index) => {
         
             const coma = (index == 0 ) ? '' : ','
-            const fecha = element.fecha != 'null' ? `'${format(element.fecha, 'yyyy-MM-dd')}'` : null;
-            const start = element.start != 'null' ? `'${format(element.start, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-            const date_end = element.date_end != 'null' ? `'${format(element.date_end, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-            const description = element.description != 'null' ? `'${element.description}'` : `''`;
+            const fecha = !element.fecha?.includes('null') ? `'${format(element.fecha, 'yyyy-MM-dd')}'` : null;
+            const start = !element.start?.includes('null') ? `'${format(element.start, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+            const date_end = !element.date_end?.includes('null') ? `'${format(element.date_end, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+            const description = !element.description?.includes('null')  ? `'${element.description}'` : `''`;
             values +=  `${coma}(
                 '${element.ID}', 
                 ${element.usuario_ID},
@@ -174,7 +174,7 @@ function useTransladoDb() {
             stateDiagnosticos.forEach((element,index) => {
                 if(element.equipo_ID <= 404){
                     //const coma = (index == 0 ) ? '' : ','
-                    const description = element.description != 'null' ? `'${element.description}'` : `''`;
+                    const description = !element.description?.includes('null') ? `'${element.description}'` : `''`;
                     values +=  `,(
                         ${element.equipo_ID}, 
                         '${element.caso_ID}',
@@ -215,11 +215,11 @@ function useTransladoDb() {
                 const values = stateVisitas.reduce( (acc,element) =>{
                     db.run(`UPDATE visita set uuid='${uuidv4()}' WHERE uuid IS NULL AND ID = ${element.ID}`)
                     //db.run(`UPDATE visita set uuid=null`)
-                    const fecha = element.fecha != 'null' ? `'${element.fecha}'` : null;
-                    const programming_date = element.programming_date != 'null' ? `'${format(element.programming_date, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-                    const realization_date = element.realization_date != 'null' ? `'${format(element.realization_date, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-                    const confirmation_date = element.confirmation_date != 'null'? `'${format(element.confirmation_date, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-                    const descripcion_motivo = element.descripcion_motivo != 'null'? `'${element.descripcion_motivo}'` : `''`;
+                    const fecha = !element.fecha?.includes('null') ? `'${element.fecha}'` : null;
+                    const programming_date = !element.programming_date?.includes('null') ? `'${format(element.programming_date, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+                    const realization_date = !element.realization_date?.includes('null') ? `'${format(element.realization_date, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+                    const confirmation_date = !element.confirmation_date?.includes('null')? `'${format(element.confirmation_date, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+                    const descripcion_motivo = !element.descripcion_motivo?.includes('null')? `'${element.descripcion_motivo}'` : `''`;
                     return acc + `,(
                         '${element.uuid}', 
                         ${element.vehiculo_ID},
