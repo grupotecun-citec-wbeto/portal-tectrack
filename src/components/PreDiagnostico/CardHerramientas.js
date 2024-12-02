@@ -26,12 +26,15 @@ import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
 
+import SqlContext from "sqlContext";
+
 /*=======================================================
  BLOQUE: Import component TECTRACK
  DESCRIPTION: IMPORTAR TODOS LOS COMPONENTES MODIFICADOS PARA ESTE FIN
 =========================================================*/
 
 import CheckboxHerramientas from "./CheckboxHerramientas";
+import { defaultBaseSortFn } from "match-sorter";
 
 /*====================FIN BLOQUE: import component TECTRACK        ==============*/
 
@@ -42,6 +45,9 @@ function CardHerramientas(props){
     
     
     const {title,...rest} = props
+
+    const { db, saveToIndexedDB } = useContext(SqlContext);
+
 
     const [necesitaEspecialista,setNecesitaEspecialista] = useState(false)
     const [selectedEspecialista,setSelectedEspecialista] = useState('')
@@ -89,26 +95,25 @@ function CardHerramientas(props){
     },[userData.casoActivo.code])
 
     useEffect(() => {
-
+        if(!db) return;
         //onSearch(debouncedSearchValue);
-        setDatos([])
         const fetchData = async () => {
           try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generaltools`);
+            // se va eliminar porque se va consultar localmente
+            //const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generaltools`);
+            const response = db.exec(`SELECT * FROM herramienta`).toArray()
             
-            let data = JSON.parse(response.data)
-            
+            //let data = JSON.parse(response.data)
+            const data = response
             setDatos(data);
             
           } catch (error) {
-            setDatos([])
-            console.error('Error al obtener datos:', error);
-            
+            console.error('Error al obtener datos: 04bbdbaf-5dde-4fa5-ab88-f65944cb6fc0', error);
           }
         };
         fetchData();
       
-    }, []);
+    }, [db]);
     
     /*====================FIN BLOQUE: useEfect        ==============*/
 

@@ -104,6 +104,7 @@ export function SqlProvider({ children }) {
   const [intervalTimeDiagnostico, setIntervalTimeDiagnostico] = useState(300000);
   const [intervalTimePrograma, setIntervalTimePrograma] = useState(300000);
   const [intervalTimeCaso, setIntervalTimeCaso] = useState(300000);
+  const [intervalTimeHerramienta, setIntervalTimeHerramienta] = useState(300000);
   
   
   
@@ -876,6 +877,26 @@ export function SqlProvider({ children }) {
     //const info_tabla = db.exec(`PRAGMA table_info(programa);`)
     //console.log(info_tabla);
     
+    //const result = db.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db);
+  }
+  //=======================================================
+  // SECTION: TABLE herramieta herramienta
+  //=======================================================
+  if (!checkTableExists(db, 'herramienta')) {
+    db.run(`
+      CREATE TABLE IF NOT EXISTS herramienta (
+        ID INTEGER NOT NULL PRIMARY KEY,
+        name TEXT NULL,
+        description TEXT NULL,
+        img TEXT NULL
+      );
+    `)
+    
+    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  }else{
+    //const info_tabla = db.exec(`PRAGMA table_info(programa);`)
+    //console.log(info_tabla);
     //const result = db.run(`DROP TABLE diagnostico;`)
     //await saveToIndexedDB(db);
   }
@@ -2247,11 +2268,9 @@ export function SqlProvider({ children }) {
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
-          console.log(response);
           
           
           const json = JSON.parse(response.data)
-          console.log('73dfb6ce-8ff5-4446-b914-ba3571a8545c',response.data);
           
           let values = ``
           json.forEach((element,index) => {
@@ -2276,7 +2295,6 @@ export function SqlProvider({ children }) {
 
           });
           
-          console.log(values);
           
           const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (ID,syncStatus,usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,uuid,equipos) VALUES ${values};`
           db.run(insertar)
@@ -2289,6 +2307,66 @@ export function SqlProvider({ children }) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
           console.error(`Error fetching data: ${tabla} 451d9079-fdfa-41f8-984a-e7bc64ccda59`, error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db.exec(`SELECT * FROM ${tabla}`);
+        
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  },[db,incrementalDate])
+  
+  
+  
+  
+  useEffect( () =>{
+    const codigo = 19, tabla = 'herramienta', setTime = setIntervalTimeHerramienta, time = intervalTimeHerramienta
+
+    const fetchData = async (synctable_ID) => {
+      if(db != null && incrementalDate != ''){
+        try {
+          
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
+          
+          
+          
+          const json = JSON.parse(response.data)
+          
+          
+          let values = ``
+          json.forEach((element,index) => {
+           
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+              ${element.ID},
+              ${element.name ? `'${element.name}'` : null},
+              ${element.description ? `'${element.description}'` : null},
+              ${element.img ? `'${element.img}'` : null}
+            )`
+
+          });
+
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,name,description,img) VALUES ${values};`
+          db.run(insertar)
+          
+          
+          // imporante simpres salvar en en indexdb
+          
+          await saveToIndexedDB(db);
+          setFinSync(true)
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error(`Error fetching data: ${tabla} c717f93b-2ae1-4e98-b30f-15c45271efd1`, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db.exec(`SELECT * FROM ${tabla}`);
