@@ -116,7 +116,7 @@ function CardTerminarCaso({openAlert}){
                 const caso_id = userData?.casoActivo?.caso_id || '' 
                 if(caso_id != ''){
                     
-                    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, equipos = '${JSON.stringify(equipos)}' where ID = ${caso_id}`)
+                    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, equipos = '${JSON.stringify(equipos)}' where ID = '${caso_id}'`)
                     saveToIndexedDB(db)
                     
                     
