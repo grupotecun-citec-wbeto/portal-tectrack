@@ -20,7 +20,7 @@ import SqlContext from 'sqlContext';
 
 
 const ResultTableSqlite = () => {
-  const {db,saveToIndexedDB} = useContext(SqlContext)
+  const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
   const [query, setQuery] = useState('select * from caso');
   const [consult, setConsult] = useState('');
   const [ejecucion, setEjecucion] = useState(false);
@@ -32,10 +32,26 @@ const ResultTableSqlite = () => {
   const bgProfile = useColorModeValue("hsla(0,0%,100%,.8)", "navy.800");
   const borderProfileColor = useColorModeValue("white", "transparent");
 
+  
+
+  const handleConsultar = async() =>{
+    await rehidratarDb()
+    setConsult(!consult)
+  }
+
+  const handleEjucutar = async() =>{
+    await rehidratarDb()
+    setEjecucion(!ejecucion)
+  }
+  
   useEffect(() => {
+    if(!db) return;
     const fetchData = async () => {
       try {
+        
         const results = await db.exec(query).toArray()
+        console.log(results);
+        
         setColumns(Object.keys(results[0] || []))
         
         setData(results);
@@ -50,18 +66,17 @@ const ResultTableSqlite = () => {
       }
     };
 
-    if (consult) {
-      setConsult(!consult)
-      fetchData();
-      
-    }
-  }, [consult, toast]);
+   
+    fetchData();
+  }, [consult]);
 
 
   useEffect(() => {
+    if(!db) return;
     const fetchData = async () => {
       try {
-        db.exec(query).toArray()
+        await rehidratarDb()
+        db.exec(query)
         saveToIndexedDB(db)
         toast({
           title: 'Successs',
@@ -82,11 +97,9 @@ const ResultTableSqlite = () => {
       }
     };
 
-    if (ejecucion) {
+   
       fetchData();
-      
-    }
-  }, [ejecucion, toast]);
+  }, [ejecucion]);
 
   return (
     <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
@@ -123,10 +136,10 @@ const ResultTableSqlite = () => {
                 color="black"
                 variant="solid"
               />
-              <Button colorScheme="blue" variant="solid" onClick={() => setConsult(!consult)} >
+              <Button colorScheme="blue" variant="solid" onClick={() => handleConsultar()} >
                 CONSULTAR
               </Button>
-              <Button colorScheme="blue" variant="solid" onClick={() => setEjecucion(!ejecucion)} >
+              <Button colorScheme="blue" variant="solid" onClick={() => handleEjucutar()} >
                   EJECUTAR
               </Button>
                 <Table variant="striped" colorScheme="teal" flex={1}>
@@ -134,7 +147,7 @@ const ResultTableSqlite = () => {
                     {/* Aquí puedes agregar los encabezados de la tabla dinámicamente */}
                     <Tr>
                       {columns.map((item, index) => (
-                        <Th>{item}</Th>
+                        <Th key={index}>{item}</Th>
                       ))}
                     </Tr>
                   </Thead>

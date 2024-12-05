@@ -1,3 +1,5 @@
+//redux
+import { useSelector, useDispatch } from 'react-redux';
 // Chakra imports
 import {
   Flex,
@@ -27,11 +29,29 @@ import CasoDetail from "components/Casos/CasoDetail";
 
 import SqlContext from "sqlContext";
 
-import useCargarCaso from "hookDB/cargarCaso";
+
 import useTransladoDb from "hookDB/transladoDB";
 
 function Casos() {
  
+
+  /*=======================================================
+     BLOQUE: REDUX-PERSIST
+     DESCRIPTION: 
+    =========================================================*/
+    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+    const dispatch = useDispatch();
+
+    const saveUserData = (json) => {
+        dispatch({ type: 'SET_USER_DATA', payload: json });
+      };
+  
+    const getUserData = () => {
+        dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+    };
+
+  /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+
   const textColor = useColorModeValue("gray.700", "white");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
@@ -42,8 +62,6 @@ function Casos() {
   const [casosCompletados,setCasosCompletados] = useState(0)
   const [casosPendientes,setCasosPendientes] = useState(0)
   const [casosEnProceso,setCasosEnProceso] = useState(0)
-
-  const cargarCasdo = useCargarCaso(casoRefresh,setCasoRefresh)
   
 
   const {db,saveToIndexedDB} = useContext(SqlContext)
@@ -58,7 +76,17 @@ function Casos() {
 
   useEffect( () =>{
     if(db != null){
-      const casosData = db.exec("SELECT * FROM caso_v2 WHERE length(ID) = 36 ORDER BY prioridad ASC").toArray();
+      let query = ``
+      switch(userData.login.perfil_ID){
+        case 3: // perfil admin
+           query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 ORDER BY prioridad ASC`
+          break;
+        default:
+          query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 AND usuario_ID = ${userData.login.ID} ORDER BY prioridad ASC`
+          break;
+      }
+      const casosData = db.exec(query).toArray();
+      
       setData(casosData)
     }
   },[db])
@@ -66,7 +94,17 @@ function Casos() {
 
   useEffect( () =>{
     if(db != null){
-      const casos = db.exec("SELECT count(*) AS cantidad FROM caso_v2").toObject();
+      
+      let query = ``
+      switch(userData.login.perfil_ID){
+        case 3: // perfil admin
+           query = `SELECT count(*) AS cantidad FROM caso_v2`
+          break;
+        default:
+          query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE length(ID) = 36 AND usuario_ID = ${userData.login.ID} `
+          break;
+      }
+      const casos = db.exec(query).toObject();
       setCasosCant(casos.cantidad)
     }
   },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
@@ -74,14 +112,36 @@ function Casos() {
   
   useEffect( () =>{
     if(db != null){
-      const casos = db.exec("SELECT count(*) AS completados FROM caso_v2 where caso_estado_ID = 5").toObject();
+      let query = ``
+      switch(userData.login.perfil_ID){
+        case 3: // perfil admin
+           query = `SELECT count(*) AS completados FROM caso_v2 where caso_estado_ID = 5`
+          break;
+        default:
+          query = `SELECT count(*) AS completados FROM caso_v2 WHERE caso_estado_ID = 5 AND length(ID) = 36 AND usuario_ID = ${userData.login.ID}`
+          break;
+      }
+
+
+      const casos = db.exec(query).toObject();
       setCasosCompletados(casos.completados)
     }
   },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
  
   useEffect( () =>{
     if(db != null){
-      const casos = db.exec("SELECT count(*) AS pendientes FROM caso_v2 where caso_estado_ID = 1").toObject();
+
+      let query = ``
+      switch(userData.login.perfil_ID){
+        case 3: // perfil admin
+           query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1`
+          break;
+        default:
+          query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1 AND length(ID) = 36 AND usuario_ID = ${userData.login.ID}`
+          break;
+      }
+
+      const casos = db.exec(query).toObject();
       setCasosPendientes(casos.pendientes)
     }
   },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
@@ -89,7 +149,17 @@ function Casos() {
   
   useEffect( () =>{
     if(db != null){
-      const casos = db.exec("SELECT count(*) AS enproceso FROM caso_v2 where caso_estado_ID = 3").toObject();
+
+      let query = ``
+      switch(userData.login.perfil_ID){
+        case 3: // perfil admin
+           query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3`
+          break;
+        default:
+          query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3 AND length(ID) = 36 AND usuario_ID = ${userData.login.ID}`
+          break;
+      }
+      const casos = db.exec(query).toObject();
       setCasosEnProceso(casos.enproceso)
     }
   },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])

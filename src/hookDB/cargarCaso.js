@@ -1,10 +1,33 @@
 import { useState,useContext,useEffect } from 'react';
 import SqlContext from 'sqlContext';
 import axios from 'axios';
+//redux
+import { useSelector, useDispatch } from 'react-redux';
 
-function useCargarCaso(casoRefresh,setCasoRefresh) {
+function useCargarCaso(caso_id) {
   
-  const {db,saveToIndexedDB,} = useContext(SqlContext)
+  
+  /*=======================================================
+     BLOQUE: REDUX-PERSIST
+     DESCRIPTION: 
+    =========================================================*/
+    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+    const dispatch = useDispatch();
+
+    const saveUserData = (json) => {
+        dispatch({ type: 'SET_USER_DATA', payload: json });
+      };
+  
+    const getUserData = () => {
+        dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+    };
+
+    /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+
+
+  const[startLoad,setStartLoad] = useState(false)
+  
+  const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
   
   const [formData, setFormData] = useState([]);
   const [times,setTimes] = useState({'caso':300000})
@@ -18,17 +41,21 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
 
 
 
+
   /**
    * Obtener lista de casos no sincronizados
    */
-  useEffect( () =>{
+  const loadCaso = async() =>{
+    
+    
+    if(caso_id == '') return;
     const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
-
+    
     const fetchData = async (synctable_ID) => {
       if(db != null){
+        await rehidratarDb()
         try {
-          const casosNoSincronizados = db.exec(`
-            SELECT
+          const query = `SELECT
               ID,
               usuario_ID,
               usuario_ID_assigned,
@@ -43,17 +70,22 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
               uuid,
               equipos
             FROM 
-              caso_v2 WHERE length(ID) = 36
-              `).toArray()
+              caso_v2 
+            WHERE 
+              length(ID) = 36
+              AND ID LIKE '%${caso_id}%'`
+          const casosNoSincronizados = db.exec(query).toArray()
 
 
             // syncStatus = 0 AND 
-            if(Object.keys(formData).length == 0){
-              setFormData(casosNoSincronizados)
-              const uuids = casosNoSincronizados.map(objeto => objeto.ID);
-              setListaCasos(uuids)
+            
+          if(casosNoSincronizados.length != 0){   
+            setFormData(casosNoSincronizados)
+            const uuids = casosNoSincronizados.map(objeto => objeto.ID);
+            setListaCasos(uuids)
+          }
               
-            }
+            
           //const json = JSON.parse(response.data)
           //const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,catalogo_ID,serie,serie_extra,chasis,proyecto_ID,departamento_crudo,departamento_code,estatus_maquinaria_ID,cliente_ID,estado_maquinaria_ID,codigo_finca,contrato,serial_modem_telemetria_pcm,serial_modem_telemetria_am53,fecha_inicio_afs_connect,fecha_vencimiento_afs_connect,fecha_vencimiento_file_transfer,modem_activo,img,unidad_negocio_ID,propietario_ID,departamento_negocio_ID,supervisor_ID,modelo_variante_ID,tiene_telemetria) VALUES ${values};`
           //db.run(insertar)
@@ -67,6 +99,9 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
           console.error('Error fetching data: 70983d04-a730-4b3c-963d-e07872845b27', error);
         }
         
+      }else{
+        console.log('cadb0a6c-385b-4caf-89e5-f79ed4b6fc27');
+        
       }
     };
 
@@ -77,7 +112,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db])
+  }
 
 
   /**
@@ -85,10 +120,10 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
    */
   useEffect( () =>{
     if (formData.length == 0) return;
-    if (formDatadiagnosticos.length == 0) return;
-    if (formDataProgramas.length == 0) return;
-    if (formDataVisitas.length == 0) return;
-    if (formDataCasoVisitas.length == 0) return;
+    //if (formDatadiagnosticos.length == 0) return;
+    //if (formDataProgramas.length == 0) return;
+    //if (formDataVisitas.length == 0) return;
+    //if (formDataCasoVisitas.length == 0) return;
 
     const fetchData = async(url,retries = 3,delay = 100) =>{
       let attempts = 0;
@@ -99,17 +134,17 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
         try{  
           const formDataMerge = {
             "casos":formData,
-            "diagnosticos":formDatadiagnosticos,
-            "programas": formDataProgramas,
-            "visitas": formDataVisitas,
-            "caso_visitas":formDataCasoVisitas
+            "diagnosticos":(formDatadiagnosticos.length != 0) ? formDatadiagnosticos : {},
+            "programas": (formDataProgramas.length != 0) ? formDataProgramas : {} ,
+            "visitas": (formDataVisitas.length != 0) ? formDataVisitas : {} ,
+            "caso_visitas":(formDataCasoVisitas.length != 0) ? formDataCasoVisitas : {}
           };
           
           const response = await axios.post(url, formDataMerge);
           const data = response.data
           setDataCasoSync(data)
           Object.keys(data).map( (uuid) => {
-            db.run(`UPDATE caso_v2 SET syncStatus = 1 WHERE ID = '${uuid}'`);
+            db.run(`UPDATE caso_v2 SET syncStatus = 0 WHERE ID = '${uuid}'`);
           })
     
           // recordar de activar este procedimiento
@@ -136,7 +171,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     
     
     
-  },[formData,formDatadiagnosticos,formDataProgramas,formDataVisitas,formDataCasoVisitas])
+  },[formDataCasoVisitas])
 
   // Obtner la lista diagnosticos segun la lista de casos sincronizados
   useEffect( () =>{
@@ -236,7 +271,7 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     
   },[db,listaCasos]) //dataCasoSync
 
-  useEffect( () =>{
+  /*useEffect( () =>{
     const fetchData = async(url,retries = 3,delay = 100) =>{
       let attempts = 0;
 
@@ -249,7 +284,6 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
           console.log('794a3d28-ac84-4675-9a50-4476ad2f6767',response);
           // recordar de activar este procedimiento
           //saveToIndexedDB(db);
-          setCasoRefresh(!casoRefresh)
           attempts = retries + 1
           
         } catch (error) {
@@ -271,7 +305,9 @@ function useCargarCaso(casoRefresh,setCasoRefresh) {
     
     
     
-  },[formDatadiagnosticos])
+  },[formDatadiagnosticos])*/
+
+  return {loadCaso}
 
 }
 

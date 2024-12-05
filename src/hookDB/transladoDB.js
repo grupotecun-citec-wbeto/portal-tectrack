@@ -155,7 +155,7 @@ function useTransladoDb() {
             )` 
         });
 
-        console.log(values);
+        
         
         
         
@@ -240,7 +240,7 @@ function useTransladoDb() {
                 //console.log('5f5b232b-5099-4942-8fff-5d89a287597d',newValues);
                 
                 const query = `INSERT INTO visita_v2 (ID,vehiculo_ID,usuario_ID,fecha,programming_date,descripcion_motivo,realization_date,confirmation_date,km_inicial,km_final) VALUES ${newValues}`
-                console.log('cb318eb7-b203-4fae-a22f-463ed5b4dc3a',query);
+                
                 
                 const data = db.run(query)
                 setStateTerminateVisitas(true) // reportar que ya se termino con visitas
@@ -319,7 +319,7 @@ function useTransladoDb() {
                 
                 
                 const query = `INSERT INTO programa_v2 (caso_ID,asistencia_tipo_ID,catalogo_ID,prioridad,name,type) VALUES ${values}`
-                console.log('c6071a02-e6c9-465e-9ed9-e0d94c49db5b',query);
+                
                 const data = db.run(query)
                 saveToIndexedDB(db)
                 

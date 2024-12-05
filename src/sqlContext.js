@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
 
-
+const SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
 
 
 async function saveToIndexedDB(db) {
@@ -81,6 +81,8 @@ export function SqlProvider({ children }) {
 
   const [retryCount,setRetryCount] = useState(0)
 
+  const [statusRehidratar,setStatusRehidratar] = useState(false)
+
 
   const [intervalTimeCategoria, setIntervalTimeCategoria] = useState(300000);
   const [intervalTimeModelo, setIntervalTimeModelo] = useState(300000);
@@ -105,6 +107,7 @@ export function SqlProvider({ children }) {
   const [intervalTimePrograma, setIntervalTimePrograma] = useState(300000);
   const [intervalTimeCaso, setIntervalTimeCaso] = useState(300000);
   const [intervalTimeHerramienta, setIntervalTimeHerramienta] = useState(300000);
+  const [intervalTimeCasoVisita, setIntervalTimeCasoVisita] = useState(300000);
   
   
   
@@ -914,66 +917,84 @@ export function SqlProvider({ children }) {
     }
   }
 
-  useEffect(() => {
-    const extendFunctions = (db) =>{
-      /**
-       * Convertir los resultados de respuesta sqlite hacia Array(Es un array de objetos) y Object(consultas de una una sola respuesta)
-       * @param {*} result 
-       * @returns 
-       */
-      const enhanceResult = (result) => {
-        return {
-            ...result,
-            
-            // Método para convertir el resultado a un array de objetos
-            toObject() {
-              return result.flatMap(item => 
-                item.values.map(valueArray => 
-                    item.columns.reduce((obj, col, index) => {
-                        obj[col] = valueArray[index];
-                        return obj;
-                    }, {})
-                )
-              )[0];
-            },
+
+  const extendFunctions = (db) =>{
+    /**
+     * Convertir los resultados de respuesta sqlite hacia Array(Es un array de objetos) y Object(consultas de una una sola respuesta)
+     * @param {*} result 
+     * @returns 
+     */
+    const enhanceResult = (result) => {
+      return {
+          ...result,
+          
+          // Método para convertir el resultado a un array de objetos
+          toObject() {
+            return result.flatMap(item => 
+              item.values.map(valueArray => 
+                  item.columns.reduce((obj, col, index) => {
+                      obj[col] = valueArray[index];
+                      return obj;
+                  }, {})
+              )
+            )[0];
+          },
+  
+          // Método para convertir el resultado a un array de arrays (si es necesario)
+          toArray() {
+            return result.flatMap(item => 
+              item.values.map(valueArray => 
+                  item.columns.reduce((obj, col, index) => {
+                      obj[col] = valueArray[index];
+                      return obj;
+                  }, {})
+              )
+            );
+          },
+          
+          result(){
+            return result
+          }
+      };
+    }
     
-            // Método para convertir el resultado a un array de arrays (si es necesario)
-            toArray() {
-              return result.flatMap(item => 
-                item.values.map(valueArray => 
-                    item.columns.reduce((obj, col, index) => {
-                        obj[col] = valueArray[index];
-                        return obj;
-                    }, {})
-                )
-              );
-            },
-            
-            result(){
-              return result
-            }
-        };
-      }
-      
-      // EXEC
-      const originalExec = db.exec.bind(db);
-      /**
-       * Extencion de funcion exec de sqlite para para poder obtener datos en Array o Object
-       * @param {*} query 
-       * @returns 
-       */
-      db.exec = (query) =>{
-        const result = originalExec(query);
-        return enhanceResult(result);
-      }
-      
-      /**
-       * Convertir respuesta de exec hacia array
-       * @param {*} data
-       * @deprecated 
-       * @returns 
-       */
-      db.toArray = (data) =>{
+    // EXEC
+    const originalExec = db.exec.bind(db);
+    /**
+     * Extencion de funcion exec de sqlite para para poder obtener datos en Array o Object
+     * @param {*} query 
+     * @returns 
+     */
+    db.exec = (query) =>{
+      const result = originalExec(query);
+      return enhanceResult(result);
+    }
+    
+    /**
+     * Convertir respuesta de exec hacia array
+     * @param {*} data
+     * @deprecated 
+     * @returns 
+     */
+    db.toArray = (data) =>{
+      return data.result.flatMap(item => 
+        item.values.map(valueArray => 
+            item.columns.reduce((obj, col, index) => {
+                obj[col] = valueArray[index];
+                return obj;
+            }, {})
+        )
+      );
+
+    }
+
+    /**
+     * Convertir respuesa exec hacia object
+     * @param {*} data 
+     * @deprecated
+     * @returns 
+     */
+    db.toObject = (data) =>{
         return data.result.flatMap(item => 
           item.values.map(valueArray => 
               item.columns.reduce((obj, col, index) => {
@@ -981,31 +1002,19 @@ export function SqlProvider({ children }) {
                   return obj;
               }, {})
           )
-        );
-
-      }
-
-      /**
-       * Convertir respuesa exec hacia object
-       * @param {*} data 
-       * @deprecated
-       * @returns 
-       */
-      db.toObject = (data) =>{
-          return data.result.flatMap(item => 
-            item.values.map(valueArray => 
-                item.columns.reduce((obj, col, index) => {
-                    obj[col] = valueArray[index];
-                    return obj;
-                }, {})
-            )
-          )[0];
-      }
+        )[0];
     }
+
+
+    
+  }
+
+  useEffect(() => {
+    
     
     const loadSqlJs = async () => {
       try{  
-        const SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
+        //const SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
         const storedDb = await loadFromIndexedDB();
 
         let db;
@@ -2095,27 +2104,34 @@ export function SqlProvider({ children }) {
           
           
           const json = JSON.parse(response.data)
+          //const hola = json[0].fecha ? `'${element.fecha}'` : null
+          //console.log(hola);
           
           let values = ``
           json.forEach((element,index) => {
             
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
-              ${element.id || element.ID}, 
-              '${element.fecha}',
-              '${element.programming_date}',
-              '${element.descripcion_motivo}',
-              '${element.realization_date}',
-              '${element.confirmation_date}',
+              '${element.ID}', 
+              ${element.vehiculo_ID}, 
+              ${element.usuario_ID}, 
+              ${element.fecha ? `'${element.fecha}'` : null},
+              ${element.programming_date ? `'${element.programming_date}'` : null},
+              ${element.descripcion_motivo ? `'${element.descripcion_motivo}'` : null},
+              ${element.realization_date ? `'${element.realization_date}'` : null},
+              ${element.confirmation_date ? `'${element.confirmation_date}'` : null},
+              ${element.km_inicial},
+              ${element.km_final}
             )` 
         
           });
           
           
-          const insertar = `INSERT OR REPLACE INTO ${tabla} (id, fecha,programming_date,descripcion_motivo,realization_date,confirmation_date) VALUES ${values};`
+          
+          const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (ID,vehiculo_ID,usuario_ID, fecha,programming_date,descripcion_motivo,realization_date,confirmation_date,km_inicial,km_final) VALUES ${values};`
           db.run(insertar)
           // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          saveToIndexedDB(db);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2161,17 +2177,28 @@ export function SqlProvider({ children }) {
             
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
-              ${element.caso_ID}, 
-              '${element.fecha}',
-              ${element.description},
+              ${element.equipo_ID}, 
+              '${element.caso_ID}',
+              ${element.diagnostico_tipo_ID},
               ${element.asistencia_tipo_ID},
-              ${element.visita_ID},
+              ${element.especialista_ID},
+              '${element.description}'
             )` 
+
+
+            /*
+            equipo_ID INTEGER NOT NULL,
+            caso_ID CHAR(36) NOT NULL,
+            diagnostico_tipo_ID INTEGER NOT NULL,
+            asistencia_tipo_ID INTEGER NOT NULL,
+            especialista_ID INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
+            description TEXT NULL,
+             */
 
           });
           
           
-          const insertar = `INSERT OR REPLACE INTO ${tabla} (caso_ID, fecha,description,asistencia_tipo_ID,visita_ID) VALUES ${values};`
+          const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description) VALUES ${values};`
           db.run(insertar)
           // imporante simpres salvar en en indexdb
           await saveToIndexedDB(db);
@@ -2204,7 +2231,7 @@ export function SqlProvider({ children }) {
    */
 
   useEffect( () =>{
-    const codigo = 12, tabla = 'diagnostico', setTime = setIntervalTimePrograma, time = intervalTimePrograma
+    const codigo = 38, tabla = 'programa', setTime = setIntervalTimePrograma, time = intervalTimePrograma
 
     const fetchData = async (synctable_ID) => {
       if(db != null && incrementalDate != ''){
@@ -2220,18 +2247,26 @@ export function SqlProvider({ children }) {
             
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
-              ${element.caso_ID}, // INTEGER
-              ${element.asistencia_tipo_ID}, // INTEGER
-              ${element.catalogo_ID}, // INTEGER
-              '${element.prioridad}', // TEXT
-              '${element.name}', // TEXT
-              '${element.type}',//'capacitacion', 'proyecto' TEXT
+              '${element.caso_ID}', 
+              ${element.asistencia_tipo_ID}, 
+              ${element.catalogo_ID}, 
+              ${element.prioridad}, 
+              '${element.name}', 
+              '${element.type}'
             )`
 
+            /*
+            caso_ID CHAR(36) NOT NULL,
+            asistencia_tipo_ID INTEGER NOT NULL,
+            catalogo_ID INTEGER NOT NULL,
+            prioridad INTEGER,
+            name TEXT,
+            type TEXT CHECK(type IN ('capacitacion', 'proyecto')) DEFAULT 'capacitacion',
+             */
           });
           
           
-          const insertar = `INSERT OR REPLACE INTO ${tabla} (caso_ID, fecha,description,asistencia_tipo_ID,visita_ID) VALUES ${values};`
+          const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (caso_ID, asistencia_tipo_ID,catalogo_ID,prioridad,name,type) VALUES ${values};`
           db.run(insertar)
           // imporante simpres salvar en en indexdb
           await saveToIndexedDB(db);
@@ -2270,7 +2305,14 @@ export function SqlProvider({ children }) {
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
-          const json = JSON.parse(response.data)
+
+          const casos_remoto = JSON.parse(response.data)
+
+          const casos_modificados_local = db.exec(`SELECT ID FROM caso_v2 WHERE syncStatus = 1`).toArray();
+
+          const json = casos_remoto.filter(item_remoto => !casos_modificados_local.some(item_local => item_local.ID === item_remoto.ID))
+          
+          
           
           let values = ``
           json.forEach((element,index) => {
@@ -2278,7 +2320,7 @@ export function SqlProvider({ children }) {
             const coma = (index == 0 ) ? '' : ','
             values +=  `${coma}(
               '${element.ID}',
-              1, 
+              0, 
               ${element.usuario_ID}, 
               ${element.usuario_ID_assigned}, 
               ${element.comunicacion_ID}, 
@@ -2295,13 +2337,14 @@ export function SqlProvider({ children }) {
 
           });
           
-          
-          const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (ID,syncStatus,usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,uuid,equipos) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          
-          await saveToIndexedDB(db);
-          setFinSync(true)
+          if(values != ''){
+            const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (ID,syncStatus,usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,uuid,equipos) VALUES ${values};`
+            db.run(insertar)
+            // imporante simpres salvar en en indexdb
+            
+            await saveToIndexedDB(db);
+            setFinSync(true)
+          }
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2324,6 +2367,65 @@ export function SqlProvider({ children }) {
   },[db,incrementalDate])
   
   
+  /**
+   * SECTION: TABLA caso_visita
+   *
+   */
+
+  useEffect( () =>{
+    const codigo = 39, tabla = 'caso_visita', setTime = setIntervalTimeCasoVisita, time = intervalTimeCasoVisita
+
+    const fetchData = async (synctable_ID) => {
+      if(db != null && incrementalDate != ''){
+        try {
+          
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
+          
+          const json = JSON.parse(response.data)
+          
+          let values = ``
+          json.forEach((element,index) => {
+            
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+              '${element.caso_ID}', 
+              '${element.visita_ID}'
+            )`
+
+            /*
+            caso_ID CHAR(36) NOT NULL,
+            visita_ID CHAR(36) NOT NULL,
+             */
+          });
+          
+          
+          const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (caso_ID, visita_ID) VALUES ${values};`
+          db.run(insertar)
+          // imporante simpres salvar en en indexdb
+          await saveToIndexedDB(db);
+          setFinSync(true)
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data:' + tabla, error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db.exec(`SELECT * FROM ${tabla}`).toArray();
+        
+        
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  },[db,incrementalDate])
   
   
   useEffect( () =>{
@@ -2427,10 +2529,20 @@ export function SqlProvider({ children }) {
     return []
   }
 
+  const rehidratarDb = async() =>{
+    const storedDb = await loadFromIndexedDB();
+
+    let db;
+    
+    db = new SQL.Database(storedDb); // Cargar base de datos desde IndexedDB
+    extendFunctions(db)
+    setDb(db)
+  }
+
   return (
         <SqlContext.Provider value={{
             data,
-            db,saveToIndexedDB,
+            db,rehidratarDb,saveToIndexedDB,
             casos_to_json
             }}>
             {children}

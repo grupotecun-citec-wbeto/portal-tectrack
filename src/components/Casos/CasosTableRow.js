@@ -119,7 +119,7 @@ function CasosTableRow(props) {
       setSelectUsuario(usuario_id)
       setSelectCasoEstado(2)
     }else{
-      db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${selectUsuario} AND caso_ID = ${caso_ID}`)
+      db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${selectUsuario} AND caso_ID = '${caso_ID}'`)
       setSelectUsuario("")
       setSelectCasoEstado(1)
     }

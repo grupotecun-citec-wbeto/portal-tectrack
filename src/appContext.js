@@ -119,7 +119,9 @@ export function AppProvider({ children }) {
                     description:'', //TEXT NULL,
                     prioridad:0, //INTEGER NULL, -- media ponderada de la prioridad
                     equipos:{/* id*/},  // array de identificadores de equipos
-                    programa: programa
+                    programa: programa,
+                    km_inicial:0,
+                    km_final:0
                     
                   },
                   diagnostico:diagnostico,

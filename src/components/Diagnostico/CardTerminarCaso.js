@@ -31,6 +31,7 @@ import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
 import SqlContext from "sqlContext";
+import useCargarCaso from "hookDB/cargarCaso";
 //import { getData } from "ajv/dist/compile/validate";
 
 
@@ -67,6 +68,8 @@ function CardTerminarCaso({openAlert}){
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
+    const {loadCaso} = useCargarCaso(userData.casoActivo?.code)
+
     const getCurrentDateTime = () => {
         const now = new Date();
         return format(now, 'yyyy-MM-dd HH:mm:ss');
@@ -90,6 +93,7 @@ function CardTerminarCaso({openAlert}){
     const changeEstadoCaso = async(estado_a_asignar) =>{
         //const estado_a_asignar = 5
         const equipos = userData.casos[userData.casoActivo?.code].equipos
+        const km_final = userData.casos[userData.casoActivo?.code]?.km_final ?? 0
         /**
          * Retorna 
          * @returns boolean
@@ -100,7 +104,6 @@ function CardTerminarCaso({openAlert}){
             const rest = equipos_keys.reduce( (acc,maquina_id) =>{
                 if(acc == false)
                     return false
-                console.log(maquina_id)
                 if( Object.keys(userData.casos[userData.casoActivo?.code].equipos[maquina_id].diagnostico.sistemas) == 0 
                     || Object.keys(userData.casos[userData.casoActivo?.code].equipos[maquina_id].diagnostico.herramientas) == 0){
                     return false
@@ -116,16 +119,24 @@ function CardTerminarCaso({openAlert}){
                 const caso_id = userData?.casoActivo?.caso_id || '' 
                 if(caso_id != ''){
                     
-                    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, equipos = '${JSON.stringify(equipos)}' where ID = '${caso_id}'`)
+                    // Actualizar estado del caso y agregar la lista de equipos
+                    await db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, equipos = '${JSON.stringify(equipos)}', syncStatus=1 where ID = '${caso_id}'`)
+                     
+                    // registrar el kilometraje final del caso
+                    const query = `UPDATE visita_v2 SET km_final = '${km_final}' where ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${caso_id}' LIMIT 1) `
+                    await db.run(query)
+                    
                     saveToIndexedDB(db)
                     
-                    
+                    loadCaso()
 
                     // Reiniciando el caso activo, para preparar para el siguiente caso
                     const newUserData = structuredClone(userData)
                     newUserData.casoActivo = structuredClone(newUserData.stuctures.casoActivo)
                     saveUserData(newUserData)
                     
+                    
+                   
                     
                     history.push('/admin/pages/casos')
                 }else{

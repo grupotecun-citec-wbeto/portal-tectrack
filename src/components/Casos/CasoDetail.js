@@ -32,6 +32,7 @@ import { MdWorkspaces } from "react-icons/md";
 import { LiaTractorSolid } from "react-icons/lia"; 
 
 import InputKm from './InputKm';
+import InputFinalKm from './InputFinalKm';
 /*=======================================================
  BLOQUE: CONTEXT
  DESCRIPTION: 
@@ -45,6 +46,7 @@ import { es } from 'date-fns/locale';
 import Timer from './Timer';
 import { useHistory } from 'react-router-dom';
 
+import useCargarCaso from 'hookDB/cargarCaso';
 
 
 /**
@@ -81,6 +83,8 @@ const CasoDetail = ({ caseData }) => {
     syncStatus
   } = caseData;
 
+  
+
   const textColor = useColorModeValue("gray.500", "white");
   const titleColor = useColorModeValue("gray.700", "white");
   const bgStatus = useColorModeValue("gray.400", "navy.900");
@@ -91,7 +95,9 @@ const CasoDetail = ({ caseData }) => {
   // Se esta elimiando para utilizar redux-persist directamente
     //const {casoActivo,setCasoActivo} = useContext(AppContext)
 
+  
   const history = useHistory()
+  const {loadCaso} = useCargarCaso(id)
 
   /*=======================================================
      BLOQUE: REDUX-PERSIST
@@ -161,14 +167,18 @@ const CasoDetail = ({ caseData }) => {
 
     const [kmInicial,setKmInicial] = useState('')
 
+    const [kmFinal,setKmFinal] = useState('')
+
     const [cantEquipos,setCantEquipos] = useState(0)
+
+    //const [startLoad,loadCaso] = useState(false) // Inicio de carga de información
 
     /**
      * Desestructurar objeto del contexto sqlContext
      * @property {Objeto} - Contiene las funciones para ejecutar sqlite
      * @property {saveToIndexedDB} - Salvar el objeto db dentro de indexdb para persistir la data
      */
-    const { db, saveToIndexedDB } = useContext(SqlContext);
+    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
 
   
 
@@ -252,7 +262,13 @@ const CasoDetail = ({ caseData }) => {
   // SECTION: useEfect
   //=======================================================
 
-  // 
+
+  
+  useEffect(() =>{
+    loadCaso()
+  },[])
+
+
   /**
    * CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
    */
@@ -407,12 +423,19 @@ const CasoDetail = ({ caseData }) => {
         //db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},'${id}','${getCurrentDateTime()}','')`)
         
         // Actualizar a estado asignado cuando se agigna un caso hacia estado 2: Asignado
-        db.exec(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}  where ID = '${id}'`)
-        
+        const db_aux = db
+        await db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}, syncStatus=1  where ID = '${id}'`)
+        saveToIndexedDB(db)
         // Establecer el usuario que va resolver el caso
         setEstado(estado_a_asignar)
         setIsEditTecnico(!isEditTecnico)
-        saveToIndexedDB(db)
+        
+        
+
+        loadCaso()
+
+        // Diaparar la sincronizacion
+        
       }
     }catch(err){
       console.error('6ac889ae-bcee-41a8-a848-dfd7ac3c0f47',err)
@@ -428,12 +451,15 @@ const CasoDetail = ({ caseData }) => {
     //db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = '${id}'`)
 
     // actualizar el estado en el caso
-    db.exec(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, usuario_ID_assigned = NULL where ID = '${id}'`)
+    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, usuario_ID_assigned = NULL, syncStatus=1  where ID = '${id}'`)
     
     setSlcUsuario(null)
     setEstado(estado_a_establecer)
     // persistir db
     saveToIndexedDB(db)
+    
+    // Diaparar la sincronizacion
+    loadCaso()
   }
 
   const empezar = async() =>{
@@ -457,17 +483,22 @@ const CasoDetail = ({ caseData }) => {
         await db.exec('BEGIN TRANSACTION');
           setIsEmpezado(true)
           const estado_a_establecer = 3
-          db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer} where ID = '${id}'`)
-
+          db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer},syncStatus=1 where ID = '${id}'`)
+          
           const visita_ID = uuidv4()
           db.run(`INSERT INTO visita_v2 (ID,vehiculo_ID,usuario_ID,km_inicial) VALUES ('${visita_ID}',${isVehiculoSelected},${userData?.login?.ID},${kmInicial})`)
           
           db.run(`INSERT INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ('${id}','${visita_ID}')`)
           await db.exec('COMMIT');
 
-          setEstado(estado_a_establecer)
           // gurdar en base de datos sqlite
           saveToIndexedDB(db)
+
+          // Diaparar la sincronizacion
+          loadCaso()
+
+          setEstado(estado_a_establecer)
+          
         
       }catch(err){
         await db.exec('ROLLBACK');
@@ -490,38 +521,62 @@ const CasoDetail = ({ caseData }) => {
       if((cantEquipos != 0 && segmento_ID == 1) || segmento_ID != 1){
         
         if(segmento_ID == 1){
-          const newUserData = structuredClone(userData)
-          
-          const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
-          newUserData.casoActivo.caso_id = id
-          newUserData.casoActivo.code = caso.uuid
-          newUserData.casoActivo.busqueda_terminada = 1
+          // SECCION PARA SOPORTE
 
-          // creacion de caso
-          //const caso = structuredClone(newUserData.stuctures.caso)
-        
-          newUserData.casos[caso.uuid] = caso
+          if(kmFinal != ''){
+          
+            const newUserData = structuredClone(userData)
+            
+            const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
+            newUserData.casoActivo.caso_id = id
+            newUserData.casoActivo.code = caso.ID
+            newUserData.casoActivo.busqueda_terminada = 1
 
-          const equipos = JSON.parse(newUserData.casos[caso.uuid].equipos)
-          console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
+            // creacion de caso
+            //const caso = structuredClone(newUserData.stuctures.caso)
           
-          newUserData.casos[caso.uuid].equipos = equipos
-          
+            newUserData.casos[caso.ID] = caso
 
-          /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID = '${id}'`).toArray()
-          
-          equipos.forEach(element => {
-            const equipoId = structuredClone(newUserData.stuctures.equipoId)
-            newUserData.casos[result.uuid].equipos[element.equipo_ID] = equipoId
-          });*/
-          
+            const equipos = JSON.parse(newUserData.casos[caso.ID].equipos)
+            console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
+            
+            newUserData.casos[caso.ID].equipos = equipos
+            newUserData.casos[caso.ID].km_final = kmFinal
+            
 
-          saveUserData(newUserData)
-          history.push('/admin/pages/searchbox')
+            /*const equipos = db.exec(`SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID = '${id}'`).toArray()
+            
+            equipos.forEach(element => {
+              const equipoId = structuredClone(newUserData.stuctures.equipoId)
+              newUserData.casos[result.uuid].equipos[element.equipo_ID] = equipoId
+            });*/
+            
+
+            saveUserData(newUserData)
+            history.push('/admin/pages/searchbox')
+          }else{
+            alert('er[1fffd590] - Ingresar kilometraje final ')
+          }
         }else{
-          const estado_a_establecer = 5
-          db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer} where ID = '${id}'`)
-          setEstado(estado_a_establecer)
+          // SECCION PARA PROYECTOS Y CAPACITACIONES
+          
+          if(kmFinal != ''){
+            const estado_a_establecer = 5
+            
+            //Actualiar estado
+            db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, syncStatus=1 where ID = '${id}'`)
+          
+            // Registrando km final
+            db.run(`UPDATE visita_v2 SET km_final = '${kmFinal}' WHERE ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${id}' LIMIT 1) `)
+            saveToIndexedDB(db)
+
+            // Diaparar la sincronizacion
+            loadCaso()
+
+            setEstado(estado_a_establecer)
+          }else{
+            alert('er[c24a4c93] Ingresar kilometraje final')
+          }
         } 
       }else{
         alert('No tiene equipos procesar, por favor contactar al administrador para revisar el caso')
@@ -691,14 +746,22 @@ const CasoDetail = ({ caseData }) => {
                   )}
                 </>
               ):(
-                <Text 
-                  fontSize="lg" 
-                  fontWeight="bold" 
-                  color={"green.500"}
-                  textAlign={"Center"}
-                >
-                  {"Caso Terminado"}
-                </Text>
+                <>
+                   <Tooltip label="Detalles del caso" aria-label="A tooltip" >
+                      <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
+                        <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                      </Button>
+                    </Tooltip>
+                    <Text 
+                      fontSize="lg" 
+                      fontWeight="bold" 
+                      color={"green.500"}
+                      textAlign={"Center"}
+                    >
+                      {"Caso Terminado"}
+                    </Text>
+                </>
+                
               )}
               
                 
@@ -707,7 +770,7 @@ const CasoDetail = ({ caseData }) => {
             </Flex>
             
           </Grid>
-          {!isEmpezado && estado != 3 && estado != 5 && !isEditTecnico && (
+          {!isEmpezado && estado != 3 && estado != 5 && !isEditTecnico ? (
             <>
             <Flex direction={'columns'} >
                 <FormControl maxW={{xl:'250px'}} key={id}>
@@ -724,6 +787,15 @@ const CasoDetail = ({ caseData }) => {
               <InputKm kmInicial={kmInicial} setKmInicial={setKmInicial}/>
             )} 
             
+            </>
+            
+          ):(
+            
+            <>
+              {estado == 3 && (
+                <InputFinalKm kmFinal={kmFinal} setKmFinal={setKmFinal}/>
+              )}
+              
             </>
             
           )}
