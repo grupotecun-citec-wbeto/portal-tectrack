@@ -45,7 +45,7 @@ function CasoListEquiposNavbar(props){
         casoActivo,setCasoActivo
     } = useContext(AppContext)*/
 
-    const { db, saveToIndexedDB } = useContext(SqlContext);
+    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
 
     const [isCasoActivo,setIsCasoActivo] = useState(false)
     const [casoEquipos,setCasoEquipos] = useState([])
@@ -68,6 +68,11 @@ function CasoListEquiposNavbar(props){
      * SECTION: useEfect
      *
      */
+
+    // Rehidratar la base de dato
+    useEffect( () =>{
+        if(!db) rehidratarDb()
+      },[db,rehidratarDb])
 
     useEffect(() =>{
         

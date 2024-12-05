@@ -44,7 +44,12 @@ function CardTerminarCaso({openAlert}){
         casoActivo,setCasoActivo,
         slcCasoId,setSlcCasoId
     } = useContext(AppContext)*/
-    const {db,saveToIndexedDB} = useContext(SqlContext)
+    const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
+
+    // Rehidratar la base de datos
+    useEffect( () =>{
+        if(!db) rehidratarDb()
+    },[db,rehidratarDb])
 
     const history = useHistory()
 

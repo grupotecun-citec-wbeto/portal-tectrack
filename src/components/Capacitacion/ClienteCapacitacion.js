@@ -40,7 +40,7 @@ import SqlContext from 'sqlContext';
     //**************** redux-persist ************************* */
 
 
-    const {db,saveToIndexedDB,} = useContext(SqlContext)
+    const {db,rehidratarDb,saveToIndexedDB,} = useContext(SqlContext)
     const [clientes,setClientes] = useState([])
 
     const [clienteSelected,setClienteSelected] = useState('')
@@ -48,6 +48,12 @@ import SqlContext from 'sqlContext';
     const capitalizeFirstLetter = (string) => {
       return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
     }
+
+    // Rehidratar la base de dato
+    useEffect( () =>{
+      if(!db) rehidratarDb()
+    },[db,rehidratarDb])
+
     useEffect(() =>{
       if(db != null){
         const catalogos = db.exec(`

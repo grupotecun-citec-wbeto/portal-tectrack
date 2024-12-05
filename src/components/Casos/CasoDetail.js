@@ -265,7 +265,12 @@ const CasoDetail = ({ caseData }) => {
 
   
   useEffect(() =>{
-    loadCaso()
+    const run = async() =>{
+      loadCaso()
+    }
+
+    run()
+    
   },[])
 
 

@@ -32,7 +32,10 @@ const ResultTableSqlite = () => {
   const bgProfile = useColorModeValue("hsla(0,0%,100%,.8)", "navy.800");
   const borderProfileColor = useColorModeValue("white", "transparent");
 
-  
+  // rehratar base de datos
+  useEffect( () =>{
+    if(!db) rehidratarDb()
+  },[db,rehidratarDb])
 
   const handleConsultar = async() =>{
     await rehidratarDb()

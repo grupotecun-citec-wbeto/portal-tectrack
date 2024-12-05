@@ -176,6 +176,8 @@ import {
       
     },[userData.casoActivo.code])*/
 
+    // Rehidratar la base de datos
+
     useEffect (() =>{
       getUserData()
       const run = async() =>{

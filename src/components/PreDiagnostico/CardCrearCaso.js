@@ -30,6 +30,8 @@ import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
 import SqlContext from "sqlContext";
+
+import useCargarCaso from "hookDB/cargarCaso";
 //import { getData } from "ajv/dist/compile/validate";
 
 
@@ -39,7 +41,12 @@ import SqlContext from "sqlContext";
 function CardCrearCaso({openAlert}){
 
     const {casoActivo,setCasoActivo} = useContext(AppContext)
-    const {db,saveToIndexedDB} = useContext(SqlContext)
+    const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
+
+    // Rehidratar la base de datos
+    useEffect( () =>{
+        if(!db) rehidratarDb()
+    },[db,rehidratarDb])
 
     const history = useHistory()
 
@@ -62,6 +69,8 @@ function CardCrearCaso({openAlert}){
     };
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+
+    const {loadCaso} = useCargarCaso(userData?.casoActivo?.code)
 
     const getCurrentDateTime = () => {
         const now = new Date();
@@ -211,6 +220,7 @@ function CardCrearCaso({openAlert}){
         const caso = db.exec(`SELECT count(*) as Size FROM caso_v2 WHERE uuid = '${uuid}' `).toObject()
         if(caso.Size == 0){
             try {
+                rehidratarDb()
                 await db.exec('BEGIN TRANSACTION');
                 const sql = `
                     INSERT INTO caso_v2 (
@@ -230,7 +240,7 @@ function CardCrearCaso({openAlert}){
                     )
                     VALUES(
                         '${uuid}',
-                        NULL,
+                        1,
                         ${usuario_ID},
                         ${usuario_ID_assigned},
                         ${comunicacion_ID},
@@ -305,7 +315,8 @@ function CardCrearCaso({openAlert}){
                 
                 await db.exec('COMMIT');
 
-                await saveToIndexedDB(db)
+                saveToIndexedDB(db)
+                loadCaso()
             }catch(err){
                 console.error('0b6bc4bd-62ac-457c-97d7-6dc450e58fa9',err)
                 await db.exec("ROLLBACK");

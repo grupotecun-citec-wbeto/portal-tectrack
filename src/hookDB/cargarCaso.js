@@ -40,7 +40,10 @@ function useCargarCaso(caso_id) {
 
 
 
-
+  // Rehidratar la base de dato
+  useEffect( () =>{
+    if(!db) rehidratarDb()
+  },[db,rehidratarDb])
 
   /**
    * Obtener lista de casos no sincronizados
@@ -53,7 +56,7 @@ function useCargarCaso(caso_id) {
     
     const fetchData = async (synctable_ID) => {
       if(db != null){
-        await rehidratarDb()
+        rehidratarDb()
         try {
           const query = `SELECT
               ID,
@@ -73,7 +76,9 @@ function useCargarCaso(caso_id) {
               caso_v2 
             WHERE 
               length(ID) = 36
-              AND ID LIKE '%${caso_id}%'`
+              AND ID LIKE '%${caso_id}%'
+              AND syncStatus = 1
+              `
           const casosNoSincronizados = db.exec(query).toArray()
 
 
@@ -125,7 +130,7 @@ function useCargarCaso(caso_id) {
     //if (formDataVisitas.length == 0) return;
     //if (formDataCasoVisitas.length == 0) return;
 
-    const fetchData = async(url,retries = 3,delay = 100) =>{
+    const fetchData = async(url,retries = 3,delay = 500) =>{
       let attempts = 0;
 
       const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -166,7 +171,7 @@ function useCargarCaso(caso_id) {
     }
 
     
-    fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/casos`,5,100)
+    fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/casos`,5,500)
     
     
     

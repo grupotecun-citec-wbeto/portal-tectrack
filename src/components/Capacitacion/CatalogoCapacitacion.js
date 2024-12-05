@@ -39,10 +39,16 @@ import SqlContext from 'sqlContext';
     };
     //**************** redux-persist ************************* */
 
-    const {db,saveToIndexedDB,} = useContext(SqlContext)
+    const {db,rehidratarDb,saveToIndexedDB,} = useContext(SqlContext)
     const [catalogos,setCatalogos] = useState([])
 
     const [catalogoSelected,setCatalogoSelected] = useState('')
+
+    // Rehidratar la base de dato
+    useEffect( () =>{
+      if(!db) rehidratarDb()
+    },[db,rehidratarDb])
+
 
     useEffect(() =>{
       if(db != null){

@@ -64,7 +64,7 @@ function Casos() {
   const [casosEnProceso,setCasosEnProceso] = useState(0)
   
 
-  const {db,saveToIndexedDB} = useContext(SqlContext)
+  const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
 
   const caseData = {
     id: 12345,
@@ -73,6 +73,11 @@ function Casos() {
     assignedTechnician: 'Juan Pérez',
     description: 'El dispositivo presenta fallas intermitentes de conexión.',
   };
+
+  // Rehidratar la base de datos
+  useEffect( () =>{
+    if(!db) rehidratarDb()
+  },[db,rehidratarDb])
 
   useEffect( () =>{
     if(db != null){

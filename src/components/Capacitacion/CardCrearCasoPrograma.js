@@ -30,6 +30,8 @@ import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
 import SqlContext from "sqlContext";
+
+import useCargarCaso from "hookDB/cargarCaso";
 //import { getData } from "ajv/dist/compile/validate";
 
 
@@ -39,8 +41,13 @@ import SqlContext from "sqlContext";
 function CardCrearCasoPrograma({openAlert}){
 
     const {casoActivo,setCasoActivo} = useContext(AppContext)
-    const {db,saveToIndexedDB} = useContext(SqlContext)
+    const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
 
+    
+    // Rehidratar la base de dato
+    useEffect( () =>{
+        if(!db) rehidratarDb()
+    },[db,rehidratarDb])
     const history = useHistory()
 
     const [caseId,setCaseId] = useState(0)
@@ -63,6 +70,7 @@ function CardCrearCasoPrograma({openAlert}){
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
+    const {loadCaso} = useCargarCaso(userData?.casoActivo?.code)
     const getCurrentDateTime = () => {
         const now = new Date();
         return format(now.toUTCString(), 'yyyy-MM-dd HH:mm:ss');
@@ -214,7 +222,9 @@ function CardCrearCasoPrograma({openAlert}){
         if(caso.Size == 0){
             
             try {
+                rehidratarDb()
                 await db.exec('BEGIN TRANSACTION');
+                
                 const sql = `
                     INSERT INTO caso_v2 (
                         ID,
@@ -233,7 +243,7 @@ function CardCrearCasoPrograma({openAlert}){
                     )
                     VALUES(
                         '${uuid}',
-                        NULL,
+                        1,
                         ${usuario_ID},
                         ${usuario_ID_assigned},
                         ${comunicacion_ID},
@@ -291,6 +301,7 @@ function CardCrearCasoPrograma({openAlert}){
                 await db.exec('COMMIT');
 
                 saveToIndexedDB(db)
+                loadCaso()
             }catch(err){
                 console.error('ebeafbf7-4a90-43f2-bcc3-76bd5578c31c',err)
                 await db.exec("ROLLBACK");

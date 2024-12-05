@@ -7,7 +7,12 @@ import {v4 as uuidv4} from 'uuid'
 
 function useTransladoDb() {
   
-  const {db,saveToIndexedDB,} = useContext(SqlContext)
+  const {db,rehidratarDb,saveToIndexedDB,} = useContext(SqlContext)
+
+  // rehratar base de datos
+  useEffect( () =>{
+    if(!db) rehidratarDb()
+  },[db,rehidratarDb])
 
   const [casos,setCasos] = useState([])
   const [stateDiagnosticos,setStateDiagnosticos] = useState([])
@@ -128,75 +133,85 @@ function useTransladoDb() {
     useEffect (() =>{
         if(casos.length == 0) return;
         
-        
+        const run = async() =>{
+            let values = ``
+            casos.forEach((element,index) => {
+            
+                const coma = (index == 0 ) ? '' : ','
+                const fecha = !element.fecha?.includes('null') ? `'${format(element.fecha, 'yyyy-MM-dd')}'` : null;
+                const start = !element.start?.includes('null') ? `'${format(element.start, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+                const date_end = !element.date_end?.includes('null') ? `'${format(element.date_end, 'yyyy-MM-dd HH:mm:ss')}'` : null;
+                const description = !element.description?.includes('null')  ? `'${element.description}'` : `''`;
+                values +=  `${coma}(
+                    '${element.ID}', 
+                    ${element.usuario_ID},
+                    ${element.comunicacion_ID},
+                    ${element.segmento_ID},
+                    ${element.caso_estado_ID},
+                    ${fecha},
+                    ${start},
+                    ${date_end},
+                    ${description},
+                    ${element.prioridad},
+                    '${element.equipos}'
 
-        
-        let values = ``
-        casos.forEach((element,index) => {
-        
-            const coma = (index == 0 ) ? '' : ','
-            const fecha = !element.fecha?.includes('null') ? `'${format(element.fecha, 'yyyy-MM-dd')}'` : null;
-            const start = !element.start?.includes('null') ? `'${format(element.start, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-            const date_end = !element.date_end?.includes('null') ? `'${format(element.date_end, 'yyyy-MM-dd HH:mm:ss')}'` : null;
-            const description = !element.description?.includes('null')  ? `'${element.description}'` : `''`;
-            values +=  `${coma}(
-                '${element.ID}', 
-                ${element.usuario_ID},
-                ${element.comunicacion_ID},
-                ${element.segmento_ID},
-                ${element.caso_estado_ID},
-                ${fecha},
-                ${start},
-                ${date_end},
-                ${description},
-                ${element.prioridad},
-                '${element.equipos}'
+                )` 
+            });
 
-            )` 
-        });
-
-        
-        
-        
-        
-        try{
-            db.run(`INSERT INTO caso_v2 (ID,usuario_ID,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,equipos) VALUES ${values}`)
-        }catch(err){
-            console.error('a98dbff4-9eba-4bdc-97ba-3ab059bdb21a',err)
+            
+            
+            
+            
+            try{
+                db.run(`INSERT INTO caso_v2 (ID,usuario_ID,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,equipos) VALUES ${values}`)
+            }catch(err){
+                console.error('a98dbff4-9eba-4bdc-97ba-3ab059bdb21a',err)
+            }
         }
+
+        run()
+        
+
+        
+        
     },[casos])
 
     useEffect( () =>{
         if(stateDiagnosticos.length == 0) return;
         
-        try{
-            let values = ``
-            stateDiagnosticos.forEach((element,index) => {
-                if(element.equipo_ID <= 404){
-                    //const coma = (index == 0 ) ? '' : ','
-                    const description = !element.description?.includes('null') ? `'${element.description}'` : `''`;
-                    values +=  `,(
-                        ${element.equipo_ID}, 
-                        '${element.caso_ID}',
-                        ${element.diagnostico_tipo_ID},
-                        ${element.asistencia_tipo_ID},
-                        ${element.especialista_ID},
-                        ${description}
-                    )` 
-                }
-            });
-            const newValues = values.replace(',','')
-            //console.log(newValues);
-            
-            
-            const data = db.run(`INSERT INTO diagnostico_v2 (equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description) VALUES ${newValues}`)
-
-            //console.log(data);
-            
-
-        }catch(err){
-            console.error('c2bf1777-1aac-4f96-b0bb-1bb68d6bc8fd',err)
+        const run = async() =>{
+            try{
+                let values = ``
+                stateDiagnosticos.forEach((element,index) => {
+                    if(element.equipo_ID <= 404){
+                        //const coma = (index == 0 ) ? '' : ','
+                        const description = !element.description?.includes('null') ? `'${element.description}'` : `''`;
+                        values +=  `,(
+                            ${element.equipo_ID}, 
+                            '${element.caso_ID}',
+                            ${element.diagnostico_tipo_ID},
+                            ${element.asistencia_tipo_ID},
+                            ${element.especialista_ID},
+                            ${description}
+                        )` 
+                    }
+                });
+                const newValues = values.replace(',','')
+                //console.log(newValues);
+                
+                
+                const data = db.run(`INSERT INTO diagnostico_v2 (equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description) VALUES ${newValues}`)
+    
+                //console.log(data);
+                
+    
+            }catch(err){
+                console.error('c2bf1777-1aac-4f96-b0bb-1bb68d6bc8fd',err)
+            }
         }
+
+        run()
+        
         
         
     },[stateDiagnosticos])

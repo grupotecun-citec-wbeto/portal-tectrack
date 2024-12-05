@@ -10,22 +10,22 @@ import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 const SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
 
 
-async function saveToIndexedDB(db) {
-  const dbData = db.export(); // Export the database to a Uint8Array
-  const request = indexedDB.open("sqlite_db", 2); // Incremented version
+async function saveToIndexedDB(db_init) {
+  const db_initData = db_init.export(); // Export the database to a Uint8Array
+  const request = indexedDB.open("sqlite_db_init", 2); // Incremented version
 
   request.onupgradeneeded = function () {
-    const idb = request.result;
-    if (!idb.objectStoreNames.contains("databases")) {
-      idb.createObjectStore("databases");
+    const idb_init = request.result;
+    if (!idb_init.objectStoreNames.contains("databases")) {
+      idb_init.createObjectStore("databases");
     }
   };
 
   request.onsuccess = function () {
-    const idb = request.result;
-    const tx = idb.transaction("databases", "readwrite");
+    const idb_init = request.result;
+    const tx = idb_init.transaction("databases", "readwrite");
     const store = tx.objectStore("databases");
-    store.put(dbData, "db");
+    store.put(db_initData, "db_init");
   };
 
   request.onerror = function () {
@@ -35,27 +35,27 @@ async function saveToIndexedDB(db) {
 
 async function loadFromIndexedDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("sqlite_db", 2); // Ensure version matches
+    const request = indexedDB.open("sqlite_db_init", 2); // Ensure version matches
 
     request.onupgradeneeded = function () {
-      const idb = request.result;
+      const idb_init = request.result;
       // Crea el objeto de almacenamiento si no existe
-      if (!idb.objectStoreNames.contains("databases")) {
-        idb.createObjectStore("databases");
+      if (!idb_init.objectStoreNames.contains("databases")) {
+        idb_init.createObjectStore("databases");
       }
     };
 
     request.onsuccess = function () {
-      const idb = request.result;
-      const tx = idb.transaction("databases", "readonly");
+      const idb_init = request.result;
+      const tx = idb_init.transaction("databases", "readonly");
       const store = tx.objectStore("databases");
-      const dbRequest = store.get("db");
+      const db_initRequest = store.get("db_init");
 
-      dbRequest.onsuccess = function () {
-        resolve(dbRequest.result ? new Uint8Array(dbRequest.result) : null);
+      db_initRequest.onsuccess = function () {
+        resolve(db_initRequest.result ? new Uint8Array(db_initRequest.result) : null);
       };
 
-      dbRequest.onerror = function () {
+      db_initRequest.onerror = function () {
         reject("Error loading database from IndexedDB.");
       };
     };
@@ -72,7 +72,8 @@ const SqlContext = createContext();
 
 // Crear el proveedor del contexto
 export function SqlProvider({ children }) {
-  const [db, setDb] = useState(null);
+  const [db_init, setDb_init] = useState(null);
+  const [db,setDb] = useState(null);
   const [data, setData] = useState([]);
   
   const [syncUuid,setSyncUuid] = useState('')
@@ -111,21 +112,21 @@ export function SqlProvider({ children }) {
   
   
   
-  const checkTableExists = (db, tableName) => {
-    const result = db.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`).toObject();
+  const checkTableExists = (db_init, tableName) => {
+    const result = db_init.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`).toObject();
     return Object.keys(result || {}).length > 0
   };
 
-  const DDL = async(db) =>{
-    if (!checkTableExists(db, 'tipo_accion')) {
-      db.run(`CREATE TABLE IF NOT EXISTS tipo_accion (ID INTEGER PRIMARY KEY,name TEXT);`);
-      db.run("INSERT INTO tipo_accion VALUES (1, 'Correctivo'), (2, 'Preventivo')");
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+  const DDL = async(db_init) =>{
+    if (!checkTableExists(db_init, 'tipo_accion')) {
+      db_init.run(`CREATE TABLE IF NOT EXISTS tipo_accion (ID INTEGER PRIMARY KEY,name TEXT);`);
+      db_init.run("INSERT INTO tipo_accion VALUES (1, 'Correctivo'), (2, 'Preventivo')");
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     
     // TABLE COMUNICACION
-    if (!checkTableExists(db, 'comunicacion')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'comunicacion')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS comunicacion (
           ID INTEGER PRIMARY KEY,
           name TEXT,
@@ -134,7 +135,7 @@ export function SqlProvider({ children }) {
           FOREIGN KEY (tipo_accion_ID) REFERENCES tipo_accion(ID) ON DELETE NO ACTION ON UPDATE NO ACTION
         );
       `)
-      db.run(`
+      db_init.run(`
         INSERT INTO comunicacion VALUES 
         (1, 'Whatsapp', 1),
         (2, 'Telefono', 1),
@@ -148,11 +149,11 @@ export function SqlProvider({ children }) {
         (10, 'En sitio', 2),
         (11, 'Comentario', 2);
       `);
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
 
-    if (!checkTableExists(db, 'caso_estado')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'caso_estado')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS caso_estado (
           ID INTEGER PRIMARY KEY,
           name TEXT,
@@ -160,7 +161,7 @@ export function SqlProvider({ children }) {
         );
       `)
 
-      db.run(`
+      db_init.run(`
         INSERT INTO caso_estado VALUES 
         (1, 'Pendiente asignación', 'Caso nuevo que no se ha asignado ningun técnico'),
         (2, 'Asignado', 'Caso nuevo que ya fue asignado a un técnico'),
@@ -168,7 +169,7 @@ export function SqlProvider({ children }) {
         (4, 'Detenido', 'Caso se encuentra detenido por falta de algún material, insumo o herramienta'),
         (5, 'OK', 'Caso terminado con éxito');
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
 
     /*=======================================================
@@ -176,8 +177,8 @@ export function SqlProvider({ children }) {
       DESCRIPTION: 
     =========================================================*/
 
-    if (!checkTableExists(db, 'caso')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'caso')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS caso (
           ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
           remote_sync_id INTEGER NULL,
@@ -198,27 +199,27 @@ export function SqlProvider({ children }) {
           FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
         );
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }else{
-      const tableInfo = db.exec(`PRAGMA table_info(caso)`).toArray()
+      const tableInfo = db_init.exec(`PRAGMA table_info(caso)`).toArray()
       const columna = 'equipos'
       const columnExists = tableInfo.some(column => column.name === columna);
       if(!columnExists){
-        db.run(`ALTER TABLE caso ADD COLUMN ${columna} TEXT NULL;`)
-        saveToIndexedDB(db);
+        db_init.run(`ALTER TABLE caso ADD COLUMN ${columna} TEXT NULL;`)
+        saveToIndexedDB(db_init);
       }
       const columna2 = 'usuario_ID_assigned'
       const columnExists2 = tableInfo.some(column => column.name === columna2);
       if(!columnExists2){
-        db.run(`ALTER TABLE caso ADD COLUMN ${columna2} INTEGER NULL;`)
-        saveToIndexedDB(db);
+        db_init.run(`ALTER TABLE caso ADD COLUMN ${columna2} INTEGER NULL;`)
+        saveToIndexedDB(db_init);
       }
       //const iden = '27'
-      //db.run(`UPDATE caso_v2 SET usuario_ID=1 WHERE usuario_ID is NULL AND ID = ${iden}`)
+      //db_init.run(`UPDATE caso_v2 SET usuario_ID=1 WHERE usuario_ID is NULL AND ID = ${iden}`)
       /*const iden = '8'
-      const resgistro = db.exec(`SELECT ID FROM caso WHERE ID = ${iden}`).toObject()
+      const resgistro = db_init.exec(`SELECT ID FROM caso WHERE ID = ${iden}`).toObject()
       if(resgistro?.ID || '' == iden){
-        db.run(`DELETE FROM caso WHERE ID = ${iden}`)
+        db_init.run(`DELETE FROM caso WHERE ID = ${iden}`)
       }else{
         console.log('131a5455-705d-4dfa-8f68-40ff96694416');
         
@@ -226,8 +227,8 @@ export function SqlProvider({ children }) {
       
 
       
-      //const result = db.run(`DROP TABLE caso;`)
-      //saveToIndexedDB(db);
+      //const result = db_init.run(`DROP TABLE caso;`)
+      //saveToIndexedDB(db_init);
     }
 
 
@@ -236,8 +237,8 @@ export function SqlProvider({ children }) {
       DESCRIPTION: 
     =========================================================*/
 
-    if (!checkTableExists(db, 'caso_v2')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'caso_v2')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS caso_v2 (
           ID CHAR(36) NOT NULL PRIMARY KEY,
           syncStatus INTEGER NULL DEFAULT 0,
@@ -259,7 +260,7 @@ export function SqlProvider({ children }) {
           FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
         );
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }else{
 
     }
@@ -268,78 +269,78 @@ export function SqlProvider({ children }) {
       BLOQUE: TABLE CATEGORIA
       DESCRIPTION: 
     =========================================================*/
-    if (!checkTableExists(db, 'categoria')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'categoria')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS categoria (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT
         );
 
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE MODELO
       DESCRIPTION: 
     =========================================================*/
-    if (!checkTableExists(db, 'modelo')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'modelo')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS modelo (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT
         );
 
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE LINEA
       DESCRIPTION: 
     =========================================================*/
-    if (!checkTableExists(db, 'linea')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'linea')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS linea (
           ID INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT
       );
 
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE MARCA
       DESCRIPTION: 
     =========================================================*/
-    if (!checkTableExists(db, 'marca')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'marca')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS marca (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT
         );
 
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE DIVISION
       DESCRIPTION: 
     =========================================================*/
-    if (!checkTableExists(db, 'division')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'division')) {
+      db_init.run(`
        CREATE TABLE IF NOT EXISTS division (
           ID INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT
       );
 
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE CATALOGO
       DESCRIPTION: 
     =========================================================*/
-    if (!checkTableExists(db, 'catalogo')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'catalogo')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS catalogo (
           ID INTEGER PRIMARY KEY AUTOINCREMENT,
           business_name TEXT NOT NULL,
@@ -357,7 +358,7 @@ export function SqlProvider({ children }) {
         );
 
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
 
     /*=======================================================
@@ -365,8 +366,8 @@ export function SqlProvider({ children }) {
       DESCRIPTION: 
     =========================================================*/
     
-    if (!checkTableExists(db, 'usuario')) {
-      db.run(`
+    if (!checkTableExists(db_init, 'usuario')) {
+      db_init.run(`
         CREATE TABLE IF NOT EXISTS usuario (
           ID INTEGER PRIMARY KEY AUTOINCREMENT,
           nombre TEXT,
@@ -376,16 +377,16 @@ export function SqlProvider({ children }) {
         );
       `)
 
-      db.run(`
+      db_init.run(`
         INSERT INTO usuario VALUES 
       (1, 'Brandon Roberto', 'Cerrano','Brandon Roberto Cerrano',''),
       (2, 'Billy Anderson', 'Guillen','Billy Anderson Guillen',''),
       (3, 'Jorge David', 'Morales','Jorge David Morales',''),
       (4, 'Jazon', 'Castillo', 'Jazon Castillo','');
       `)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }else{
-      //db.run(`DROP TABLE usuario;`)
+      //db_init.run(`DROP TABLE usuario;`)
     }
 
     /*CREATE TABLE IF NOT EXISTS asignacion (
@@ -403,8 +404,8 @@ export function SqlProvider({ children }) {
     DESCRIPTION: @deprecated
   =========================================================*/
     
-  if (!checkTableExists(db, 'asignacion')) {
-    /*db.run(`
+  if (!checkTableExists(db_init, 'asignacion')) {
+    /*db_init.run(`
       CREATE TABLE IF NOT EXISTS asignacion (
         usuario_ID INTEGER NOT NULL,
         caso_ID INTEGER NOT NULL,
@@ -415,45 +416,45 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB*/
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB*/
   }else{
-    db.run(`DROP TABLE asignacion;`)
-    await saveToIndexedDB(db);
+    db_init.run(`DROP TABLE asignacion;`)
+    await saveToIndexedDB(db_init);
   }
 
   //=======================================================
   // SECTION: TABLE PROYECTO
   //=======================================================
-  if (!checkTableExists(db, 'proyecto')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'proyecto')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS proyecto (
         ID INTEGER PRIMARY KEY,
         name TEXT
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //db.run(`DROP TABLE proyecto;`)
-    //await saveToIndexedDB(db);
+    //db_init.run(`DROP TABLE proyecto;`)
+    //await saveToIndexedDB(db_init);
   }
   //=======================================================
   // SECTION: TABLE departamento_negocio
   //=======================================================
-  if (!checkTableExists(db, 'departamento_negocio')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'departamento_negocio')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS departamento_negocio (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         unidad_negocio_ID INTEGER NOT NULL
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE unidad_negocio
   //=======================================================
-  if (!checkTableExists(db, 'unidad_negocio')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'unidad_negocio')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS unidad_negocio (
         ID INTEGER NOT NULL PRIMARY KEY,
         nombre TEXT,
@@ -461,88 +462,88 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (unidad_negocio_ID) REFERENCES unidad_negocio(ID) 
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE departamento
   //=======================================================
-  if (!checkTableExists(db, 'departamento')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'departamento')) {
+    db_init.run(`
      CREATE TABLE IF NOT EXISTS departamento (
         code TEXT NOT NULL PRIMARY KEY,
         country_name TEXT,
         subdivision_name TEXT
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE Estatus maquinaria
   //=======================================================
-  if (!checkTableExists(db, 'estatus_maquinaria')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'estatus_maquinaria')) {
+    db_init.run(`
      CREATE TABLE IF NOT EXISTS estatus_maquinaria (
         ID INTEGER NOT NULL PRIMARY KEY,
         name TEXT
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE Estado maquinaria
   //=======================================================
-  if (!checkTableExists(db, 'estado_maquinaria')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'estado_maquinaria')) {
+    db_init.run(`
      CREATE TABLE IF NOT EXISTS estado_maquinaria (
         ID INTEGER NOT NULL PRIMARY KEY,
         name TEXT
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE cliente
   //=======================================================
-  if (!checkTableExists(db, 'cliente')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'cliente')) {
+    db_init.run(`
      CREATE TABLE IF NOT EXISTS cliente (
         ID INTEGER NOT NULL PRIMARY KEY,
         name TEXT
       );
 
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE supervisor
   //=======================================================
-  if (!checkTableExists(db, 'supervisor')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'supervisor')) {
+    db_init.run(`
      CREATE TABLE IF NOT EXISTS supervisor (
         ID INTEGER NOT NULL PRIMARY KEY,
         name TEXT
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE modelo_variante
   //=======================================================
-  if (!checkTableExists(db, 'modelo_variante')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'modelo_variante')) {
+    db_init.run(`
      CREATE TABLE IF NOT EXISTS modelo_variante (
         ID INTEGER NOT NULL PRIMARY KEY,
         name TEXT
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
  
   //=======================================================
   // SECTION: TABLE equipo
   //=======================================================
-  if (!checkTableExists(db, 'equipo')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'equipo')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS equipo (
         ID INTEGER NOT NULL,
         catalogo_ID INTEGER NOT NULL,
@@ -586,28 +587,28 @@ export function SqlProvider({ children }) {
       );
 
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
 
 
   //=======================================================
   // SECTION: TABLE diagnostico_tipo
   //=======================================================
-  if (!checkTableExists(db, 'diagnostico_tipo')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'diagnostico_tipo')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS diagnostico_tipo (
         ID INTEGER NOT NULL PRIMARY KEY,
         name TEXT
       );
 
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE asistencia_tipo
   //=======================================================
-  if (!checkTableExists(db, 'asistencia_tipo')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'asistencia_tipo')) {
+    db_init.run(`
      CREATE TABLE IF NOT EXISTS asistencia_tipo (
       ID INTEGER NOT NULL PRIMARY KEY,
       name TEXT
@@ -615,15 +616,15 @@ export function SqlProvider({ children }) {
 
 
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
 
   
   //=======================================================
   // SECTION: TABLE vehiculo
   //=======================================================
-  if (!checkTableExists(db, 'vehiculo')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'vehiculo')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS vehiculo (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         code TEXT,
@@ -632,22 +633,22 @@ export function SqlProvider({ children }) {
         name TEXT
       );
     `)
-    db.run(`
+    db_init.run(`
       INSERT INTO vehiculo (ID,code,placa,year,name) VALUES 
     (1, '112', 'P102JBC','2020','Mazda BT 50'),
     (2, 'AGRI02', 'P397GLD','2017','Mazda BT 50'),
     (3, 'AGRI03', 'P752JLP','2023','Mazda BT 50')
   `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const result = db.run(`DROP TABLE vehiculo;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE vehiculo;`)
+    //await saveToIndexedDB(db_init);
   }
   //=======================================================
   // SECTION: TABLE Visita
   //=======================================================
-  if (!checkTableExists(db, 'visita')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'visita')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS visita (
         ID INTEGER PRIMARY KEY AUTOINCREMENT,
         vehiculo_ID INTEGER NOT NULL,
@@ -663,52 +664,52 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    const tableInfo = db.exec(`PRAGMA table_info(visita)`).toArray()
+    const tableInfo = db_init.exec(`PRAGMA table_info(visita)`).toArray()
     let columna = 'uuid'
     let columnExists = tableInfo.some(column => column.name === columna);
     if(!columnExists){
-      db.run(`ALTER TABLE visita ADD COLUMN ${columna} CHAR(36) NULL;`)
-      saveToIndexedDB(db);
+      db_init.run(`ALTER TABLE visita ADD COLUMN ${columna} CHAR(36) NULL;`)
+      saveToIndexedDB(db_init);
     }
 
     columna = 'usuario_ID'
     columnExists = tableInfo.some(column => column.name === columna);
     if(!columnExists){
-      db.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NOT NULL;`)
-      saveToIndexedDB(db);
+      db_init.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NOT NULL;`)
+      saveToIndexedDB(db_init);
     }
 
     columna = 'km_inicial'
     columnExists = tableInfo.some(column => column.name === columna);
     if(!columnExists){
-      db.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NULL;`)
-      saveToIndexedDB(db);
+      db_init.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NULL;`)
+      saveToIndexedDB(db_init);
     }
     
     columna = 'km_final'
     columnExists = tableInfo.some(column => column.name === columna);
     if(!columnExists){
-      db.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NULL;`)
-      saveToIndexedDB(db);
+      db_init.run(`ALTER TABLE visita ADD COLUMN ${columna} INTEGER NULL;`)
+      saveToIndexedDB(db_init);
     }
 
     const columna2 = 'vehiculo_ID'
     const columnExists2 = tableInfo.some(column => column.name === columna2);
     if(!columnExists2){
-      db.run(`ALTER TABLE visita ADD COLUMN ${columna2} INTEGER NOT NULL;`)
-      saveToIndexedDB(db);
+      db_init.run(`ALTER TABLE visita ADD COLUMN ${columna2} INTEGER NOT NULL;`)
+      saveToIndexedDB(db_init);
     }
-    //const result = db.run(`DROP TABLE visita;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE visita;`)
+    //await saveToIndexedDB(db_init);
   }
 
   //=======================================================
   // SECTION: TABLE Visita_v2
   //=======================================================
-  if (!checkTableExists(db, 'visita_v2')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'visita_v2')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS visita_v2 (
         ID CHAR(36) PRIMARY KEY,
         vehiculo_ID INTEGER NOT NULL,
@@ -724,17 +725,17 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const result = db.run(`DROP TABLE visita;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE visita;`)
+    //await saveToIndexedDB(db_init);
   }
 
   //=======================================================
   // SECTION: TABLE caso_visita
   //=======================================================
-  if (!checkTableExists(db, 'caso_visita')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'caso_visita')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS caso_visita (
         caso_ID INTEGER NOT NULL,
         visita_ID INTEGER NOT NULL,
@@ -743,17 +744,17 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (visita_ID) REFERENCES visita (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const result = db.run(`DROP TABLE caso_visita;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE caso_visita;`)
+    //await saveToIndexedDB(db_init);
   }
 
   //=======================================================
   // SECTION: TABLE caso_visita
   //=======================================================
-  if (!checkTableExists(db, 'caso_visita_v2')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'caso_visita_v2')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS caso_visita_v2 (
         caso_ID CHAR(36) NOT NULL,
         visita_ID CHAR(36) NOT NULL,
@@ -762,17 +763,17 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (visita_ID) REFERENCES visita (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const result = db.run(`DROP TABLE caso_visita;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE caso_visita;`)
+    //await saveToIndexedDB(db_init);
   }
   
   //=======================================================
   // SECTION: TABLE diagnostico
   //=======================================================
-  if (!checkTableExists(db, 'diagnostico')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'diagnostico')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS diagnostico (
         equipo_ID INTEGER NOT NULL,
         caso_ID INTEGER NOT NULL,
@@ -792,17 +793,17 @@ export function SqlProvider({ children }) {
       );
 
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const result = db.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db_init);
   }
 
   //=======================================================
   // SECTION: TABLE diagnostico_v2
   //=======================================================
-  if (!checkTableExists(db, 'diagnostico_v2')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'diagnostico_v2')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS diagnostico_v2 (
         equipo_ID INTEGER NOT NULL,
         caso_ID CHAR(36) NOT NULL,
@@ -819,18 +820,18 @@ export function SqlProvider({ children }) {
       );
 
     `)
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const result = db.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db_init);
   }
 
 
   //=======================================================
   // SECTION: TABLE programa
   //=======================================================
-  if (!checkTableExists(db, 'programa')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'programa')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS programa (
         caso_ID INTEGER NOT NULL,
         asistencia_tipo_ID INTEGER NOT NULL,
@@ -846,20 +847,20 @@ export function SqlProvider({ children }) {
 
     `)
     
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const info_tabla = db.exec(`PRAGMA table_info(programa);`)
+    //const info_tabla = db_init.exec(`PRAGMA table_info(programa);`)
     //console.log(info_tabla);
     
-    //const result = db.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db_init);
   }
 
   //=======================================================
   // SECTION: TABLE programa_v2
   //=======================================================
-  if (!checkTableExists(db, 'programa_v2')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'programa_v2')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS programa_v2 (
         caso_ID CHAR(36) NOT NULL,
         asistencia_tipo_ID INTEGER NOT NULL,
@@ -875,19 +876,19 @@ export function SqlProvider({ children }) {
 
     `)
     
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const info_tabla = db.exec(`PRAGMA table_info(programa);`)
+    //const info_tabla = db_init.exec(`PRAGMA table_info(programa);`)
     //console.log(info_tabla);
     
-    //const result = db.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db_init);
   }
   //=======================================================
   // SECTION: TABLE herramieta herramienta
   //=======================================================
-  if (!checkTableExists(db, 'herramienta')) {
-    db.run(`
+  if (!checkTableExists(db_init, 'herramienta')) {
+    db_init.run(`
       CREATE TABLE IF NOT EXISTS herramienta (
         ID INTEGER NOT NULL PRIMARY KEY,
         name TEXT NULL,
@@ -896,29 +897,29 @@ export function SqlProvider({ children }) {
       );
     `)
     
-    await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
-    //const info_tabla = db.exec(`PRAGMA table_info(programa);`)
+    //const info_tabla = db_init.exec(`PRAGMA table_info(programa);`)
     //console.log(info_tabla);
-    //const result = db.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db);
+    //const result = db_init.run(`DROP TABLE diagnostico;`)
+    //await saveToIndexedDB(db_init);
   }
     
     
 }
 
-  const DDL_UUID_SYNC = async(db) =>{
-    if (!checkTableExists(db, 'version_sync')) {
+  const DDL_UUID_SYNC = async(db_init) =>{
+    if (!checkTableExists(db_init, 'version_sync')) {
       const uuid = uuidv4()
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_create/${uuid}`);
-      db.run(`CREATE TABLE IF NOT EXISTS version_sync ( uuid TEXT);`)
-      db.run(`INSERT INTO version_sync VALUES ('${uuid}');`)
-      await saveToIndexedDB(db); // Guardar la nueva base de datos en IndexedDB
+      db_init.run(`CREATE TABLE IF NOT EXISTS version_sync ( uuid TEXT);`)
+      db_init.run(`INSERT INTO version_sync VALUES ('${uuid}');`)
+      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
   }
 
 
-  const extendFunctions = (db) =>{
+  const extendFunctions = (db_init) =>{
     /**
      * Convertir los resultados de respuesta sqlite hacia Array(Es un array de objetos) y Object(consultas de una una sola respuesta)
      * @param {*} result 
@@ -959,13 +960,13 @@ export function SqlProvider({ children }) {
     }
     
     // EXEC
-    const originalExec = db.exec.bind(db);
+    const originalExec = db_init.exec.bind(db_init);
     /**
      * Extencion de funcion exec de sqlite para para poder obtener datos en Array o Object
      * @param {*} query 
      * @returns 
      */
-    db.exec = (query) =>{
+    db_init.exec = (query) =>{
       const result = originalExec(query);
       return enhanceResult(result);
     }
@@ -976,7 +977,7 @@ export function SqlProvider({ children }) {
      * @deprecated 
      * @returns 
      */
-    db.toArray = (data) =>{
+    db_init.toArray = (data) =>{
       return data.result.flatMap(item => 
         item.values.map(valueArray => 
             item.columns.reduce((obj, col, index) => {
@@ -994,7 +995,7 @@ export function SqlProvider({ children }) {
      * @deprecated
      * @returns 
      */
-    db.toObject = (data) =>{
+    db_init.toObject = (data) =>{
         return data.result.flatMap(item => 
           item.values.map(valueArray => 
               item.columns.reduce((obj, col, index) => {
@@ -1017,26 +1018,26 @@ export function SqlProvider({ children }) {
         //const SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
         const storedDb = await loadFromIndexedDB();
 
-        let db;
+        let db_init;
         if (storedDb) {
-          db = new SQL.Database(storedDb); // Cargar base de datos desde IndexedDB
-          extendFunctions(db)
+          db_init = new SQL.Database(storedDb); // Cargar base de datos desde IndexedDB
+          extendFunctions(db_init)
           // Crear la version de sqlite en MYSQL: crear la tabla que va guardar el codigo unico de base de datos sqlite
-          await DDL_UUID_SYNC(db)
-          await DDL(db)
+          await DDL_UUID_SYNC(db_init)
+          await DDL(db_init)
         } else {
-          db = new SQL.Database(); // Crear nueva base de datos si no hay datos guardados
-          extendFunctions(db)
+          db_init = new SQL.Database(); // Crear nueva base de datos si no hay datos guardados
+          extendFunctions(db_init)
           // Crear la version de sqlite en MYSQL: crear la tabla que va guardar el codigo unico de base de datos sqlite
-          await DDL_UUID_SYNC(db)
-          await DDL(db)
+          await DDL_UUID_SYNC(db_init)
+          await DDL(db_init)
         }
       
-        setDb(db);
+        setDb_init(db_init);
 
         // Obtener y establecer los datos en el estado
         ///api/v1/synctable/<uuid_sqlite>
-        const data = db.exec("SELECT uuid FROM version_sync LIMIT 1").toObject();
+        const data = db_init.exec("SELECT uuid FROM version_sync LIMIT 1").toObject();
         
         setSyncUuid(data.uuid)
       }catch(err){
@@ -1111,7 +1112,7 @@ export function SqlProvider({ children }) {
 
     const fetchData = async (synctable_ID) => {
       
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           
@@ -1128,9 +1129,9 @@ export function SqlProvider({ children }) {
           });
 
           const insertar = `INSERT OR REPLACE INTO categoria (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1138,7 +1139,7 @@ export function SqlProvider({ children }) {
           }
           console.error('Error fetching data:' + 'categoria', error);
         }
-        const result = db.exec("SELECT * FROM categoria");
+        const result = db_init.exec("SELECT * FROM categoria");
         
       }
     };
@@ -1161,7 +1162,7 @@ export function SqlProvider({ children }) {
    */
   useEffect( () =>{
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1177,9 +1178,9 @@ export function SqlProvider({ children }) {
           });
 
           const insertar = `INSERT OR REPLACE INTO modelo (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1188,7 +1189,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + 'modelo', error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec("SELECT * FROM modelo");
+        const result = db_init.exec("SELECT * FROM modelo");
         
       }
     };
@@ -1200,7 +1201,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
 
   /**
@@ -1212,7 +1213,7 @@ export function SqlProvider({ children }) {
   useEffect( () =>{
     const codigo = 20; const tabla = 'linea'
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1229,9 +1230,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1240,7 +1241,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1252,7 +1253,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   /*==================== FIN ========================
   BLOQUE: INFO LINEA
@@ -1266,7 +1267,7 @@ export function SqlProvider({ children }) {
     const codigo = 21, tabla = 'marca', setTime = setIntervalTimeMarca, time = intervalTimeMarca
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1283,9 +1284,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1294,7 +1295,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1306,7 +1307,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   /*==================== FIN ========================
   BLOQUE: INFO MARCA
@@ -1320,7 +1321,7 @@ export function SqlProvider({ children }) {
     const codigo = 14, tabla = 'division', setTime = setIntervalTimeDivision, time = intervalTimeDivision
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1337,9 +1338,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1348,7 +1349,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1360,7 +1361,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   /*==================== FIN ========================
   BLOQUE: INFO DIVISION
@@ -1374,7 +1375,7 @@ export function SqlProvider({ children }) {
     const codigo = 6, tabla = 'catalogo', setTime = setIntervalTimeCatalogo, time = intervalTimeCatalogo
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1393,9 +1394,9 @@ export function SqlProvider({ children }) {
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, business_name,categoria_id,division_ID,linea_ID,modelo_id,marca_ID,img) VALUES ${values};`
             
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1404,7 +1405,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1416,7 +1417,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   /*==================== FIN ========================
   BLOQUE: INFO CATALOGO
@@ -1431,7 +1432,7 @@ export function SqlProvider({ children }) {
     const codigo = 24, tabla = 'proyecto', setTime = setIntervalTimeProyecto, time = intervalTimeProyecto
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1448,9 +1449,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1459,7 +1460,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1471,7 +1472,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   
   /**
@@ -1483,7 +1484,7 @@ export function SqlProvider({ children }) {
     const codigo = 11, tabla = 'departamento_negocio', setTime = setIntervalTimedepartamentoNegocio, time = intervalTimedepartamentoNegocio
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1500,9 +1501,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name, unidad_negocio_ID) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1511,7 +1512,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1523,7 +1524,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -1535,7 +1536,7 @@ export function SqlProvider({ children }) {
     const codigo = 33, tabla = 'unidad_negocio', setTime = setIntervalTimeUnidadNegocio, time = intervalTimeUnidadNegocio
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1553,9 +1554,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, nombre, unidad_negocio_ID) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1564,7 +1565,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1576,7 +1577,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   
   /**
@@ -1588,7 +1589,7 @@ export function SqlProvider({ children }) {
     const codigo = 10, tabla = 'departamento', setTime = setIntervalTimeDepartamento, time = intervalTimeDepartamento
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1610,9 +1611,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (code, country_name, subdivision_name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1621,7 +1622,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1633,7 +1634,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -1645,7 +1646,7 @@ export function SqlProvider({ children }) {
     const codigo = 18, tabla = 'estatus_maquinaria', setTime = setIntervalTimeEstatusMaquina, time = intervalTimeEstatusMaquina
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1663,9 +1664,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1674,7 +1675,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1686,7 +1687,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -1698,7 +1699,7 @@ export function SqlProvider({ children }) {
     const codigo = 17, tabla = 'estado_maquinaria', setTime = setIntervalTimeEstadoMaquina, time = intervalTimeEstadoMaquina
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1716,9 +1717,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1727,7 +1728,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1739,7 +1740,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -1751,7 +1752,7 @@ export function SqlProvider({ children }) {
     const codigo = 8, tabla = 'cliente', setTime = setIntervalTimeCliente, time = intervalTimeCliente
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1769,9 +1770,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1780,7 +1781,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1792,7 +1793,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
   
   /**
@@ -1804,7 +1805,7 @@ export function SqlProvider({ children }) {
     const codigo = 31, tabla = 'supervisor', setTime = setIntervalTimeSupervisor, time = intervalTimeSupervisor
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1822,9 +1823,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1833,7 +1834,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1845,7 +1846,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -1857,7 +1858,7 @@ export function SqlProvider({ children }) {
     const codigo = 23, tabla = 'modelo_variante', setTime = setIntervalTimeModeloVariante, time = intervalTimeModeloVariante
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1875,9 +1876,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1886,7 +1887,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1898,7 +1899,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -1910,7 +1911,7 @@ export function SqlProvider({ children }) {
     const codigo = 16, tabla = 'equipo', setTime = setIntervalTimeEquipo, time = intervalTimeEquipo
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -1955,9 +1956,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,catalogo_ID,serie,serie_extra,chasis,proyecto_ID,departamento_crudo,departamento_code,estatus_maquinaria_ID,cliente_ID,estado_maquinaria_ID,codigo_finca,contrato,serial_modem_telemetria_pcm,serial_modem_telemetria_am53,fecha_inicio_afs_connect,fecha_vencimiento_afs_connect,fecha_vencimiento_file_transfer,modem_activo,img,unidad_negocio_ID,propietario_ID,departamento_negocio_ID,supervisor_ID,modelo_variante_ID,tiene_telemetria) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1966,7 +1967,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -1978,7 +1979,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
 
@@ -1991,7 +1992,7 @@ export function SqlProvider({ children }) {
     const codigo = 13, tabla = 'diagnostico_tipo', setTime = setIntervalTimeDiagnosticoTipo, time = intervalTimeDiagnosticoTipo
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -2009,9 +2010,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2020,7 +2021,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -2032,7 +2033,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -2044,7 +2045,7 @@ export function SqlProvider({ children }) {
     const codigo = 3, tabla = 'asistencia_tipo', setTime = setIntervalTimeAsistenciaTipo, time = intervalTimeAsistenciaTipo
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -2062,9 +2063,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2073,7 +2074,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -2085,7 +2086,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -2097,7 +2098,7 @@ export function SqlProvider({ children }) {
     const codigo = 37, tabla = 'visita', setTime = setIntervalTimeVisita, time = intervalTimeVisita
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -2129,9 +2130,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (ID,vehiculo_ID,usuario_ID, fecha,programming_date,descripcion_motivo,realization_date,confirmation_date,km_inicial,km_final) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2140,7 +2141,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -2152,7 +2153,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
   /**
@@ -2164,7 +2165,7 @@ export function SqlProvider({ children }) {
     const codigo = 12, tabla = 'diagnostico', setTime = setIntervalTimeDiagnostico, time = intervalTimeDiagnostico
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -2199,9 +2200,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2210,7 +2211,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -2222,7 +2223,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   
   /**
@@ -2234,7 +2235,7 @@ export function SqlProvider({ children }) {
     const codigo = 38, tabla = 'programa', setTime = setIntervalTimePrograma, time = intervalTimePrograma
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -2267,9 +2268,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (caso_ID, asistencia_tipo_ID,catalogo_ID,prioridad,name,type) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2278,7 +2279,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`).toArray();
+        const result = db_init.exec(`SELECT * FROM ${tabla}`).toArray();
         
         
       }
@@ -2291,7 +2292,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
 
 
 
@@ -2299,7 +2300,7 @@ export function SqlProvider({ children }) {
     const codigo = 4, tabla = 'caso', setTime = setIntervalTimeCaso, time = intervalTimeCaso
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -2308,7 +2309,7 @@ export function SqlProvider({ children }) {
 
           const casos_remoto = JSON.parse(response.data)
 
-          const casos_modificados_local = db.exec(`SELECT ID FROM caso_v2 WHERE syncStatus = 1`).toArray();
+          const casos_modificados_local = db_init.exec(`SELECT ID FROM caso_v2 WHERE syncStatus = 1`).toArray();
 
           const json = casos_remoto.filter(item_remoto => !casos_modificados_local.some(item_local => item_local.ID === item_remoto.ID))
           
@@ -2339,10 +2340,10 @@ export function SqlProvider({ children }) {
           
           if(values != ''){
             const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (ID,syncStatus,usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,date_end,description,prioridad,uuid,equipos) VALUES ${values};`
-            db.run(insertar)
-            // imporante simpres salvar en en indexdb
+            db_init.run(insertar)
+            // imporante simpres salvar en en indexdb_init
             
-            await saveToIndexedDB(db);
+            await saveToIndexedDB(db_init);
             setFinSync(true)
           }
         } catch (error) {
@@ -2352,7 +2353,7 @@ export function SqlProvider({ children }) {
           console.error(`Error fetching data: ${tabla} 451d9079-fdfa-41f8-984a-e7bc64ccda59`, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -2364,7 +2365,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   
   /**
@@ -2376,7 +2377,7 @@ export function SqlProvider({ children }) {
     const codigo = 39, tabla = 'caso_visita', setTime = setIntervalTimeCasoVisita, time = intervalTimeCasoVisita
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -2401,9 +2402,9 @@ export function SqlProvider({ children }) {
           
           
           const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (caso_ID, visita_ID) VALUES ${values};`
-          db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          await saveToIndexedDB(db);
+          db_init.run(insertar)
+          // imporante simpres salvar en en indexdb_init
+          await saveToIndexedDB(db_init);
           setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2412,7 +2413,7 @@ export function SqlProvider({ children }) {
           console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`).toArray();
+        const result = db_init.exec(`SELECT * FROM ${tabla}`).toArray();
         
         
       }
@@ -2425,14 +2426,14 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   
   useEffect( () =>{
     const codigo = 19, tabla = 'herramienta', setTime = setIntervalTimeHerramienta, time = intervalTimeHerramienta
 
     const fetchData = async (synctable_ID) => {
-      if(db != null && incrementalDate != ''){
+      if(db_init != null && incrementalDate != ''){
         try {
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
@@ -2457,12 +2458,12 @@ export function SqlProvider({ children }) {
           });
 
           const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,name,description,img) VALUES ${values};`
-          db.run(insertar)
+          db_init.run(insertar)
           
           
-          // imporante simpres salvar en en indexdb
+          // imporante simpres salvar en en indexdb_init
           
-          await saveToIndexedDB(db);
+          await saveToIndexedDB(db_init);
           setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2471,7 +2472,7 @@ export function SqlProvider({ children }) {
           console.error(`Error fetching data: ${tabla} c717f93b-2ae1-4e98-b30f-15c45271efd1`, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db.exec(`SELECT * FROM ${tabla}`);
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
@@ -2483,7 +2484,7 @@ export function SqlProvider({ children }) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
-  },[db,incrementalDate])
+  },[db_init,incrementalDate])
   
   
 

@@ -46,8 +46,7 @@ function CardHerramientas(props){
     
     const {title,...rest} = props
 
-    const { db, saveToIndexedDB } = useContext(SqlContext);
-
+    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
 
     const [necesitaEspecialista,setNecesitaEspecialista] = useState(false)
     const [selectedEspecialista,setSelectedEspecialista] = useState('')
@@ -77,7 +76,14 @@ function CardHerramientas(props){
     /*=======================================================
      BLOQUE: useEfect
      DESCRIPTION: Cagar contenido externo
-    =========================================================*/    
+    =========================================================*/
+    
+    // rehratar base de datos
+    useEffect( () =>{
+      if(!db) rehidratarDb()
+    },[db,rehidratarDb])
+
+
     // Cargando datos cuando el navegador de reinicia
     useEffect(()=>{
         getUserData()

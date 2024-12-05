@@ -67,8 +67,14 @@ function CasosTableRow(props) {
    BLOQUE: CONTEXT
    DESCRIPTION: 
   =========================================================*/
-  const {db,saveToIndexedDB,casos_to_json} = useContext(SqlContext)
+  const {db,rehidratarDb,saveToIndexedDB,casos_to_json} = useContext(SqlContext)
   
+  // Rehidratar la base de datos
+  useEffect( () =>{
+    if(!db) rehidratarDb()
+  },[db,rehidratarDb])
+  
+
   const {
     casoActivo,setCasoActivo
   } = useContext(AppContext)
