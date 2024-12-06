@@ -114,9 +114,13 @@ export default function Dashboard(props) {
         return getRoutes(prop.views);
       }
       if (prop.layout === "/admin") {
+        let params = ``
+        prop?.params?.map( (param) =>{
+            params += `/:${param}`
+        })
         return (
           <Route
-            path={prop.layout + prop.path}
+            path={prop.layout + prop.path + params}
             component={prop.component}
             key={key}
           />

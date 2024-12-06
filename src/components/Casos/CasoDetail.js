@@ -33,6 +33,8 @@ import { LiaTractorSolid } from "react-icons/lia";
 
 import InputKm from './InputKm';
 import InputFinalKm from './InputFinalKm';
+
+import { NavLink } from 'react-router-dom';
 /*=======================================================
  BLOQUE: CONTEXT
  DESCRIPTION: 
@@ -726,9 +728,11 @@ const CasoDetail = ({ caseData }) => {
                     
                     
                       <Tooltip label="Detalles del caso" aria-label="A tooltip" >
-                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
-                          <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                        </Button>
+                        <NavLink to={`/admin/pages/casoinfo/${id}`} >
+                          <Button ms={{lg:"10px"}} my={{sm:"5px"}}>
+                            <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                          </Button>
+                        </NavLink>
                       </Tooltip>
                       
                       <Tooltip label="Empezar" aria-label="A tooltip" >
@@ -753,9 +757,11 @@ const CasoDetail = ({ caseData }) => {
               ):(
                 <>
                    <Tooltip label="Detalles del caso" aria-label="A tooltip" >
-                      <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={() => alert('agregar funcionalidad de ver')}>
-                        <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
-                      </Button>
+                      <NavLink to={`/admin/pages/casoinfo/${id}`} >
+                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} >
+                          <Icon as={FaEye  } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                        </Button>
+                      </NavLink>
                     </Tooltip>
                     <Text 
                       fontSize="lg" 

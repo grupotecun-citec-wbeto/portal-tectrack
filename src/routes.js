@@ -19,6 +19,7 @@ import DiagnosticoBox from 'views/Dashboard/DiagnosticoBox';
 import Casos from 'views/Dashboard/Casos';
 import SelectSegmentoDash from 'views/Dashboard/SelectSegmentoDash';
 import ResultTableSqlite from 'views/Pages/ResultTableSqlite';
+import CasoInfo from 'components/Casos/CasoInfo';
 
 
 // - NOTE
@@ -283,6 +284,16 @@ var dashRoutes = [
         secondaryNavbar: true,
         component: ResultTableSqlite,
         layout: "/admin",
+      },
+      {
+        path: "/pages/casoinfo",
+        name: "Caso info",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: CasoInfo,
+        layout: "/admin",
+        params:['id']
       },
       {
         path: "/signin",
