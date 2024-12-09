@@ -1033,6 +1033,7 @@ export function SqlProvider({ children }) {
         }
       
         setDb_init(db_init);
+        setDb(db_init)
 
         // Obtener y establecer los datos en el estado
         ///api/v1/synctable/<uuid_sqlite>
