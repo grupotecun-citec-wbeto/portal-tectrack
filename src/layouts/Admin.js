@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 
 // TECTRACK CUSTOM
-import useTransladoDb from "hookDB/transladoDB";
+//import useTransladoDb from "hookDB/transladoDB";
 
 
 import Configurator from "components/Configurator/Configurator";
@@ -43,7 +43,7 @@ import medallon_naranja from "assets/img/Medallones Tecun-04.png" // color naran
 export default function Dashboard(props) {
   const { ...rest } = props;
 
-  useTransladoDb() // cargar correción de base de datos hacia base de datos distribuidas
+  //useTransladoDb() // cargar correción de base de datos hacia base de datos distribuidas
 
   // states and functions
   const [fixed, setFixed] = useState(false);
