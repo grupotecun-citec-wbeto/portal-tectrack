@@ -70,9 +70,9 @@ function CasoListEquiposNavbar(props){
      */
 
     // Rehidratar la base de dato
-    useEffect( () =>{
+    /*useEffect( () =>{
         if(!db) rehidratarDb()
-      },[db,rehidratarDb])
+      },[db,rehidratarDb])*/
 
     useEffect(() =>{
         

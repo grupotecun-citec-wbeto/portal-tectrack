@@ -33,9 +33,9 @@ const ResultTableSqlite = () => {
   const borderProfileColor = useColorModeValue("white", "transparent");
 
   // rehratar base de datos
-  useEffect( () =>{
+  /*useEffect( () =>{
     if(!db) rehidratarDb()
-  },[db,rehidratarDb])
+  },[db,rehidratarDb])*/
 
   const handleConsultar = async() =>{
     await rehidratarDb()

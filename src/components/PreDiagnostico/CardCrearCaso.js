@@ -44,9 +44,9 @@ function CardCrearCaso({openAlert}){
     const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
 
     // Rehidratar la base de datos
-    useEffect( () =>{
+    /*useEffect( () =>{
         if(!db) rehidratarDb()
-    },[db,rehidratarDb])
+    },[db,rehidratarDb])*/
 
     const history = useHistory()
 

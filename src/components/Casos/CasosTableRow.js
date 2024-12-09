@@ -70,9 +70,9 @@ function CasosTableRow(props) {
   const {db,rehidratarDb,saveToIndexedDB,casos_to_json} = useContext(SqlContext)
   
   // Rehidratar la base de datos
-  useEffect( () =>{
+  /*useEffect( () =>{
     if(!db) rehidratarDb()
-  },[db,rehidratarDb])
+  },[db,rehidratarDb])*/
   
 
   const {

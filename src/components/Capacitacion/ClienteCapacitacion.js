@@ -50,9 +50,9 @@ import SqlContext from 'sqlContext';
     }
 
     // Rehidratar la base de dato
-    useEffect( () =>{
+    /*useEffect( () =>{
       if(!db) rehidratarDb()
-    },[db,rehidratarDb])
+    },[db,rehidratarDb])*/
 
     useEffect(() =>{
       if(db != null){

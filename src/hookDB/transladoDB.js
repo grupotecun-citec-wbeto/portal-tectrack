@@ -10,9 +10,9 @@ function useTransladoDb() {
   const {db,rehidratarDb,saveToIndexedDB,} = useContext(SqlContext)
 
   // rehratar base de datos
-  useEffect( () =>{
+  /*useEffect( () =>{
     if(!db) rehidratarDb()
-  },[db,rehidratarDb])
+  },[db,rehidratarDb])*/
 
   const [casos,setCasos] = useState([])
   const [stateDiagnosticos,setStateDiagnosticos] = useState([])

@@ -41,9 +41,9 @@ function useCargarCaso(caso_id) {
 
 
   // Rehidratar la base de dato
-  useEffect( () =>{
+  /*useEffect( () =>{
     if(!db) rehidratarDb()
-  },[db,rehidratarDb])
+  },[db,rehidratarDb])*/
 
   /**
    * Obtener lista de casos no sincronizados
@@ -56,7 +56,7 @@ function useCargarCaso(caso_id) {
     
     const fetchData = async (synctable_ID) => {
       if(db != null){
-        rehidratarDb()
+        //rehidratarDb()
         try {
           const query = `SELECT
               ID,

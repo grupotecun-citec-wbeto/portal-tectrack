@@ -45,9 +45,9 @@ import SqlContext from 'sqlContext';
     const [catalogoSelected,setCatalogoSelected] = useState('')
 
     // Rehidratar la base de dato
-    useEffect( () =>{
+    /*useEffect( () =>{
       if(!db) rehidratarDb()
-    },[db,rehidratarDb])
+    },[db,rehidratarDb])*/
 
 
     useEffect(() =>{

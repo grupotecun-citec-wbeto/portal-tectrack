@@ -32,9 +32,9 @@ const Dianostico = ({diagnostico,prediagnostico,equipo_id}) =>{
     const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
 
     // Rehidratar la base de datos
-    useEffect( () =>{
+    /*useEffect( () =>{
         if(!db) rehidratarDb()
-    },[db,rehidratarDb])
+    },[db,rehidratarDb])*/
     
     
     return(
@@ -104,9 +104,9 @@ const CaseDetailCard = ({ caso_ID }) => {
     const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
 
     // Rehidratar la base de datos
-    useEffect( () =>{
+    /*useEffect( () =>{
         if(!db) rehidratarDb()
-    },[db,rehidratarDb])
+    },[db,rehidratarDb])*/
 
     // Estados
 

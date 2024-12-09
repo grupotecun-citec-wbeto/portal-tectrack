@@ -79,9 +79,9 @@ function CardHerramientas(props){
     =========================================================*/
     
     // rehratar base de datos
-    useEffect( () =>{
+    /*useEffect( () =>{
       if(!db) rehidratarDb()
-    },[db,rehidratarDb])
+    },[db,rehidratarDb])*/
 
 
     // Cargando datos cuando el navegador de reinicia

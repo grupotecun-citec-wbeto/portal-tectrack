@@ -636,7 +636,8 @@ export function SqlProvider({ children }) {
       INSERT INTO vehiculo (ID,code,placa,year,name) VALUES 
     (1, '112', 'P102JBC','2020','Mazda BT 50'),
     (2, 'AGRI02', 'P397GLD','2017','Mazda BT 50'),
-    (3, 'AGRI03', 'P752JLP','2023','Mazda BT 50')
+    (3, 'AGRI03', 'P752JLP','2023','Mazda BT 50'),
+    (4, 'CITEC 01','','2024','Mazda BT 50')
   `)
     await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
