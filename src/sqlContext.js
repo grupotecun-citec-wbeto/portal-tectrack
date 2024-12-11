@@ -120,7 +120,7 @@ export function SqlProvider({ children }) {
     if (!checkTableExists(db_init, 'tipo_accion')) {
       db_init.run(`CREATE TABLE IF NOT EXISTS tipo_accion (ID INTEGER PRIMARY KEY,name TEXT);`);
       db_init.run("INSERT INTO tipo_accion VALUES (1, 'Correctivo'), (2, 'Preventivo')");
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     
     // TABLE COMUNICACION
@@ -148,7 +148,7 @@ export function SqlProvider({ children }) {
         (10, 'En sitio', 2),
         (11, 'Comentario', 2);
       `);
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
 
     if (!checkTableExists(db_init, 'caso_estado')) {
@@ -168,7 +168,7 @@ export function SqlProvider({ children }) {
         (4, 'Detenido', 'Caso se encuentra detenido por falta de algún material, insumo o herramienta'),
         (5, 'OK', 'Caso terminado con éxito');
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
 
     /*=======================================================
@@ -198,7 +198,7 @@ export function SqlProvider({ children }) {
           FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
         );
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }else{
       const tableInfo = db_init.exec(`PRAGMA table_info(caso)`).toArray()
       const columna = 'equipos'
@@ -259,7 +259,7 @@ export function SqlProvider({ children }) {
           FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
         );
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }else{
 
     }
@@ -276,7 +276,7 @@ export function SqlProvider({ children }) {
         );
 
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE MODELO
@@ -290,7 +290,7 @@ export function SqlProvider({ children }) {
         );
 
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE LINEA
@@ -304,7 +304,7 @@ export function SqlProvider({ children }) {
       );
 
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE MARCA
@@ -318,7 +318,7 @@ export function SqlProvider({ children }) {
         );
 
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE DIVISION
@@ -332,7 +332,7 @@ export function SqlProvider({ children }) {
       );
 
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
     /*=======================================================
       BLOQUE: TABLE CATALOGO
@@ -357,7 +357,7 @@ export function SqlProvider({ children }) {
         );
 
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
 
     /*=======================================================
@@ -383,7 +383,7 @@ export function SqlProvider({ children }) {
       (3, 'Jorge David', 'Morales','Jorge David Morales',''),
       (4, 'Jazon', 'Castillo', 'Jazon Castillo','');
       `)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }else{
       //db_init.run(`DROP TABLE usuario;`)
     }
@@ -415,10 +415,10 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (caso_ID) REFERENCES caso (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB*/
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB*/
   }else{
     db_init.run(`DROP TABLE asignacion;`)
-    await saveToIndexedDB(db_init);
+    saveToIndexedDB(db_init);
   }
 
   //=======================================================
@@ -431,10 +431,10 @@ export function SqlProvider({ children }) {
         name TEXT
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //db_init.run(`DROP TABLE proyecto;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
   //=======================================================
   // SECTION: TABLE departamento_negocio
@@ -447,7 +447,7 @@ export function SqlProvider({ children }) {
         unidad_negocio_ID INTEGER NOT NULL
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE unidad_negocio
@@ -461,7 +461,7 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (unidad_negocio_ID) REFERENCES unidad_negocio(ID) 
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE departamento
@@ -474,7 +474,7 @@ export function SqlProvider({ children }) {
         subdivision_name TEXT
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE Estatus maquinaria
@@ -486,7 +486,7 @@ export function SqlProvider({ children }) {
         name TEXT
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE Estado maquinaria
@@ -498,7 +498,7 @@ export function SqlProvider({ children }) {
         name TEXT
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE cliente
@@ -511,7 +511,7 @@ export function SqlProvider({ children }) {
       );
 
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE supervisor
@@ -523,7 +523,7 @@ export function SqlProvider({ children }) {
         name TEXT
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE modelo_variante
@@ -535,7 +535,7 @@ export function SqlProvider({ children }) {
         name TEXT
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
  
   //=======================================================
@@ -586,7 +586,7 @@ export function SqlProvider({ children }) {
       );
 
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
 
 
@@ -601,7 +601,7 @@ export function SqlProvider({ children }) {
       );
 
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
   //=======================================================
   // SECTION: TABLE asistencia_tipo
@@ -615,7 +615,7 @@ export function SqlProvider({ children }) {
 
 
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }
 
   
@@ -639,10 +639,10 @@ export function SqlProvider({ children }) {
     (3, 'AGRI03', 'P752JLP','2023','Mazda BT 50'),
     (4, 'CITEC 01','','2024','Mazda BT 50')
   `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const result = db_init.run(`DROP TABLE vehiculo;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
   //=======================================================
   // SECTION: TABLE Visita
@@ -664,7 +664,7 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     const tableInfo = db_init.exec(`PRAGMA table_info(visita)`).toArray()
     let columna = 'uuid'
@@ -702,7 +702,7 @@ export function SqlProvider({ children }) {
       saveToIndexedDB(db_init);
     }
     //const result = db_init.run(`DROP TABLE visita;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
 
   //=======================================================
@@ -725,10 +725,10 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (usuario_ID) REFERENCES usuario (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const result = db_init.run(`DROP TABLE visita;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
 
   //=======================================================
@@ -744,10 +744,10 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (visita_ID) REFERENCES visita (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const result = db_init.run(`DROP TABLE caso_visita;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
 
   //=======================================================
@@ -763,10 +763,10 @@ export function SqlProvider({ children }) {
         FOREIGN KEY (visita_ID) REFERENCES visita (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
       );
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const result = db_init.run(`DROP TABLE caso_visita;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
   
   //=======================================================
@@ -793,10 +793,10 @@ export function SqlProvider({ children }) {
       );
 
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const result = db_init.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
 
   //=======================================================
@@ -820,10 +820,10 @@ export function SqlProvider({ children }) {
       );
 
     `)
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const result = db_init.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
 
 
@@ -847,13 +847,13 @@ export function SqlProvider({ children }) {
 
     `)
     
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const info_tabla = db_init.exec(`PRAGMA table_info(programa);`)
     //console.log(info_tabla);
     
     //const result = db_init.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
 
   //=======================================================
@@ -876,13 +876,13 @@ export function SqlProvider({ children }) {
 
     `)
     
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const info_tabla = db_init.exec(`PRAGMA table_info(programa);`)
     //console.log(info_tabla);
     
     //const result = db_init.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
   //=======================================================
   // SECTION: TABLE herramieta herramienta
@@ -897,12 +897,12 @@ export function SqlProvider({ children }) {
       );
     `)
     
-    await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
   }else{
     //const info_tabla = db_init.exec(`PRAGMA table_info(programa);`)
     //console.log(info_tabla);
     //const result = db_init.run(`DROP TABLE diagnostico;`)
-    //await saveToIndexedDB(db_init);
+    //saveToIndexedDB(db_init);
   }
     
     
@@ -914,7 +914,7 @@ export function SqlProvider({ children }) {
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_create/${uuid}`);
       db_init.run(`CREATE TABLE IF NOT EXISTS version_sync ( uuid TEXT);`)
       db_init.run(`INSERT INTO version_sync VALUES ('${uuid}');`)
-      await saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+      saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
   }
 
@@ -1132,7 +1132,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO categoria (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1181,7 +1181,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO modelo (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1233,7 +1233,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1287,7 +1287,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1341,7 +1341,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1397,7 +1397,7 @@ export function SqlProvider({ children }) {
             
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1452,7 +1452,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1504,7 +1504,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name, unidad_negocio_ID) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1557,7 +1557,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, nombre, unidad_negocio_ID) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1614,7 +1614,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (code, country_name, subdivision_name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1667,7 +1667,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1720,7 +1720,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1773,7 +1773,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1826,7 +1826,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1879,7 +1879,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1959,7 +1959,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,catalogo_ID,serie,serie_extra,chasis,proyecto_ID,departamento_crudo,departamento_code,estatus_maquinaria_ID,cliente_ID,estado_maquinaria_ID,codigo_finca,contrato,serial_modem_telemetria_pcm,serial_modem_telemetria_am53,fecha_inicio_afs_connect,fecha_vencimiento_afs_connect,fecha_vencimiento_file_transfer,modem_activo,img,unidad_negocio_ID,propietario_ID,departamento_negocio_ID,supervisor_ID,modelo_variante_ID,tiene_telemetria) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2013,7 +2013,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2066,7 +2066,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla} (id, name) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2203,8 +2203,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
-          setFinSync(true)
+          saveToIndexedDB(db_init);
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2271,8 +2270,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (caso_ID, asistencia_tipo_ID,catalogo_ID,prioridad,name,type) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
-          setFinSync(true)
+          saveToIndexedDB(db_init);
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2344,8 +2342,7 @@ export function SqlProvider({ children }) {
             db_init.run(insertar)
             // imporante simpres salvar en en indexdb_init
             
-            await saveToIndexedDB(db_init);
-            setFinSync(true)
+            saveToIndexedDB(db_init);
           }
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2405,8 +2402,7 @@ export function SqlProvider({ children }) {
           const insertar = `INSERT OR REPLACE INTO ${tabla}_v2 (caso_ID, visita_ID) VALUES ${values};`
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
-          await saveToIndexedDB(db_init);
-          setFinSync(true)
+          saveToIndexedDB(db_init);
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2464,7 +2460,7 @@ export function SqlProvider({ children }) {
           
           // imporante simpres salvar en en indexdb_init
           
-          await saveToIndexedDB(db_init);
+          saveToIndexedDB(db_init);
           setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {

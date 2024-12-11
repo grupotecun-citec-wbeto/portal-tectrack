@@ -273,7 +273,7 @@ const CasoDetail = ({ caseData }) => {
 
     run()
     
-  },[])
+  },[db])
 
 
   /**
@@ -431,14 +431,15 @@ const CasoDetail = ({ caseData }) => {
         
         // Actualizar a estado asignado cuando se agigna un caso hacia estado 2: Asignado
         const db_aux = db
-        await db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}, syncStatus=1  where ID = '${id}'`)
+        db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}, syncStatus=1  where ID = '${id}'`)
         saveToIndexedDB(db)
         // Establecer el usuario que va resolver el caso
         setEstado(estado_a_asignar)
         setIsEditTecnico(!isEditTecnico)
         
-        
-
+        // rehidratar db
+        rehidratarDb()
+        // sicronizar caso
         loadCaso()
 
         // Diaparar la sincronizacion
@@ -458,6 +459,7 @@ const CasoDetail = ({ caseData }) => {
     //db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = '${id}'`)
 
     // actualizar el estado en el caso
+    
     db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, usuario_ID_assigned = NULL, syncStatus=1  where ID = '${id}'`)
     
     setSlcUsuario(null)
@@ -465,6 +467,8 @@ const CasoDetail = ({ caseData }) => {
     // persistir db
     saveToIndexedDB(db)
     
+    // rehidratar db
+    rehidratarDb()
     // Diaparar la sincronizacion
     loadCaso()
   }
@@ -501,6 +505,8 @@ const CasoDetail = ({ caseData }) => {
           // gurdar en base de datos sqlite
           saveToIndexedDB(db)
 
+          // rehidratar db
+          rehidratarDb()
           // Diaparar la sincronizacion
           loadCaso()
 
@@ -577,6 +583,8 @@ const CasoDetail = ({ caseData }) => {
             db.run(`UPDATE visita_v2 SET km_final = '${kmFinal}' WHERE ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${id}' LIMIT 1) `)
             saveToIndexedDB(db)
 
+            //rehidratar db
+            rehidratarDb()
             // Diaparar la sincronizacion
             loadCaso()
 

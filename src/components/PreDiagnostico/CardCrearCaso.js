@@ -291,7 +291,7 @@ function CardCrearCaso({openAlert}){
         especialista_ID INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
         description TEXT NULL, */
             
-                    db.exec(sql)
+                    db.run(sql)
 
                    
                 })
@@ -316,6 +316,10 @@ function CardCrearCaso({openAlert}){
                 await db.exec('COMMIT');
 
                 saveToIndexedDB(db)
+
+                // rehidratar db
+                rehidratarDb()
+                // sincronizar caso
                 loadCaso()
             }catch(err){
                 console.error('0b6bc4bd-62ac-457c-97d7-6dc450e58fa9',err)

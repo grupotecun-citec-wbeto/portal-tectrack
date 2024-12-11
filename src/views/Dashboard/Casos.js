@@ -81,10 +81,10 @@ function Casos() {
     description: 'El dispositivo presenta fallas intermitentes de conexión.',
   };
 
-  // Rehidratar la base de datos
-  /*useEffect( () =>{
-    if(!db) rehidratarDb()
-  },[db,rehidratarDb])*/
+  // Rehidratar la base de datos db una sola vez
+  useEffect( () =>{
+    rehidratarDb()
+  },[])
 
 
   useEffect( () =>{
