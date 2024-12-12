@@ -97,11 +97,10 @@ function Casos() {
       
       switch(userData.login.perfil_ID){
         case 3: // perfil admin
-           query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 ${query_user} ${query_prioridad} ${query_segmento} ORDER BY prioridad ASC`
-           console.log('55b414e1-c54c-4c06-b8a3-5c2ecbb611e7',query)
+           query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 ${query_user} ${query_prioridad} ${query_segmento} ORDER BY start DESC`
           break;
         default:
-          query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 AND usuario_ID = ${userData.login.ID} ${query_prioridad} ${query_segmento} ORDER BY prioridad ASC`
+          query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento} ORDER BY start DESC`
           break;
       }
       const casosData = db.exec(query).toArray();
@@ -122,10 +121,10 @@ function Casos() {
       
       switch(userData.login.perfil_ID){
         case 3: // perfil admin
-           query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE 1=1 ${query_user} ${query_prioridad} ${query_segmento}`
+           query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE 1=1 AND caso_estado_ID <> 6 ${query_user} ${query_prioridad} ${query_segmento}`
           break;
         default:
-          query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE length(ID) = 36 AND usuario_ID = ${userData.login.ID} ${query_prioridad} ${query_segmento}`
+          query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
           break;
       }
       const casos = db.exec(query).toObject();
@@ -148,7 +147,7 @@ function Casos() {
            query = `SELECT count(*) AS completados FROM caso_v2 where caso_estado_ID = 5 ${query_user} ${query_prioridad} ${query_segmento}`
           break;
         default:
-          query = `SELECT count(*) AS completados FROM caso_v2 WHERE caso_estado_ID = 5 AND length(ID) = 36 AND usuario_ID = ${userData.login.ID} ${query_prioridad} ${query_segmento}`
+          query = `SELECT count(*) AS completados FROM caso_v2 WHERE caso_estado_ID = 5 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
           break;
       }
 
@@ -171,7 +170,7 @@ function Casos() {
            query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1 ${query_user} ${query_prioridad} ${query_segmento}`
           break;
         default:
-          query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1 AND length(ID) = 36 AND usuario_ID = ${userData.login.ID} ${query_prioridad} ${query_segmento}`
+          query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
           break;
       }
 
@@ -190,7 +189,7 @@ function Casos() {
            query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3`
           break;
         default:
-          query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3 AND length(ID) = 36 AND usuario_ID = ${userData.login.ID}`
+          query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} )`
           break;
       }
       const casos = db.exec(query).toObject();

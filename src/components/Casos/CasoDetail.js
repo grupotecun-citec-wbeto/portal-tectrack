@@ -132,7 +132,7 @@ const CasoDetail = ({ caseData }) => {
      * Estado actual del caso, representado por el ID de estado.
      * @type {number}
      */
-    const [estado, setEstado] = useState(status_ID);
+    const [estado, setEstado] = useState(status_ID ?? 1);
     
     /**
      * 
@@ -400,7 +400,7 @@ const CasoDetail = ({ caseData }) => {
    */
   const getCurrentDateTime = () => {
     const now = new Date();
-    return format(now, 'yyyy-MM-dd HH:mm:ss');
+    return format(now.toUTCString(), 'yyyy-MM-dd HH:mm:ss');
   }
 
   /**
@@ -409,7 +409,7 @@ const CasoDetail = ({ caseData }) => {
    */
   const getCurrentDate = () => {
     const now = new Date();
-    return format(now, 'yyyy-MM-dd');
+    return format(now.toUTCString(), 'yyyy-MM-dd');
   }
 
   /**
@@ -577,7 +577,7 @@ const CasoDetail = ({ caseData }) => {
             const estado_a_establecer = 5
             
             //Actualiar estado
-            db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, syncStatus=1 where ID = '${id}'`)
+            db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, date_end = '${getCurrentDateTime()}', syncStatus=1 where ID = '${id}'`)
           
             // Registrando km final
             db.run(`UPDATE visita_v2 SET km_final = '${kmFinal}' WHERE ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${id}' LIMIT 1) `)

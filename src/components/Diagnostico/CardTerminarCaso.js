@@ -77,12 +77,12 @@ function CardTerminarCaso({openAlert}){
 
     const getCurrentDateTime = () => {
         const now = new Date();
-        return format(now, 'yyyy-MM-dd HH:mm:ss');
+        return format(now.toUTCString(), 'yyyy-MM-dd HH:mm:ss');
     }
 
     const getCurrentDate = () => {
         const now = new Date();
-        return format(now, 'yyyy-MM-dd');
+        return format(now.toUTCString(), 'yyyy-MM-dd');
     }
 
     const obtenerFechaUTC = (fecha) => {
@@ -125,7 +125,7 @@ function CardTerminarCaso({openAlert}){
                 if(caso_id != ''){
                     
                     // Actualizar estado del caso y agregar la lista de equipos
-                    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, equipos = '${JSON.stringify(equipos)}', syncStatus=1 where ID = '${caso_id}'`)
+                    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, date_end = '${getCurrentDateTime()}' , equipos = '${JSON.stringify(equipos)}', syncStatus=1 where ID = '${caso_id}'`)
                      
                     // registrar el kilometraje final del caso
                     const query = `UPDATE visita_v2 SET km_final = '${km_final}' where ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${caso_id}' LIMIT 1) `

@@ -908,10 +908,14 @@ export function SqlProvider({ children }) {
     
 }
 
+  /**
+   * Crea la version de la base de datos
+   * @param {Objeto de base de datos} db_init 
+   */
   const DDL_UUID_SYNC = async(db_init) =>{
     if (!checkTableExists(db_init, 'version_sync')) {
       const uuid = uuidv4()
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_create/${uuid}`);
+      //X const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_create/${uuid}`);
       db_init.run(`CREATE TABLE IF NOT EXISTS version_sync ( uuid TEXT);`)
       db_init.run(`INSERT INTO version_sync VALUES ('${uuid}');`)
       saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
@@ -1053,14 +1057,16 @@ export function SqlProvider({ children }) {
 
   /**
    * Chequear como se encuenta el syncCotnrol para ver ver si se hace una carga completa o una carga incremental
+   * @deprecated se va eliminar porque se va hacer sincronizacion por cada tabla
    */
-  useEffect(() =>{
+  /*useEffect(() =>{
     const checkSyncControl = async() => {
       if(syncUuid != ''){
         try{
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}`);
           
-          const last_incremental_timestamp =  JSON.parse(JSON.parse(response.data)[0]).last_incremental_timestamp
+          const objeto = JSON.parse(response.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
           //const zonedDate = toZonedTime(format(last_incremental_timestamp, 'yyyy-MM-dd HH:mm:ss'), 'UTC');
           //const formattedDate = formatInTimeZone(zonedDate, 'UTC', 'yyyy-MM-dd HH:mm:ss');
           
@@ -1076,30 +1082,14 @@ export function SqlProvider({ children }) {
         }
       }
     }
+    
     checkSyncControl()
-  },[syncUuid,
-    intervalTimeCategoria, 
-    intervalTimeModelo, 
-    intervalTimeLinea, 
-    intervalTimeMarca, 
-    intervalTimeDivision, 
-    intervalTimeCatalogo, 
-    intervalTimeProyecto, 
-    intervalTimedepartamentoNegocio, 
-    intervalTimeUnidadNegocio, 
-    intervalTimeDepartamento, 
-    intervalTimeEstatusMaquina, 
-    intervalTimeEstadoMaquina, 
-    intervalTimeCliente, 
-    intervalTimeSupervisor, 
-    intervalTimeModeloVariante, 
-    intervalTimeEquipo, 
-    intervalTimeDiagnosticoTipo, 
-    intervalTimeAsistenciaTipo,
-    intervalTimeVisita,
-    intervalTimeDiagnostico,
-    intervalTimePrograma
-  ])
+    //const intervalId = setInterval(() => checkSyncControl(), 60000);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => {}//clearInterval(intervalId);
+    
+  },[syncUuid])*/
 
 
   /**
@@ -1108,14 +1098,21 @@ export function SqlProvider({ children }) {
    * TYPE: DURA
    */
 
+
   useEffect( () =>{
-    
+    const codigo = 7, tabla = 'categoria', setTime = setIntervalTimeModelo, time = intervalTimeModelo
 
     const fetchData = async (synctable_ID) => {
-      
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
-          
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1133,25 +1130,32 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
-            setIntervalTimeCategoria((prevTime) => Math.min(prevTime + 300000, 3600000));
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:' + 'categoria', error);
+          console.error('Error fetching data:' + tabla, error);
         }
-        const result = db_init.exec("SELECT * FROM categoria");
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
-    fetchData(7);
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(7), intervalTimeCategoria);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[incrementalDate])
-  
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
 
@@ -1161,10 +1165,21 @@ export function SqlProvider({ children }) {
    * TYPE: DURA
    * CODE: 22
    */
+
   useEffect( () =>{
+    const codigo = 22, tabla = 'modelo', setTime = setIntervalTimeModelo, time = intervalTimeModelo
+
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1182,27 +1197,33 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
-            setIntervalTimeModelo((prevTime) => Math.min(prevTime + 300000, 3600000));
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data:' + 'modelo', error);
+          console.error('Error fetching data:' + tabla, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
-        const result = db_init.exec("SELECT * FROM modelo");
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
         
       }
     };
 
     // Llamar a la función de inmediato
-    fetchData(22);
+    fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(22), intervalTimeModelo);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
+
   
 
   /**
@@ -1210,12 +1231,22 @@ export function SqlProvider({ children }) {
    * TYPE: DURA
    * CODE: 20
    */
+
+  
   
   useEffect( () =>{
     const codigo = 20; const tabla = 'linea'
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1234,6 +1265,12 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1250,11 +1287,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), intervalTimeLinea);
+    ////const intervalId = setInterval(() => fetchData(codigo), intervalTimeLinea);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   /*==================== FIN ========================
   BLOQUE: INFO LINEA
@@ -1268,8 +1305,16 @@ export function SqlProvider({ children }) {
     const codigo = 21, tabla = 'marca', setTime = setIntervalTimeMarca, time = intervalTimeMarca
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1288,6 +1333,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1304,11 +1354,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   /*==================== FIN ========================
   BLOQUE: INFO MARCA
@@ -1322,8 +1372,16 @@ export function SqlProvider({ children }) {
     const codigo = 14, tabla = 'division', setTime = setIntervalTimeDivision, time = intervalTimeDivision
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1342,6 +1400,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1358,11 +1421,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   /*==================== FIN ========================
   BLOQUE: INFO DIVISION
@@ -1376,8 +1439,16 @@ export function SqlProvider({ children }) {
     const codigo = 6, tabla = 'catalogo', setTime = setIntervalTimeCatalogo, time = intervalTimeCatalogo
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1398,6 +1469,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1414,11 +1490,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   /*==================== FIN ========================
   BLOQUE: INFO CATALOGO
@@ -1433,8 +1509,16 @@ export function SqlProvider({ children }) {
     const codigo = 24, tabla = 'proyecto', setTime = setIntervalTimeProyecto, time = intervalTimeProyecto
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1453,6 +1537,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1469,11 +1558,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   
   /**
@@ -1485,8 +1574,16 @@ export function SqlProvider({ children }) {
     const codigo = 11, tabla = 'departamento_negocio', setTime = setIntervalTimedepartamentoNegocio, time = intervalTimedepartamentoNegocio
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1505,6 +1602,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1521,11 +1623,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -1537,8 +1639,16 @@ export function SqlProvider({ children }) {
     const codigo = 33, tabla = 'unidad_negocio', setTime = setIntervalTimeUnidadNegocio, time = intervalTimeUnidadNegocio
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1558,6 +1668,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1574,11 +1689,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   
   /**
@@ -1590,8 +1705,16 @@ export function SqlProvider({ children }) {
     const codigo = 10, tabla = 'departamento', setTime = setIntervalTimeDepartamento, time = intervalTimeDepartamento
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1615,6 +1738,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1631,11 +1759,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -1647,8 +1775,16 @@ export function SqlProvider({ children }) {
     const codigo = 18, tabla = 'estatus_maquinaria', setTime = setIntervalTimeEstatusMaquina, time = intervalTimeEstatusMaquina
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1668,6 +1804,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1684,11 +1825,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -1700,8 +1841,16 @@ export function SqlProvider({ children }) {
     const codigo = 17, tabla = 'estado_maquinaria', setTime = setIntervalTimeEstadoMaquina, time = intervalTimeEstadoMaquina
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1721,6 +1870,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1737,11 +1891,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -1753,8 +1907,17 @@ export function SqlProvider({ children }) {
     const codigo = 8, tabla = 'cliente', setTime = setIntervalTimeCliente, time = intervalTimeCliente
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
+
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1774,6 +1937,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1790,11 +1958,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
   
   /**
@@ -1806,8 +1974,16 @@ export function SqlProvider({ children }) {
     const codigo = 31, tabla = 'supervisor', setTime = setIntervalTimeSupervisor, time = intervalTimeSupervisor
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1827,6 +2003,12 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1843,11 +2025,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -1859,8 +2041,16 @@ export function SqlProvider({ children }) {
     const codigo = 23, tabla = 'modelo_variante', setTime = setIntervalTimeModeloVariante, time = intervalTimeModeloVariante
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1880,6 +2070,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1896,11 +2091,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -1912,8 +2107,17 @@ export function SqlProvider({ children }) {
     const codigo = 16, tabla = 'equipo', setTime = setIntervalTimeEquipo, time = intervalTimeEquipo
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
+
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -1960,6 +2164,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -1976,11 +2185,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
 
@@ -1993,8 +2202,16 @@ export function SqlProvider({ children }) {
     const codigo = 13, tabla = 'diagnostico_tipo', setTime = setIntervalTimeDiagnosticoTipo, time = intervalTimeDiagnosticoTipo
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -2014,6 +2231,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2030,11 +2252,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -2046,9 +2268,18 @@ export function SqlProvider({ children }) {
     const codigo = 3, tabla = 'asistencia_tipo', setTime = setIntervalTimeAsistenciaTipo, time = intervalTimeAsistenciaTipo
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
           
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
+
+
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
@@ -2067,6 +2298,11 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
           //setFinSync(true)
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2083,11 +2319,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -2099,8 +2335,16 @@ export function SqlProvider({ children }) {
     const codigo = 37, tabla = 'visita', setTime = setIntervalTimeVisita, time = intervalTimeVisita
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -2134,7 +2378,13 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
-          //setFinSync(true)
+
+
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2150,11 +2400,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 30000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
   /**
@@ -2166,9 +2416,17 @@ export function SqlProvider({ children }) {
     const codigo = 12, tabla = 'diagnostico', setTime = setIntervalTimeDiagnostico, time = intervalTimeDiagnostico
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
           
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
+
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
@@ -2204,6 +2462,12 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2219,11 +2483,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 30000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   
   /**
@@ -2235,8 +2499,16 @@ export function SqlProvider({ children }) {
     const codigo = 38, tabla = 'programa', setTime = setIntervalTimePrograma, time = intervalTimePrograma
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+          
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -2271,6 +2543,13 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2287,11 +2566,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 30000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
 
 
 
@@ -2299,8 +2578,16 @@ export function SqlProvider({ children }) {
     const codigo = 4, tabla = 'caso', setTime = setIntervalTimeCaso, time = intervalTimeCaso
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+          
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+          
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -2343,6 +2630,12 @@ export function SqlProvider({ children }) {
             // imporante simpres salvar en en indexdb_init
             
             saveToIndexedDB(db_init);
+            
+            // terminar sincronizacion
+            await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+            // terminar sincronizacion
+            
+            setDb(db_init)
           }
         } catch (error) {
           if (error.response && error.response.status === 404) {
@@ -2359,11 +2652,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 30000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   
   /**
@@ -2375,8 +2668,16 @@ export function SqlProvider({ children }) {
     const codigo = 39, tabla = 'caso_visita', setTime = setIntervalTimeCasoVisita, time = intervalTimeCasoVisita
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
+
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
           
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
@@ -2403,6 +2704,13 @@ export function SqlProvider({ children }) {
           db_init.run(insertar)
           // imporante simpres salvar en en indexdb_init
           saveToIndexedDB(db_init);
+
+
+
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2419,20 +2727,28 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 30000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   
   useEffect( () =>{
     const codigo = 19, tabla = 'herramienta', setTime = setIntervalTimeHerramienta, time = intervalTimeHerramienta
 
     const fetchData = async (synctable_ID) => {
-      if(db_init != null && incrementalDate != ''){
+      if(db_init != null && syncUuid != ''){
         try {
           
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
+
           const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
           
           
@@ -2461,7 +2777,11 @@ export function SqlProvider({ children }) {
           // imporante simpres salvar en en indexdb_init
           
           saveToIndexedDB(db_init);
-          setFinSync(true)
+          
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
         } catch (error) {
           if (error.response && error.response.status === 404) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
@@ -2477,11 +2797,11 @@ export function SqlProvider({ children }) {
     // Llamar a la función de inmediato
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    const intervalId = setInterval(() => fetchData(codigo), time);
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);
 
     // Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(intervalId);
-  },[db_init,incrementalDate])
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
   
   
 
@@ -2490,7 +2810,7 @@ export function SqlProvider({ children }) {
 
   const maxRetries = 5
 
-  useEffect( () =>{
+  /*useEffect( () =>{
     const fetchData = async() =>{
       
       if (finSync && retryCount < maxRetries) {
@@ -2505,7 +2825,7 @@ export function SqlProvider({ children }) {
       }
     }
     fetchData()
-  },[finSync])
+  },[finSync])*/
 
   /**
    * Convertir la respuesta de base de datos en array
