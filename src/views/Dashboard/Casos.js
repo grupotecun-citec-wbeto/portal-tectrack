@@ -267,6 +267,7 @@ function Casos() {
           id: row.ID,
           status_ID: row.caso_estado_ID,
           createdAt: row.start,
+          closedAt: row.date_end,
           assignedTechnician: 'Juan Pérez',
           description: row.descripcion,
           prioridad: row.prioridad,

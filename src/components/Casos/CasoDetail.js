@@ -76,6 +76,7 @@ const CasoDetail = ({ caseData }) => {
     id,
     status_ID, // caso_estado_ID
     createdAt,
+    closedAt,
     description,
     prioridad,
     segmento_ID,
@@ -667,7 +668,7 @@ const CasoDetail = ({ caseData }) => {
         
           
             
-          <Timer startDate={createdAt} />
+          <Timer createdAt={createdAt} closedAt={closedAt} id={id} />
 
           <Tooltip label="Cantidad de equipos" aria-label="A tooltip" >
             <Badge

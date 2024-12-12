@@ -15,13 +15,20 @@ import {
     Icon
   } from "@chakra-ui/react";
 
-const Timer = ({ startDate }) => {
+const Timer = ({ createdAt, closedAt, id}) => {
   const [timeElapsed, setTimeElapsed] = useState({ hours: 0, minutes: 0 });
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      const start = new Date(startDate); // Convierte la fecha de inicio a un objeto Date
-      const now = new Date(); // Obtiene la fecha y hora actuales
+      const start = new Date(createdAt); // Convierte la fecha de inicio a un objeto Date
+      let now = null
+      
+      if(closedAt){
+        now = new Date(closedAt); 
+      }else{
+        now = new Date(); // Obtiene la fecha y hora actuales
+      }
+      
       const elapsed = Math.floor((now - start) / 1000); // Calcula los segundos transcurridos
 
       const hours = Math.floor(elapsed / 3600); // Calcula las horas
@@ -31,7 +38,7 @@ const Timer = ({ startDate }) => {
     }, 1000); // Actualiza cada segundo
 
     return () => clearInterval(intervalId); // Limpia el intervalo al desmontar el componente
-  }, [startDate]);
+  }, []);
 
   return (
     <Tooltip label="Tiempo hh : mm" aria-label="A tooltip" >
