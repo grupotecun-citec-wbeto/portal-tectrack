@@ -21,6 +21,10 @@ import SelectSegmentoDash from 'views/Dashboard/SelectSegmentoDash';
 import ResultTableSqlite from 'views/Pages/ResultTableSqlite';
 import CasoInfo from 'components/Casos/CasoInfo';
 
+import { PiLineSegmentsThin } from "react-icons/pi";
+import { IoBriefcaseOutline } from "react-icons/io5";
+import { VscServerProcess } from "react-icons/vsc";
+
 
 // - NOTE
 // - In routes active redirect:"#", is not visible en slidebar, without content only "#"
@@ -43,6 +47,7 @@ var dashRoutes = [
     rtlName: "لوحة القيادة",
     icon: <HomeIcon color='inherit' />,
     component: Dashboard,
+    visible:false,
     layout: "/admin",
   },
   /*{
@@ -76,6 +81,7 @@ var dashRoutes = [
     rtlName: "صفحات",
     state: "pageCollapse",
     layout: "/admin",
+    visible:false,
     icon: <PersonIcon color='inherit' />,
     views: [
       {
@@ -112,6 +118,7 @@ var dashRoutes = [
     rtlName: "لوحة القيادة",
     icon: <StatsIcon color='inherit' />,
     component: Tables,
+    visible:false,
     layout: "/admin",
   },
   {
@@ -121,6 +128,7 @@ var dashRoutes = [
     rtlName: "صفحات",
     state: "pageCollapse",
     layout: "/admin",
+    visible: false,
     icon: <PersonIcon color='inherit' />,
     views: [
       {
@@ -151,13 +159,13 @@ var dashRoutes = [
     ],
   },
   {
-    name: "PAGES",
+    name: "PROCESOS",
     path: "/pages",
     category: "pages",
     rtlName: "صفحات",
     state: "pageCollapse",
     layout: "/admin",
-    icon: <PersonIcon color='inherit' />,
+    icon: <VscServerProcess color='inherit' />,
     views: [
       {
         path: "/pages/base64image",
@@ -191,9 +199,9 @@ var dashRoutes = [
       },
       {
         path: "/pages/selectsegmento",
-        name: "Select Segmento",
+        name: "Segmentos",
         rtlName: "لوحة القيادة",
-        icon: <PersonIcon color='inherit' />,
+        icon: <PiLineSegmentsThin color='inherit' />,
         secondaryNavbar: true,
         component: SelectSegmentoDash,
         layout: "/admin",
@@ -252,7 +260,7 @@ var dashRoutes = [
         path: "/pages/casos",
         name: "Casos",
         rtlName: "لوحة القيادة",
-        icon: <PersonIcon color='inherit' />,
+        icon: <IoBriefcaseOutline color='inherit' />,
         secondaryNavbar: true,
         component: Casos,
         layout: "/admin",

@@ -153,14 +153,14 @@ export default function Dashboard(props) {
                   src={citec_png}
                   alt="Imagen de ejemplo"
                   borderRadius="lg"
-                  w={{sm:"50px",md:"75px"}}
+                  w={{xs:"75px",sm:"50px",md:"75px"}}
                 />
             ) : (
                 <Image
                   src={citec_png}
                   alt="Imagen de ejemplo"
                   borderRadius="lg"
-                  w={{sm:"50px",md:"75px"}}
+                  w={{xs:"75px",sm:"50px",md:"75px"}}
                 />
             )}
             <Box
@@ -173,14 +173,14 @@ export default function Dashboard(props) {
                 src={tecun_png}
                 alt="Imagen de ejemplo"
                 borderRadius="lg"
-                w={{sm:"50px",md:"75px"}}
+                w={{xs:"75px",sm:"50px",md:"75px"}}
               />
             ) : (
               <Image
                 src={medallon_naranja}
                 alt="Imagen de ejemplo"
                 borderRadius="lg"
-                w={{sm:"50px",md:"75px"}}
+                w={{xs:"75px",sm:"50px",md:"75px"}}
               />
             )}
           </Stack>

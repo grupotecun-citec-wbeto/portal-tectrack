@@ -44,38 +44,30 @@ export default function AuthNavbar(props) {
     md: "white",
   };
   let brand = (
-    <Link
-      href={`${process.env.PUBLIC_URL}/#/`}
-      target="_blank"
-      display="flex"
-      lineHeight="100%"
-      fontWeight="bold"
-      justifyContent="center"
-      alignItems="center"
-      color={mainText}
-    >
+    <>
       <Stack direction="row" spacing="12px" align="center" justify="center">
         <Image
           src={citec_png}
           alt="Imagen de ejemplo"
           borderRadius="lg"
-          w={{sm:"50px",md:"75px"}}
+          w={{xs:"75px", sm:"50px",md:"75px"}}
         />
         <Box w="1px" h="20px" bg={"white"} />
         <Image
           src={tecun_png}
           alt="Imagen de ejemplo"
           borderRadius="lg"
-          w={{sm:"50px",md:"75px"}}
+          w={{xs:"75px", sm:"50px",md:"75px"}}
         />
       </Stack>
       <Text fontsize="sm" mt="3px">
         {logoText}
       </Text>
-    </Link>
+    </>
   );
   hamburgerColor = { base: "white" };
-  var linksAuth = (
+  var linksAuth = ""
+  {/*var linksAuth = (
     <HStack display={{ sm: "none", lg: "flex" }}>
       <NavLink to="/admin/dashboard">
         <Button
@@ -139,7 +131,7 @@ export default function AuthNavbar(props) {
         </Button>
       </NavLink>
     </HStack>
-  );
+  );*/}
   return (
     <Flex
       position={navbarPosition}
@@ -166,7 +158,7 @@ export default function AuthNavbar(props) {
           ms={{ base: "auto", lg: "0px" }}
           display={{ base: "flex", lg: "none" }}
         >
-          <SidebarResponsive
+          {/*<SidebarResponsive
             hamburgerColor={hamburgerColor}
             logoText={props.logoText}
             secondary={props.secondary}
@@ -196,10 +188,25 @@ export default function AuthNavbar(props) {
               </Stack>
             }
             {...rest}
-          />
+          />*/}
         </Box>
         {linksAuth}
       </Flex>
     </Flex>
   );
 }
+
+
+{/* 
+<Link
+      href={`${process.env.PUBLIC_URL}/#/`}
+      target="_blank"
+      display="flex"
+      lineHeight="100%"
+      fontWeight="bold"
+      justifyContent="center"
+      alignItems="center"
+      color={mainText}
+    >  
+  </Link>
+*/}

@@ -10,7 +10,8 @@ import {
   MenuButton,
   MenuItem,
   MenuList, Stack, Text, useColorMode,
-  useColorModeValue
+  useColorModeValue,
+  Image
 } from "@chakra-ui/react";
 
 // ACCORDION
@@ -21,6 +22,11 @@ import {
   AccordionPanel,
   AccordionIcon,
 } from '@chakra-ui/react'
+
+// imagenes
+import citec_png from "assets/img/CITEC.png";
+import tecun_png from "assets/img/TECUN_isotipo.png";
+import medallon_naranja from "assets/img/Medallones Tecun-04.png" // color naranja
 // Assets
 import avatar1 from "assets/img/avatars/avatar1.png";
 import avatar2 from "assets/img/avatars/avatar2.png";
@@ -116,11 +122,11 @@ export default function HeaderLinks(props) {
 
   return (
     <Flex
-      pe={{ sm: "0px", md: "16px" }}
-      w={{ sm: "100%", md: "auto" }}
+      pe={{sm: "0px", md: "16px" }}
+      w={{xs:"100%", sm: "100%", md: "auto" }}
       alignItems='center'
       flexDirection='row'>
-      <SearchBar me='18px' />
+      <SearchBar me='18px' w={{xs:"auto", sm:"auto"}} display={{xs:"block",sm:"block"}} />
       
       {
         Object.keys(userData?.login || {}).length == 0 ? (
@@ -145,7 +151,7 @@ export default function HeaderLinks(props) {
                   ""
                 )
               }>
-              <Text display={{ sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
+              <Text display={{ xs:"none", sm: "none", md: "block"}}>{userData?.login?.display_name || ''}</Text>
             </Button>
           </NavLink>
         ):(
@@ -171,7 +177,7 @@ export default function HeaderLinks(props) {
                     ""
                   )
                 }>
-                <Text display={{ sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
+                <Text display={{ xs:"none", sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
               </Button>
             </MenuButton>
             <MenuList p='16px 8px' bg={menuBg}>
@@ -204,32 +210,7 @@ export default function HeaderLinks(props) {
       
       
       
-      <SidebarResponsive
-        hamburgerColor={"white"}
-        logo={
-          <Stack direction='row' spacing='12px' align='center' justify='center'>
-            {colorMode === "dark" ? (
-              <ArgonLogoLight w='74px' h='27px' />
-            ) : (
-              <ArgonLogoDark w='74px' h='27px' />
-            )}
-            <Box
-              w='1px'
-              h='20px'
-              bg={colorMode === "dark" ? "white" : "gray.700"}
-            />
-            {colorMode === "dark" ? (
-              <ChakraLogoLight w='82px' h='21px' />
-            ) : (
-              <ChakraLogoDark w='82px' h='21px' />
-            )}
-          </Stack>
-        }
-        colorMode={colorMode}
-        secondary={props.secondary}
-        routes={routes}
-        {...rest}
-      />
+      
     
 
       <CasoListEquiposNavbar props={props} />
@@ -279,6 +260,56 @@ export default function HeaderLinks(props) {
           </Flex>
         </MenuList>
       </Menu>
+
+      <SidebarResponsive
+        ms={{ base: "16px", xl: "0px" }}
+        hamburgerColor={"white"}
+        logo={
+          <Stack direction='row' spacing='12px' align='center' justify='center'>
+            {colorMode === "dark" ? (
+                <Image
+                  src={citec_png}
+                  alt="Imagen de ejemplo"
+                  borderRadius="lg"
+                  w={{xs:"75px",sm:"50px",md:"75px"}}
+                />
+            ) : (
+                <Image
+                  src={citec_png}
+                  alt="Imagen de ejemplo"
+                  borderRadius="lg"
+                  w={{xs:"75px",sm:"50px",md:"75px"}}
+                />
+            )}
+            <Box
+              w='1px'
+              h='20px'
+              bg={colorMode === "dark" ? "white" : "gray.700"}
+            />
+            {colorMode === "dark" ? (
+              <Image
+                src={tecun_png}
+                alt="Imagen de ejemplo"
+                borderRadius="lg"
+                w={{xs:"75px",sm:"50px",md:"75px"}}
+              />
+            ) : (
+              <Image
+                src={medallon_naranja}
+                alt="Imagen de ejemplo"
+                borderRadius="lg"
+                w={{xs:"75px",sm:"50px",md:"75px"}}
+              />
+            )}
+          </Stack>
+        }
+        colorMode={colorMode}
+        secondary={props.secondary}
+        routes={routes}
+        {...rest}
+      />
+
+
     </Flex>
   );
 }

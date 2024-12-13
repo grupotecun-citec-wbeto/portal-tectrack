@@ -125,6 +125,7 @@ export default function AdminNavbar(props) {
       <Flex
         w="100%"
         flexDirection={{
+          xs: "column",
           sm: "column",
           md: "row",
         }}
@@ -172,7 +173,7 @@ export default function AdminNavbar(props) {
             {brandText}
           </Link>
         </Box>
-        <Box ms="auto" w={{ sm: "100%", md: "unset" }}>
+        <Box ms="auto" w={{sm: "100%", md: "unset" }}>
           <AdminNavbarLinks
             onOpen={props.onOpen}
             logoText={props.logoText}

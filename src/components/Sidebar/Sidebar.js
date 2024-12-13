@@ -374,7 +374,7 @@ function Sidebar(props) {
   // SIDEBAR
   return (
     <Box ref={mainPanel}>
-      <Box display={{ sm: "none", xl: "block" }} position="fixed">
+      <Box display={{base: "none", sm: "none", xl: "block" }} position="fixed">
         <Box
           bg={sidebarBg}
           transition={variantChange}
@@ -414,7 +414,7 @@ function Sidebar(props) {
             <Stack direction="column" mb="40px">
               <Box>{links}</Box>
             </Stack>
-            <SidebarHelp sidebarVariant={sidebarVariant} />
+            {/*<SidebarHelp sidebarVariant={sidebarVariant} />*/}
           </Scrollbars>
         </Box>
       </Box>
@@ -466,10 +466,130 @@ export function SidebarResponsive(props) {
         var st = {};
         st[prop["state"]] = !state[prop.state];
         return (
-          <AccordionItem defaultIsOpen>
-            <h2>
-                {activeRoute(prop.layout + prop.path,prop.category) === "active" ? (
-                  <AccordionButton
+          <>
+            {(prop?.visible ?? true) && (
+              <AccordionItem defaultIsOpen>
+                <h2>
+                    {activeRoute(prop.layout + prop.path,prop.category) === "active" ? (
+                      <AccordionButton
+                        boxSize="initial"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                        bg={activeBg}
+                        boxShadow={sidebarActiveShadow}
+                        mb={{
+                          xl: "6px",
+                        }}
+                        mx={{
+                          xl: "auto",
+                        }}
+                        ps={{
+                          sm: "10px",
+                          xl: "16px",
+                        }}
+                        py="12px"
+                        borderRadius="15px"
+                        _hover="none"
+                        w="100%"
+                        _active={{
+                          bg: "inherit",
+                          transform: "none",
+                          borderColor: "transparent",
+                        }}
+                        _focus={{
+                          boxShadow: "none",
+                        }}
+                      >
+                        <Flex>
+                          {typeof prop.icon === "string" ? (
+                            <Icon>{prop.icon}</Icon>
+                          ) : (
+                            <IconBox
+                              bg="blue.500"
+                              color="white"
+                              h="30px"
+                              w="30px"
+                              me="12px"
+                            >
+                              {prop.icon}
+                            </IconBox>
+                          )}
+                          <Text color={activeColor} my="auto" fontSize="sm">
+                            {document.documentElement.dir === "rtl"
+                              ? prop.rtlName
+                              : prop.name}
+                          </Text>
+                        </Flex>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    ) : (
+                      <AccordionButton
+                        boxSize="initial"
+                        justifyContent="flex-start"
+                        alignItems="center"
+                        bg="transparent"
+                        mb={{
+                          xl: "6px",
+                        }}
+                        mx={{
+                          xl: "auto",
+                        }}
+                        py="12px"
+                        ps={{
+                          sm: "5px",
+                          xl: "8px",
+                        }}
+                        borderRadius="15px"
+                        _hover="none"
+                        w="100%"
+                        _active={{
+                          bg: "inherit",
+                          transform: "none",
+                          borderColor: "transparent",
+                        }}
+                        _focus={{
+                          boxShadow: "none",
+                        }}
+                      >
+                        <Flex>
+                          {typeof prop.icon === "string" ? (
+                            <Icon>{prop.icon}</Icon>
+                          ) : (
+                            <IconBox
+                              bg={inactiveBg}
+                              color="blue.500"
+                              h="30px"
+                              w="30px"
+                              me="12px"
+                            >
+                              {prop.icon}
+                            </IconBox>
+                          )}
+                          <Text color={inactiveColor} my="auto" fontSize="sm">
+                            {document.documentElement.dir === "rtl"
+                              ? prop.rtlName
+                              : prop.name}
+                          </Text>
+                        </Flex>
+                        <AccordionIcon />
+                      </AccordionButton>
+                    )}
+                </h2>
+                <AccordionPanel pb={4}>
+                  {createLinks(prop.views)}
+                </AccordionPanel>
+              </AccordionItem>
+            )}
+          </>
+            
+        );
+      }
+      return (
+        <>
+            {(prop?.visible ?? true) && (
+              <NavLink to={prop.layout + prop.path} key={key}>
+                {activeRoute(prop.layout + prop.path) === "active" ? (
+                  <Button
                     boxSize="initial"
                     justifyContent="flex-start"
                     alignItems="center"
@@ -518,10 +638,9 @@ export function SidebarResponsive(props) {
                           : prop.name}
                       </Text>
                     </Flex>
-                    <AccordionIcon />
-                  </AccordionButton>
+                  </Button>
                 ) : (
-                  <AccordionButton
+                  <Button
                     boxSize="initial"
                     justifyContent="flex-start"
                     alignItems="center"
@@ -534,8 +653,8 @@ export function SidebarResponsive(props) {
                     }}
                     py="12px"
                     ps={{
-                      sm: "5px",
-                      xl: "8px",
+                      sm: "10px",
+                      xl: "16px",
                     }}
                     borderRadius="15px"
                     _hover="none"
@@ -569,122 +688,11 @@ export function SidebarResponsive(props) {
                           : prop.name}
                       </Text>
                     </Flex>
-                    <AccordionIcon />
-                  </AccordionButton>
+                  </Button>
                 )}
-            </h2>
-            <AccordionPanel pb={4}>
-              {createLinks(prop.views)}
-            </AccordionPanel>
-          </AccordionItem>
-            
-        );
-      }
-      return (
-        <NavLink to={prop.layout + prop.path} key={key}>
-          {activeRoute(prop.layout + prop.path) === "active" ? (
-            <Button
-              boxSize="initial"
-              justifyContent="flex-start"
-              alignItems="center"
-              bg={activeBg}
-              boxShadow={sidebarActiveShadow}
-              mb={{
-                xl: "6px",
-              }}
-              mx={{
-                xl: "auto",
-              }}
-              ps={{
-                sm: "10px",
-                xl: "16px",
-              }}
-              py="12px"
-              borderRadius="15px"
-              _hover="none"
-              w="100%"
-              _active={{
-                bg: "inherit",
-                transform: "none",
-                borderColor: "transparent",
-              }}
-              _focus={{
-                boxShadow: "none",
-              }}
-            >
-              <Flex>
-                {typeof prop.icon === "string" ? (
-                  <Icon>{prop.icon}</Icon>
-                ) : (
-                  <IconBox
-                    bg="blue.500"
-                    color="white"
-                    h="30px"
-                    w="30px"
-                    me="12px"
-                  >
-                    {prop.icon}
-                  </IconBox>
-                )}
-                <Text color={activeColor} my="auto" fontSize="sm">
-                  {document.documentElement.dir === "rtl"
-                    ? prop.rtlName
-                    : prop.name}
-                </Text>
-              </Flex>
-            </Button>
-          ) : (
-            <Button
-              boxSize="initial"
-              justifyContent="flex-start"
-              alignItems="center"
-              bg="transparent"
-              mb={{
-                xl: "6px",
-              }}
-              mx={{
-                xl: "auto",
-              }}
-              py="12px"
-              ps={{
-                sm: "10px",
-                xl: "16px",
-              }}
-              borderRadius="15px"
-              _hover="none"
-              w="100%"
-              _active={{
-                bg: "inherit",
-                transform: "none",
-                borderColor: "transparent",
-              }}
-              _focus={{
-                boxShadow: "none",
-              }}
-            >
-              <Flex>
-                {typeof prop.icon === "string" ? (
-                  <Icon>{prop.icon}</Icon>
-                ) : (
-                  <IconBox
-                    bg={inactiveBg}
-                    color="blue.500"
-                    h="30px"
-                    w="30px"
-                    me="12px"
-                  >
-                    {prop.icon}
-                  </IconBox>
-                )}
-                <Text color={inactiveColor} my="auto" fontSize="sm">
-                  {document.documentElement.dir === "rtl"
-                    ? prop.rtlName
-                    : prop.name}
-                </Text>
-              </Flex>
-            </Button>
-          )}
-        </NavLink>
+              </NavLink>
+            )}
+        </>
       );
     });
   };
@@ -722,8 +730,8 @@ export function SidebarResponsive(props) {
     >
       <HamburgerIcon
         color={hamburgerColor}
-        w="18px"
-        h="18px"
+        w="40px"
+        h="40px"
         ref={btnRef}
         onClick={onOpen}
       />
@@ -756,7 +764,7 @@ export function SidebarResponsive(props) {
               <Stack direction="column" mb="40px">
                 <Box>{links}</Box>
               </Stack>
-              <SidebarHelp />
+              {/*<SidebarHelp />*/}
             </Box>
           </DrawerBody>
         </DrawerContent>
