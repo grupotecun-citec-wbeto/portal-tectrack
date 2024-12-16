@@ -310,7 +310,7 @@ function CasosTableRow(props) {
         <FormControl maxW={{xl:'250px'}}>
             {selectUsuario >= 1 ? (<FormLabel htmlFor='country'>Asigando a:</FormLabel>) : (<FormLabel htmlFor='country'>Seleccionar</FormLabel>)}
             
-            <Select id='country' placeholder='Selecconar a usuario' onChange={(e) => asignar(e.target.value)} value={selectUsuario}>
+            <Select id='country' placeholder='Seleccionar a usuario' onChange={(e) => asignar(e.target.value)} value={selectUsuario}>
                 {usuarios.map( (usuario) =>(
                   <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
                 ))}

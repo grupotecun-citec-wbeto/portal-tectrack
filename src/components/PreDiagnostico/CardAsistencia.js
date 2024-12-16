@@ -81,16 +81,16 @@ function CardAsistencia(props){
     return(
         <Card>
               <CardHeader>
-                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>¿Que tipo asistencia consideras que se dara?</Heading>
+                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>¿Que tipo asistencia consideras que se dará?</Heading>
               </CardHeader>
               <CardBody mt={{xl:'50px', sm:'50px'}}>
                 <Flex ms={{xl:'25px', sm:'25px'}}>
                     <FormControl maxW={{xl:'250px'}}>
                         <FormLabel htmlFor='country'>Tipo de Asistencia</FormLabel>
-                        <Select id='country' placeholder='Selecconar tipo de asistencia' onChange={(e) => actionSelectAsistencia(e.target.value)} value={selectedAsistencia}>
-                            <option key='1' value='1'>Asistencia presencial</option>
-                            <option key='2' value='2'>Asistencia virtual</option>
-                            <option key='3' value='3'>Asistnecia telefonica</option>
+                        <Select id='country' placeholder='Seleccionar tipo de asistencia' onChange={(e) => actionSelectAsistencia(e.target.value)} value={selectedAsistencia}>
+                            <option key='1' value='1'>Asistencia Presencial</option>
+                            <option key='2' value='2'>Asistencia Virtual</option>
+                            <option key='3' value='3'>Asistencia Telefónica</option>
                         </Select>
                     </FormControl>
                 </Flex>

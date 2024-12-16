@@ -794,7 +794,7 @@ const CasoDetail = ({ caseData }) => {
             <>
             <Flex direction={'columns'} >
                 <FormControl maxW={{xl:'250px'}} key={id}>
-                  <Select id='country' placeholder='Selecconar Vehiculo' onChange={(e) => setIsVehiculoSelected(e.target.value)} value={isVehiculoSelected}>
+                  <Select id='country' placeholder='Seleccionar Vehiculo' onChange={(e) => setIsVehiculoSelected(e.target.value)} value={isVehiculoSelected}>
                     {vehiculos.map( (vehiculo) => (
                       <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
                     ))}

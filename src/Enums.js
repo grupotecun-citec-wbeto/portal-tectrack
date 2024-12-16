@@ -2,7 +2,7 @@ const Enums = {
     CORRECTIVO: '1',
     PREVENTIVO: '2',
     WHATSAPP:'WhatsApp',
-    TELEFONO:'Telefono',
+    TELEFONO:'Teléfono',
     CORREO:'Correo',
     SOLICITUD_COMERCIAL:'Solicitud Comercial',
     EN_SITIO:'En Sitio',

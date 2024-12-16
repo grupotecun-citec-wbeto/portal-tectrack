@@ -128,7 +128,7 @@ function CheckboxPrograma(props){
             fontSize='md'
             color='gray.400'
             fontWeight='400'>
-            {name}
+            {name.toUpperCase()}
           </Text>
         </Flex>
         { check && (
@@ -136,7 +136,7 @@ function CheckboxPrograma(props){
             <Flex ms={{xl:'10px'}}>
               <FormControl maxW={{xl:'250px'}} key={id}>
                 <FormLabel htmlFor='country'>Tipo de servicio</FormLabel>
-                <Select id='country' placeholder='Selecconar servicio' onChange={(e) => actionService(e.target.value)} value={selectedService}>
+                <Select id='country' placeholder='Seleccionar servicio' onChange={(e) => actionService(e.target.value)} value={selectedService}>
                   {serviceTypeData.map( (data) =>(
                     <option key={data.ID} value={data.ID}>{data.servicio_tipo_name}</option>
                   ))}
@@ -147,7 +147,7 @@ function CheckboxPrograma(props){
               <Flex ms={{xl:'10px'}}>
               <FormControl maxW={{xl:'250px'}} key={id}>
                 <FormLabel htmlFor='country'>Tipo de Marca</FormLabel>
-                <Select id='country' placeholder='Selecconar Marca' onChange={(e) => actionMarca(e.target.value)} value={selectedMarca}>
+                <Select id='country' placeholder='Seleccionar Marca' onChange={(e) => actionMarca(e.target.value)} value={selectedMarca}>
                   <option key='1' value='1'>RAVEN</option>
                   <option key='2' value='2'>TRIMBLE</option>
                 </Select>

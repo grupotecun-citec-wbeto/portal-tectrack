@@ -279,13 +279,13 @@ import {
                 textAlign={{ sm: "center", md: "start" }}
                 p='24px'
               >
-                <Text fontSize={{xl:'4em',sm:'3em'}}>Pre Diagnostico</Text>
+                <Text fontSize={{xl:'4em',sm:'3em'}}>Pre Diagnóstico</Text>
                 
               </Flex>
               
             </Flex>
             <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
-              < CardComunication title="¿Como te contactaron?" />
+              < CardComunication title="¿Comó te contactaron?" />
               <Card>
                   <CardHeader>
                     <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>

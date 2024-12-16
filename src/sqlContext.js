@@ -137,12 +137,12 @@ export function SqlProvider({ children }) {
       db_init.run(`
         INSERT INTO comunicacion VALUES 
         (1, 'Whatsapp', 1),
-        (2, 'Telefono', 1),
+        (2, 'Teléfono', 1),
         (3, 'Correo', 1),
         (4, 'Solicitud comercial', 1),
         (5, 'En sitio', 1),
         (6, 'Whatsapp', 2),
-        (7, 'Telefono', 2),
+        (7, 'Teléfono', 2),
         (8, 'Correo', 2),
         (9, 'Solicitud comercial', 2),
         (10, 'En sitio', 2),
@@ -378,7 +378,7 @@ export function SqlProvider({ children }) {
 
       db_init.run(`
         INSERT INTO usuario VALUES 
-      (1, 'Brandon Roberto', 'Cerrano','Brandon Roberto Cerrano',''),
+      (1, 'Brandon Roberto', 'Serrano','Brandon Roberto Serrano',''),
       (2, 'Billy Anderson', 'Guillen','Billy Anderson Guillen',''),
       (3, 'Jorge David', 'Morales','Jorge David Morales',''),
       (4, 'Jazon', 'Castillo', 'Jazon Castillo','');

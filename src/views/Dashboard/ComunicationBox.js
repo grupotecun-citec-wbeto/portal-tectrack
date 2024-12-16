@@ -135,7 +135,7 @@ import {
 
             <Box flex="1" direction="column">
               {caseType == Enums.CORRECTIVO ? (
-                <CardComunication title="¿Como te contactaron?"/>
+                <CardComunication title="¿Comó te contactaron?"/>
               ):(
                 <CardComunication title="¿Como lo encontraste?"/>
               )}

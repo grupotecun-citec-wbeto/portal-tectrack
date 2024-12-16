@@ -369,7 +369,7 @@ import ClienteCapacitacion from "components/Capacitacion/ClienteCapacitacion";
                             {Object.keys(datos).map( (key) =>(
                               <>
                                 <Text fontSize='sm' color='gray.400' fontWeight='600' mb='20px'>
-                                {key}
+                                {key.toUpperCase()}
                                 </Text>
                                 <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
                                   {datos[key].map( (element) =>(
