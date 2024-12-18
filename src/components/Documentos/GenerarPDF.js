@@ -30,21 +30,17 @@ const styles = StyleSheet.create({
     header: {
       fontSize: 16,
       textAlign: "center",
-      marginBottom: 0,
       fontWeight: "bold",
     },
     section: {
-      marginBottom: 0,
       borderRadius:5,
     },
     sectionInput: {
-      marginBottom: 0,
       flexDirection: "row",
     },
     row: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginBottom: 0,
     },
     column: {
       width: "48%", // Ajusta el ancho para dos columnas
@@ -52,7 +48,7 @@ const styles = StyleSheet.create({
     label: {
         
         fontWeight: "bold",
-        marginBottom: 2,
+        marginBottom: 0,
       
     },
     
@@ -94,7 +90,6 @@ const styles = StyleSheet.create({
         border: "2pt solid #000",
         fontWeight: "bold",
         marginTop: 5,
-        marginBottom: 0,
         paddingTop:5,
         backgroundColor:"#FFFFFF",
         borderRadius:5,
@@ -103,11 +98,9 @@ const styles = StyleSheet.create({
     },
     separator: {
       borderBottom: "2px solid #000",
-      marginBottom: 0,
     },
     separatorSubTitle: {
         borderBottom: "1px solid #000",
-        marginBottom: 0,
         maxWidth:"35%",
       },
     gridContainer: {
@@ -142,6 +135,13 @@ const styles = StyleSheet.create({
         position: "relative", // Asegura que el contenido se renderice sobre la imagen
         zIndex: 1, // Eleva el contenido por encima del fondo
     },
+    imageContent: {
+        border: "2pt solid #000",
+        borderRadius:5,
+        backgroundColor:"#FFFFFF",
+        padding: 10,
+        marginBottom: 5,
+    },
   });
   
   // Datos de ejemplo
@@ -158,10 +158,10 @@ const styles = StyleSheet.create({
     },
     visitDetail: {
       system: "Sistema principal de climatización todo es posible",
-      findings: "Se encontraron filtros sucios y fugas menores en el ducto principal. Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old. Richard McClintock, a Latin professor at Hampden-Sydney College in Virginia, looked up one of the more obscure Latin words, consectetur, from a Lorem Ipsum passage, and going through the cites of the word in classical literature, discovered the undoubtable source. Lorem Ipsum comes from sections 1.10.32 and 1.10.33 of de Finibus Bonorum et Malorum (The Extremes of Good and Evil) by Cicero, written in 45 BC. This book is a treatise on the theory of ethics, very popular during the Renaissance. The first line of Lorem Ipsum, Lorem ipsum dolor sit amet.., comes from a line in section 1.10.32. There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.",
-      actions: "Limpieza de filtros y sellado de fugas con material aprobado. There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc. There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.",
+      findings: "Se encontraron filtros sucios y fugas menores en el ducto principal. .",
+      actions: "Limpieza de filtros y sellado de fugas con material aprobado. ",
       recommendations:
-        "Recomendar mantenimiento periódico y reemplazo de filtros cada 6 meses. There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc.There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet. It uses a dictionary of over 200 Latin words, combined with a handful of model sentence structures, to generate Lorem Ipsum which looks reasonable. The generated Lorem Ipsum is therefore always free from repetition, injected humour, or non-characteristic words etc. ",
+        "Recomendar mantenimiento periódico y reemplazo de filtros cada 6 meses.",
     },
     technicianData: {
       preparedBy: "Billy Guillen",
@@ -184,7 +184,7 @@ const MyPDFDocument = () => {
                 src={fondo} // Reemplaza con la ruta de tu imagen
                 style={styles.imageCover}
             />*/}
-            <View style={styles.content}>  
+            
                 <Image
                     src={portada_reporte_citec} // Reemplaza con la ruta de tu imagen
                     style={{ width: "104%", height: 150, marginLeft:-10,  }}
@@ -269,13 +269,13 @@ const MyPDFDocument = () => {
                     <View style={styles.separatorSubTitle} />
                     <Text style={styles.textArea} >{reportData.visitDetail.findings}</Text>
                 
-                    <View style={styles.section} break={true} minPresenceAhead={500}>
+                    <View style={styles.section} break={true} minPresenceAhead={100}>
                         <Text style={styles.labelSubTitle}>Acciones Ejecutadas</Text>
                         <View style={styles.separatorSubTitle} />
                         <Text style={styles.textArea}>{reportData.visitDetail.actions}</Text>
                     </View>
                 
-                    <View style={styles.section} break={true} minPresenceAhead={500}>
+                    <View style={styles.section} break={true} minPresenceAhead={100}>
                         <Text style={styles.labelSubTitle}>Recomendaciones</Text>
                         <View style={styles.separatorSubTitle} />
                         <Text style={styles.textArea}>{reportData.visitDetail.recommendations}</Text>
@@ -285,7 +285,7 @@ const MyPDFDocument = () => {
                 </View>
         
                 {/* Cuarta Sección Datos del Técnico */}
-                <View style={styles.section} break={true} minPresenceAhead={500}>
+                <View style={styles.section}>
                     <Text style={styles.labelTitle}>DATOS DEL TÉCNICO</Text>
                     
                     <View style={styles.separator} />
@@ -303,7 +303,35 @@ const MyPDFDocument = () => {
                         <Text style={styles.input}>{reportData.technicianData.reportDate}</Text>
                     </View>
                 </View>
-            </View>  
+                
+                <View style={{ flexDirection: "column", alignItems: "center"}}>
+                    <View style={styles.imageContent} break={true} minPresenceAhead={100}>
+                        <Image
+                            src="https://i.ibb.co/rfCKH0D/OIP.jpg"
+                            style={{ width: 474, height: 266, marginBottom: 5 }}
+                        />
+                    </View>
+                    
+                    {/*<Text style={{ fontSize: 10 }}>Descripción de la Imagen</Text>*/}
+                    
+                    <View style={styles.imageContent} break={true} minPresenceAhead={100}>
+                        <Image
+                            src="https://i.ibb.co/rfCKH0D/OIP.jpg"
+                            style={{ width: 474, height: 266, marginBottom: 5 }}
+                        />
+                    </View>
+
+                    <View style={styles.imageContent} break={true} minPresenceAhead={100}>
+                        <Image
+                            src="https://i.ibb.co/rfCKH0D/OIP.jpg"
+                            style={{ width: 474, height: 266, marginBottom: 5 }}
+                        />
+                    </View>
+                    
+                    {/*<Text style={{ fontSize: 10 }}>Descripción de la Imagen</Text>*/}
+                </View>
+                
+              
         </Page>
       </Document>
     )
