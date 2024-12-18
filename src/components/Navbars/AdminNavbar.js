@@ -139,7 +139,7 @@ export default function AdminNavbar(props) {
               </BreadcrumbLink>
             </BreadcrumbItem>
 
-            {props.categories.map((category, index) => (
+            {props?.categories?.map((category, index) => (
               <BreadcrumbItem key={index + 1} color={mainText}>
                   <BreadcrumbLink  color={mainText}>
                     {category}  {/** Ensure category name is displayed */}

@@ -20,10 +20,12 @@ import Casos from 'views/Dashboard/Casos';
 import SelectSegmentoDash from 'views/Dashboard/SelectSegmentoDash';
 import ResultTableSqlite from 'views/Pages/ResultTableSqlite';
 import CasoInfo from 'components/Casos/CasoInfo';
+import GenerarPDF from 'components/Documentos/GenerarPDF';
 
 import { PiLineSegmentsThin } from "react-icons/pi";
 import { IoBriefcaseOutline } from "react-icons/io5";
 import { VscServerProcess } from "react-icons/vsc";
+
 
 
 // - NOTE
@@ -315,6 +317,16 @@ var dashRoutes = [
         visible:false,
         layout: "/admin",
         params:['id']
+      },
+      {
+        path: "/pages/pdf",
+        name: "pdf",
+        rtlName: "لوحة القيادة",
+        icon: <PersonIcon color='inherit' />,
+        secondaryNavbar: true,
+        component: GenerarPDF,
+        visible:false,
+        layout: "/admin",
       },
       {
         path: "/signin",
