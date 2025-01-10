@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, useMemo  } from 'react';
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 import {v4 as uuidv4} from 'uuid'
@@ -15,6 +15,7 @@ import {
   Button,
   Select,
   Grid,
+  useDisclosure,
 } from '@chakra-ui/react';
 
 import {
@@ -23,6 +24,8 @@ import {
   FormErrorMessage,
   FormHelperText,
 } from '@chakra-ui/react'
+
+// ICONOS
 import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose   } from 'react-icons/fa';
 import { FaUserPen,FaUserMinus,FaEye   } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
@@ -30,9 +33,12 @@ import { FcLowPriority } from "react-icons/fc";
 import { IoIosBusiness } from "react-icons/io";
 import { MdWorkspaces } from "react-icons/md";
 import { LiaTractorSolid } from "react-icons/lia"; 
+import { HiOutlineDocumentReport } from "react-icons/hi";
 
 import InputKm from './InputKm';
 import InputFinalKm from './InputFinalKm';
+import CasoModal from './Modal/CasoModal';
+//import GenerarPDF from 'components/Documentos/GenerarPDF';
 
 import { NavLink } from 'react-router-dom';
 /*=======================================================
@@ -86,6 +92,8 @@ const CasoDetail = ({ caseData }) => {
     syncStatus
   } = caseData;
 
+  // MODAL
+  const { isOpen, onOpen, onClose } = useDisclosure()
   
 
   const textColor = useColorModeValue("gray.500", "white");
@@ -772,6 +780,14 @@ const CasoDetail = ({ caseData }) => {
                         </Button>
                       </NavLink>
                     </Tooltip>
+                    <Tooltip label="Reporte" aria-label="A tooltip" >
+                      <NavLink to={`/admin/pages/pdf/${id}`} >
+                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={onOpen} >
+                          <Icon as={ HiOutlineDocumentReport } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
+                        </Button>
+                      </NavLink>
+                      
+                    </Tooltip>
                     <Text 
                       fontSize="lg" 
                       fontWeight="bold" 
@@ -864,7 +880,9 @@ const CasoDetail = ({ caseData }) => {
         )}
         
       </Stack>
+      {/*<CasoModal isOpen={isOpen} onOpen={onOpen} onClose={onClose}  />*/}
     </Box>
+    
   );
 };
 

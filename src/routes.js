@@ -20,7 +20,7 @@ import Casos from 'views/Dashboard/Casos';
 import SelectSegmentoDash from 'views/Dashboard/SelectSegmentoDash';
 import ResultTableSqlite from 'views/Pages/ResultTableSqlite';
 import CasoInfo from 'components/Casos/CasoInfo';
-import GenerarPDF from 'components/Documentos/GenerarPDF';
+import GenerarPDF from 'components/Casos/Modal/GenerarPDF';
 
 import { PiLineSegmentsThin } from "react-icons/pi";
 import { IoBriefcaseOutline } from "react-icons/io5";
@@ -175,7 +175,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible:true,
         component: Base64Image,
         layout: "/admin",
       },
@@ -327,6 +327,7 @@ var dashRoutes = [
         component: GenerarPDF,
         visible:false,
         layout: "/admin",
+        params:['id'],
       },
       {
         path: "/signin",
