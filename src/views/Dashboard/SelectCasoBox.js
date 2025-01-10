@@ -36,6 +36,9 @@ import {
 
   // ROUTER
 import { Link, useHistory   } from 'react-router-dom';
+
+import Enums from '../../Enums';
+
   
   
   function SelectCasoBox({ onSearch }) {
@@ -46,7 +49,8 @@ import { Link, useHistory   } from 'react-router-dom';
     // context 
     const {
         casoActivo,setCasoActivo,
-        baseStructure,setBaseStructure
+        baseStructure,setBaseStructure,
+        setCaseType
     } = useContext(AppContext)
 
 
@@ -122,9 +126,11 @@ import { Link, useHistory   } from 'react-router-dom';
     }, [debouncedSearchValue]);
 
   // creando un caso nuevo 
-  const btnCreateCase = async(comunicacion_ID) =>{
+  const btnCreateCase = async(comunicacion_ID,caseType) =>{
       //const uuid = uuidv4()
-      
+    
+      setCaseType(caseType)
+
       const newUserData = structuredClone(userData)
 
       //const caso = structuredClone(userData.stuctures.caso);
@@ -152,8 +158,8 @@ import { Link, useHistory   } from 'react-router-dom';
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
           <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
             
-            <CardSelectCaso title="¿Se comunicaron?" botonTitle="Seleccionar" to="/admin/pages/searchbox" id='1' btnCreateCase={btnCreateCase} />
-            <CardSelectCaso title="¿Preventivo?" botonTitle="Seleccionar" to="/admin/pages/searchbox" id='2' btnCreateCase={btnCreateCase} />
+            <CardSelectCaso title="¿Se comunicaron?" botonTitle="Seleccionar" to="/admin/pages/searchbox" id='1' btnCreateCase={btnCreateCase} caseType={Enums.CORRECTIVO} />
+            <CardSelectCaso title="¿Preventivo?" botonTitle="Seleccionar" to="/admin/pages/searchbox" id='2' btnCreateCase={btnCreateCase} caseType={Enums.PREVENTIVO}/>
             
           </Grid>
       </Flex>
