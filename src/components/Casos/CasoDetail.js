@@ -25,9 +25,18 @@ import {
   FormHelperText,
 } from '@chakra-ui/react'
 
+import {
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+} from '@chakra-ui/react'
+
 // ICONOS
 import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose   } from 'react-icons/fa';
-import { FaUserPen,FaUserMinus,FaEye   } from "react-icons/fa6";
+import { BiUserVoice } from "react-icons/bi";
+import { FaUserPen,FaUserMinus,FaEye } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
 import { IoIosBusiness } from "react-icons/io";
@@ -168,7 +177,7 @@ const CasoDetail = ({ caseData }) => {
      */
     const [isEditTecnico, setIsEditTecnico] = useState(false);
 
-    const [prediagnostico,setPrediagnostico] = useState({})
+    const [prediagnostico,setPrediagnostico] = useState([])
 
     const [isEmpezado,setIsEmpezado] = useState(false)
 
@@ -269,6 +278,10 @@ const CasoDetail = ({ caseData }) => {
     }[segmento_ID] || bgStatus
   },[segmento_ID])
 
+  
+
+
+
   //=======================================================
   // SECTION: useEfect
   //=======================================================
@@ -350,13 +363,19 @@ const CasoDetail = ({ caseData }) => {
   useEffect( () =>{
     const consultarDiagnostico = async() =>{
       try{
-        const sql = `SELECT 
-          caso_ID,
-          diagnostico_tipo_ID,
-          description,
-          asistencia_tipo_ID,
-          visita_ID
-          FROM  diagnostico WHERE caso_ID = '${id}'`
+        const sql = `
+          SELECT
+            AT.name as asistencia_tipo, 
+            E.codigo_finca,
+            D.equipo_ID,
+            D.caso_ID,
+            D.diagnostico_tipo_ID,
+            D.description
+          FROM  
+            diagnostico_v2 D
+            INNER JOIN Equipo E ON D.equipo_ID = E.ID
+            INNER JOIN asistencia_tipo AT ON D.asistencia_tipo_ID = AT.ID
+          WHERE caso_ID = '${id}'`
           
         const diagnosticos = db.exec(sql).toArray()
           if(diagnosticos.length != 0){
@@ -672,9 +691,6 @@ const CasoDetail = ({ caseData }) => {
               
             </Badge>
           </Tooltip>
-        
-        
-          
             
           <Timer createdAt={createdAt} closedAt={closedAt} id={id} />
 
@@ -857,10 +873,67 @@ const CasoDetail = ({ caseData }) => {
           </Select>
         ):(
           <>
+            {/* Se va eliminar esto porque prediagnostico es una array  
             <Text fontSize="2xl" fontWeight="bold">
               {typeof prediagnostico.description !== 'undefined' ? decodeURIComponent(prediagnostico.description) : ''}
-            </Text>
+            </Text>*/}
 
+            {prediagnostico.length != 0 && (
+              <Accordion allowMultiple>
+                <AccordionItem>
+                  <h2>
+                    <AccordionButton>
+                      <Box flex='1' textAlign='left'>
+                        Equipos
+                      </Box>
+                      <AccordionIcon />
+                    </AccordionButton>
+                  </h2>
+                  <AccordionPanel pb={4}>
+                    {prediagnostico.map( (diagnostico) => (
+                      <Box key={diagnostico.ID} border="1px" borderColor={borderColor} p={3} rounded="md">
+                        <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
+                          <Badge
+                            bg="yellow.400"
+                            color={"black"}
+                            fontSize="0.8em"
+                            p="3px 10px"
+                            borderRadius="8px"
+                          >
+                            <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                              <Icon as={LiaTractorSolid } color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                              {diagnostico.codigo_finca}     
+                              
+                            </Flex>
+                            
+                          </Badge>
+                          <Badge
+                            bg="green.400"
+                            color={"black"}
+                            fontSize="0.8em"
+                            p="3px 10px"
+                            borderRadius="8px"
+                          >
+                            <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                              <Icon as={BiUserVoice} color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                              {diagnostico.asistencia_tipo.replace(/Asistencia/g, '')}     
+                              
+                            </Flex>
+                            
+                          </Badge>
+                        </Grid>
+                        <Text fontSize="10px" fontWeight="bold" key={diagnostico.ID}>
+                          {decodeURIComponent(diagnostico.description)}
+                        </Text>
+                      </Box>
+                    ))}
+                  </AccordionPanel>
+                </AccordionItem>
+              </Accordion>
+                
+            )}
+
+            <Divider />
             <Stack direction="row" align="center">
               <Icon as={FaCalendarAlt} color="gray.500" />
               <Text fontSize="sm" color="gray.500">
