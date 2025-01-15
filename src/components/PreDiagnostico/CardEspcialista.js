@@ -118,7 +118,7 @@ function CardEspecialista(props){
                             <FormControl maxW={{xl:'250px'}}>
                                 <FormLabel htmlFor='country'>Especialista</FormLabel>
                                 <Select id='country' placeholder='Seleccionar a especialista' onChange={(e) => actionSelectEspecialista(e.target.value)} value={selectedEspecialista}>
-                                    <option key='1' value='1'>Brandon Roberto Cerrano</option>
+                                    <option key='1' value='1'>Brandon Roberto Serrano</option>
                                     <option key='2' value='2'>Billy Anderson Guillen</option>
                                     <option key='3' value='3'>Jorge David Morales</option>
                                     <option key='4' value='4'>Jazon Castillo</option>
