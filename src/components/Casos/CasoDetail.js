@@ -923,7 +923,7 @@ const CasoDetail = ({ caseData }) => {
                           </Badge>
                         </Grid>
                         <Text fontSize="10px" fontWeight="bold" key={diagnostico.ID}>
-                          {decodeURIComponent(diagnostico?.description || 'Sin%20data')}
+                          {/*decodeURIComponent(diagnostico?.description || 'Sin%20data')*/}
                         </Text>
                       </Box>
                     ))}
