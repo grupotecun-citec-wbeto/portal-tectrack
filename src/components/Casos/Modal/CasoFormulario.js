@@ -126,10 +126,6 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
         codigo.set(sCaso.usuario_ID + '-' + shortUuid)  // cambiar estado de codigo
     },[sCaso])
 
-    function capitalizeFirstLetter(string) {
-        if (!string) return '';
-        return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-    }
 
     useEffect( () =>{
         if(!db) return;
@@ -140,7 +136,7 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
 
         const clientes = db.exec(` SELECT DISTINCT name FROM cliente where ID IN (SELECT cliente_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
         equipos.set({codigos:equiposData})
-        nameUsuario.set(clientes.map(cliente => capitalizeFirstLetter(cliente.name)).join(', '))
+        nameUsuario.set(clientes.map(cliente => cliente.name).join(', '))
 
         const departamentos = db.exec(` SELECT DISTINCT subdivision_name FROM departamento where code IN (SELECT departamento_code FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
         lugar.set(departamentos.map(departamento => departamento.subdivision_name).join(', '))
