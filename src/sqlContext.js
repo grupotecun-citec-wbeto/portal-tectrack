@@ -108,6 +108,7 @@ export function SqlProvider({ children }) {
   const [intervalTimeCaso, setIntervalTimeCaso] = useState(300000);
   const [intervalTimeHerramienta, setIntervalTimeHerramienta] = useState(300000);
   const [intervalTimeCasoVisita, setIntervalTimeCasoVisita] = useState(300000);
+  const [intervalTimeVehiculo, setIntervalTimeVehiculo] = useState(300000);
   
   
   
@@ -2734,6 +2735,11 @@ export function SqlProvider({ children }) {
   },[db_init,syncUuid])
   
   
+  /**
+   * SECTION: TABLA herramienta
+   *
+   */
+
   useEffect( () =>{
     const codigo = 19, tabla = 'herramienta', setTime = setIntervalTimeHerramienta, time = intervalTimeHerramienta
 
@@ -2798,6 +2804,85 @@ export function SqlProvider({ children }) {
     fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
     const intervalId = setInterval(() => fetchData(codigo), 3600000);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
+
+
+
+  /**
+   * SECTION: TABLA vehiculo
+   *
+   */
+
+  useEffect( () =>{
+    const codigo = 35, tabla = 'vehiculo', setTime = setIntervalTimeVehiculo, time = intervalTimeVehiculo
+
+    const fetchData = async (synctable_ID) => {
+      if(db_init != null && syncUuid != ''){
+        try {
+          
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
+
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
+          
+          
+          
+          const json = JSON.parse(response.data)
+          
+          
+          let values = ``
+          json.forEach((element,index) => {
+           
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+              ${element.ID},
+              ${element.code ? `'${element.code}'` : null},
+              ${element.placa ? `'${element.placa}'` : null},
+              ${element.year ? `'${element.year}'` : null},
+              ${element.name ? `'${element.name}'` : null}
+            )`
+
+
+          });
+
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,code,placa,year,name) VALUES ${values};`
+          const run = db_init.run(insertar)
+          console.log(run);
+          
+          // imporante simpres salvar en en indexdb_init
+          
+          saveToIndexedDB(db_init);
+          
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error(`Error fetching data: ${tabla} c717f93b-2ae1-4e98-b30f-15c45271efd1`, error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
+        console.log(result);
+        
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);// 
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => {}//clearInterval(intervalId);

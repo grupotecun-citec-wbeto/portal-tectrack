@@ -175,7 +175,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:true,
+        visible:false,
         component: Base64Image,
         layout: "/admin",
       },
