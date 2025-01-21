@@ -45,9 +45,7 @@ import SqlContext from 'sqlContext';
 
     const [clienteSelected,setClienteSelected] = useState('')
 
-    const capitalizeFirstLetter = (string) => {
-      return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-    }
+    
 
     // Rehidratar la base de dato
     /*useEffect( () =>{
@@ -93,7 +91,7 @@ import SqlContext from 'sqlContext';
               value={clienteSelected}
             >
               {clientes.map((cliente) =>(
-                <option key={cliente.ID} value={cliente.ID}>{capitalizeFirstLetter(cliente.name)}</option>
+                <option key={cliente.ID} value={cliente.ID}>{cliente.name}</option>
               ))}
             </Select>
           </FormControl>
