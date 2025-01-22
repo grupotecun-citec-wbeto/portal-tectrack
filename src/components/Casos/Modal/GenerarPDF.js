@@ -1,4 +1,4 @@
-import React,{useState,useEffect  } from "react";
+import React,{useState,useEffect,useRef  } from "react";
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Image, PDFViewer   } from "@react-pdf/renderer";
@@ -97,13 +97,13 @@ const styles = StyleSheet.create({
       backgroundColor:"#FFFFFF",
     },
     labelInput: {
-        border: "2pt solid #000",
+        //border: "2pt solid #000",
         fontWeight: "bold",
         marginTop: 5,
         paddingTop:5,
-        backgroundColor:"#FFFFFF",
-        borderRadius:5,
-        paddingLeft:5
+        //backgroundColor:"#FFFFFF",
+        //borderRadius:5,
+        //paddingLeft:5
       
     },
     separator: {
@@ -185,7 +185,7 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
 
 
     return(
-        <Document>
+        <Document minPresenceAhead={100}>
         <Page size="A4" style={styles.page}>
           {/* Encabezado Principal 
           
@@ -262,38 +262,35 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
         
             
                 {/* Tercera Sección: Detalle de la Visita */}
-                <View style={styles.section}>
-                    <Text style={styles.labelTitle}>DETALLE DE LA VISITA</Text>
-                    
-                    <View style={styles.separator} />
-                    
-                    <View style={styles.sectionInput}>
-                        <Text style={styles.labelInput}>Sistema del Equipo</Text>
-                        <Text style={styles.input}>{sistemas.value}</Text>
-                    </View>
-                
-                    
-                    <Text style={styles.labelSubTitle}>Hallazgos Encontrados</Text>
+                <View style={styles.section} wrap={false}>
+                  <Text style={styles.labelTitle}>DETALLE DE LA VISITA</Text>
+                  
+                  <View style={styles.separator} />
+                  
+                  <View style={styles.sectionInput}>
+                    <Text style={styles.labelInput}>Sistema del Equipo</Text>
+                    <Text style={styles.input}>{sistemas.value}</Text>
+                  </View>
+                  
+                  <Text style={styles.labelSubTitle}>Hallazgos Encontrados</Text>
+                  <View style={styles.separatorSubTitle} />
+                  <Text style={styles.textArea}>{hallazgos.current?.value}</Text>
+                  
+                  <View style={styles.section}>
+                    <Text style={styles.labelSubTitle}>Acciones Ejecutadas</Text>
                     <View style={styles.separatorSubTitle} />
-                    <Text style={styles.textArea} >{hallazgos.value}</Text>
-                
-                    <View style={styles.section} break={true} minPresenceAhead={100}>
-                        <Text style={styles.labelSubTitle}>Acciones Ejecutadas</Text>
-                        <View style={styles.separatorSubTitle} />
-                        <Text style={styles.textArea}>{accionesEjecutadas.value}</Text>
-                    </View>
-                
-                    <View style={styles.section} break={true} minPresenceAhead={100}>
-                        <Text style={styles.labelSubTitle}>Recomendaciones</Text>
-                        <View style={styles.separatorSubTitle} />
-                        <Text style={styles.textArea}>{recomendaciones.value}</Text>
-                    </View>
-                
-                
+                    <Text style={styles.textArea}>{accionesEjecutadas.current?.value}</Text>
+                  </View>
+                  
+                  <View style={styles.section}>
+                    <Text style={styles.labelSubTitle}>Recomendaciones</Text>
+                    <View style={styles.separatorSubTitle} />
+                    <Text style={styles.textArea}>{recomendaciones.current.value}</Text>
+                  </View>
                 </View>
-        
+
                 {/* Cuarta Sección Datos del Técnico */}
-                <View style={styles.section}>
+                <View style={styles.section} wrap={false} >
                     <Text style={styles.labelTitle}>DATOS DEL TÉCNICO</Text>
                     
                     <View style={styles.separator} />
@@ -312,39 +309,22 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
                     </View>
                 </View>
                 
-                <View style={{ flexDirection: "column", alignItems: "center"}}>
-                    {images.value.map((image) => (
-                      <View style={styles.imageContent} break={true} minPresenceAhead={100}>
-                        <Image
-                            src={image.src}
-                            style={{ width: 474, height: 266, marginBottom: 5 }}
-                        />
-                      </View>
+                
+                    {images.value.map((image,index) => (
+                        <View style={{ flexDirection: "column", alignItems: "center",paddingTop:"5px"}} wrap={false} minPresenceAhead={100}>
+                          
+                          <View key={index} style={styles.imageContent} >
+                            <Image
+                              key={index}
+                              src={image.src}
+                              style={{ width: 474, height: 360, marginBottom: 5 }}
+                            />
+                          </View>
+                          
+                        </View>
                     ))}
-                    
-                    
-                    
-                    
-                    
-                    {/*<Text style={{ fontSize: 10 }}>Descripción de la Imagen</Text>*/}
-                    {/*
-                    <View style={styles.imageContent} break={true} minPresenceAhead={100}>
-                        <Image
-                            src="https://i.ibb.co/rfCKH0D/OIP.jpg"
-                            style={{ width: 474, height: 266, marginBottom: 5 }}
-                        />
-                    </View>
-
-                    <View style={styles.imageContent} break={true} minPresenceAhead={100}>
-                        <Image
-                            src="https://i.ibb.co/rfCKH0D/OIP.jpg"
-                            style={{ width: 474, height: 266, marginBottom: 5 }}
-                        />
-                    </View>
-                    */}
-                    
-                    {/*<Text style={{ fontSize: 10 }}>Descripción de la Imagen</Text>*/}
-                </View>
+                
+                
                 
               
         </Page>
@@ -405,13 +385,15 @@ const GenerarPDF2 = () => {
     // ************** useState **************
     const [refresh, setRefresh] = useState(false);
     // hallazgos
-    const [hallazgosValue,setHallazgosValue] = useState('')
+    const hallazgos = useRef(null)
+    //const [hallazgosValue,setHallazgosValue] = useState('')
     
-    
-    const [accionesEjecutadasValue,setaccionesEjecutadasValue] = useState('')
+    const accionesEjecutadas = useRef(null)
+    //const [accionesEjecutadasValue,setaccionesEjecutadasValue] = useState('')
 
     // recomendaciones
-    const [recomendacionesValue,setRecomendacionesValue] = useState('')
+    const recomendaciones = useRef(null)
+    //const [recomendacionesValue,setRecomendacionesValue] = useState('')
     
     // ubiccaion
     const [ubicacionValue,setUbicacionValue] = useState('Guatemala, Guatemala')
@@ -452,12 +434,19 @@ const GenerarPDF2 = () => {
     //images  
     const [imagesValue, setImagesValue] = useState([]);
 
-    
+    // ************** useRef **************
+
+    //images
+    const imagesRef = useRef(imagesValue)
+
+    //trigger Generar PDF
+    const [triggerGenerarPdf,setTriggerGenerarPdf] = useState(false)
 
     // ************** functions **************
 
-    const handleVer = () =>{
-        console.log("Ver")
+    const handleGenerarPdf = () =>{
+        setImagesValue(imagesRef.current)
+        setTriggerGenerarPdf(!triggerGenerarPdf)
     }
 
     const handleGuardar = () =>{
@@ -471,9 +460,9 @@ const GenerarPDF2 = () => {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
         <CasoFormulario 
           caso_ID = {id} 
-          hallazgos={{value: hallazgosValue, set:setHallazgosValue}}
-          accionesEjecutadas={{value: accionesEjecutadasValue, set:setaccionesEjecutadasValue}}
-          recomendaciones={{value: recomendacionesValue, set:setRecomendacionesValue}}
+          hallazgos={hallazgos}
+          accionesEjecutadas={accionesEjecutadas}
+          recomendaciones={recomendaciones}
           ubicacion={{value: ubicacionValue, set:setUbicacionValue}}
           lugar={{value: lugarValue, set:setLugarValue}}
           nameUsuario={{value: nameUsuarioValue, set:setNameUsuarioValue}}
@@ -487,7 +476,8 @@ const GenerarPDF2 = () => {
           revisadoPor={{value: revisadoPorValue, set:setRevisadoPorValue}}
           fechaEmision={{value: fechaEmisionValue, set:setFechaEmisionValue}}
           images={{value: imagesValue, set:setImagesValue}}
-          handle={{ver:handleVer, guardar:handleGuardar}}
+          imagesRef={imagesRef}
+          handle={{generarPdf:handleGenerarPdf, guardar:handleGuardar}}
           
           />
 
@@ -498,9 +488,9 @@ const GenerarPDF2 = () => {
                   document={
                     <MyPDFDocument 
                       caso_ID = {id}
-                      hallazgos={{value: hallazgosValue, set:setHallazgosValue}}
-                      accionesEjecutadas={{value: accionesEjecutadasValue, set:setaccionesEjecutadasValue}}
-                      recomendaciones={{value: recomendacionesValue, set:setRecomendacionesValue}}
+                      hallazgos={hallazgos}
+                      accionesEjecutadas={accionesEjecutadas}
+                      recomendaciones={recomendaciones}
                       ubicacion={{value: ubicacionValue, set:setUbicacionValue}}
                       lugar={{value: lugarValue, set:setLugarValue}}
                       nameUsuario={{value: nameUsuarioValue, set:setNameUsuarioValue}}
@@ -531,14 +521,14 @@ const GenerarPDF2 = () => {
                   }
                   </PDFDownloadLink>
               </div>
-          </Flex>
+        </Flex>
         
         <PDFViewer style={{ height: '800px' }} >
           <MyPDFDocument 
             caso_ID = {id}
-            hallazgos={{value: hallazgosValue, set:setHallazgosValue}}
-            accionesEjecutadas={{value: accionesEjecutadasValue, set:setaccionesEjecutadasValue}}
-            recomendaciones={{value: recomendacionesValue, set:setRecomendacionesValue}}
+            hallazgos={hallazgos}
+            accionesEjecutadas={accionesEjecutadas}
+            recomendaciones={recomendaciones}
             ubicacion={{value: ubicacionValue, set:setUbicacionValue}}
             lugar={{value: lugarValue, set:setLugarValue}}
             nameUsuario={{value: nameUsuarioValue, set:setNameUsuarioValue}}

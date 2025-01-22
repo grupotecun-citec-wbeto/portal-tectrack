@@ -46,9 +46,8 @@ import ImgLoader from "./ImgLoader";
 
 
 
-const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubicacion,lugar,nameUsuario,codigo,fecha,celular,proyecto,equipos,sistemas,elaboradoPor,revisadoPor,fechaEmision,images,handle}) =>{
+const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubicacion,lugar,nameUsuario,codigo,fecha,celular,proyecto,equipos,sistemas,elaboradoPor,revisadoPor,fechaEmision,images,imagesRef,handle}) =>{
     
-
     const timeZone = 'America/Guatemala'; // Define tu zona horaria
     const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
     
@@ -66,9 +65,9 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
 
     //HALLAZGOS
     
-    const handleInputChangeHallazgos = (event) =>{
+    /*const handleInputChangeHallazgos = (event) =>{
         hallazgos.set(event.target.value)
-    }
+    }*/
 
     // ACCIONES EJECUTADAS
     const handleInputChangeAccionesEjecutadas = (event) =>{
@@ -102,10 +101,10 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
         fecha.set(dateFormat)
     }
 
-    const [imgLoaders, setImgLoaders] = useState([<ImgLoader key={0} images={images} />]);
+    const [imgLoaders, setImgLoaders] = useState([<ImgLoader key={0} imagesRef={imagesRef} />]);
 
     const addImgLoader = () => {
-        setImgLoaders([...imgLoaders, <ImgLoader key={imgLoaders.length} images={images} />]);
+        setImgLoaders([...imgLoaders, <ImgLoader key={imgLoaders.length} imagesRef={imagesRef} />]);
     };
 
     // Rehidratar la base de datos
@@ -237,36 +236,36 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                         
                         </Box>
                     </Flex>
-
                     <CasoModalTextArea 
-                        title="Hallazgos Encontrados" 
-                        value={hallazgos.value} 
+                        title="Hallazgos Encontrados"
+                        reference={hallazgos}
                         placeholder="Ingresar los Hallazgos"
-                        handleInputChange={handleInputChangeHallazgos}  
+                        
                     />
                     <CasoModalTextArea 
                         title="Acciones Ejecutadas" 
-                        value={accionesEjecutadas.value} 
+                        reference={accionesEjecutadas}
                         placeholder="Ingresar los Acciones ejecutadas"
-                        handleInputChange={handleInputChangeAccionesEjecutadas}  
                     />
                     <CasoModalTextArea 
                         title="Recomendaciones" 
-                        value={recomendaciones.value} 
+                        reference={recomendaciones}
                         placeholder="Ingresar las Recomendaciones"
-                        handleInputChange={handleInputChangeRecomendaciones}
                     />
 
                     
 
                     <Flex direction="column" align="left" justify="center">
+                        <Text fontSize="sm">
+                            Sección de imágenes
+                        </Text>
                         {imgLoaders}
-                        <Button onClick={addImgLoader} mt="10px">Agregar Imagen</Button>
+                        <Button onClick={addImgLoader} mt="10px" bg="blue.500" _hover={{ bg: "blue.600" }}>Agregar Imagen</Button>
                     </Flex>
 
 
                     <Flex direction="row" mt="10px">
-                        <Button onClick={() => handle.ver()} mx="5px">Ver</Button>
+                        <Button bg="green.300" _hover={{ bg: "green.600" }} onClick={() => handle.generarPdf()} mx="5px">Generar PDF</Button>
                     </Flex>
                     
                 </CardBody>
