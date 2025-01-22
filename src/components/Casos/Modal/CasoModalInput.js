@@ -11,7 +11,7 @@ const CasoModalInput = ({type,title,value,helperText,handleInputChange}) =>{
     return(
         <>
             <FormControl>
-                <FormLabel htmlFor='email'>{title}</FormLabel>
+                <FormLabel htmlFor='email' fontSize="sm">{title}</FormLabel>
                 <Input 
                     id={type} 
                     type={type} 
