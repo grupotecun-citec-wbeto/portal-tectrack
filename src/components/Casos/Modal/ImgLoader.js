@@ -2,21 +2,36 @@ import React,{useEffect} from 'react';
 import { Box, Input, Image, Button, Text } from '@chakra-ui/react';
 import {v4 as uuidv4} from 'uuid'
 import { use } from 'react';
+import imageCompression from "browser-image-compression";
 
 const ImgLoader = ({imagesRef}) => {
     const [base64Image, setBase64Image] = React.useState(null);
     const [imageId, setImageId] = React.useState(uuidv4());
-    const handleImageChange = (e) => {
+    const handleImageChange = async(e) => {
         const file = e.target.files[0];
         
-        const reader = new FileReader();
+        /*const reader = new FileReader();
   
         reader.onloadend = () => {
           setBase64Image(reader.result);
         };
         if(file){
             reader.readAsDataURL(file);
-        }
+        }*/
+
+        const options = {
+            maxSizeMB: 1, // Tamaño máximo en MB
+            maxWidthOrHeight: 1024, // Resolución máxima
+            useWebWorker: true,
+            };
+        
+            try {
+                const compressedFile = await imageCompression(file, options);
+                const compressedBlob = URL.createObjectURL(compressedFile);
+                setBase64Image(compressedBlob);
+            } catch (error) {
+                console.error("Error al comprimir la imagen:", error);
+            }
     };
 
     useEffect(() => {
