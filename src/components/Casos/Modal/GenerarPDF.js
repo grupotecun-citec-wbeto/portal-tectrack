@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     },
     gridItem: {
       width: "30%",        // Divide el contenedor en 3 columnas (33.33% cada una)
-      height: 20,             // Altura de las celdas
+      height: 50,             // Altura de las celdas
       border: "1pt solid #000", 
       justifyContent: "center",
       alignItems: "center",
@@ -252,9 +252,18 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
                         <Text style={styles.input}>{proyecto.value}</Text>
                     </View>
                     <View style={styles.gridContainer}>
-                        {equipos?.value?.codigos?.map((equipo) => (
-                            <Text style={styles.gridItem}>{equipo.codigo_finca}</Text>
-                        ))}
+                        {equipos?.value?.codigos?.map((equipo) => {
+                            const chasisValue = equipo.chasis.includes('|') ? equipo.chasis.split('|')[0] : equipo.chasis;
+                            return(
+                              <Text style={styles.gridItem}>
+                                <Text>{equipo.business_name} {equipo.marca}</Text>
+                                <Text>{'\n'}</Text>
+                                <Text>Serie: {chasisValue}</Text>
+                                <Text>{'\n'}</Text>
+                                <Text>Cod: {equipo.codigo_finca}</Text>
+                              </Text>
+                            )
+                      })}
                     </View>
                 </View>
             

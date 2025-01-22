@@ -20,7 +20,7 @@ const ImgLoader = ({imagesRef}) => {
         }*/
 
         const options = {
-            maxSizeMB: 1, // Tamaño máximo en MB
+            maxSizeMB: 0.3, // Tamaño máximo en MB
             maxWidthOrHeight: 1024, // Resolución máxima
             useWebWorker: true,
             };

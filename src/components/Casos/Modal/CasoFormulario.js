@@ -129,7 +129,15 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
     useEffect( () =>{
         if(!db) return;
         if(Object.keys(sCaso).length == 0) return;
-        const equiposData = db.exec(` SELECT codigo_finca,ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}') `).toArray()
+        const equiposData = db.exec(` 
+            SELECT 
+                E.codigo_finca,E.ID,C.business_name,E.chasis,M.name as marca
+            FROM 
+                equipo E
+                INNER JOIN catalogo C ON E.catalogo_ID = C.ID
+                INNER JOIN marca M ON C.marca_ID = M.ID
+            WHERE 
+                E.ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}') `).toArray()
         
         
 
