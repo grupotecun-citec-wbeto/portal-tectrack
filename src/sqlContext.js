@@ -123,8 +123,9 @@ export function SqlProvider({ children }) {
       db_init.run("INSERT INTO tipo_accion VALUES (1, 'Correctivo'), (2, 'Preventivo')");
       saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }
-    
+    // **************************************************************************
     // TABLE COMUNICACION
+    // **************************************************************************
     if (!checkTableExists(db_init, 'comunicacion')) {
       db_init.run(`
         CREATE TABLE IF NOT EXISTS comunicacion (
@@ -150,6 +151,12 @@ export function SqlProvider({ children }) {
         (11, 'Comentario', 2);
       `);
       saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
+    }else{
+      const registro = db_init.exec(`SELECT ID FROM comunicacion WHERE ID = 12`).toObject();
+      if (!registro) {
+        db_init.run(`INSERT INTO comunicacion (ID, name, tipo_accion_ID) VALUES (12, 'Planificado', 2)`);
+        saveToIndexedDB(db_init);
+      }
     }
 
     if (!checkTableExists(db_init, 'caso_estado')) {
