@@ -14,7 +14,7 @@ import { useState } from 'react';
 
 
 function SelectComunication(props){
-    const {comunicaciones, ...rest} = props
+    const {comunicaciones,placeholder, ...rest} = props
 
      // CONTEXTO
     const {casoActivo,setCasoActivo} = useContext(AppContext)
@@ -61,7 +61,7 @@ function SelectComunication(props){
 
     return(
         <FormControl>
-            <Select id='country' placeholder='Seleccionar comunicación' fontSize={{xl:'1em',sm:'1em'}} value={comunicacionValue} onChange={(e) => handleComunicacion(e.target.value)}>
+            <Select id='country' placeholder={placeholder} fontSize={{xl:'1em',sm:'1em'}} value={comunicacionValue} onChange={(e) => handleComunicacion(e.target.value)}>
                 {comunicaciones?.map((comunicacion) =>(
                     <option value={comunicacion.value}>{comunicacion.text}</option>
                 ))}
