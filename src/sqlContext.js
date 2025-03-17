@@ -6,7 +6,9 @@ import {v4 as uuidv4} from 'uuid'
 import { format } from 'date-fns';
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
-const SQL = await initSqlJs({ locateFile: file => `https://sql.js.org/dist/${file}` });
+
+import sqlWasm from "!!file-loader?name=sql-wasm-[contenthash].wasm!sql.js/dist/sql-wasm.wasm";
+const SQL = await initSqlJs({ locateFile: file => sqlWasm });
 
 
 async function saveToIndexedDB(db_init) {
