@@ -285,7 +285,7 @@ import {
               
             </Flex>
             <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
-              < CardComunication title="¿Comó te contactaron?" />
+              < CardComunication title="¿Por cuál canal te contactaron?" />
               <Card>
                   <CardHeader>
                     <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Explicación del problema</Heading>

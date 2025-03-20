@@ -56,29 +56,35 @@ function CardComunication(props) {
     return (
         <Card>
             <CardHeader>
-                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>{title}</Heading>
+                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>{(caseType == Enums.CORRECTIVO) ? title : '¿Por cuál canal lo identificaste?'}</Heading>
                 
             </CardHeader>
             <CardBody>
                 <Box flex='1' align='center' mt='10px'>
                     {caseType == Enums.CORRECTIVO ?(
-                        <SelectComunication comunicaciones={[
-                            {value:'1',text:Enums.WHATSAPP},
-                            {value:'2',text:Enums.TELEFONO},
-                            {value:'3',text:Enums.CORREO},
-                            {value:'4',text:Enums.SOLICITUD_COMERCIAL},
-                            {value:'5',text:Enums.EN_SITIO},
-                        ]} /> 
+                        <SelectComunication 
+                            comunicaciones={[
+                                {value:'1',text:Enums.WHATSAPP},
+                                {value:'2',text:Enums.TELEFONO},
+                                {value:'3',text:Enums.CORREO},
+                                {value:'4',text:Enums.SOLICITUD_COMERCIAL},
+                                {value:'5',text:Enums.EN_SITIO},
+                            ]}
+                            placeholder='Selecciona el canal' 
+                        /> 
                     ):(
-                        <SelectComunication comunicaciones={[
-                            {value:'6',text:Enums.WHATSAPP},
-                            {value:'7',text:Enums.TELEFONO},
-                            {value:'8',text:Enums.CORREO},
-                            {value:'9',text:Enums.SOLICITUD_COMERCIAL},
-                            {value:'10',text:Enums.EN_SITIO},
-                            {value:'11',text:Enums.COMENTARIO},
-                           
-                        ]} /> 
+                        <SelectComunication 
+                            comunicaciones={[
+                                {value:'6',text:Enums.WHATSAPP},
+                                {value:'7',text:Enums.TELEFONO},
+                                {value:'8',text:Enums.CORREO},
+                                {value:'9',text:Enums.SOLICITUD_COMERCIAL},
+                                {value:'10',text:Enums.EN_SITIO},
+                                {value:'11',text:Enums.COMENTARIO},
+                            
+                            ]}
+                            placeholder='Selecciona el canal'  
+                        /> 
                     )}
                 </Box>
             </CardBody>
