@@ -64,6 +64,9 @@ import {
      * SECTION: useState
      *
      */
+
+    const [refresh, setRefresh] = useState(false);
+
     const [searchValue, setSearchValue] = useState('');
     const [debouncedSearchValue] = useDebounce(searchValue, 500);
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
@@ -157,7 +160,7 @@ import {
         };
         fetchData()
       
-    }, [debouncedSearchValue,isBusquedaTerminada]);
+    }, [debouncedSearchValue,isBusquedaTerminada,refresh]);
 
     useEffect( () =>{
       if(userData?.casoActivo?.busqueda_terminada == 1){
@@ -278,6 +281,7 @@ import {
                   cliente_name={maquina.cliente_name}
                   isSelected={maquina.isSelected}
                   isPost={isPost}
+                  onRefresh={{set:setRefresh, get: refresh}}
                   infos={[
                     {title:"Categoria",text:maquina.categoria_name},
                     {title:"Departamento",text:maquina.subdivision_name},

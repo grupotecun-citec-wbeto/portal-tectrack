@@ -175,11 +175,17 @@ function SearchCard(props) {
     const eliminarEquipo = async() =>{
 
         const newUserData = {...userData}
-
-        delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
         
-        setIsSelectedEquipo(false)
-        saveUserData(newUserData)
+        if (window.confirm("¿Está seguro que quiere eliminar este equipo?")) {
+            // Acción a realizar si el usuario confirma
+            delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
+            saveUserData(newUserData)        
+            props.onRefresh.set(!props.onRefresh.get);
+            setIsSelectedEquipo(false)
+            
+        }
+        
+       
 
     }
 
@@ -232,17 +238,17 @@ function SearchCard(props) {
                         />
                     ):(
                         <>
-                            {!isPost && (
-                                <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
-                                    <IconButton
-                                        icon={<FaTimes />} // Icono para quitar selección
-                                        aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
-                                        colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
-                                        size="md" // Tamaño del botón
-                                        onClick={eliminarEquipo} // Acción al hacer clic
-                                    />
-                                </Tooltip>
-                            )}
+                            
+                            <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
+                                <IconButton
+                                    icon={<FaTimes />} // Icono para quitar selección
+                                    aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
+                                    colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
+                                    size="md" // Tamaño del botón
+                                    onClick={eliminarEquipo} // Acción al hacer clic
+                                />
+                            </Tooltip>
+                            
                             
                             
                             {( (!isCreatedPreDiagnostico && !isPost) || (!isCreatedDiagnostico && isPost) ) ? (
