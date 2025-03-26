@@ -24,6 +24,7 @@ import CardBody from "components/Card/CardBody";
 import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
+import SqlContext from "sqlContext";
 
 
 
@@ -34,8 +35,12 @@ function CardEspecialista(props){
     
     const {...rest} = props
 
+    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
+
     const [necesitaEspecialista,setNecesitaEspecialista] = useState(false)
     const [selectedEspecialista,setSelectedEspecialista] = useState('')
+
+    const [usuarios, setUsuarios] = useState([]);
 
     // CONTEXTO
     // Esta quitando el contexto de casoActivo, si se va utilizar otro contexto crear otra linea
@@ -70,6 +75,18 @@ function CardEspecialista(props){
         
         
     },[userData.casoActivo.code])
+
+    // cargar especialistas
+    useEffect(() =>{
+        if(!db) return;
+        const getUsuario = async() =>{
+          const usuarios = db.exec(`SELECT * FROM usuario WHERE perfil_ID = 1 OR perfil_ID = 2`).toArray()
+        if(usuarios.length != 0)
+          setUsuarios(usuarios)
+        }
+
+        getUsuario()
+    },[db])
 
     const actionCheckEspecialista = () =>{
         getUserData()
@@ -118,10 +135,9 @@ function CardEspecialista(props){
                             <FormControl maxW={{xl:'250px'}}>
                                 <FormLabel htmlFor='country'>Especialista</FormLabel>
                                 <Select id='country' placeholder='Seleccionar a especialista' onChange={(e) => actionSelectEspecialista(e.target.value)} value={selectedEspecialista}>
-                                    <option key='1' value='1'>Brandon Roberto Serrano</option>
-                                    <option key='2' value='2'>Billy Anderson Guillen</option>
-                                    <option key='3' value='3'>Jorge David Morales</option>
-                                    <option key='4' value='4'>Jazon Castillo</option>
+                                {usuarios.map( (usuario) =>(
+                                    <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
+                                ))}
                                 </Select>
                             </FormControl>
                       </Flex>
