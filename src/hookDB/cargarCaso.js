@@ -3,6 +3,7 @@ import SqlContext from 'sqlContext';
 import axios from 'axios';
 //redux
 import { useSelector, useDispatch } from 'react-redux';
+import { use } from 'react';
 
 function useCargarCaso(caso_id) {
   
@@ -39,6 +40,10 @@ function useCargarCaso(caso_id) {
   const [listaCasos,setListaCasos] = useState([])
 
 
+  /*useEffect( () => {
+    console.log('loadCaso rehidratarDb:', '8230d797-8360-4920-85fa-1d359221ac12');
+    rehidratarDb()
+  },[])*/
 
   // Rehidratar la base de dato
   /*useEffect( () =>{
@@ -49,9 +54,10 @@ function useCargarCaso(caso_id) {
    * Obtener lista de casos no sincronizados
    */
   const loadCaso = async() =>{
-    
-    
+  
+    //rehidratarDb();
     if(caso_id == '') return;
+    console.log('loadCaso called from component:', caso_id, '5f2f8267-7599-4a83-a0e8-90d9cbba3ddb');
     const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
     
     const fetchData = async (synctable_ID) => {
@@ -80,14 +86,15 @@ function useCargarCaso(caso_id) {
               AND syncStatus = 1
               `
           const casosNoSincronizados = db.exec(query).toArray()
-
-
+          
             // syncStatus = 0 AND 
             
           if(casosNoSincronizados.length != 0){   
             setFormData(casosNoSincronizados)
             const uuids = casosNoSincronizados.map(objeto => objeto.ID);
             setListaCasos(uuids)
+          }else{
+            setListaCasos([])
           }
               
             
@@ -117,6 +124,16 @@ function useCargarCaso(caso_id) {
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
+  }
+
+ 
+  useEffect( () => {
+    if(!db) return;
+      loadCaso()
+  },[db])
+
+  const loadCasoRehidrated = async() =>{  
+    rehidratarDb()
   }
 
 
@@ -173,7 +190,7 @@ function useCargarCaso(caso_id) {
     
     fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/casos`,5,500)
     
-    
+    setFormData([])
     
     
   },[formDataCasoVisitas])
@@ -260,6 +277,7 @@ function useCargarCaso(caso_id) {
             `).toArray()
           setFormDataCasoVisitas(casoVisitas)
 
+          setListaCasos([])
           /** caso_ID CHAR(36) NOT NULL,
         visita_ID CHAR(36) NOT NULL, */
 
@@ -312,7 +330,7 @@ function useCargarCaso(caso_id) {
     
   },[formDatadiagnosticos])*/
 
-  return {loadCaso}
+  return {loadCaso,loadCasoRehidrated}
 
 }
 
