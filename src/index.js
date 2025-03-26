@@ -25,6 +25,7 @@ import RTLLayout from "layouts/RTL.js"; // Chakra imports
 import { ChakraProvider } from "@chakra-ui/react";
 import { AppProvider } from './appContext.js';
 import { SqlProvider } from './sqlContext.js';
+import { DisposalProvider } from "./disposalContext.js";
 import Notfound404 from "layouts/Errors/Notfound404.js";
 // Custom Chakra theme
 import theme from "theme/theme.js";
@@ -57,16 +58,18 @@ ReactDOM.render(
       <ChakraProvider theme={theme} resetCss={false} position="relative">
         <AppProvider>
           <SqlProvider>
-            <HashRouter>
-              <Switch>
-                <Route path={`/auth`} component={AuthLayout} />
-                <Route path={`/admin`} component={AdminLayout} />
-                <Route path={`/user/:userId`} component={UserProfile} />
-                <Route path={`/error`} component={Notfound404} />
-                <Route path={`/rtl`} component={RTLLayout} />
-                <Redirect from={`/`} to="/admin/dashboard" />
-              </Switch>
-            </HashRouter>
+            <DisposalProvider> 
+              <HashRouter>
+                <Switch>
+                  <Route path={`/auth`} component={AuthLayout} />
+                  <Route path={`/admin`} component={AdminLayout} />
+                  <Route path={`/user/:userId`} component={UserProfile} />
+                  <Route path={`/error`} component={Notfound404} />
+                  <Route path={`/rtl`} component={RTLLayout} />
+                  <Redirect from={`/`} to="/admin/dashboard" />
+                </Switch>
+              </HashRouter>
+            </DisposalProvider>
           </SqlProvider>
         </AppProvider>
       </ChakraProvider>

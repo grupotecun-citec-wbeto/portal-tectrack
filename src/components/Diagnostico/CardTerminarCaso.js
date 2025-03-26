@@ -32,14 +32,16 @@ import CardHeader from "components/Card/CardHeader";
 import AppContext from "appContext";
 import SqlContext from "sqlContext";
 import useCargarCaso from "hookDB/cargarCaso";
+import { use } from "react";
 //import { getData } from "ajv/dist/compile/validate";
 
 
 
 //******************************************* FIN IMPORTS ************************** */
 
-function CardTerminarCaso({openAlert}){
+function CardTerminarCaso(props){
 
+    const {refresh} = props
     /*const {
         casoActivo,setCasoActivo,
         slcCasoId,setSlcCasoId
@@ -51,6 +53,9 @@ function CardTerminarCaso({openAlert}){
         if(!db) rehidratarDb()
     },[db,rehidratarDb])*/
 
+    useEffect(() => {
+        rehidratarDb()
+    }, [refresh])
     const history = useHistory()
 
     const [caseId,setCaseId] = useState(0)
@@ -73,7 +78,7 @@ function CardTerminarCaso({openAlert}){
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
-    const {loadCaso} = useCargarCaso(userData.casoActivo?.code)
+    const {loadCaso,loadCasoRehidrated} = useCargarCaso(userData.casoActivo?.code)
 
     const getCurrentDateTime = () => {
         const now = new Date();
@@ -133,9 +138,7 @@ function CardTerminarCaso({openAlert}){
                     
                     saveToIndexedDB(db)
                     
-                    // rehidratar db
-                    rehidratarDb()
-                    // sincronizar caso
+                    // sincronizar caso con rehidratación
                     loadCaso()
 
                     // Reiniciando el caso activo, para preparar para el siguiente caso
