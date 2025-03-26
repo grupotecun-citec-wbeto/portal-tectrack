@@ -133,7 +133,7 @@ import { Link, useHistory   } from 'react-router-dom';
       
       caso.segmento_ID = segmento_ID
       
-      newUserData.casos[uuid] = caso
+      newUserData.casos = {[uuid]:caso}
       
       const caso_activo = structuredClone(userData.stuctures.casoActivo)
       newUserData.casoActivo = caso_activo
