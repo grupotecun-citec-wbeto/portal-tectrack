@@ -315,7 +315,7 @@ const CasoDetail = ({ caseData }) => {
   // LISTA DE USUARIOS - obtener la lista de usuarios
   useEffect(() =>{
     const getUsuario = async() =>{
-      const usuarios = db.exec(`SELECT * FROM usuario`).toArray()
+      const usuarios = db.exec(`SELECT * FROM usuario WHERE perfil_ID = 1 OR perfil_ID = 2`).toArray()
     if(usuarios.length != 0)
       setUsuarios(usuarios)
     }
