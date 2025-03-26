@@ -1,4 +1,5 @@
 import React, {useContext,useEffect, useState} from 'react';
+import { DisposalContext } from 'disposalContext';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     Input,
@@ -51,6 +52,8 @@ function SearchCard(props) {
         ...rest } = props;
     
     const history = useHistory();
+
+    const { addToDeleteQueue } = useContext(DisposalContext);
 
      // ************************** REDUX-PRESIST ****************************
      const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -178,6 +181,8 @@ function SearchCard(props) {
         
         if (window.confirm("¿Está seguro que quiere eliminar este equipo?")) {
             // Acción a realizar si el usuario confirma
+            const caso_ID = userData?.casoActivo?.code
+            addToDeleteQueue(caso_ID,maquina_id,'diagnostico_v2',`/api/v1/disposal/diagnostico/${caso_ID}/${maquina_id}`)
             delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
             saveUserData(newUserData)        
             props.onRefresh.set(!props.onRefresh.get);
@@ -186,6 +191,17 @@ function SearchCard(props) {
         }
         
        
+
+    }
+
+    const eliminarEquipoEnBusqueda = async() =>{
+
+        const newUserData = {...userData}
+
+        delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
+        
+        setIsSelectedEquipo(false)
+        saveUserData(newUserData)
 
     }
 
@@ -245,7 +261,7 @@ function SearchCard(props) {
                                     aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
                                     colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
                                     size="md" // Tamaño del botón
-                                    onClick={eliminarEquipo} // Acción al hacer clic
+                                    onClick={(!isPost) ? eliminarEquipoEnBusqueda : eliminarEquipo} // Acción al hacer clic
                                 />
                             </Tooltip>
                             

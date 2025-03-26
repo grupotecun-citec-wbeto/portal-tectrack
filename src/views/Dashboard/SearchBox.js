@@ -341,7 +341,7 @@ import {
             )}
           </>
         ):(
-          <CardTerminarCaso />
+          <CardTerminarCaso refresh={refresh} />
         )}
        
         <CardCommand />
