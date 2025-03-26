@@ -111,6 +111,7 @@ export function SqlProvider({ children }) {
   const [intervalTimeHerramienta, setIntervalTimeHerramienta] = useState(300000);
   const [intervalTimeCasoVisita, setIntervalTimeCasoVisita] = useState(300000);
   const [intervalTimeVehiculo, setIntervalTimeVehiculo] = useState(300000);
+  const [intervalTimeUsuario, setIntervalTimeUsuario] = useState(300000);
   
   
   
@@ -395,7 +396,13 @@ export function SqlProvider({ children }) {
       `)
       saveToIndexedDB(db_init); // Guardar la nueva base de datos en IndexedDB
     }else{
-      //db_init.run(`DROP TABLE usuario;`)
+      const tableInfo = db_init.exec(`PRAGMA table_info(usuario)`).toArray()
+      let columna = 'perfil_ID'
+      let columnExists = tableInfo.some(column => column.name === columna);
+      if(!columnExists){
+        db_init.run(`ALTER TABLE usuario ADD COLUMN ${columna} INTEGER NULL;`)
+        saveToIndexedDB(db_init);
+      }
     }
 
     /*CREATE TABLE IF NOT EXISTS asignacion (
@@ -2880,6 +2887,93 @@ export function SqlProvider({ children }) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
           console.error(`Error fetching data: ${tabla} c717f93b-2ae1-4e98-b30f-15c45271efd1`, error);
+        }
+          // Aquí puedes actualizar el estado con la información recibida si es necesario
+        const result = db_init.exec(`SELECT * FROM ${tabla}`);
+        console.log(result);
+        
+      }
+    };
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), 3600000);// 
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => {}//clearInterval(intervalId);
+  },[db_init,syncUuid])
+
+
+  /**
+   * SECTION: TABLA usuario
+   *
+   */
+
+  useEffect( () =>{
+    const codigo = 34, tabla = 'usuario', setTime = setIntervalTimeUsuario, time = intervalTimeUsuario
+
+    const fetchData = async (synctable_ID) => {
+      if(db_init != null && syncUuid != ''){
+        try {
+          
+          // verificar sync
+          const sync = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable/${syncUuid}/${synctable_ID}`);
+
+          const objeto = JSON.parse(sync.data)[0]
+          const last_incremental_timestamp =  objeto.last_incremental_timestamp
+          const incrementalDate = (last_incremental_timestamp != null) ?  encodeURIComponent(last_incremental_timestamp) : 'all'
+          // verificar sync
+
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
+          
+          
+          
+          
+          const json = JSON.parse(response.data)
+          
+          /*
+          ID INTEGER PRIMARY KEY AUTOINCREMENT,
+          nombre TEXT,
+          apellido TEXT,
+          display_name TEXT,
+          password TEXT 
+          */
+
+
+          let values = ``
+          json.forEach((element,index) => {
+           
+            const coma = (index == 0 ) ? '' : ','
+            values +=  `${coma}(
+              ${element.ID},
+              ${element.nombre ? `'${element.nombre}'` : null},
+              ${element.apellido ? `'${element.apellido}'` : null},
+              ${element.display_name ? `'${element.display_name}'` : null},
+              ${element.password ? `'NO APLICA'` : null},
+              ${element.perfil_ID ? `${element.perfil_ID}` : null}
+            )`
+
+
+          });
+
+          const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,nombre,apellido,display_name,password,perfil_ID) VALUES ${values};`
+          const run = db_init.run(insertar)
+          console.log(run);
+          
+          // imporante simpres salvar en en indexdb_init
+          
+          saveToIndexedDB(db_init);
+          
+          // terminar sincronizacion
+          await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${syncUuid}/${synctable_ID}`);
+          // terminar sincronizacion
+
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error(`Error fetching data: ${tabla} a32d22eb-7625-47ba-bff0-6a77121a9c5a`, error);
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db_init.exec(`SELECT * FROM ${tabla}`);
