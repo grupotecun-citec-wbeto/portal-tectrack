@@ -133,6 +133,8 @@ import { Link, useHistory   } from 'react-router-dom';
       
       caso.segmento_ID = segmento_ID
       
+      // si necesita utilizar historial de casos en borrador se tiene colocar newUserData.casos[uuid] = caso
+      // Esto es para solo se pueda guardar un solo caso
       newUserData.casos = {[uuid]:caso}
       
       const caso_activo = structuredClone(userData.stuctures.casoActivo)
