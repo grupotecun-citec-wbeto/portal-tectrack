@@ -26,6 +26,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { AppProvider } from './appContext.js';
 import { SqlProvider } from './sqlContext.js';
 import { DisposalProvider } from "./disposalContext.js";
+import { DataBaseProvider } from "dataBaseContext.js";
 import Notfound404 from "layouts/Errors/Notfound404.js";
 // Custom Chakra theme
 import theme from "theme/theme.js";
@@ -36,7 +37,6 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store.js';
 
 import { Spinner } from '@chakra-ui/react'
-
 
 const UserProfile = () => {
   const { userId } = useParams();
@@ -51,26 +51,32 @@ const UserProfile = () => {
   return <h2>Perfil del usuario con ID: {userId}</h2>;
 };
 
+/*useEffect(() => {
+  initDatabase().then(() => setDbReady(true));
+}, []);*/
+
 
 ReactDOM.render(
   <Provider store={store}>
     <PersistGate loading={<Spinner />} persistor={persistor}>
       <ChakraProvider theme={theme} resetCss={false} position="relative">
         <AppProvider>
-          <SqlProvider>
-            <DisposalProvider> 
-              <HashRouter>
-                <Switch>
-                  <Route path={`/auth`} component={AuthLayout} />
-                  <Route path={`/admin`} component={AdminLayout} />
-                  <Route path={`/user/:userId`} component={UserProfile} />
-                  <Route path={`/error`} component={Notfound404} />
-                  <Route path={`/rtl`} component={RTLLayout} />
-                  <Redirect from={`/`} to="/admin/dashboard" />
-                </Switch>
-              </HashRouter>
-            </DisposalProvider>
-          </SqlProvider>
+          <DataBaseProvider>
+            <SqlProvider>
+              <DisposalProvider> 
+                <HashRouter>
+                  <Switch>
+                    <Route path={`/auth`} component={AuthLayout} />
+                    <Route path={`/admin`} component={AdminLayout} />
+                    <Route path={`/user/:userId`} component={UserProfile} />
+                    <Route path={`/error`} component={Notfound404} />
+                    <Route path={`/rtl`} component={RTLLayout} />
+                    <Redirect from={`/`} to="/admin/dashboard" />
+                  </Switch>
+                </HashRouter>
+              </DisposalProvider>
+            </SqlProvider>
+          </DataBaseProvider>
         </AppProvider>
       </ChakraProvider>
     </PersistGate>

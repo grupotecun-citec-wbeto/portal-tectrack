@@ -16,6 +16,9 @@ module.exports = function override(config, env) {
       ...config.resolve.alias,
       "@components": pathBrowserify.resolve(__dirname, "src/components"),
       "@utils": pathBrowserify.resolve(__dirname, "src/utils"),
+      "@db": pathBrowserify.resolve(__dirname, "src/db"),
+      "@repositories": pathBrowserify.resolve(__dirname, "src/repositories"),
+      "@hooks": pathBrowserify.resolve(__dirname, "src/hooks"),
     };
   
 

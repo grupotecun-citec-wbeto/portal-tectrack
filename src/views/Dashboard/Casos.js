@@ -25,7 +25,7 @@ import { FaUserAlt,FaCheckCircle, FaTasks } from "react-icons/fa";
 
 import CasoSummary from "components/Casos/CasoSummary";
 
-//import CasoDetail from "components/Casos/CasoDetail";
+import CasoDetail from "components/Casos/CasoDetail";
 
 import SqlContext from "sqlContext";
 
@@ -34,9 +34,7 @@ import FilterCase from 'components/Casos/FilterCase';
 
 import useTransladoDb from "hookDB/transladoDB";
 
-
-// components
-import CaseGrid from 'components/Casos/CaseGrid';
+import useCargarCaso from 'hookDB/cargarCaso';
 
 function Casos() {
  
@@ -265,7 +263,29 @@ function Casos() {
         segmentoSelected={segmentoSelected}
         setSegmentoSelected={setSegmentoSelected}
       />
-      <CaseGrid items={data} />
+      <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
+      {data?.map((row, index, arr) => {
+        const casoData = {
+          id: row.ID,
+          status_ID: row.caso_estado_ID,
+          createdAt: row.start,
+          closedAt: row.date_end,
+          assignedTechnician: 'Juan Pérez',
+          description: row.descripcion,
+          prioridad: row.prioridad,
+          segmento_ID: row.segmento_ID,
+          fecha:row.fecha,
+          usuario_ID: row.usuario_ID,
+          caso_uuid: row.uuid,
+          syncStatus: row.syncStatus
+        }
+        return(
+          <CasoDetail caseData={casoData} />
+        )
+
+      })}
+        
+      </SimpleGrid>
     </Flex>
 
     

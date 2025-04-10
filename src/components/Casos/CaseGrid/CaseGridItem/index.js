@@ -56,7 +56,7 @@ import { NavLink } from 'react-router-dom';
  DESCRIPTION: 
 =========================================================*/
 //import AppContext from "appContext";
-import SqlContext from "sqlContext";
+//import SqlContext from "sqlContext";
 
 import { format } from "date-fns";
 //import { es } from 'date-fns/locale';
@@ -68,6 +68,7 @@ import useCargarCaso from 'hookDB/cargarCaso';
 
 // componentes
 import Head from './Head';
+import Body from './Body';
 
 
 /**
@@ -89,16 +90,16 @@ import Head from './Head';
  * @param {CaseData} props.caseData - Objeto que contiene la información del caso.
  * @returns {JSX.Element} - El componente renderizado.
  */
-const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions }) => {
+const CaseGridItem = ({ caseData, dataSets,vehiculosOptions,usuariosOptions,sqlContextProps }) => {
 
-  /*const prevVehiculosOptionsRef = useRef(statusData);
+  /*const prevVehiculosOptionsRef = useRef(dataSets);
 
   useEffect(() => {
-    if (prevVehiculosOptionsRef.current !== statusData) {
-      console.warn("statusData has changed its reference.", caseData.id);
-      prevVehiculosOptionsRef.current = statusData;
+    if (prevVehiculosOptionsRef.current !== dataSets) {
+      console.warn("dataSets has changed its reference.", caseData.id);
+      prevVehiculosOptionsRef.current = dataSets;
     }
-  }, [statusData]);*/
+  }, [dataSets]);*/
   
   const {
     id,
@@ -150,13 +151,11 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
     
-  // ==========================================================
-  // SECTION: Estados (useState)
-  // ==========================================================
+  // --------------------------------------------------- USE STATE -------------------------------------------------------------------
   
     
     const [status,setStatus] = useState({
-      ...statusData,
+      ...dataSets,
       prediagnostico:[],
       slcUsuario:null,
       cantEquipos:0
@@ -179,14 +178,21 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
 
 
     /**
-     * Indica si el modo de edición para el técnico asignado está activo.
-     * Cambia entre modo de visualización y edición.
-     * @type {boolean}
+     * State to manage the active status of the technician edit section.
+     * 
+     * @type {boolean|null} - Indicates whether the technician edit section is active.
+     *                        `true` if active, `false` if inactive, and `null` if not set.
      */
-    const [isEditTecnico, setIsEditTecnico] = useState(false);
+    const [isActiveTechicianEditSection, setIsActiveTechicianEditSection] = useState(null);
 
 
-    const [isEmpezado,setIsEmpezado] = useState(false)
+    /**
+     * State to manage whether the case has been started.
+     *
+     * @type {boolean} - Indicates if the case has been started.
+     *                   `true` if the case has started, `false` inactive, and `null` if not set.
+     */    
+    const [isStartCase,setIsStartCase] = useState(null)
 
 
     const [isVehiculoSelected,setIsVehiculoSelected] = useState('')
@@ -203,29 +209,28 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
      * @property {Objeto} - Contiene las funciones para ejecutar sqlite
      * @property {saveToIndexedDB} - Salvar el objeto db dentro de indexdb para persistir la data
      */
-    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
+    const { db,rehidratarDb, saveToIndexedDB } = sqlContextProps
 
   
+  //-------------------------------- USE MEMO --------------------------------------------------------
 
-
-  //=======================================================
-  // SECTION: useMemo
-  //=======================================================
-
+  
   /**
-   * Nombre a deaplegar el usuario
-   * @type {string}
+   * Memoized value to determine the name of the assigned technician.
+   * It iterates through the list of users (`status.usuarios`) and checks if the selected user ID (`status.slcUsuario`)
+   * matches the current user's ID (`status.usuario?.ID`). If a match is found, it returns the display name of the user.
+   * 
+   * @returns {string|null} - The display name of the assigned technician, or `null` if no match is found.
    */
   const assignedTechnician = useMemo(() => {
-    return status.usuarios.reduce( (acc,usuario) => {
-      if(acc) return acc
-    
-      if(status.usuario?.ID == status.slcUsuario){
-        return status.usuario?.display_name
+    return status.usuarios.reduce((acc, usuario) => {
+      if (acc) return acc;
+
+      if (status.usuario?.ID == status.slcUsuario) {
+        return status.usuario?.display_name;
       }
-      return acc
-      
-    },null)
+      return acc;
+    }, null);
   }, [status.slcUsuario]);
 
   
@@ -248,9 +253,7 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
   },[db])*/
 
 
-  /**
-   * CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
-   */
+  
   useEffect( () =>{
     const consultarCasoEstado = async() =>{
       //loadCaso()
@@ -297,121 +300,29 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
       consultarCasoEstado()
   },[db])
 
-  // LISTA DE USUARIOS - obtener la lista de usuarios
-  /*useEffect(() =>{
-    const getUsuario = async() =>{
-      const usuarios = db.exec(`SELECT * FROM usuario WHERE perfil_ID = 1 OR perfil_ID = 2`).toArray()
-    if(usuarios.length != 0)
-      setUsuarios(usuarios)
-    }
-
-    getUsuario()
-  },[])*/
-
-  // LISTA DE VEHICULOS
-  /*useEffect(() =>{
-    const run = async() =>{
-      const vehiculos = db.exec(`SELECT * FROM vehiculo`).toArray()
-      
-      if(vehiculos.length != 0)
-        setVehiculos(vehiculos)
-    }
-
-    run()
-  },[])*/
-
-  
-  /**
-   * CONSULTAR ASIGNACION
-   */
-  /*useEffect( () =>{
-    const consultarAsigancion = async() =>{
-      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso_v2 WHERE ID = '${id}'`).toObject()
-      if(Object.keys(caso || {}).length != 0){
-        setSlcUsuario(caso.usuario_ID_assigned)
-      }
-      
-      
-    }
-
-    consultarAsigancion()
-  },[])*/
-
-  // CONSULTAR DIAGANOSTICO
-  /*useEffect( () =>{
-    const consultarDiagnostico = async() =>{
-      try{
-        const sql = `
-          SELECT
-            AT.name as asistencia_tipo, 
-            E.codigo_finca,
-            D.equipo_ID,
-            D.caso_ID,
-            D.diagnostico_tipo_ID,
-            D.description
-          FROM  
-            diagnostico_v2 D
-            INNER JOIN Equipo E ON D.equipo_ID = E.ID
-            INNER JOIN asistencia_tipo AT ON D.asistencia_tipo_ID = AT.ID
-          WHERE caso_ID = '${id}'`
-          
-        const diagnosticos = db.exec(sql).toArray()
-          if(diagnosticos.length != 0){
-            setPrediagnostico(diagnosticos)        
-          }
-      }catch(err){
-        console.error('c5a8827b-7fa0-4572-88db-e52326aed799',err)
-      }
-      
-    }
-
-    consultarDiagnostico()
-  },[])*/
-
-  /*useEffect( () =>{
-    if(typeof id !== 'undefined'){
-      
-
-
-      const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
-            
-      const equipos = JSON.parse(caso.equipos)
-
-      const areKeysNumbers = Object.keys(equipos || {}).every(key => !isNaN(Number(key)));
-      
-      if(areKeysNumbers){
-        const cantKeys = Object.keys(equipos).length
-        setstatus.CantEquipos(cantKeys)
-      }else{
-        setstatus.CantEquipos(0)
-      }
-    }
-    
-    
-  },[id])*/
-
-  
-
-  
-
-  
 
   //=======================================================
   // SECTION: FUNCIONES
   //=======================================================
 
+  
   /**
-   * Obtener el dateTime formato ISO 8601
-   * @returns {string} - formato de fecha en standar ISO 8601
+   * Returns the current date and time in UTC format as a string.
+   * The format of the returned string is 'yyyy-MM-dd HH:mm:ss'.
+   *
+   * @returns {string} The formatted current UTC date and time.
    */
   const getCurrentDateTime = useCallback(() => {
     const now = new Date();
     return format(now.toUTCString(), 'yyyy-MM-dd HH:mm:ss');
   }, []);
 
+  
   /**
-   * Obtener el date formato ISO 8601
-   * @returns {string} - formato de fecha en standar ISO 8601
+   * Returns the current date in UTC format as a string.
+   * The format of the returned string is 'yyyy-MM-dd'.
+   *
+   * @returns {string} The formatted current UTC date.
    */
   const getCurrentDate = useCallback(() => {
     const now = new Date();
@@ -419,10 +330,15 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
   }, []);
 
   /**
-   * Asingar un usuario(técnico) al caso
-   * @property {number} slcUsuario identificador unico de usuario como estado
+   * Handles the assignment of a technician to the case.
+   * Updates the case status to "Assigned" and assigns the selected technician.
+   * Persists the changes to the database and triggers synchronization.
+   *
+   * @async
+   * @function handleAssignTechnician
+   * @returns {void}
    */
-  const asignar = useCallback(async () => {
+  const handleAssignTechnician = useCallback(async () => {
     try {
       if (status.slcUsuario != null && status.slcUsuario != "") {
         /**
@@ -435,7 +351,7 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
         saveToIndexedDB(db);
         // Establecer el usuario que va resolver el caso
         setEstado(estado_a_asignar);
-        setIsEditTecnico(!isEditTecnico);
+        setIsActiveTechicianEditSection(!isActiveTechicianEditSection);
 
         // Rehidratar db
         rehidratarDb();
@@ -445,8 +361,13 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
     } catch (err) {
       console.error('6ac889ae-bcee-41a8-a848-dfd7ac3c0f47', err);
     }
-  }, [status.slcUsuario, db, id, rehidratarDb, saveToIndexedDB, isEditTecnico]);
+  }, [status.slcUsuario, db, id, rehidratarDb, saveToIndexedDB, isActiveTechicianEditSection]);
 
+  
+  /**
+   * @deprecated This function is deprecated and may be removed in future versions.
+   * Please use an updated method for unassigning technicians from cases.
+   */
   const desasignar = useCallback(async () => {
     const estado_a_establecer = 1;
     // actualizar el estado en el caso
@@ -482,7 +403,7 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
     if(message == ''){
       try{
         await db.exec('BEGIN TRANSACTION');
-          setIsEmpezado(true)
+          setIsStartCase(true)
           const estado_a_establecer = 3
           db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer},syncStatus=1 where ID = '${id}'`)
           
@@ -598,6 +519,14 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
    
   }
 
+  /**
+   * Activate o innactivate useState section edit techician
+   * @return {void}
+   */
+  const handleActiveTechicianEditSection = () => {
+    setIsActiveTechicianEditSection((prevState) => !prevState)
+  }
+
   return (
     <Box
       maxW="lg"
@@ -609,6 +538,16 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
       overflow="hidden"
       key={caseData.id} // Use a unique identifier from caseData, such as id
     >
+      
+      <Body 
+        id={id} 
+        status_ID={status_ID} 
+        status={status} 
+        estado={estado} 
+        isActiveTechicianEditSection={isActiveTechicianEditSection}
+        handleEditTecnico={handleEditTecnico}
+      />
+      
       <Head 
         status_ID={status_ID} 
         estados={status.estados} 
@@ -619,6 +558,7 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
         createdAt={createdAt}
         closedAt={closedAt}
         cantEquipos={status.cantEquipos}
+        sqlContextProps={sqlContextProps}
         
       />  
 
@@ -627,13 +567,21 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
           Caso #: {usuario_ID}-{id?.split('-')[0]}
         </Text>
 
-        <Grid templateColumns={{ sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
+        <Body 
+          id={id} 
+          status_ID={status_ID} 
+          status={status} 
+          estado={estado} 
+          isActiveTechicianEditSection={isActiveTechicianEditSection}
+          setIsActiveTechicianEditSection={setIsActiveTechicianEditSection}
+        />
+        {/*<Grid templateColumns={{ sm: "repeat(3, 1fr)", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
           <Flex align="center" direction={{ sm: "row", lg: "row" }} mb={2}>
             {estado != 5 ? (
               <>
-                {!isEmpezado && estado != 3 ? (
+                {!isStartCase && estado != 3 ? (
                   <>
-                    {isEditTecnico ? (
+                    {isActiveTechicianEditSection ? (
                       <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
                         <Button ms={{ lg: "10px" }} onClick={() => asignar()}>
                           <Icon as={FaRegSave} color="gray.500" boxSize={{ sm: "24px", lg: "24px" }} />
@@ -642,7 +590,7 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
                     ) : (
                       <>
                         <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
-                          <Button ms={{ lg: "10px" }} my={{ sm: "5px" }} onClick={() => setIsEditTecnico(!isEditTecnico)}>
+                          <Button ms={{ lg: "10px" }} my={{ sm: "5px" }} onClick={() => setIsActiveTechicianEditSection(!isActiveTechicianEditSection)}>
                             <Icon as={FaUserPen} color="gray.500" boxSize={{ sm: "24px", lg: "24px" }} />
                           </Button>
                         </Tooltip>
@@ -700,9 +648,9 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
               </>
             )}
           </Flex>
-        </Grid>
+        </Grid>*/}
 
-        {!isEmpezado && estado != 3 && estado != 5 && !isEditTecnico ? (
+        {!isStartCase && estado != 3 && estado != 5 && !isActiveTechicianEditSection ? (
           <>
             <Flex direction={'columns'}>
               <FormControl maxW={{ xl: '250px' }} key={id}>
@@ -723,7 +671,7 @@ const CaseGridItem = ({ caseData, statusData,vehiculosOptions,usuariosOptions })
           </>
         )}
 
-        {isEditTecnico ? (
+        {isActiveTechicianEditSection ? (
           <Select
             id="options"
             placeholder="Selecciona un usuario"

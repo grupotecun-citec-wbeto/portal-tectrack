@@ -17,18 +17,18 @@ const CaseGrid = (props) => {
     
     
     // USE STATE
-    const [status,setStatus] = useState({
+    
+    const [dataSets,setDataSets] = useState({
           estados:[],
           usuarios:[],
           vehiculos:[]
     })
 
-    
-
+    //--------------------------------------------- USE EFFECT ----------------------------------------------    
     
     useEffect( () =>{
         const consultarCasoEstado = async() =>{
-          const data = {...status}
+          const data = {...dataSets}
           const casoEstados = db.exec(`SELECT * FROM  caso_estado`).toArray()
           const usuarios = db.exec(`SELECT * FROM usuario WHERE perfil_ID = 1 OR perfil_ID = 2`).toArray()
           const vehiculos = db.exec(`SELECT * FROM vehiculo`).toArray()
@@ -41,8 +41,8 @@ const CaseGrid = (props) => {
           if(vehiculos.length != 0)
               data.vehiculos = [...vehiculos]
           
-          if(JSON.stringify(status) !== JSON.stringify(data))
-            setStatus(data)
+          if(JSON.stringify(dataSets) !== JSON.stringify(data))
+            setDataSets(data)
           
         }
     
@@ -50,19 +50,21 @@ const CaseGrid = (props) => {
             consultarCasoEstado()
     },[db])
 
+    //------------ FUNCTIONS --------------------------------- FUNCTIONS -------------------------- FUNCTIONS ---------    
+
     // Lista de opciones de vehiculos
     const vehiculosOptions = useMemo(() => { 
-        return status.vehiculos.map( (vehiculo) => (
+        return dataSets.vehiculos.map( (vehiculo) => (
             <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
           ))
-    }, [status.vehiculos]);
+    }, [dataSets.vehiculos]);
     
     // Lista de opciones de usuarios
     const usuariosOptions = useMemo(() => { 
-        return status.usuarios.map( (usuario) =>(
+        return dataSets.usuarios.map( (usuario) =>(
             <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
         ))
-    }, [status.vehiculos]);
+    }, [dataSets.vehiculos]);
 
     // Set a timer to periodically check for updates
     
@@ -89,17 +91,15 @@ const CaseGrid = (props) => {
                     caso_uuid: row.uuid,
                     syncStatus: row.syncStatus
                     }}
-                    statusData={status}
+                    dataSets={dataSets}
                     vehiculosOptions={vehiculosOptions}
                     usuariosOptions={usuariosOptions}
+                    sqlContextProps={{db,rehidratarDb, saveToIndexedDB}} // Renamed to sqlContextProps for clarity
                     key={row.ID}
                 />
             </React.Suspense>
         ))}
         </SimpleGrid>
-    
-        
-        
     );
 };
 
