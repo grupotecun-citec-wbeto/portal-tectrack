@@ -1,20 +1,20 @@
 /**
- * @package hooks/caso
- * @description Hook para manejar la sincronización de caso
+ * @package hooks/caso_estado
+ * @description Hook para manejar la sincronización de caso_estado
  * @author CITEC
  */
 
-const PACKAGE = 'hooks/caso';
+const PACKAGE = 'hooks/caso_estado';
 
 
 import { useEffect, useState } from 'react';
-import repository from '../../repositories/local/caso/repository';
+import repository from '../../repositories/local/caso_estado/repository';
 
 // servicios
-import syncService from '../../services/caso/syncService';
+import syncService from '../../services/caso_estado/syncService';
 
 
-function useCaso(dbReady = false,syncActive = true) {
+function useCasoEstado(dbReady = false,syncActive = true) {
   
     // code de la tabla in mysql
     const codigo = 7, tabla = 'categoria'
@@ -23,8 +23,8 @@ function useCaso(dbReady = false,syncActive = true) {
     const [time, setTime] = useState(300000);
 
     const loadItems = () => {
-        const allCategorias = repository.findAll();
-        setItems(allCategorias);
+        const all = repository.findAll();
+        setItems(all);
     };
 
     const createItem = (name, email) => {
@@ -36,17 +36,6 @@ function useCaso(dbReady = false,syncActive = true) {
         repository.deleteById(id);
         loadItems();
     };
-
-    const findById = async (id) => {  
-        const item = await repository.findById(id);
-        setItems(item);
-    }
-
-    const findCasesByFilters = async (userDataLogin,filters,estado = {operador:"<>", value:"6"},config = {countOnly:false}) => {
-        
-        const allCases = await repository.findAllByFilters(userDataLogin,filters,estado,config);
-        return allCases;
-    }
 
     useEffect(() => {
         if(!syncActive) return; // Evitar sincronización si syncActive es false
@@ -68,10 +57,8 @@ function useCaso(dbReady = false,syncActive = true) {
         loadItems,
         createItem,
         deleteItem,
-        findCasesByFilters,
-        findById
     };
 }
 
-export default useCaso;
+export default useCasoEstado;
 

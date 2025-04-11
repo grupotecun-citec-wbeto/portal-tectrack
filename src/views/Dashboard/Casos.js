@@ -27,7 +27,8 @@ import CasoSummary from "components/Casos/CasoSummary";
 
 import CasoDetail from "components/Casos/CasoDetail";
 
-import SqlContext from "sqlContext";
+import { useDataBaseContext } from 'dataBaseContext';
+import useCaso from 'hooks/caso/useCaso';
 
 import FilterCase from 'components/Casos/FilterCase';
 
@@ -73,7 +74,9 @@ function Casos() {
   const [segmentoSelected,setSegmentoSelected] = useState('')
   
 
-  const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
+  const {dbReady} = useDataBaseContext()
+
+  const {findCasesByFilters } = useCaso(dbReady,false); // Hook para manejar la sincronización de casos
 
   const caseData = {
     id: 12345,
@@ -83,121 +86,103 @@ function Casos() {
     description: 'El dispositivo presenta fallas intermitentes de conexión.',
   };
 
-  // Rehidratar la base de datos db una sola vez
+  
   useEffect( () =>{
-    rehidratarDb()
-  },[])
-
-
-  useEffect( () =>{
-    if(db != null){
-      let query = ``
-      //filtros
-      const query_user = (usuarioSelected != '') ? ` AND usuario_ID = ${usuarioSelected} ` : ''
-      const query_prioridad = (prioridadSelected != '') ? ` AND prioridad = ${prioridadSelected} ` : ''
-      const query_segmento = (segmentoSelected != '') ? ` AND segmento_ID = ${segmentoSelected} ` : ''
-      
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 ${query_user} ${query_prioridad} ${query_segmento} ORDER BY start DESC`
-          break;
-        default:
-          query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento} ORDER BY start DESC`
-          break;
+    if(!dbReady) return // Esperar a que la base de datos esté lista
+   
+      const filters = {
+        usuarioSelected: usuarioSelected,
+        prioridadSelected: prioridadSelected,
+        segmentoSelected: segmentoSelected
       }
-      const casosData = db.exec(query).toArray();
-      
-      setData(casosData)
-    }
-  },[db,usuarioSelected,prioridadSelected,segmentoSelected])
+
+      const fetchData = async () => {
+        const casosData = await findCasesByFilters(userData.login,filters,{operador:"<>", value:"6"},{countOnly:false})
+        setData(casosData)
+      }
+      fetchData()
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
 
 
   useEffect( () =>{
-    if(db != null){
-      
-      let query = ``
-      //filtros
-      const query_user = (usuarioSelected != '') ? ` AND usuario_ID = ${usuarioSelected} ` : ''
-      const query_prioridad = (prioridadSelected != '') ? ` AND prioridad = ${prioridadSelected} ` : ''
-      const query_segmento = (segmentoSelected != '') ? ` AND segmento_ID = ${segmentoSelected} ` : ''
-      
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE 1=1 AND caso_estado_ID <> 6 ${query_user} ${query_prioridad} ${query_segmento}`
-          break;
-        default:
-          query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
-          break;
+    if(!dbReady) return; // Esperar a que la base de datos esté lista
+    const filters = {
+        usuarioSelected: usuarioSelected,
+        prioridadSelected: prioridadSelected,
+        segmentoSelected: segmentoSelected
       }
-      const casos = db.exec(query).toObject();
+
+    const fetchData = async () => {
+      const casos = await findCasesByFilters(userData.login,filters,{operador:"<>", value:"6"},{countOnly:true})
+      console.log('f8f060cb-cd6e-48cd-ba14-c10c318fec2c setCasosCant',casos)
       setCasosCant(casos.cantidad)
     }
-  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso,usuarioSelected,prioridadSelected,segmentoSelected])
+
+    fetchData()
+
+   
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
   
   
   useEffect( () =>{
-    if(db != null){
-      let query = ``
-      
-      //filtros
-      const query_user = (usuarioSelected != '') ? ` AND usuario_ID = ${usuarioSelected} ` : ''
-      const query_prioridad = (prioridadSelected != '') ? ` AND prioridad = ${prioridadSelected} ` : ''
-      const query_segmento = (segmentoSelected != '') ? ` AND segmento_ID = ${segmentoSelected} ` : ''
-
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT count(*) AS completados FROM caso_v2 where caso_estado_ID = 5 ${query_user} ${query_prioridad} ${query_segmento}`
-          break;
-        default:
-          query = `SELECT count(*) AS completados FROM caso_v2 WHERE caso_estado_ID = 5 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
-          break;
+    if(!dbReady) return; // Esperar a que la base de datos esté lista
+    const filters = {
+        usuarioSelected: usuarioSelected,
+        prioridadSelected: prioridadSelected,
+        segmentoSelected: segmentoSelected
       }
-
-
-      const casos = db.exec(query).toObject();
-      setCasosCompletados(casos.completados)
+    const fetchData = async () => {
+      const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"5"},{countOnly:true})
+      console.log('308cef0d-68ad-44c3-978f-52c2e8359de7 setCasosCompletados',casos)
+      // completados
+      setCasosCompletados(casos.cantidad)
     }
-  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso,usuarioSelected,prioridadSelected,segmentoSelected])
+    fetchData()
+    
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
  
   useEffect( () =>{
-    if(db != null){
-
-      const query_user = (usuarioSelected != '') ? ` AND usuario_ID = ${usuarioSelected} ` : ''
-      const query_prioridad = (prioridadSelected != '') ? ` AND prioridad = ${prioridadSelected} ` : ''
-      const query_segmento = (segmentoSelected != '') ? ` AND segmento_ID = ${segmentoSelected} ` : ''
-
-      let query = ``
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1 ${query_user} ${query_prioridad} ${query_segmento}`
-          break;
-        default:
-          query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
-          break;
+    if(!dbReady) return; // Esperar a que la base de datos esté lista
+    
+    const filters = {
+        usuarioSelected: usuarioSelected,
+        prioridadSelected: prioridadSelected,
+        segmentoSelected: segmentoSelected
       }
 
-      const casos = db.exec(query).toObject();
-      setCasosPendientes(casos.pendientes)
-    }
-  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso,usuarioSelected,prioridadSelected,segmentoSelected])
+      const fetchData = async () => {
+        const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"1"},{countOnly:true})
+        console.log('a5ed80ea-93ee-4ee0-b4c1-d39ec9b60539 setCasosPendientes',casos)
+        // pendientes
+        setCasosPendientes(casos.cantidad)
+      }
+      fetchData()
+   
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
   
   
   useEffect( () =>{
-    if(db != null){
+    if(!dbReady) return; // Esperar a que la base de datos esté lista
 
-      let query = ``
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3`
-          break;
-        default:
-          query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} )`
-          break;
-      }
-      const casos = db.exec(query).toObject();
-      setCasosEnProceso(casos.enproceso)
+    const filters = {
+      usuarioSelected:'',
+      prioridadSelected:'',
+      segmentoSelected:''
     }
-  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
+
+    const fetchData = async () => {
+      const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"3"},{countOnly:true})
+      console.log('78be8859-4a1d-4ad9-b19c-6884633e64b0 setCasosEnProceso',casos)
+      // enproceso
+      setCasosEnProceso(casos.cantidad)
+    }
+    fetchData()
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
 
   
 

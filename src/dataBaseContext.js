@@ -28,6 +28,8 @@ import useCasoVisita from 'hooks/caso_visita/useCasoVisita';
 import useHerramienta from 'hooks/herramienta/useHerramienta';
 import useVehiculo from 'hooks/vehiculo/useVehiculo';
 import useUsuario from 'hooks/usuario/useUsuario';
+import useCasoEstado from 'hooks/caso_estado/useCasoEstado';
+import useSegmento from 'hooks/segmento/useSegmento';
 
 
 
@@ -68,6 +70,8 @@ export const DataBaseProvider = ({ children }) => {
     const { } = useHerramienta(dbReady); // Hook para manejar la sincronización de herramientas
     const { } = useVehiculo(dbReady); // Hook para manejar la sincronización de vehículos
     const { } = useUsuario(dbReady); // Hook para manejar la sincronización de usuarios
+    const { } = useCasoEstado(dbReady); // Hook para manejar la sincronización de casos de estado
+    const { } = useSegmento(dbReady); // Hook para manejar la sincronización de segmentos
     
 
     const updateData = (newData) => {
@@ -89,3 +93,4 @@ export const DataBaseProvider = ({ children }) => {
 export const useDataBaseContext = () => {
     return useContext(DataBaseContext);
 };
+

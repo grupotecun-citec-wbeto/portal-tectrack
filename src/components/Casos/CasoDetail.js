@@ -55,7 +55,17 @@ import { NavLink } from 'react-router-dom';
  DESCRIPTION: 
 =========================================================*/
 import AppContext from "appContext";
-import SqlContext from "sqlContext";
+
+
+// BASE DE DATOS
+import { useDataBaseContext } from 'dataBaseContext';
+import { useCasoContext } from 'casoContext';
+import  {useUsuarioContext}  from 'usuarioContext';
+import useVehiculo from 'hooks/vehiculo/useVehiculo';
+import useCaso from 'hooks/caso/useCaso';
+import useDiagnostico from 'hooks/diagnostico/useDiagnostico';
+
+
 
 import { format } from "date-fns";
 import { es } from 'date-fns/locale';
@@ -64,6 +74,8 @@ import Timer from './Timer';
 import { useHistory } from 'react-router-dom';
 
 import useCargarCaso from 'hookDB/cargarCaso';
+
+
 
 
 /**
@@ -100,6 +112,16 @@ const CasoDetail = ({ caseData }) => {
     caso_uuid,
     syncStatus
   } = caseData;
+
+
+   // change database
+   const {dbReady} = useDataBaseContext()
+   const {estados,segmentos} = useCasoContext()
+   const {usuarios,vehiculos} = useUsuarioContext();
+   
+   const {items: caso,findById: getCasoById} = useCaso(dbReady,false)
+   const {items: prediagnostico,findByCasoId: getDiagnosticoByCasoId} = useDiagnostico(dbReady,false)
+
 
   // MODAL
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -155,13 +177,13 @@ const CasoDetail = ({ caseData }) => {
     /**
      * 
      */
-    const [estados,setEstados] = useState([])
+    //const [estados,setEstados] = useState([])
 
     /**
      * Lista de usuarios obtenida desde la base de datos.
      * @type {Array<Object>}
      */
-    const [usuarios, setUsuarios] = useState([]);
+    //const [usuarios, setUsuarios] = useState([]);
 
     /**
      * Usuario seleccionado en el caso actual.
@@ -177,11 +199,11 @@ const CasoDetail = ({ caseData }) => {
      */
     const [isEditTecnico, setIsEditTecnico] = useState(false);
 
-    const [prediagnostico,setPrediagnostico] = useState([])
+    //const [prediagnostico,setPrediagnostico] = useState([])
 
     const [isEmpezado,setIsEmpezado] = useState(false)
 
-    const [vehiculos,setVehiculos] = useState([])
+    //const [vehiculos,setVehiculos] = useState([])
 
     const [isVehiculoSelected,setIsVehiculoSelected] = useState('')
 
@@ -193,13 +215,13 @@ const CasoDetail = ({ caseData }) => {
 
     //const [startLoad,loadCaso] = useState(false) // Inicio de carga de información
 
-    /**
-     * Desestructurar objeto del contexto sqlContext
-     * @property {Objeto} - Contiene las funciones para ejecutar sqlite
-     * @property {saveToIndexedDB} - Salvar el objeto db dentro de indexdb para persistir la data
-     */
-    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
 
+    /**
+     * Change database
+     */
+
+   
+    
   
 
 
@@ -227,14 +249,11 @@ const CasoDetail = ({ caseData }) => {
    * nombre del estado activo
    */
   const estadoName  = useMemo ( () =>{
-     
+    if (!estado || !estados || estados.length === 0) return; // Verificar si el estado o la lista de estados están disponibles
     if(estados.length != 0){
       
       return estados.reduce((acc, obj) => {
-        // Si ya hemos encontrado el objeto, lo devolvemos (acc no es null)
-        if (acc) return acc;
-        // Si el objeto actual cumple la condición, lo devolvemos como acumulador
-        return obj.ID == estado ? obj.name : acc;
+        return estados.find(obj => obj.ID === estado)?.name || estados[0]?.name || '';
       }, null) || estados[0].name;
     }else{
       return '' 
@@ -270,12 +289,17 @@ const CasoDetail = ({ caseData }) => {
     }[prioridad] || bgStatus
   },[prioridad])
   
+  const segmentosMap = useMemo(() => {
+    if (!segmentos || segmentos.length === 0) return {}; // Verificar si la lista de segmentos está disponible
+    return segmentos.reduce((acc, segmento) => {
+      acc[segmento.ID] = segmento.name;
+      return acc;
+    }, {});
+  },[segmentos])
+
   const segmentoName = useMemo ( () =>{
-    return {
-      "1":"Soporte",
-      "2":"Proyectos",
-      "3":"Capacitación"
-    }[segmento_ID] || bgStatus
+    if (!segmento_ID || !segmentos || segmentos.length === 0) return; // Verificar si el estado o la lista de estados están disponible
+    return segmentosMap[segmento_ID] || 'Desconocido';
   },[segmento_ID])
 
   
@@ -288,51 +312,22 @@ const CasoDetail = ({ caseData }) => {
 
 
   
-  useEffect(() =>{
+  /*useEffect(() =>{
     const run = async() =>{
       loadCaso()
     }
 
     run()
     
-  },[db])
+  },[db])*/
 
 
   /**
    * CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
    */
   useEffect( () =>{
-    const consultarCasoEstado = async() =>{
-      const casoEstados = db.exec(`SELECT * FROM  caso_estado`).toArray()
-      if(casoEstados.length != 0){
-        setEstados(casoEstados)
-      }
-    }
-
-    consultarCasoEstado()
-  },[])
-
-  // LISTA DE USUARIOS - obtener la lista de usuarios
-  useEffect(() =>{
-    const getUsuario = async() =>{
-      const usuarios = db.exec(`SELECT * FROM usuario WHERE perfil_ID = 1 OR perfil_ID = 2`).toArray()
-    if(usuarios.length != 0)
-      setUsuarios(usuarios)
-    }
-
-    getUsuario()
-  },[])
-
-  // LISTA DE VEHICULOS
-  useEffect(() =>{
-    const run = async() =>{
-      const vehiculos = db.exec(`SELECT * FROM vehiculo`).toArray()
-      
-      if(vehiculos.length != 0)
-        setVehiculos(vehiculos)
-    }
-
-    run()
+    //CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
+    getCasoById(id)
   },[])
 
   
@@ -340,63 +335,30 @@ const CasoDetail = ({ caseData }) => {
    * CONSULTAR ASIGNACION
    */
   useEffect( () =>{
+    if (!caso || (Array.isArray(caso) && caso.length === 0)) return
     const consultarAsigancion = async() =>{
-      
-      /*const result = db.toObject(db.exec(`SELECT * FROM  asignacion WHERE caso_ID = '${id}' ORDER BY fecha DESC LIMIT 1;`) || {})
-      if(typeof result !== 'undefined'){
-        if(Object.keys(result).length != 0){
-          setSlcUsuario(result.usuario_ID)
-        }
-      }*/
-      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso_v2 WHERE ID = '${id}'`).toObject()
       if(Object.keys(caso || {}).length != 0){
         setSlcUsuario(caso.usuario_ID_assigned)
       }
-      
-      
     }
-
     consultarAsigancion()
-  },[])
+  },[caso])
 
   // CONSULTAR DIAGANOSTICO
   useEffect( () =>{
+    if(!id) return
     const consultarDiagnostico = async() =>{
-      try{
-        const sql = `
-          SELECT
-            AT.name as asistencia_tipo, 
-            E.codigo_finca,
-            D.equipo_ID,
-            D.caso_ID,
-            D.diagnostico_tipo_ID,
-            D.description
-          FROM  
-            diagnostico_v2 D
-            INNER JOIN Equipo E ON D.equipo_ID = E.ID
-            INNER JOIN asistencia_tipo AT ON D.asistencia_tipo_ID = AT.ID
-          WHERE caso_ID = '${id}'`
-          
-        const diagnosticos = db.exec(sql).toArray()
-          if(diagnosticos.length != 0){
-            setPrediagnostico(diagnosticos)        
-          }
-      }catch(err){
-        console.error('c5a8827b-7fa0-4572-88db-e52326aed799',err)
-      }
+      getDiagnosticoByCasoId(id)
       
     }
 
     consultarDiagnostico()
-  },[])
+  },[id])
 
   useEffect( () =>{
+    if (!caso || (Array.isArray(caso) && caso.length === 0)) return
     if(typeof id !== 'undefined'){
       
-
-
-      const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
-            
       const equipos = JSON.parse(caso.equipos)
 
       const areKeysNumbers = Object.keys(equipos || {}).every(key => !isNaN(Number(key)));
@@ -410,7 +372,7 @@ const CasoDetail = ({ caseData }) => {
     }
     
     
-  },[id])
+  },[id,caso])
 
   
 

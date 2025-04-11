@@ -1,6 +1,7 @@
 const DB_NAME = 'TECTRACK_DB';
 const DB_STORE_NAME = 'TECTRACK_STORE';
-const DB_KEY = '2c882398-914b-4c16-926f-24ec828ac1b3';
+//const DB_KEY = '2c882398-914b-4c16-926f-24ec828ac1b3';
+const DB_KEY = '0b28eecd-1287-4fe3-bc4a-6ff955973df2';
 const DB_VERSION = 1;
 
 function upgradeDatabase(db) {

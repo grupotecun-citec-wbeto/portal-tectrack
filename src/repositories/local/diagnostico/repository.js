@@ -7,6 +7,9 @@
 const PACKAGE = 'repositories/local/diagnostico';
 
 import { getDB, persistDatabase } from '../../../db/database';
+import repositoryEquipo from '../equipo/repository';
+import repositoryAsistenciaTipo from '../asistencia_tipo/repository';
+
 
 const repository = {
     tableCode:12,
@@ -54,6 +57,31 @@ const repository = {
         stmt.run([id]);
         stmt.free();
         await persistDatabase();
+    },
+
+    findByCasoId: (casoId) => {
+        const db = getDB();
+        const stmt = db.prepare(`
+            SELECT
+                AT.name as asistencia_tipo, 
+                E.codigo_finca,
+                D.equipo_ID,
+                D.caso_ID,
+                D.diagnostico_tipo_ID,
+                D.description
+            FROM  
+                ${repository.tableName} D
+                INNER JOIN ${repositoryEquipo.tableName} E ON D.equipo_ID = E.ID
+                INNER JOIN ${repositoryAsistenciaTipo.tableName} AT ON D.asistencia_tipo_ID = AT.ID
+            WHERE caso_ID = ?
+        `);
+        const results = [];
+        stmt.bind([casoId]);
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
     }
 
     

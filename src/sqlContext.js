@@ -942,7 +942,7 @@ export function SqlProvider({ children }) {
     let db;
     
     db = new SQL.Database(storedDb); // Cargar base de datos desde IndexedDB
-    extendFunctions(db)
+    //extendFunctions(db)
     setDb(db)
   }
 

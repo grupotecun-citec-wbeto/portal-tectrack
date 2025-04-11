@@ -1,20 +1,20 @@
 /**
- * @package hooks/caso
- * @description Hook para manejar la sincronización de caso
+ * @package hooks/segmento
+ * @description Hook para manejar la sincronización de segmento
  * @author CITEC
  */
 
-const PACKAGE = 'hooks/caso';
+const PACKAGE = 'hooks/segmento';
 
 
 import { useEffect, useState } from 'react';
-import repository from '../../repositories/local/caso/repository';
+import repository from '../../repositories/local/segmento/repository';
 
 // servicios
-import syncService from '../../services/caso/syncService';
+import syncService from '../../services/segmento/syncService';
 
 
-function useCaso(dbReady = false,syncActive = true) {
+function useSegmento(dbReady = false,syncActive = true) {
   
     // code de la tabla in mysql
     const codigo = 7, tabla = 'categoria'
@@ -37,17 +37,6 @@ function useCaso(dbReady = false,syncActive = true) {
         loadItems();
     };
 
-    const findById = async (id) => {  
-        const item = await repository.findById(id);
-        setItems(item);
-    }
-
-    const findCasesByFilters = async (userDataLogin,filters,estado = {operador:"<>", value:"6"},config = {countOnly:false}) => {
-        
-        const allCases = await repository.findAllByFilters(userDataLogin,filters,estado,config);
-        return allCases;
-    }
-
     useEffect(() => {
         if(!syncActive) return; // Evitar sincronización si syncActive es false
         if(!dbReady) return; // Esperar a que la base de datos esté lista
@@ -68,10 +57,8 @@ function useCaso(dbReady = false,syncActive = true) {
         loadItems,
         createItem,
         deleteItem,
-        findCasesByFilters,
-        findById
     };
 }
 
-export default useCaso;
+export default useSegmento;
 

@@ -54,6 +54,39 @@ const repository = {
         stmt.run([id]);
         stmt.free();
         await persistDatabase();
+    },
+
+    findByPerfilIds: (args = { perfilIds : [], config: { countOnly : false } }) => {
+        const db = getDB();
+        
+        const config = args.config
+        const perfilIds = args.perfilIds;
+
+        const select = config.countOnly ? ' COUNT(*) AS count ' : '*';
+
+        const placeholders = perfilIds.map(() => '?').join(', ');
+
+        const sql = `SELECT ${select} FROM ${repository.tableName} WHERE perfil_ID in ( ${placeholders} )`
+        console.log('4772052c-1fb6-4440-a76e-56438c0546b5',sql, perfilIds);
+        const stmt = db.prepare(sql);
+        const results = [];
+
+
+        stmt.bind(perfilIds);
+        if (perfilIds.length == 1) {
+            stmt.step()
+            const result = stmt.getAsObject();
+            return result;
+        }
+        if (config.countOnly) {
+            stmt.step()
+            return stmt.getAsObject();
+        }
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
     }
 
     

@@ -82,6 +82,14 @@ CREATE TABLE IF NOT EXISTS caso (
     FOREIGN KEY (usuario_ID) REFERENCES usuario(ID)
 );
 
+
+-- CREATE TABLE: segmento
+
+CREATE TABLE IF NOT EXISTS segmento (
+    ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT
+);
+
 -- CREATE TABLE: categoria
 
 CREATE TABLE IF NOT EXISTS categoria (

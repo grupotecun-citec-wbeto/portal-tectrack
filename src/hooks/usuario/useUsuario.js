@@ -23,8 +23,8 @@ function useUsuario(dbReady = false,syncActive = true) {
     const [time, setTime] = useState(300000);
 
     const loadItems = () => {
-        const allCategorias = repository.findAll();
-        setItems(allCategorias);
+        const all = repository.findAll();
+        setItems(all);
     };
 
     const createItem = (name, email) => {
@@ -36,6 +36,11 @@ function useUsuario(dbReady = false,syncActive = true) {
         repository.deleteById(id);
         loadItems();
     };
+
+    const findByPerfilIds = (args = { perfilIds : [], config: { countOnly : false } }) => {
+        const all = repository.findByPerfilIds(args);
+        setItems(all);
+    }
 
     useEffect(() => {
         if(!syncActive) return; // Evitar sincronización si syncActive es false
@@ -57,6 +62,8 @@ function useUsuario(dbReady = false,syncActive = true) {
         loadItems,
         createItem,
         deleteItem,
+        findByPerfilIds,
+        
     };
 }
 

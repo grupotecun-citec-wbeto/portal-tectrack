@@ -37,6 +37,11 @@ function useDiagnostico(dbReady = false,syncActive = true) {
         loadItems();
     };
 
+    const findByCasoId = ({ casoId = '', config= { countOnly : false } }) => {
+        const all = repository.findByCasoId(casoId, config);
+        setItems(all);
+    }
+
     useEffect(() => {
         if(!syncActive) return; // Evitar sincronización si syncActive es false
         if(!dbReady) return; // Esperar a que la base de datos esté lista
@@ -57,6 +62,7 @@ function useDiagnostico(dbReady = false,syncActive = true) {
         loadItems,
         createItem,
         deleteItem,
+        findByCasoId,
     };
 }
 
