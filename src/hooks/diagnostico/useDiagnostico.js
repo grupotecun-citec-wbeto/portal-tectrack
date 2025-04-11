@@ -37,8 +37,8 @@ function useDiagnostico(dbReady = false,syncActive = true) {
         loadItems();
     };
 
-    const findByCasoId = ({ casoId = '', config= { countOnly : false } }) => {
-        const all = repository.findByCasoId(casoId, config);
+    const findByCasoId = (args = { casoId :'', config: { countOnly : false } }) => {
+        const all = repository.findByCasoId(args);
         setItems(all);
     }
 

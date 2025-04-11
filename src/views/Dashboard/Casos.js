@@ -115,7 +115,6 @@ function Casos() {
 
     const fetchData = async () => {
       const casos = await findCasesByFilters(userData.login,filters,{operador:"<>", value:"6"},{countOnly:true})
-      console.log('f8f060cb-cd6e-48cd-ba14-c10c318fec2c setCasosCant',casos)
       setCasosCant(casos.cantidad)
     }
 
@@ -135,7 +134,6 @@ function Casos() {
       }
     const fetchData = async () => {
       const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"5"},{countOnly:true})
-      console.log('308cef0d-68ad-44c3-978f-52c2e8359de7 setCasosCompletados',casos)
       // completados
       setCasosCompletados(casos.cantidad)
     }
@@ -155,7 +153,6 @@ function Casos() {
 
       const fetchData = async () => {
         const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"1"},{countOnly:true})
-        console.log('a5ed80ea-93ee-4ee0-b4c1-d39ec9b60539 setCasosPendientes',casos)
         // pendientes
         setCasosPendientes(casos.cantidad)
       }
@@ -176,7 +173,6 @@ function Casos() {
 
     const fetchData = async () => {
       const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"3"},{countOnly:true})
-      console.log('78be8859-4a1d-4ad9-b19c-6884633e64b0 setCasosEnProceso',casos)
       // enproceso
       setCasosEnProceso(casos.cantidad)
     }

@@ -35,7 +35,9 @@ import {
 
 // ICONOS
 import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose   } from 'react-icons/fa';
-import { BiUserVoice } from "react-icons/bi";
+import { FaHeadset } from "react-icons/fa6";
+import { FaBookOpen } from "react-icons/fa";
+import { IoMdPerson } from "react-icons/io";
 import { FaUserPen,FaUserMinus,FaEye } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
@@ -348,7 +350,10 @@ const CasoDetail = ({ caseData }) => {
   useEffect( () =>{
     if(!id) return
     const consultarDiagnostico = async() =>{
-      getDiagnosticoByCasoId(id)
+      getDiagnosticoByCasoId({
+        casoId: id,
+        config: { countOnly: false }
+      })
       
     }
 
@@ -854,7 +859,22 @@ const CasoDetail = ({ caseData }) => {
                   <AccordionPanel pb={4}>
                     {prediagnostico.map( (diagnostico) => (
                       <Box key={diagnostico.ID} border="1px" borderColor={borderColor} p={3} rounded="md">
-                        <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
+                        <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='5px'>
+                          <Badge
+                            bg="yellow.400"
+                            color={"black"}
+                            fontSize="0.8em"
+                            p="3px 10px"
+                            borderRadius="8px"
+                          >
+                            
+                            <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                              <Icon as={FaBookOpen } color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                              {diagnostico.catalogo}     
+                              
+                            </Flex>
+                            
+                          </Badge>
                           <Badge
                             bg="yellow.400"
                             color={"black"}
@@ -877,8 +897,23 @@ const CasoDetail = ({ caseData }) => {
                             borderRadius="8px"
                           >
                             <Flex align="center" direction={{sm:"row",lg:"row"}}>
-                              <Icon as={BiUserVoice} color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                              <Icon as={FaHeadset} color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
                               {diagnostico.asistencia_tipo.replace(/Asistencia/g, '')}     
+                              
+                            </Flex>
+                            
+                          </Badge>
+                          <Badge
+                            bg="green.400"
+                            color={"black"}
+                            fontSize="0.8em"
+                            p="3px 10px"
+                            borderRadius="8px"
+                          >
+                            
+                            <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                              <Icon as={IoMdPerson} color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                              {diagnostico.cliente}     
                               
                             </Flex>
                             

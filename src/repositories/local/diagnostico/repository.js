@@ -9,6 +9,9 @@ const PACKAGE = 'repositories/local/diagnostico';
 import { getDB, persistDatabase } from '../../../db/database';
 import repositoryEquipo from '../equipo/repository';
 import repositoryAsistenciaTipo from '../asistencia_tipo/repository';
+import repositoryCliente from '../cliente/repository';
+import repositoryProyecto from '../proyecto/repository';
+import repositoryCatalogo from '../catalogo/repository';
 
 
 const repository = {
@@ -59,13 +62,18 @@ const repository = {
         await persistDatabase();
     },
 
-    findByCasoId: (casoId) => {
+    findByCasoId: (args) => {
+        const {casoId} = args;
         const db = getDB();
-        const stmt = db.prepare(`
+        const sql = `
             SELECT
                 AT.name as asistencia_tipo, 
                 E.codigo_finca,
                 D.equipo_ID,
+                (SELECT name FROM ${repositoryCliente.tableName} WHERE ID = E.cliente_ID) as cliente,
+                (SELECT name FROM ${repositoryAsistenciaTipo.tableName} WHERE ID = D.asistencia_tipo_ID) as asistencia_tipo,
+                (SELECT name FROM ${repositoryProyecto.tableName} WHERE ID = E.proyecto_ID) as proyecto,
+                (SELECT business_name FROM ${repositoryCatalogo.tableName} WHERE ID = E.catalogo_ID) as catalogo,
                 D.caso_ID,
                 D.diagnostico_tipo_ID,
                 D.description
@@ -74,7 +82,9 @@ const repository = {
                 INNER JOIN ${repositoryEquipo.tableName} E ON D.equipo_ID = E.ID
                 INNER JOIN ${repositoryAsistenciaTipo.tableName} AT ON D.asistencia_tipo_ID = AT.ID
             WHERE caso_ID = ?
-        `);
+        `
+        
+        const stmt = db.prepare(sql);
         const results = [];
         stmt.bind([casoId]);
         while (stmt.step()) {
