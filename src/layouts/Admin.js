@@ -56,7 +56,6 @@ export default function Dashboard(props) {
   const [fixed, setFixed] = useState(false);
   const { colorMode } = useColorMode();
 
-  const { dbReady } = useDataBaseContext();
 
   const location = useLocation()
 
@@ -202,7 +201,7 @@ export default function Dashboard(props) {
           base: "100%",
           xl: "calc(100% - 275px)",
         }}>
-        {dbReady ? <UserList /> : <p>Loading DB...</p>}
+        
         <Portal>
           <AdminNavbar
             onOpen={onOpen}

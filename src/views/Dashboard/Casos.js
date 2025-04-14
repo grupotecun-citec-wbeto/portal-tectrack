@@ -11,6 +11,7 @@ import {
   Tr,
   useColorModeValue
 } from "@chakra-ui/react";
+
 import { ChakraProvider, SimpleGrid, Container } from '@chakra-ui/react';
 // Custom components
 import Card from "components/Card/Card.js";
@@ -18,7 +19,7 @@ import CardBody from "components/Card/CardBody.js";
 import CardHeader from "components/Card/CardHeader.js";
 import TablesProjectRow from "components/Tables/TablesProjectRow";
 import CasosTableRow from "components/Casos/CasosTableRow";
-import React, { useEffect, useState, useContext} from "react";
+import React, { useEffect, useState, useMemo} from "react";
 import { tablesProjectData, tablesTableData } from "variables/general";
 
 import { FaUserAlt,FaCheckCircle, FaTasks } from "react-icons/fa";
@@ -182,6 +183,30 @@ function Casos() {
 
   
 
+  // Memorizar el mapeo de `data`
+  const memoizedCasoDetails = useMemo(() => {
+    return data.map((row, index) => {
+      const casoData = {
+        id: row.ID,
+        status_ID: row.caso_estado_ID,
+        createdAt: row.start,
+        closedAt: row.date_end,
+        assignedTechnician: "Juan Pérez",
+        usuario_ID_assigned: row.usuario_ID_assigned,
+        description: row.descripcion,
+        prioridad: row.prioridad,
+        segmento_ID: row.segmento_ID,
+        fecha: row.fecha,
+        usuario_ID: row.usuario_ID,
+        caso_uuid: row.uuid,
+        syncStatus: row.syncStatus,
+        equipos: row.equipos,
+
+      };
+      console.log('67c0ff94-05c2-405b-90be-6e090865393e')
+      return <CasoDetail key={index} caseData={casoData} />;
+    });
+  }, [data]); // Solo se recalcula cuando `data` cambia
   
   
   return (
@@ -245,27 +270,7 @@ function Casos() {
         setSegmentoSelected={setSegmentoSelected}
       />
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
-      {data?.map((row, index, arr) => {
-        const casoData = {
-          id: row.ID,
-          status_ID: row.caso_estado_ID,
-          createdAt: row.start,
-          closedAt: row.date_end,
-          assignedTechnician: 'Juan Pérez',
-          description: row.descripcion,
-          prioridad: row.prioridad,
-          segmento_ID: row.segmento_ID,
-          fecha:row.fecha,
-          usuario_ID: row.usuario_ID,
-          caso_uuid: row.uuid,
-          syncStatus: row.syncStatus
-        }
-        return(
-          <CasoDetail caseData={casoData} />
-        )
-
-      })}
-        
+        {memoizedCasoDetails}
       </SimpleGrid>
     </Flex>
 

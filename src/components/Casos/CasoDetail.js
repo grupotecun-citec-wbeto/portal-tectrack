@@ -18,6 +18,10 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 
+import { Skeleton, SkeletonCircle, SkeletonText } from '@chakra-ui/react'
+
+
+
 import {
   FormControl,
   FormLabel,
@@ -99,66 +103,60 @@ import useCargarCaso from 'hookDB/cargarCaso';
  * @param {CaseData} props.caseData - Objeto que contiene la información del caso.
  * @returns {JSX.Element} - El componente renderizado.
  */
-const CasoDetail = ({ caseData }) => {
+const CasoDetail = React.memo(({ caseData }) => {
 
   const {
     id,
     status_ID, // caso_estado_ID
     createdAt,
     closedAt,
-    description,
     prioridad,
     segmento_ID,
-    fecha,
     usuario_ID,
-    caso_uuid,
-    syncStatus
+    usuario_ID_assigned,
+    equipos,
   } = caseData;
 
 
-   // change database
-   const {dbReady} = useDataBaseContext()
-   const {estados,segmentos} = useCasoContext()
-   const {usuarios,vehiculos} = useUsuarioContext();
+  // CHANGE DATABASE
+  const {dbReady} = useDataBaseContext()
+  const {estados,segmentos} = useCasoContext()
+  const {usuarios,vehiculos} = useUsuarioContext();
    
-   const {items: caso,findById: getCasoById} = useCaso(dbReady,false)
-   const {items: prediagnostico,findByCasoId: getDiagnosticoByCasoId} = useDiagnostico(dbReady,false)
+  // HOOKS AND REPOSITORIES
+  //const {items: caso,findById: getCasoById} = useCaso(dbReady,false)
+  const {items: prediagnostico,findByCasoId: getDiagnosticoByCasoId} = useDiagnostico(dbReady,false)
 
+  // HOOKS
+  const {loadCaso} = useCargarCaso(id)
 
-  // MODAL
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  
-
+  // COLORS
   const textColor = useColorModeValue("gray.500", "white");
   const titleColor = useColorModeValue("gray.700", "white");
   const bgStatus = useColorModeValue("gray.400", "navy.900");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
-  //const {slcCasoId,setSlcCasoId} = useContext(AppContext)
-  
-  // Se esta elimiando para utilizar redux-persist directamente
-    //const {casoActivo,setCasoActivo} = useContext(AppContext)
-
-  
+  // NAVEGATION
   const history = useHistory()
-  const {loadCaso} = useCargarCaso(id)
+  
+  
 
   /*=======================================================
-     BLOQUE: REDUX-PERSIST
-     DESCRIPTION: 
-    =========================================================*/
-    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
-    const dispatch = useDispatch();
+    BLOQUE: REDUX-PERSIST
+    DESCRIPTION: 
+  =========================================================*/
+  const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+  const dispatch = useDispatch();
 
-    const saveUserData = (json) => {
-        dispatch({ type: 'SET_USER_DATA', payload: json });
-      };
-  
-    const getUserData = () => {
-        dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+  const saveUserData = (json) => {
+      dispatch({ type: 'SET_USER_DATA', payload: json });
     };
 
-    /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+  const getUserData = () => {
+      dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+  };
+
+  /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
     
   // ==========================================================
   // SECTION: Estados (useState)
@@ -191,8 +189,7 @@ const CasoDetail = ({ caseData }) => {
      * Usuario seleccionado en el caso actual.
      * @type {Object|null}
      */
-    const [slcUsuario, setSlcUsuario] = useState(null);
-    const [lblUsuario,setLblUsuario] = useState(null)
+    const [slcUsuario, setSlcUsuario] = useState(usuario_ID_assigned ?? null);
 
     /**
      * Indica si el modo de edición para el técnico asignado está activo.
@@ -201,11 +198,8 @@ const CasoDetail = ({ caseData }) => {
      */
     const [isEditTecnico, setIsEditTecnico] = useState(false);
 
-    //const [prediagnostico,setPrediagnostico] = useState([])
 
     const [isEmpezado,setIsEmpezado] = useState(false)
-
-    //const [vehiculos,setVehiculos] = useState([])
 
     const [isVehiculoSelected,setIsVehiculoSelected] = useState('')
 
@@ -215,20 +209,9 @@ const CasoDetail = ({ caseData }) => {
 
     const [cantEquipos,setCantEquipos] = useState(0)
 
-    //const [startLoad,loadCaso] = useState(false) // Inicio de carga de información
-
-
-    /**
-     * Change database
-     */
-
-   
-    
-  
-
 
   //=======================================================
-  // SECTION: useMemo
+  // SECTION: USEMENO
   //=======================================================
 
   /**
@@ -313,38 +296,28 @@ const CasoDetail = ({ caseData }) => {
   //=======================================================
 
 
-  
-  /*useEffect(() =>{
-    const run = async() =>{
-      loadCaso()
-    }
-
-    run()
-    
-  },[db])*/
-
-
+  // loadCaso() Verificar como se esta actualizando el caso en base de datos remota
   /**
    * CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
    */
   useEffect( () =>{
-    //CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
-    getCasoById(id)
+    //CONSULTAR CASO - obtiene la lista de todos los estados del caso
+    //getCasoById(id)
   },[])
 
   
   /**
    * CONSULTAR ASIGNACION
    */
-  useEffect( () =>{
-    if (!caso || (Array.isArray(caso) && caso.length === 0)) return
-    const consultarAsigancion = async() =>{
-      if(Object.keys(caso || {}).length != 0){
-        setSlcUsuario(caso.usuario_ID_assigned)
-      }
-    }
-    consultarAsigancion()
-  },[caso])
+  // useEffect( () =>{
+  //   if (!caso || (Array.isArray(caso) && caso.length === 0)) return
+  //   const consultarAsigancion = async() =>{
+  //     if(Object.keys(caso || {}).length != 0){
+  //       setSlcUsuario(caso.usuario_ID_assigned)
+  //     }
+  //   }
+  //   consultarAsigancion()
+  // },[caso])
 
   // CONSULTAR DIAGANOSTICO
   useEffect( () =>{
@@ -361,23 +334,12 @@ const CasoDetail = ({ caseData }) => {
   },[id])
 
   useEffect( () =>{
-    if (!caso || (Array.isArray(caso) && caso.length === 0)) return
-    if(typeof id !== 'undefined'){
-      
-      const equipos = JSON.parse(caso.equipos)
+    if(!prediagnostico || prediagnostico.length === 0) return
 
-      const areKeysNumbers = Object.keys(equipos || {}).every(key => !isNaN(Number(key)));
-      
-      if(areKeysNumbers){
-        const cantKeys = Object.keys(equipos).length
-        setCantEquipos(cantKeys)
-      }else{
-        setCantEquipos(0)
-      }
-    }
+    setCantEquipos(prediagnostico.length)
     
     
-  },[id,caso])
+  },[prediagnostico])
 
   
 
@@ -603,6 +565,23 @@ const CasoDetail = ({ caseData }) => {
    
   }
 
+
+  const usuariosList = useMemo(() => {
+    if(!usuarios || usuarios.length === 0) return; // Verificar si la lista de usuarios está disponible
+    return usuarios.map((usuario) => (
+      <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
+    ));
+  },[usuarios])
+
+  const vehiculosList = useMemo(() => {
+
+    if(!vehiculos || vehiculos.length === 0) return; // Verificar si la lista de usuarios está disponible
+    return vehiculos.map( (vehiculo) => (
+      <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
+    ));
+
+  },[vehiculos])
+
   return (
     <Box
       maxW="lg"
@@ -765,7 +744,7 @@ const CasoDetail = ({ caseData }) => {
                     </Tooltip>
                     <Tooltip label="Reporte" aria-label="A tooltip" >
                       <NavLink to={`/admin/pages/pdf/${id}`} >
-                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={onOpen} >
+                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} >
                           <Icon as={ HiOutlineDocumentReport } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
                         </Button>
                       </NavLink>
@@ -794,10 +773,7 @@ const CasoDetail = ({ caseData }) => {
             <Flex direction={'columns'} >
                 <FormControl maxW={{xl:'250px'}} key={id}>
                   <Select id='country' placeholder='Seleccionar Vehiculo' onChange={(e) => setIsVehiculoSelected(e.target.value)} value={isVehiculoSelected}>
-                    {vehiculos.map( (vehiculo) => (
-                      <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
-                    ))}
-                    
+                    {vehiculosList}
                   </Select>
                 </FormControl>
                 
@@ -834,9 +810,7 @@ const CasoDetail = ({ caseData }) => {
             onChange={(e) => setSlcUsuario(e.target.value)}
             value={slcUsuario}
           >
-            {usuarios.map( (usuario) =>(
-              <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
-            ))}
+            {usuariosList}
           </Select>
         ):(
           <>
@@ -954,6 +928,6 @@ const CasoDetail = ({ caseData }) => {
     </Box>
     
   );
-};
+});
 
 export default CasoDetail;
