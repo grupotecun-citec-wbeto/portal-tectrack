@@ -23,8 +23,9 @@ function useCliente(dbReady = false,syncActive = true) {
     const [time, setTime] = useState(300000);
 
     const loadItems = () => {
-        const allCategorias = repository.findAll();
-        setItems(allCategorias);
+        const all = repository.findAll();
+        setItems(all);
+        return all
     };
 
     const createItem = (name, email) => {
