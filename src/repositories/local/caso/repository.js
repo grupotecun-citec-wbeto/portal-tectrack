@@ -7,6 +7,9 @@
 const PACKAGE = 'repositories/local/caso';
 
 import { getDB, persistDatabase } from '../../../db/database';
+import repositoryVisita from '../visita/repository';
+import repositoryCasoVisita from '../caso_visita/repository';
+import repositoryDiagnostico from '../diagnostico/repository';
 
 const repository = {
     tableCode:4,
@@ -144,7 +147,133 @@ const repository = {
         }
 
         
+    },
+
+    updateStatus: async (id,status) => {
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ${status}, syncStatus = 1 WHERE id = ?`);
+        stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
+    assignTechnician: async (id,technicianID) =>{
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 2, usuario_ID_assigned = ${technicianID}, syncStatus = 1 WHERE id = ?`);
+        stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
+    /**
+     * Un Assign Technician
+     * @param {interger} id identifier of case
+     * 
+     * @var {integer} caso_estado_ID 1: Pendiente de asignación 
+     */
+    unAssignTechnician : async (id) =>{
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 1, usuario_ID_assigned = NULL WHERE id = ?`);
+        stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
+    start: async (id,visita_ID,vehiculo_ID,userLogin,kmInicial) => {
+        const db = getDB();
+       
+        try{
+            db.exec("BEGIN TRANSACTION")
+            const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 3,syncStatus=1 WHERE id = ?`);
+            stmt.run([id]);
+            stmt.free();
+
+            const stmt2 = db.prepare(`INSERT INTO ${repositoryVisita.tableName} (ID,vehiculo_ID,usuario_ID,km_inicial) VALUES (?, ?, ?, ?)`);
+            stmt2.run([visita_ID,vehiculo_ID,userLogin.ID,kmInicial]);
+            stmt2.free();
+
+            //INSERT INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ('${id}','${visita_ID}')
+
+            const stmt3 = db.prepare(`INSERT INTO ${repositoryCasoVisita.tableName} (caso_ID,visita_ID) VALUES (?, ?)`);
+            stmt3.run([id,visita_ID]);
+            stmt3.free();
+
+            db.exec("COMMIT")
+            await persistDatabase();
+        }catch(error){
+            
+            console.error(`[${PACKAGE}] 55ef495e-57dc-467e-a0b7-f0c8813f3f4a Error al iniciar el caso:`, error);
+            db.exec("ROLLBACK")
+        }
+
+        
+    },
+    
+    endCaseWithoutDiagnosis: async (id,kmFinal,currentDateTime) => {
+        const db = getDB();
+        try{
+            db.exec("BEGIN TRANSACTION")
+            const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 5, date_end = ? ,syncStatus = 1 WHERE id = ?`);
+            stmt.run([currentDateTime,id]);
+            stmt.free();
+
+            const stmt2 = db.prepare(`UPDATE ${repositoryVisita.tableName} SET km_final = ?  WHERE id = (SELECT visita_ID FROM ${repositoryCasoVisita.tableName} WHERE caso_ID = ? LIMIT 1)`);
+            stmt2.run([kmFinal,id]);
+            stmt2.free();
+
+
+            db.exec("COMMIT")
+            await persistDatabase();
+        }catch(error){
+            console.error(`[${PACKAGE}] 1dc96abd-024c-412b-896f-8fcfb0868c8d Error al iniciar el caso:`, error);
+            db.exec("ROLLBACK")
+        }
+
+        
+    },
+    
+    unsynchronizedCases: async (id) => {
+        const db = getDB();
+        const stmt = db.prepare( 
+            `SELECT
+                ID,
+                usuario_ID,
+                usuario_ID_assigned,
+                comunicacion_ID,
+                segmento_ID,
+                caso_estado_ID,
+                fecha,
+                start,
+                date_end,
+                description,
+                prioridad,
+                uuid,
+                equipos
+            FROM 
+                ${repository.tableName} 
+            WHERE 
+                ID LIKE ?
+                AND syncStatus = 1
+            `);
+        const searchPattern = `%${id}%`;
+        stmt.bind([searchPattern])
+        const results = [];
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
+    },
+
+    setAsSynchronized: async (id) => {
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET syncStatus = 0 WHERE ID = ?`);
+        stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
     }
+
+    
 
     
 

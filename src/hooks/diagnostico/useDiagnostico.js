@@ -41,6 +41,11 @@ function useDiagnostico(dbReady = false,syncActive = true) {
         const all = repository.findByCasoId(args);
         setItems(all);
     }
+    const findByListCaseIds = async (uuids) => {
+        const all = await repository.findByListCaseIds(uuids);
+        setItems(all);
+        return all;
+    }
 
     useEffect(() => {
         if(!syncActive) return; // Evitar sincronización si syncActive es false

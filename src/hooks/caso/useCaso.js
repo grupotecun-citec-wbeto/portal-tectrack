@@ -20,6 +20,7 @@ function useCaso(dbReady = false,syncActive = true) {
     const codigo = 7, tabla = 'categoria'
     
     const [items, setItems] = useState([]);
+    const [item, setItem] = useState(null);
     const [time, setTime] = useState(300000);
 
     const loadItems = () => {
@@ -39,13 +40,66 @@ function useCaso(dbReady = false,syncActive = true) {
 
     const findById = async (id) => {  
         const item = await repository.findById(id);
-        setItems(item);
+        setItem(item);
+        return item;
     }
 
     const findCasesByFilters = async (userDataLogin,filters,estado = {operador:"<>", value:"6"},config = {countOnly:false}) => {
         
         const allCases = await repository.findAllByFilters(userDataLogin,filters,estado,config);
         return allCases;
+    }
+
+    const updateStatus = async (id,status) =>{
+        try{
+            repository.updateStatus(id,status)
+            return true
+        }catch(err){
+            return false
+        }
+        
+    }
+
+    const assignTechnician = async (id,technicianID) =>{
+        try{
+            repository.assignTechnician(id,technicianID)
+            return true
+        }catch(err){
+            return false
+        }
+    }
+    
+    const unAssignTechnician = async (id) =>{
+        try{
+            repository.unAssignTechnician(id)
+            return true
+        }catch(err){
+            return false
+        }
+    }
+
+    const start = async (id,visita_ID,vehiculo_ID,userLogin,kmInicial) => {
+        try{
+            await repository.start(id,visita_ID,vehiculo_ID,userLogin,kmInicial)
+            return true
+        }catch(err){
+            throw err;
+        }
+    }
+
+    const endCaseWithoutDiagnosis = async (id,kmFinal,currentDateTime) => {
+        try{
+            await repository.endCaseWithoutDiagnosis(id,kmFinal,currentDateTime)
+            return true
+        }catch(err){
+            throw err;
+        }
+    }
+
+    const unsynchronizedCases = async (id) => {
+        const Items = repository.unsynchronizedCases(id);
+        setItems(Items);
+        return Items
     }
 
     useEffect(() => {
@@ -69,7 +123,13 @@ function useCaso(dbReady = false,syncActive = true) {
         createItem,
         deleteItem,
         findCasesByFilters,
-        findById
+        findById,
+        updateStatus,
+        assignTechnician,
+        unAssignTechnician,
+        start,
+        endCaseWithoutDiagnosis,
+        unsynchronizedCases,
     };
 }
 

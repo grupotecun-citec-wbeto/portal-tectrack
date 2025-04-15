@@ -122,6 +122,18 @@ const CasoDetail = React.memo(({ caseData }) => {
   const {dbReady} = useDataBaseContext()
   const {estados,segmentos} = useCasoContext()
   const {usuarios,vehiculos} = useUsuarioContext();
+  
+  
+  // *********************************** HOOK CASO **************************************
+  // ************* HOOOK CASO *************************************HOOK CASO ************
+  // *********************************** HOOK CASO **************************************
+  const {
+    assignTechnician,
+    unAssignTechnician,
+    findById,
+    endCaseWithoutDiagnosis,
+    start: startCase, 
+    item: stateCaso} = useCaso(dbReady,false)
    
   // HOOKS AND REPOSITORIES
   //const {items: caso,findById: getCasoById} = useCaso(dbReady,false)
@@ -369,37 +381,29 @@ const CasoDetail = React.memo(({ caseData }) => {
     return format(now.toUTCString(), 'yyyy-MM-dd');
   }
 
-  /**
-   * Asingar un usuario(técnico) al caso
-   * @property {number} slcUsuario identificador unico de usuario como estado
+   /**
+   * Asigna un técnico a un caso y actualiza su estado en la base de datos.
+   * 
+   * @async
+   * @function asignar
+   * @throws {Error} Si ocurre un error durante la asignación o actualización del caso.
+   * 
+   * Variables utilizadas en la función `assignTechnician`:
+   * @param {string} id - El identificador único del caso que se está asignando.
+   * @param {number} estado_a_asignar - El estado que se asignará al caso (por ejemplo, 2 para "Asignado").
+   * @param {string} slcUsuario - El identificador del usuario/técnico que será asignado al caso.
    */
   const asignar = async() =>{
     
     try{
       if(slcUsuario != null && slcUsuario != ""){
-        /**
-         * Estado el caso que se va colocar cuando el usuario es asignado a un caso
-         * @type {number}
-         */
-        const estado_a_asignar = 2
-        // Insertar asignacion de usuario al caso, para establecer que usuario que resolver el caso
-        //const result = await db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},'${id}','${getCurrentDateTime()}','')`)
-        //db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},'${id}','${getCurrentDateTime()}','')`)
-        
-        // Actualizar a estado asignado cuando se agigna un caso hacia estado 2: Asignado
-        const db_aux = db
-        db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}, syncStatus=1  where ID = '${id}'`)
-        saveToIndexedDB(db)
+        await assignTechnician(id,slcUsuario)
+        loadCaso()
         // Establecer el usuario que va resolver el caso
+        const estado_a_asignar = 2
         setEstado(estado_a_asignar)
         setIsEditTecnico(!isEditTecnico)
-        
-        // rehidratar db
-        rehidratarDb()
-        // sicronizar caso
-        loadCaso()
-
-        // Diaparar la sincronizacion
+        // verificar
         
       }
     }catch(err){
@@ -410,30 +414,20 @@ const CasoDetail = React.memo(({ caseData }) => {
   }
 
   const desasignar = async() =>{
-    // 
-    const estado_a_establecer = 1
-    // Se elimina el usuario que estaba seleccionado
-    //db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = '${id}'`)
-
-    // actualizar el estado en el caso
     
-    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, usuario_ID_assigned = NULL, syncStatus=1  where ID = '${id}'`)
+    
+    unAssignTechnician(id)
+    loadCaso()
     
     setSlcUsuario(null)
+    const estado_a_establecer = 1
     setEstado(estado_a_establecer)
-    // persistir db
-    saveToIndexedDB(db)
-    
-    // rehidratar db
-    rehidratarDb()
-    // Diaparar la sincronizacion
-    loadCaso()
   }
 
   const empezar = async() =>{
+    const caso = await findById(id)
     const verificar = () =>{
       // verificar si ya tiene asignado a un tecnico el caso
-      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso_v2 where ID = '${id}'`).toObject()
       const isUsuario = (caso.usuario_ID_assigned == null) ? false : true
       if(!isUsuario) return 'Ingresar tecnico'
       // Verificar que tenga vehiculo asignado
@@ -447,46 +441,30 @@ const CasoDetail = React.memo(({ caseData }) => {
     }
     const message = verificar()
     if(message == ''){
+      
+      
+      const visita_ID = uuidv4()
       try{
-        await db.exec('BEGIN TRANSACTION');
-          setIsEmpezado(true)
-          const estado_a_establecer = 3
-          db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer},syncStatus=1 where ID = '${id}'`)
-          
-          const visita_ID = uuidv4()
-          db.run(`INSERT INTO visita_v2 (ID,vehiculo_ID,usuario_ID,km_inicial) VALUES ('${visita_ID}',${isVehiculoSelected},${userData?.login?.ID},${kmInicial})`)
-          
-          db.run(`INSERT INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ('${id}','${visita_ID}')`)
-          await db.exec('COMMIT');
-
-          // gurdar en base de datos sqlite
-          saveToIndexedDB(db)
-
-          // rehidratar db
-          rehidratarDb()
-          // Diaparar la sincronizacion
-          loadCaso()
-
-          setEstado(estado_a_establecer)
-          
-        
+        await startCase(id,visita_ID,isVehiculoSelected,userData.login,kmInicial)
+        loadCaso()
       }catch(err){
-        await db.exec('ROLLBACK');
-        console.log('f45ebaa5-8d54-4634-a2cd-efda1cb2a8bd',err)
+        console.error('Error al iniciar el caso: b1d6a763-9495-4d3e-b4b5-3c49207f2b2b', err);
       }
+      
+      const estado_a_establecer = 3
+      setEstado(estado_a_establecer)
       
     }else{
       alert(message)
     }
 
-    /**/
     
   }
 
   
 
   const terminar = async() => {
-    
+    const caso = await findById(id)
     try{
       if((cantEquipos != 0 && segmento_ID == 1) || segmento_ID != 1){
         
@@ -497,7 +475,6 @@ const CasoDetail = React.memo(({ caseData }) => {
           
             const newUserData = structuredClone(userData)
             
-            const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
             newUserData.casoActivo.caso_id = id
             newUserData.casoActivo.code = caso.ID
             newUserData.casoActivo.busqueda_terminada = 1
@@ -531,23 +508,15 @@ const CasoDetail = React.memo(({ caseData }) => {
           // SECCION PARA PROYECTOS Y CAPACITACIONES
           
           if(kmFinal != ''){
-            const estado_a_establecer = 5
             
-            //Actualiar estado
-            db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, date_end = '${getCurrentDateTime()}', syncStatus=1 where ID = '${id}'`)
-          
-            // Registrando km final
-            db.run(`UPDATE visita_v2 SET km_final = '${kmFinal}' WHERE ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${id}' LIMIT 1) `)
-            saveToIndexedDB(db)
-
-            //rehidratar db
-            rehidratarDb()
-            // Diaparar la sincronizacion
+            //id,kmFinal,currentDateTime
+            const currentDateTime = getCurrentDateTime()
+            await endCaseWithoutDiagnosis(id,kmFinal,currentDateTime)
             loadCaso()
-
+            const estado_a_establecer = 5
             setEstado(estado_a_establecer)
           }else{
-            alert('er[c24a4c93] Ingresar kilometraje final')
+            alert('Ingresar kilometraje final')
           }
         } 
       }else{

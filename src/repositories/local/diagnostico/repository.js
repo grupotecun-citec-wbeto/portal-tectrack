@@ -12,6 +12,7 @@ import repositoryAsistenciaTipo from '../asistencia_tipo/repository';
 import repositoryCliente from '../cliente/repository';
 import repositoryProyecto from '../proyecto/repository';
 import repositoryCatalogo from '../catalogo/repository';
+import repositoryCaso from '../caso/repository';
 
 
 const repository = {
@@ -87,6 +88,38 @@ const repository = {
         const stmt = db.prepare(sql);
         const results = [];
         stmt.bind([casoId]);
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
+    },
+    
+
+    findByListCaseIds: async (uuids) => {
+        const db = getDB();
+        const placeholders = uuids.map(() => '?').join(', '); // Genera "?, ?, ?" según la cantidad de UUIDs
+        
+        const stmt = db.prepare(
+            `
+            SELECT
+                D.equipo_ID,
+                D.caso_ID,
+                D.diagnostico_tipo_ID,
+                D.asistencia_tipo_ID,
+                CASE 
+                WHEN D.especialista_ID <> 0 THEN D.especialista_ID 
+                ELSE NULL 
+                END AS especialista_ID,
+                D.description
+            FROM 
+                ${repositoryCaso.tableName} C
+                INNER JOIN ${repository.tableName} D ON D.caso_ID = C.ID
+            WHERE
+                C.ID IN (${placeholders})
+            `);
+        stmt.bind([uuids])
+        const results = [];
         while (stmt.step()) {
             results.push(stmt.getAsObject());
         }

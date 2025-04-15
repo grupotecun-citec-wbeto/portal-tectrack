@@ -21,6 +21,11 @@ const syncRepository = {
         await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/synctable_terminate/${versionSqliteDB}/${synctable_ID}`);
         
     },
+    syncLocalCasesWithCloud : async (formDataMerge) =>{
+        const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/cargar/casos`,formDataMerge);
+        const data = response.data
+        return data
+    }
 
 }
 

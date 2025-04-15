@@ -545,7 +545,6 @@ const CaseGridItem = ({ caseData, dataSets,vehiculosOptions,usuariosOptions,sqlC
         status={status} 
         estado={estado} 
         isActiveTechicianEditSection={isActiveTechicianEditSection}
-        handleEditTecnico={handleEditTecnico}
       />
       
       <Head 

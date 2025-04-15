@@ -17,7 +17,7 @@ import CaseInProgress from './CaseInProgress';
 const ActionsButtons = (props) => {
 
     
-    const {isEmpezado,estado} = props
+    const {id,isEmpezado,estado} = props
     
     const caseIsNotAssigned = !isEmpezado && estado != 3
     const caseIsNotClosed = estado != 5
@@ -85,7 +85,7 @@ const ActionsButtons = (props) => {
                 </Tooltip>
                 <Tooltip label="Reporte" aria-label="A tooltip">
                   <NavLink to={`/admin/pages/pdf/${id}`}>
-                    <Button ms={{ lg: "10px" }} my={{ sm: "5px" }} onClick={onOpen}>
+                    <Button ms={{ lg: "10px" }} my={{ sm: "5px" }}>
                       <Icon as={HiOutlineDocumentReport} color="gray.500" boxSize={{ sm: "24px", lg: "24px" }} />
                     </Button>
                   </NavLink>

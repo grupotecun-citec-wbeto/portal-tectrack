@@ -8,6 +8,8 @@ const PACKAGE = 'repositories/local/caso_visita';
 
 import { getDB, persistDatabase } from '../../../db/database';
 
+import repositoryCaso from '../caso/repository';
+
 const repository = {
     tableCode:39,
     tableName:'caso_visita',
@@ -54,6 +56,30 @@ const repository = {
         stmt.run([id]);
         stmt.free();
         await persistDatabase();
+    },
+
+    findByListCaseIds: async (uuids) => {
+        const db = getDB();
+        const placeholders = uuids.map(() => '?').join(', '); // Genera "?, ?, ?" según la cantidad de UUIDs
+        
+        const stmt = db.prepare(
+            `
+             SELECT
+              CV.caso_ID,
+              CV.visita_ID
+            FROM 
+              ${repositoryCaso.tableName} C
+              INNER JOIN ${repository.tableName} CV ON CV.caso_ID = C.ID
+            WHERE
+              C.ID IN (${placeholders})
+            `);
+        stmt.bind([uuids])
+        const results = [];
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
     }
 
     
