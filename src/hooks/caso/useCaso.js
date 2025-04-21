@@ -28,10 +28,20 @@ function useCaso(dbReady = false,syncActive = true) {
         setItems(allCategorias);
     };
 
-    const createItem = (name, email) => {
-        repository.create(name, email);
+
+    const createItem = (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy,catalogo_ID,name) => {
+        repository.create(uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy,catalogo_ID,name);
         loadItems();
     };
+
+    const createSupportItem = async (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos) => {
+        try{
+            await repository.createSupport(uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos);
+            loadItems();
+        }catch(err){
+            throw err;
+        }
+    }
 
     const deleteItem= (id) => {
         repository.deleteById(id);
@@ -121,6 +131,7 @@ function useCaso(dbReady = false,syncActive = true) {
         items,
         loadItems,
         createItem,
+        createSupportItem,
         deleteItem,
         findCasesByFilters,
         findById,

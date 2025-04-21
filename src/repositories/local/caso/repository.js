@@ -9,8 +9,8 @@ const PACKAGE = 'repositories/local/caso';
 import { getDB, persistDatabase } from '../../../db/database';
 import repositoryVisita from '../visita/repository';
 import repositoryCasoVisita from '../caso_visita/repository';
+import repositoryPrograma from '../programa/repository';
 import repositoryDiagnostico from '../diagnostico/repository';
-
 const repository = {
     tableCode:4,
     tableName:'caso',
@@ -37,14 +37,147 @@ const repository = {
         await persistDatabase();
     },
 
-    create: async (id, name) => {
+    /**
+     * Create a new case for training and project
+     * @param {string} uuid identifier of case
+     * @param {number} usuario_ID identifier of user who created the case
+     * @param {number} usuario_ID_assigned identifier of user assigned to the case
+     * @param {number} comunicacion_ID identifier of communication
+     * @param {number} segmento_ID identifier of segment, example: 1 = support, 2 = project, 3 = training
+     * @param {number} caso_estado_ID identifier of case status, example: 1 = pending, 2 = assigned, 3 = in progress, 4 = finished, 5 = closed
+     * @param {string} fecha date of case creation in ISO format, example: "2023-01-01T00:00:00Z"
+     * @param {string} start date of case start in ISO format, example: "2023-01-01T00:00:00Z"
+     * @param {number} prioridad identifier of priority, example: 1 = low, 2 = medium, 3 = high
+     * @param {object} programaSistemasIfy object containing program system information
+     * @param {number} catalogo_ID identifier of catalog
+     * @param {string} name name of the case
+     */
+    create: async (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy,catalogo_ID,name) => {
         const db = getDB();
-        const stmt = db.prepare(`INSERT INTO ${repository.tableName} (id, name) VALUES (?, ?)`);
+        try{
+            db.exec('BEGIN TRANSACTION');
+            const stmt = db.prepare(`
+            INSERT INTO ${repository.tableName} (
+                ID,
+                syncStatus,
+                usuario_ID,
+                usuario_ID_assigned,
+                comunicacion_ID,
+                segmento_ID,
+                caso_estado_ID,
+                fecha,
+                start,
+                date_end,
+                description,
+                prioridad,
+                equipos
+            )
+            VALUES(
+                ?,
+                1,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                NULL,
+                NULL,
+                ?,
+                ?
+            )    
+            `);
 
-        stmt.run([id, name]);
-        stmt.free();
-        await persistDatabase();
+            stmt.run([uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy]);
+            stmt.free();
+
+            const stmt2 = db.prepare(`
+                INSERT INTO ${repositoryPrograma.tableName} (
+                    caso_ID,
+                    asistencia_tipo_ID,
+                    catalogo_ID,
+                    prioridad,
+                    name) 
+                VALUES (
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?)
+            `);
+            stmt2.run([uuid,1,catalogo_ID,prioridad,name]);
+            stmt2.free();
+
+            db.exec('COMMIT');
+            await persistDatabase();
+        }catch(err){
+            console.error(`[${PACKAGE}] Error al crear el caso:`, err);
+            db.exec("ROLLBACK")
+        }
     },
+
+    createSupport: async (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos) => {
+        const db = getDB();
+        try{
+            db.exec('BEGIN TRANSACTION');
+            const stmt = db.prepare(`
+            INSERT INTO ${repository.tableName} (
+                ID,
+                syncStatus,
+                usuario_ID,
+                usuario_ID_assigned,
+                comunicacion_ID,
+                segmento_ID,
+                caso_estado_ID,
+                fecha,
+                start,
+                date_end,
+                description,
+                prioridad,
+                equipos
+            )
+            VALUES(
+                ?,
+                1,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                NULL,
+                NULL,
+                ?,
+                ?
+            )    
+            `);
+
+            stmt.run([uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy]);
+            stmt.free();
+            const stmt2 = db.prepare(`
+                INSERT INTO ${repositoryDiagnostico.tableName}
+                    (equipo_ID, caso_ID, diagnostico_tipo_ID, asistencia_tipo_ID, especialista_ID, description)
+                VALUES
+                    (
+                        ?, ?, ?, ?, ?, ?
+                    )
+            `);
+
+            for (const { maquina_id, uuid, diagnostico_tipo_ID,asistencia_tipo_ID, especialista_ID, description } of diagnosticos) {
+                stmt2.run([maquina_id, uuid, diagnostico_tipo_ID,asistencia_tipo_ID, especialista_ID, description]);
+            }
+            stmt2.free();
+
+            db.exec('COMMIT');
+            await persistDatabase();
+        }catch(err){
+            console.error(`[${PACKAGE}] Error al crear el caso:`, err);
+            db.exec("ROLLBACK")
+        }
+    },
+
     
     findAll: () => {
         const db = getDB();
@@ -69,7 +202,10 @@ const repository = {
         const db = getDB();
         const stmt = db.prepare(`SELECT * FROM ${repository.tableName} WHERE ID = ?`);
         stmt.bind([id]);
-        stmt.step()
+        if (!stmt.step()) {
+            stmt.free();
+            return {};
+        }
         const result = stmt.getAsObject()
         stmt.free();
         return result;

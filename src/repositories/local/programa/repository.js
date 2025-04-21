@@ -77,7 +77,7 @@ const repository = {
             WHERE
               C.ID IN (${placeholders})
             `);
-        stmt.bind([uuids])
+        stmt.bind(uuids)
         const results = [];
         while (stmt.step()) {
             results.push(stmt.getAsObject());

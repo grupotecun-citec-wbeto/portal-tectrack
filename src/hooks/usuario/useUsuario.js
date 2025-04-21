@@ -40,6 +40,7 @@ function useUsuario(dbReady = false,syncActive = true) {
     const findByPerfilIds = (args = { perfilIds : [], config: { countOnly : false } }) => {
         const all = repository.findByPerfilIds(args);
         setItems(all);
+        return all;
     }
 
     useEffect(() => {

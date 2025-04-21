@@ -337,7 +337,7 @@ import {
             {isSuccessAlertCaso ?(
               <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid}/>
             ):(
-              <CardCrearCaso openAlert={openAlert} />
+              <CardCrearCaso openAlert={openAlert} key='CardCrearCaso' />
             )}
           </>
         ):(
