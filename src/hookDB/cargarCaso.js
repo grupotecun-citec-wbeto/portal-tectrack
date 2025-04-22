@@ -65,7 +65,6 @@ function useCargarCaso(caso_id) {
             await syncCloud(formDataMerge)
           }else{
             console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
-            setListaCasos({})
           }
         } catch (error) {
           if (error.response && error.response.status === 400) {
@@ -111,7 +110,6 @@ function useCargarCaso(caso_id) {
           try{  
             
             const data = await syncRepository.syncLocalCasesWithCloud(formDataMerge)
-            setDataCasoSync(data)
             for (const uuid of Object.keys(data)) {
               repositoryCaso.setAsSynchronized(uuid);
             }

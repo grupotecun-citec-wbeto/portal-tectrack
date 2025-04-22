@@ -112,6 +112,12 @@ function useCaso(dbReady = false,syncActive = true) {
         return Items
     }
 
+    const stop = async (id,kmFinal,estado_a_asignar,currentDateTime,equipos) => {
+        const Items = repository.stop(id,kmFinal,estado_a_asignar,currentDateTime,equipos);
+        setItems(Items);
+        return Items
+    }
+
     useEffect(() => {
         if(!syncActive) return; // Evitar sincronización si syncActive es false
         if(!dbReady) return; // Esperar a que la base de datos esté lista
@@ -139,6 +145,7 @@ function useCaso(dbReady = false,syncActive = true) {
         assignTechnician,
         unAssignTechnician,
         start,
+        stop,
         endCaseWithoutDiagnosis,
         unsynchronizedCases,
     };

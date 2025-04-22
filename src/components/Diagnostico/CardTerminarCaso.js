@@ -6,6 +6,9 @@ import { format } from 'date-fns';
 
 import { useHistory } from "react-router-dom";
 
+import { useDataBaseContext } from "dataBaseContext";
+import useCaso from "hooks/caso/useCaso";
+
 import {
     Text,
     Flex,
@@ -40,6 +43,12 @@ import { use } from "react";
 //******************************************* FIN IMPORTS ************************** */
 
 function CardTerminarCaso(props){
+
+
+    // iniciar base de datos
+    const {dbReady} = useDataBaseContext()
+    const {stop: stopCase} = useCaso(dbReady,false)
+
 
     const {refresh} = props
     /*const {
@@ -129,17 +138,16 @@ function CardTerminarCaso(props){
                 const caso_id = userData?.casoActivo?.caso_id || '' 
                 if(caso_id != ''){
                     
-                    // Actualizar estado del caso y agregar la lista de equipos
-                    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, date_end = '${getCurrentDateTime()}' , equipos = '${JSON.stringify(equipos)}', syncStatus=1 where ID = '${caso_id}'`)
-                     
-                    // registrar el kilometraje final del caso
-                    const query = `UPDATE visita_v2 SET km_final = '${km_final}' where ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${caso_id}' LIMIT 1) `
-                    db.run(query)
+                    const equipos_jsonstringify = JSON.stringify(equipos)
+                    try{
+                        await stopCase(caso_id,km_final,estado_a_asignar,getCurrentDateTime(),equipos_jsonstringify)
                     
-                    saveToIndexedDB(db)
                     
-                    // sincronizar caso con rehidratación
-                    loadCaso()
+                        // sincronizar caso con rehidratación
+                        loadCaso()
+                    }catch(err){
+                        console.warn('Error al terminar el caso 07506205-36c1-4767-a2cc-1b5a301754bf',err)
+                    }
 
                     // Reiniciando el caso activo, para preparar para el siguiente caso
                     const newUserData = structuredClone(userData)
@@ -170,11 +178,14 @@ function CardTerminarCaso(props){
                 <CardBody mt={{xl:'50px', sm:'50px'}} w={{xl:"35%",sm:"100%"}}>
                     <Grid templateColumns={{ sm: "1fr", md: "repeat(2, 1fr)", xl: "repeat(2, 1fr)" }} gap='22px'>
                         <Button variant='dark' backgroundColor={"green.400"} minW='145px' h='36px' fontSize={{xl:'2em',sm:'1em'}} onClick={() => changeEstadoCaso(5)}>
-                            Caso terminado
+                            Terminar Caso
                         </Button>
-                        <Button variant='dark' backgroundColor={"red.400"}  minW='145px' h='36px' fontSize={{xl:'2em',sm:'1em'}} onClick={() => changeEstadoCaso(4)}>
-                            Detener caso
-                        </Button>
+                        {/* Esta funcionalidad esta pendiente de Revisión*/}
+                        {false && (
+                            <Button variant='dark' backgroundColor={"red.400"}  minW='145px' h='36px' fontSize={{xl:'2em',sm:'1em'}} onClick={() => changeEstadoCaso(4)}>
+                                Detener caso
+                            </Button>
+                        )}
                     </Grid>
                     
 

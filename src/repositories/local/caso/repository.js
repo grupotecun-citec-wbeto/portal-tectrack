@@ -344,6 +344,37 @@ const repository = {
 
         
     },
+
+    stop: async (id,kmFinal,estado_a_asignar,currentDateTime,equipos) => {
+        /*
+        // Actualizar estado del caso y agregar la lista de equipos
+                    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, date_end = '${getCurrentDateTime()}' , equipos = '${JSON.stringify(equipos)}', syncStatus=1 where ID = '${caso_id}'`)
+                        
+                    // registrar el kilometraje final del caso
+                    const query = `UPDATE visita_v2 SET km_final = '${km_final}' where ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${caso_id}' LIMIT 1) `
+                    db.run(query) 
+        */
+
+        const db = getDB();
+
+        try{
+            db.exec("BEGIN TRANSACTION")
+            const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ?, date_end = ? , equipos = ?, syncStatus=1 where ID = ?`);
+            stmt.run([estado_a_asignar,currentDateTime,equipos,id]);
+            stmt.free();
+
+            const stmt2 = db.prepare(`UPDATE ${repositoryVisita.tableName} SET km_final = ? where ID = (SELECT visita_ID FROM ${repositoryCasoVisita.tableName} WHERE caso_ID = ? LIMIT 1) `);
+            stmt2.run([kmFinal,id]);
+            stmt2.free();
+
+            db.exec("COMMIT")
+            await persistDatabase();
+        }catch(error){
+            
+            console.error(`[${PACKAGE}] 55ef495e-57dc-467e-a0b7-f0c8813f3f4a Error al detener[stop] el caso:`, error);
+            db.exec("ROLLBACK")
+        }
+    },
     
     endCaseWithoutDiagnosis: async (id,kmFinal,currentDateTime) => {
         const db = getDB();

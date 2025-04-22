@@ -462,7 +462,9 @@ const CasoDetail = React.memo(({ caseData }) => {
   }
 
   
-
+  /**
+   * Finaliza un caso y actualiza su estado en la base de datos.
+   */
   const terminar = async() => {
     const caso = await findById(id)
     try{
