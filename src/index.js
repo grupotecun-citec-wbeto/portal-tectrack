@@ -1,3 +1,53 @@
+if (!navigator.onLine) {
+  window.addEventListener('beforeunload', (event) => {
+    event.preventDefault();
+    event.returnValue = ''; // Esto evita el reinicio del navegador
+  });
+}
+
+if (!navigator.onLine) {
+  if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registrado con éxito:', registration);
+        })
+        .catch((error) => {
+          console.error('Error al registrar el Service Worker:', error);
+        });
+    }
+  } else {
+    console.log('Modo de desarrollo: no se registra el Service Worker.');
+  }
+}else{
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((registration) => {
+      registration.unregister().then(() => {
+      console.log('Service Worker viejo desregistrado:', registration);
+    
+        if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker
+              .register('/service-worker.js')
+              .then((registration) => {
+                console.log('Service Worker registrado con éxito:', registration);
+              })
+              .catch((error) => {
+                console.error('Error al registrar el Service Worker:', error);
+              });
+          }
+        } else {
+          console.log('Modo de desarrollo: no se registra el Service Worker.');
+        }
+      }).catch((error) => {
+      console.error('Error al desregistrar el Service Worker viejo:', error);
+      });
+    });
+  });
+}
+
+
 /*!
 
 =========================================================
@@ -58,34 +108,40 @@ const UserProfile = () => {
 }, []);*/
 
 
+
+
 ReactDOM.render(
   <Provider store={store}>
     <PersistGate loading={<Spinner />} persistor={persistor}>
       <ChakraProvider theme={theme} resetCss={false} position="relative">
-        <AppProvider>
-          <DataBaseProvider>
-            <UsuarioProvider>
-              <CasoProvider>
-                <SqlProvider>
-                  <DisposalProvider> 
-                    <HashRouter>
-                      <Switch>
-                        <Route path={`/auth`} component={AuthLayout} />
-                        <Route path={`/admin`} component={AdminLayout} />
-                        <Route path={`/user/:userId`} component={UserProfile} />
-                        <Route path={`/error`} component={Notfound404} />
-                        <Route path={`/rtl`} component={RTLLayout} />
-                        <Redirect from={`/`} to="/admin/dashboard" />
-                      </Switch>
-                    </HashRouter>
-                  </DisposalProvider>
-                </SqlProvider>
-              </CasoProvider>
-            </UsuarioProvider>
-          </DataBaseProvider>
-        </AppProvider>
+        <DataBaseProvider>
+          <AppProvider>
+              <UsuarioProvider>
+                <CasoProvider>
+                  <SqlProvider>
+                    <DisposalProvider> 
+                      <HashRouter>
+                        <Switch>
+                          <Route path={`/auth`} component={AuthLayout} />
+                          <Route path={`/admin`} component={AdminLayout} />
+                          <Route path={`/user/:userId`} component={UserProfile} />
+                          <Route path={`/error`} component={Notfound404} />
+                          <Route path={`/rtl`} component={RTLLayout} />
+                          <Redirect from={`/`} to="/admin/dashboard" />
+                        </Switch>
+                      </HashRouter>
+                    </DisposalProvider>
+                  </SqlProvider>
+                </CasoProvider>
+              </UsuarioProvider>
+          </AppProvider>
+        </DataBaseProvider>
       </ChakraProvider>
     </PersistGate>
   </Provider>,
   document.getElementById("root")
 );
+
+
+
+

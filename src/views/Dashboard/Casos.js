@@ -14,22 +14,22 @@ import {
 
 import { ChakraProvider, SimpleGrid, Container } from '@chakra-ui/react';
 // Custom components
-import Card from "components/Card/Card.js";
-import CardBody from "components/Card/CardBody.js";
-import CardHeader from "components/Card/CardHeader.js";
-import TablesProjectRow from "components/Tables/TablesProjectRow";
-import CasosTableRow from "components/Casos/CasosTableRow";
+import Card from "@components/Card/Card.js";
+import CardBody from "@components/Card/CardBody.js";
+import CardHeader from "@components/Card/CardHeader.js";
+import TablesProjectRow from "@components/Tables/TablesProjectRow";
+import CasosTableRow from "@components/Casos/CasosTableRow";
 import React, { useEffect, useState, useMemo} from "react";
 import { tablesProjectData, tablesTableData } from "variables/general";
 
 import { FaUserAlt,FaCheckCircle, FaTasks } from "react-icons/fa";
 
-import CasoSummary from "components/Casos/CasoSummary";
+import CasoSummary from "@components/Casos/CasoSummary";
 
-import CasoDetail from "components/Casos/CasoDetail";
+import CasoDetail from "@components/Casos/CasoDetail";
 
 import { useDataBaseContext } from 'dataBaseContext';
-import useCaso from 'hooks/caso/useCaso';
+import useCaso from '@hooks/caso/useCaso';
 
 import FilterCase from 'components/Casos/FilterCase';
 

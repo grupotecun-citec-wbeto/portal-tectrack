@@ -74,7 +74,7 @@
 	},
 	"scripts": {
 		"start": "cross-env NODE_ENV=development react-app-rewired start",
-		"build": "cross-env CI=false;cross-env PUBLIC_URL=/ react-app-rewired build && gulp licenses",
+		"build": "dotenv -e .env react-app-rewired build && gulp licenses",
 		"test": "react-app-rewired test --env=jsdom",
 		"eject": "react-scripts eject",
 		"deploy": "cross-env CI=false PUBLIC_URL=/ NODE_ENV=production REACT_APP_API_URL=https://apirest-tectrack-58928188038.us-central1.run.app react-app-rewired build && gulp licenses",
@@ -89,6 +89,7 @@
 	"devDependencies": {
 		"@babel/plugin-transform-react-jsx-source": "^7.14.5",
 		"cross-env": "^7.0.3",
+		"dotenv-cli": "^8.0.0",
 		"eslint-config-prettier": "8.3.0",
 		"eslint-plugin-prettier": "3.4.0",
 		"gulp": "4.0.2",
