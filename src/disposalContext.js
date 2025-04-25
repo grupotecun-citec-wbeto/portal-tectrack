@@ -62,7 +62,6 @@ const DisposalProvider = ({ children }) => {
     }, [deleteQueue, db]);
 
     const addToDeleteQueue = (caso_ID,equipo_ID, table, ruta) => {
-        rehidratarDb()
         setDeleteQueue([...deleteQueue, { caso_ID,equipo_ID, table,ruta }]);
     };
 

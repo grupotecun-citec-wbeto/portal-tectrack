@@ -66,13 +66,18 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
   useEffect( () =>{
     if(!dbReady) return;
     
-    const users = usuariosLoadItems()
-    
-    //console.log(cont => cont + 1);
-    if(JSON.stringify(usuarios_ref.current) !== JSON.stringify(users)){
-      usuarios_ref.current = users
-      setUsuarios(users)
+    const run = async () => {
+      const users = await usuariosLoadItems()
+      console.log(users,"9b3c1432-e9bf-4c97-bca7-30f2746010bf")
+      
+      //console.log(cont => cont + 1);
+      if(JSON.stringify(usuarios_ref.current) !== JSON.stringify(users)){
+        usuarios_ref.current = users
+        setUsuarios(users)
+      }
     }
+
+    run()
     
   },[dbReady])
 

@@ -25,6 +25,7 @@ function useUsuario(dbReady = false,syncActive = true) {
     const loadItems = () => {
         const all = repository.findAll();
         setItems(all);
+        return all;
     };
 
     const createItem = (name, email) => {

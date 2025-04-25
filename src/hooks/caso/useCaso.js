@@ -136,9 +136,9 @@ function useCaso(dbReady = false,syncActive = true) {
         const fetchDataWithTimeout = async () => {
             if (isFetching) return; // Evitar múltiples llamadas simultáneas
             isFetching = true;
+            isFetching = await syncService.run();
             try{
                 await loadCasos()
-                isFetching = await syncService.run();
             }catch(err){
                 console.log('No se encontro ningun caso no sincronizado',err,'dbf7fc9b-d36d-4484-8617-cbb2351edd1e')
             }

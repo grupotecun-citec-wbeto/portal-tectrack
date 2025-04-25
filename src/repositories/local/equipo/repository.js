@@ -8,6 +8,12 @@ const PACKAGE = 'repositories/local/equipo';
 
 import { getDB, persistDatabase } from '../../../db/database';
 
+
+import repoCatalogo from '../catalogo/repository';
+import repoDivision from '../division/repository';
+import repoCategoria from '../categoria/repository';
+import repoModelo from '../modelo/repository';
+
 const repository = {
     tableCode:16,
     tableName:'equipo',
@@ -123,6 +129,38 @@ const repository = {
         stmt.free();
         return results;
         
+    },
+
+
+    searchList: async(seleccionados) =>{
+
+        const placeholders = seleccionados.map(() => '?').join(',');
+        const db = getDB();
+        const query = `
+            SELECT 
+                E.ID,
+                E.chasis,
+                E.serie, 
+                E.serie_extra,
+                DV.name AS division_name,
+                CTE.name AS categoria_name,
+                M.name AS modelo_name,
+                CT.business_name 
+            FROM ${repository.tableName} E
+            INNER JOIN ${repoCatalogo.tableName} CT ON CT.ID = E.catalogo_ID
+            INNER JOIN ${repoDivision.tableName} DV ON DV.ID = CT.division_ID
+            INNER JOIN ${repoCategoria.tableName} CTE ON CTE.ID = CT.categoria_id
+            INNER JOIN ${repoModelo.tableName} M ON M.ID = CT.modelo_ID
+            WHERE E.ID IN (${placeholders})
+        `;
+        const stmt = db.prepare(query);
+        stmt.bind(seleccionados);
+        const results = [];
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
     }
 
     
