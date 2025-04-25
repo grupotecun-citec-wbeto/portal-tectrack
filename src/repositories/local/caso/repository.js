@@ -223,6 +223,7 @@ const repository = {
         return results;
     },
     findAllByFilters: async (userDataLogin,filters, estado = {operador:"<>", value:"6"}, config = {countOnly:false}) => {
+        
         try{
             const db = getDB();
             let query = ``
@@ -254,7 +255,8 @@ const repository = {
                 case 3: // perfil admin 
                     parameters.unshift(estado.value)   
                     query = `SELECT ${query_count} FROM ${repository.tableName} WHERE 1=1 AND caso_estado_ID ${estadoFilter} ${query_user} ${query_prioridad} ${query_segmento} ORDER BY start DESC`
-                break;
+                    console.log(query,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
+                    break;
                 default:
                     
                     parameters.unshift(userDataLogin.ID)
@@ -268,9 +270,11 @@ const repository = {
 
             if(config.countOnly) {
                 stmt.bind(parameters)
+                console.log(parameters,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
                 stmt.step()
                 results = stmt.getAsObject()
             }else{
+                console.log(parameters,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c-2")
                 stmt.bind(parameters)
                 while (stmt.step()) {
                     results.push(stmt.getAsObject());

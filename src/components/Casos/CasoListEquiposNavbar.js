@@ -15,7 +15,10 @@ import avatar3 from "assets/img/avatars/avatar3.png";
 
 
 import AppContext from "appContext";
-import SqlContext from "sqlContext";
+
+// data base
+import { useDataBaseContext } from "dataBaseContext";
+import useEquipo from "hooks/equipo/useEquipo";
 
 
 import {  TecTrackCaseLight  } from "components/Icons/Icons";
@@ -40,12 +43,12 @@ function CasoListEquiposNavbar(props){
         ...rest
       } = props;
 
-    // context 
-    /*const {
-        casoActivo,setCasoActivo
-    } = useContext(AppContext)*/
+      
 
-    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
+    //dbReady
+    const { dbReady } = useContext(AppContext);
+    const { searchList: searchListEquipo } = useEquipo(dbReady,false);  
+
 
     const [isCasoActivo,setIsCasoActivo] = useState(false)
     const [casoEquipos,setCasoEquipos] = useState([])
@@ -68,12 +71,6 @@ function CasoListEquiposNavbar(props){
      * SECTION: useEfect
      *
      */
-
-    // Rehidratar la base de dato
-    /*useEffect( () =>{
-        if(!db) rehidratarDb()
-      },[db,rehidratarDb])*/
-
     useEffect(() =>{
         
         const run = async() =>{
@@ -91,46 +88,18 @@ function CasoListEquiposNavbar(props){
 
     // Lista de equipo en el caso actual
     useEffect( () => {
+        if(!dbReady) return; // Esperar a que la base de datos esté lista
         const run = async() => {
-            if(db == null || userData == null) return 0
-
             const equipos = {...userData.casos[userData?.casoActivo?.code]?.equipos}
-            
-
             const valuesArray = Object.keys(equipos);
-            const joinArray = valuesArray.join(', ');
-            //equipo where ID in (${joinArray})
-            try{
-                if(joinArray == '') {
-                    setCasoEquipos([])
-                    return 0
-                }  // se muere el proceso
-                const equipos = db.exec(`
-                    SELECT 
-                        E.ID,
-                        E.chasis,
-                        E.serie, 
-                        E.serie_extra,
-                        DV.name AS division_name,
-                        CTE.name categoria_name,
-                        M.name modelo_name,
-                        CT.business_name 
-                    FROM equipo E
-                    INNER JOIN catalogo CT ON CT.ID = E.catalogo_ID
-                    INNER JOIN division DV ON DV.ID = CT.division_ID
-                    INNER JOIN categoria CTE ON CTE.ID = CT.categoria_id
-                    INNER JOIN modelo M ON M.ID = CT.modelo_ID
-                    where E.ID in (${joinArray})`).toArray()
-                
-                setCasoEquipos(equipos)
-            }catch(err){
-               console.error(err) 
-            }
+            
+            const equiposResponse = await searchListEquipo(valuesArray)
+            setCasoEquipos(equiposResponse)
             
             
         }
         run()
-    },[db,userData])
+    },[dbReady,userData])
 
 
     const eliminarEquipo = async(maquina_id) =>{

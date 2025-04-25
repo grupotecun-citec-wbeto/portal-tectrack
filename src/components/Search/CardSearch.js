@@ -254,16 +254,17 @@ function SearchCard(props) {
                         />
                     ):(
                         <>
-                            
-                            <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
-                                <IconButton
-                                    icon={<FaTimes />} // Icono para quitar selección
-                                    aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
-                                    colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
-                                    size="md" // Tamaño del botón
-                                    onClick={(!isPost) ? eliminarEquipoEnBusqueda : eliminarEquipo} // Acción al hacer clic
-                                />
-                            </Tooltip>
+                            {(!isPost) && (
+                                <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
+                                    <IconButton
+                                        icon={<FaTimes />} // Icono para quitar selección
+                                        aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
+                                        colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
+                                        size="md" // Tamaño del botón
+                                        onClick={(!isPost) ? eliminarEquipoEnBusqueda : eliminarEquipo} // Acción al hacer clic
+                                    />
+                                </Tooltip>
+                            )}
                             
                             
                             

@@ -110,11 +110,12 @@ function Sidebar(props) {
         return (
             <>
             {(prop?.visible ?? true) && (
-              <AccordionItem isCollapsed  borderWidth={0} >
+              <AccordionItem key={`${ruta}-${key}-${prop.name}`} isCollapsed borderWidth={0} >
                 <h2>
                   
                     {activeRoute(prop.layout + prop.path,prop.category) === "active" ? (
                       <AccordionButton
+                        key={(prop.layout + prop.path,prop.category)}
                         boxSize="initial"
                         justifyContent="flex-start"
                         alignItems="center"
@@ -170,6 +171,7 @@ function Sidebar(props) {
                       </AccordionButton>
                     ) : (
                       <AccordionButton
+                        key={(prop.layout + prop.path,prop.category)}
                         boxSize="initial"
                         justifyContent="flex-start"
                         alignItems="center"
@@ -223,7 +225,7 @@ function Sidebar(props) {
                       </AccordionButton>
                     )}
                 </h2>
-                <AccordionPanel pb={4} >
+                <AccordionPanel key={ruta + 11} pb={4} >
                   {createLinks(prop.views)}
                 </AccordionPanel>
               </AccordionItem>
@@ -235,7 +237,7 @@ function Sidebar(props) {
       return (
         <>
           {(prop?.visible ?? true) && (
-            <NavLink to={prop.layout + prop.path} >
+            <NavLink key={`${prop.layout + prop.path}-${key}-${prop.name}`} to={prop.layout + prop.path} >
               {activeRoute(prop.layout + prop.path) === "active" ? (
                 <Button
                   boxSize="initial"
@@ -470,7 +472,7 @@ export function SidebarResponsive(props) {
         return (
           <>
             {(prop?.visible ?? true) && (
-              <AccordionItem defaultIsOpen >
+              <AccordionItem key={ruta} defaultIsOpen >
                 <h2 >
                     {activeRoute(prop.layout + prop.path,prop.category) === "active" ? (
                       <AccordionButton
@@ -589,7 +591,7 @@ export function SidebarResponsive(props) {
       return (
         <>
             {(prop?.visible ?? true) && (
-              <NavLink to={prop.layout + prop.path} >
+              <NavLink key={prop.layout + prop.path} to={prop.layout + prop.path} >
                 {activeRoute(prop.layout + prop.path) === "active" ? (
                   <Button
                     boxSize="initial"

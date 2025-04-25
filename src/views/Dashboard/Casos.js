@@ -103,6 +103,7 @@ function Casos() {
 
       const fetchData = async () => {
         const casosData = await findCasesByFilters(userData.login,filters,{operador:"<>", value:"6"},{countOnly:false})
+        console.log('casosData 471c03b2-ccc8-4c8c-95c4-91574ce59103',casosData)
         setData(casosData)
       }
       fetchData()

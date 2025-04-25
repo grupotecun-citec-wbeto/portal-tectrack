@@ -163,7 +163,7 @@ ReactDOM.render(
               <UsuarioProvider>
                 <CasoProvider>
                   <SqlProvider>
-                    <DisposalProvider> 
+                    <DisposalProvider>
                       <HashRouter>
                         <Switch>
                           <Route path={`/auth`} component={AuthLayout} />
