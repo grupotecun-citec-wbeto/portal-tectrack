@@ -23,7 +23,7 @@ import {
 // Layout components
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
 import routes from "routes.js";
 // Custom Chakra theme
@@ -39,15 +39,23 @@ import citec_png from "assets/img/CITEC.png";
 import tecun_png from "assets/img/TECUN_isotipo.png";
 import medallon_naranja from "assets/img/Medallones Tecun-04.png" // color naranja
 
+// database
+import { useDataBaseContext } from "dataBaseContext";
+import UserList from '../components/UserList';
+
 
 export default function Dashboard(props) {
   const { ...rest } = props;
+
+  
+  
 
   //useTransladoDb() // cargar correción de base de datos hacia base de datos distribuidas
 
   // states and functions
   const [fixed, setFixed] = useState(false);
   const { colorMode } = useColorMode();
+
 
   const location = useLocation()
 
@@ -193,6 +201,7 @@ export default function Dashboard(props) {
           base: "100%",
           xl: "calc(100% - 275px)",
         }}>
+        
         <Portal>
           <AdminNavbar
             onOpen={onOpen}

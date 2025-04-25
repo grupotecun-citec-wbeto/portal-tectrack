@@ -26,7 +26,8 @@ import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
 
-import SqlContext from "sqlContext";
+import { useDataBaseContext } from "dataBaseContext";
+import useHerramienta from "hooks/herramienta/useHerramienta";
 
 /*=======================================================
  BLOQUE: Import component TECTRACK
@@ -46,7 +47,8 @@ function CardHerramientas(props){
     
     const {title,...rest} = props
 
-    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
+    const {dbReady} = useDataBaseContext()
+    const { loadItems: loadHerramientas, findById: findByHerramientaId} = useHerramienta(dbReady,false)
 
     const [necesitaEspecialista,setNecesitaEspecialista] = useState(false)
     const [selectedEspecialista,setSelectedEspecialista] = useState('')
@@ -101,13 +103,13 @@ function CardHerramientas(props){
     },[userData.casoActivo.code])
 
     useEffect(() => {
-        if(!db) return;
+        if(!dbReady) return;
         //onSearch(debouncedSearchValue);
         const fetchData = async () => {
           try {
             // se va eliminar porque se va consultar localmente
             //const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generaltools`);
-            const response = db.exec(`SELECT * FROM herramienta`).toArray()
+            const response = await loadHerramientas()
             
             //let data = JSON.parse(response.data)
             const data = response
@@ -119,7 +121,7 @@ function CardHerramientas(props){
         };
         fetchData();
       
-    }, [db]);
+    }, [dbReady]);
     
     /*====================FIN BLOQUE: useEfect        ==============*/
 

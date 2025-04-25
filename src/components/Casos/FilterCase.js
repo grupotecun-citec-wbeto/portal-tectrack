@@ -9,7 +9,8 @@ import Card from "components/Card/Card";
 import CardBody from "components/Card/CardBody";
 import CardHeader from "components/Card/CardHeader";
 
-import SqlContext from 'sqlContext';
+import { useDataBaseContext } from 'dataBaseContext';
+import useUsuario from 'hooks/usuario/useUsuario';
 
 const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPrioridadSelected,segmentoSelected,setSegmentoSelected}) => {
   // ... estado para manejar los valores de los filtros
@@ -28,7 +29,8 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
    
    // ************************** REDUX-PRESIST ****************************
 
-  const {db,rehidratarDb,saveToIndexedDB,} = useContext(SqlContext)
+  const { dbReady } = useDataBaseContext(); // Obtener la base de datos desde el contexto
+  const { loadItems: usuariosLoadItems } = useUsuario(dbReady,false); // Obtener la función findAll desde el hook de usuario
 
   // useState
 
@@ -62,9 +64,9 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
   
   //Lista de usuarios
   useEffect( () =>{
-    if(!db) return;
+    if(!dbReady) return;
     
-    const users = db.exec(`SELECT * FROM usuario`).toArray()
+    const users = usuariosLoadItems()
     
     //console.log(cont => cont + 1);
     if(JSON.stringify(usuarios_ref.current) !== JSON.stringify(users)){
@@ -72,7 +74,7 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
       setUsuarios(users)
     }
     
-  },[db])
+  },[dbReady])
 
  
   
@@ -83,12 +85,14 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
         <Heading size="md">Filtros de Casos</Heading>
         <HStack spacing={4} mb={{xl:"15px",sm:"15px"}}>
           {/* Filtros básicos */}
-          {userData.login.perfil_ID == 3 && (
+          {userData?.login?.perfil_ID == 3 ? (
             <Select placeholder="Todos los usuarios" value={userSelected} onChange={(e) => setUserSelected(e.target.value)}>
-              {usuarios?.map((usuario,key) =>(
+              {usuarios?.map((usuario, key) => (
                 <option key={key} value={usuario.ID}>{usuario.display_name}</option>
               ))}
             </Select>
+          ) : (
+            window.location.href = '/login' // Redirigir al login si no existe perfil_ID
           )}
           
           <Select placeholder="Ordenado Prioridad mas urgente" value={prioriSelected} onChange={(e) => setPrioriSelected(e.target.value)}>

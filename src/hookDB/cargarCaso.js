@@ -1,13 +1,26 @@
 import { useState,useContext,useEffect } from 'react';
-import SqlContext from 'sqlContext';
-import axios from 'axios';
+
 //redux
 import { useSelector, useDispatch } from 'react-redux';
-import { use } from 'react';
 
-function useCargarCaso(caso_id) {
+import { useDataBaseContext } from 'dataBaseContext';
+
+// repositorios de datos
+import syncRepository from 'repositories/api/syncRepository';
+import repositoryDiagnostico from 'repositories/local/diagnostico/repository';
+import repositoryVisita from 'repositories/local/visita/repository';
+import repositoryPrograma from 'repositories/local/programa/repository';
+import repositoryCasoVisita from 'repositories/local/caso_visita/repository';
+import repositoryCaso from 'repositories/local/caso/repository';
+
+function useCargarCaso(caso_id = false) {
   
-  
+  // Preparar la base de datos
+  //const {dbReady} = useDataBaseContext()
+
+    // *********************************** HOOK CASO **************************************
+    // ************* HOOOK CASO *************************************HOOK CASO ************
+    // *********************************** HOOK CASO **************************************
   /*=======================================================
      BLOQUE: REDUX-PERSIST
      DESCRIPTION: 
@@ -26,95 +39,91 @@ function useCargarCaso(caso_id) {
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
 
-  const[startLoad,setStartLoad] = useState(false)
-  
-  const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
-  
-  const [formData, setFormData] = useState([]);
   const [times,setTimes] = useState({'caso':300000})
-  const [dataCasoSync,setDataCasoSync] = useState({})
-  const [formDatadiagnosticos,setFormDataDiagnosticos] = useState({})
-  const [formDataProgramas,setFormDataProgramas] = useState({})
-  const [formDataVisitas,setFormDataVisitas] = useState({})
-  const [formDataCasoVisitas,setFormDataCasoVisitas] = useState({})
-  const [listaCasos,setListaCasos] = useState([])
 
+  const loadCasoPromise = async() =>{
+    //rehidratarDb();
+    if(caso_id == '') return;
+    const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
+    
 
-  /*useEffect( () => {
-    console.log('loadCaso rehidratarDb:', '8230d797-8360-4920-85fa-1d359221ac12');
-    rehidratarDb()
-  },[])*/
+    return new Promise(async(resolve, reject) => {
+      
+        try {
+          const casosNoSincronizados = await repositoryCaso.unsynchronizedCase(caso_id)
+          
+          console.log('casosNoSincronizados: 9ef51e92-feb1-4a2e-b178-8f9af10f7ed5', casosNoSincronizados,caso_id);
+            
+          if(casosNoSincronizados.length != 0){  
+            console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
+            const uuids = casosNoSincronizados.map(objeto => objeto.ID);
+            
+            const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
+            const formDataMerge = await getDataMerge(listaCasos)
+            await syncCloud(formDataMerge)
+            resolve(true)
+          }else{
+            console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
+            reject(false)
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 400) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data: 70983d04-a730-4b3c-963d-e07872845b27', error);
+          reject(error) 
+        }
+        
+      
+    });
 
-  // Rehidratar la base de dato
-  /*useEffect( () =>{
-    if(!db) rehidratarDb()
-  },[db,rehidratarDb])*/
+    // Llamar a la función de inmediato
+    //fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    //const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  }
+
 
   /**
    * Obtener lista de casos no sincronizados
    */
   const loadCaso = async() =>{
-  
     //rehidratarDb();
     if(caso_id == '') return;
-    console.log('loadCaso called from component:', caso_id, '5f2f8267-7599-4a83-a0e8-90d9cbba3ddb');
     const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
     
+
     const fetchData = async (synctable_ID) => {
-      if(db != null){
-        //rehidratarDb()
+      //if(dbReady){
         try {
-          const query = `SELECT
-              ID,
-              usuario_ID,
-              usuario_ID_assigned,
-              comunicacion_ID,
-              segmento_ID,
-              caso_estado_ID,
-              fecha,
-              start,
-              date_end,
-              description,
-              prioridad,
-              uuid,
-              equipos
-            FROM 
-              caso_v2 
-            WHERE 
-              length(ID) = 36
-              AND ID LIKE '%${caso_id}%'
-              AND syncStatus = 1
-              `
-          const casosNoSincronizados = db.exec(query).toArray()
+          const casosNoSincronizados = await repositoryCaso.unsynchronizedCases(caso_id)
           
-            // syncStatus = 0 AND 
+          console.log('casosNoSincronizados: 9ef51e92-feb1-4a2e-b178-8f9af10f7ed5', casosNoSincronizados,caso_id);
             
-          if(casosNoSincronizados.length != 0){   
-            setFormData(casosNoSincronizados)
+          if(casosNoSincronizados.length != 0){  
+            console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
             const uuids = casosNoSincronizados.map(objeto => objeto.ID);
-            setListaCasos(uuids)
-          }else{
-            setListaCasos([])
-          }
-              
             
-          //const json = JSON.parse(response.data)
-          //const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,catalogo_ID,serie,serie_extra,chasis,proyecto_ID,departamento_crudo,departamento_code,estatus_maquinaria_ID,cliente_ID,estado_maquinaria_ID,codigo_finca,contrato,serial_modem_telemetria_pcm,serial_modem_telemetria_am53,fecha_inicio_afs_connect,fecha_vencimiento_afs_connect,fecha_vencimiento_file_transfer,modem_activo,img,unidad_negocio_ID,propietario_ID,departamento_negocio_ID,supervisor_ID,modelo_variante_ID,tiene_telemetria) VALUES ${values};`
-          //db.run(insertar)
-          // imporante simpres salvar en en indexdb
-          //await saveToIndexedDB(db);
+            const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
+            const formDataMerge = await getDataMerge(listaCasos)
+            await syncCloud(formDataMerge)
+          }else{
+            console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
+          }
         } catch (error) {
           if (error.response && error.response.status === 400) {
-            //const prevTime = time[tabla]
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
           console.error('Error fetching data: 70983d04-a730-4b3c-963d-e07872845b27', error);
         }
         
-      }else{
+      /*}else{
         console.log('cadb0a6c-385b-4caf-89e5-f79ed4b6fc27');
         
-      }
+      }*/
     };
 
     // Llamar a la función de inmediato
@@ -126,231 +135,145 @@ function useCargarCaso(caso_id) {
     return () => clearInterval(intervalId);
   }
 
- 
-  useEffect( () => {
-    if(!db) return;
-      loadCaso()
-  },[db])
 
-  const loadCasoRehidrated = async() =>{  
-    rehidratarDb()
+  const loadCasos = async() =>{
+    //rehidratarDb();
+    const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
+
+    return new Promise(async(resolve, reject) => {
+      /*if(dbReady){*/
+        try {
+          const casosNoSincronizados = await repositoryCaso.unsynchronizedCases()
+          
+          console.log('casosNoSincronizados: f9bee5eb-9ef5-434c-9598-fe7c54437074', casosNoSincronizados,caso_id);
+            
+          if(casosNoSincronizados.length != 0){  
+            console.log('loadCaso a880314f-5d74-460b-aacd-bfbd00ba7e57', casosNoSincronizados); 
+            const uuids = casosNoSincronizados.map(objeto => objeto.ID);
+            
+            const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
+            const formDataMerge = await getDataMerge(listaCasos)
+            await syncCloud(formDataMerge)
+            resolve(true)
+          }else{
+            console.log('loadCaso fail 3ba8b4c2-fa61-45ee-b29c-ce8e22e4f350', casosNoSincronizados);
+            reject(false)
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 400) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data: 6263ae81-e343-439a-82db-2a2e496b2fda', error);
+          reject(error)
+        }
+        
+      /*}else{
+        console.log('b331b681-b213-447c-b0b7-bda3d2fb68ed');
+        reject(false)
+        
+      }*/
+    });
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  }
+
+
+
+
+
+
+
+  
+
+
+  /**
+   * Cargar datos hacia medio de datos enviado por repositorio de datos.
+   * @param {*} formDataMerge 
+   * @returns 
+   */
+  const syncCloud = async(formDataMerge) => {
+    return new Promise(async(resolve, reject) => {
+      const fetchData = async(retries = 3,delay = 500) =>{
+        let attempts = 0;
+  
+        const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        
+        while (attempts < retries) {
+          try{  
+            
+            const data = await syncRepository.syncLocalCasesWithCloud(formDataMerge)
+            for (const uuid of Object.keys(data)) {
+              repositoryCaso.setAsSynchronized(uuid);
+            }
+
+            resolve(data)
+  
+            attempts = retries + 1
+            
+          } catch (error) {
+            attempts++;
+            console.warn(`Intento ${attempts} fallido.`, error.message);
+  
+            if (attempts >= retries) {
+                //throw error; // Propaga el error después de agotar los intentos
+                reject(error)
+            }
+            await wait(delay); // Espera antes del siguiente intento
+          }
+        }
+    
+      }
+  
+      
+      fetchData(5,500)
+    })
   }
 
 
   /**
-   * Cargar Casos hacia MYSQL
+   * Obtiene los datos de los casos, diagnosticos, programas y visitas
+   * @param {object} listaCasos objeto con la lista de casos y sus identificadores
+   * @returns 
    */
-  useEffect( () =>{
-    if (formData.length == 0) return;
-    //if (formDatadiagnosticos.length == 0) return;
-    //if (formDataProgramas.length == 0) return;
-    //if (formDataVisitas.length == 0) return;
-    //if (formDataCasoVisitas.length == 0) return;
-
-    const fetchData = async(url,retries = 3,delay = 500) =>{
-      let attempts = 0;
-
-      const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-      while (attempts < retries) {
-        try{  
-          const formDataMerge = {
-            "casos":formData,
-            "diagnosticos":(formDatadiagnosticos.length != 0) ? formDatadiagnosticos : {},
-            "programas": (formDataProgramas.length != 0) ? formDataProgramas : {} ,
-            "visitas": (formDataVisitas.length != 0) ? formDataVisitas : {} ,
-            "caso_visitas":(formDataCasoVisitas.length != 0) ? formDataCasoVisitas : {}
-          };
-          
-          const response = await axios.post(url, formDataMerge);
-          const data = response.data
-          setDataCasoSync(data)
-          Object.keys(data).map( (uuid) => {
-            db.run(`UPDATE caso_v2 SET syncStatus = 0 WHERE ID = '${uuid}'`);
-          })
-    
-          // recordar de activar este procedimiento
-          saveToIndexedDB(db);
-
-          attempts = retries + 1
-          
-        } catch (error) {
-          attempts++;
-          console.warn(`Intento ${attempts} fallido.`, error.message);
-
-          if (attempts >= retries) {
-              //throw error; // Propaga el error después de agotar los intentos
-          }
-          await wait(delay); // Espera antes del siguiente intento
-        }
-      }
-  
-    }
-
-    
-    fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/casos`,5,500)
-    
-    setFormData([])
-    
-    
-  },[formDataCasoVisitas])
-
-  // Obtner la lista diagnosticos segun la lista de casos sincronizados
-  useEffect( () =>{
-    if (!db) return;
-    if( Object.keys(listaCasos).length == 0) return;
-
-    const fetchData = async() => {
-    
+  const getDataMerge = (listaCasos) => {
+    return new Promise(async(resolve, reject) => {
       try{
-        const uuids = listaCasos.map(key => `'${key}'`).join(",")
-        const diagnosticos = db.exec(`
-          SELECT
-            D.equipo_ID,
-            D.caso_ID,
-            D.diagnostico_tipo_ID,
-            D.asistencia_tipo_ID,
-            CASE 
-              WHEN D.especialista_ID <> 0 THEN D.especialista_ID 
-              ELSE NULL 
-            END AS especialista_ID,
-            D.description
-          FROM 
-            caso_v2 C
-            INNER JOIN diagnostico_v2 D ON D.caso_ID = C.ID
-          WHERE
-            C.ID IN (${uuids})
-          
-          `).toArray()
-          setFormDataDiagnosticos(diagnosticos)
+        
+        const diagnosticos = await repositoryDiagnostico.findByListCaseIds(listaCasos.uuids)
+           
+        const programas = await repositoryPrograma.findByListCaseIds(listaCasos.uuids)
+ 
+        const visitas = await repositoryVisita.findByListCaseIds(listaCasos.uuids)
+ 
+        const caso_visitas = await repositoryCasoVisita.findByListCaseIds(listaCasos.uuids)
+ 
+        resolve({
+          casos:listaCasos.casosNoSincronizados,
+          diagnosticos: diagnosticos,
+          programas: programas ,
+          visitas: visitas ,
+          caso_visitas: caso_visitas
+        })
+       
+       }catch(err){
+         console.warn('bdd2c366-e099-4a5c-bc71-d2aa7e3de3ac',err)
+         reject(err)
+       }
+    });
+  }
 
-          
-          const programas = db.exec(`
-            SELECT
-              P.asistencia_tipo_ID,
-              P.caso_ID,
-              P.catalogo_ID,
-              P.prioridad,
-              P.name,
-              P.type
-            FROM 
-              caso_v2 C
-              INNER JOIN programa_v2 P ON P.caso_ID = C.ID
-            WHERE
-              C.ID IN (${uuids})
-            
-            `).toArray()
-          setFormDataProgramas(programas)
 
-          const visitas = db.exec(`
-            SELECT
-              V.ID,
-              V.vehiculo_ID,
-              V.usuario_ID,
-              V.fecha,
-              V.programming_date,
-              V.descripcion_motivo,
-              V.realization_date,
-              V.confirmation_date,
-              V.km_inicial,
-              V.km_final
-            FROM 
-              caso_v2 C
-              INNER JOIN caso_visita_v2 CV ON CV.caso_ID = C.ID
-              INNER JOIN visita_v2 V ON V.ID = CV.visita_ID
-            WHERE
-              C.ID IN (${uuids})
-            
-            `).toArray()
-          setFormDataVisitas(visitas)
 
-          const casoVisitas = db.exec(`
-            SELECT
-              CV.caso_ID,
-              CV.visita_ID
-            FROM 
-              caso_v2 C
-              INNER JOIN caso_visita_v2 CV ON CV.caso_ID = C.ID
-            WHERE
-              C.ID IN (${uuids})
-            
-            `).toArray()
-          setFormDataCasoVisitas(casoVisitas)
-
-          setListaCasos([])
-          /** caso_ID CHAR(36) NOT NULL,
-        visita_ID CHAR(36) NOT NULL, */
-
-    
-      
-      }catch(err){
-        console.warn('bdd2c366-e099-4a5c-bc71-d2aa7e3de3ac',err)
-      }
-    }
-
-    fetchData()
-
-    return () => {}
-    
-  },[db,listaCasos]) //dataCasoSync
-
-  /*useEffect( () =>{
-    const fetchData = async(url,retries = 3,delay = 100) =>{
-      let attempts = 0;
-
-      const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-      while (attempts < retries) {
-        try{  
-          
-          const response = await axios.post(url, formDatadiagnosticos);
-          console.log('794a3d28-ac84-4675-9a50-4476ad2f6767',response);
-          // recordar de activar este procedimiento
-          //saveToIndexedDB(db);
-          attempts = retries + 1
-          
-        } catch (error) {
-          attempts++;
-          console.warn(`Intento ${attempts} fallido.`, error.message);
-
-          if (attempts >= retries) {
-              //throw error; // Propaga el error después de agotar los intentos
-          }
-          await wait(delay); // Espera antes del siguiente intento
-        }
-      }
-  
-    }
-
-    if(Object.keys(formDatadiagnosticos).length > 0){
-      //fetchData(`${process.env.REACT_APP_API_URL}/api/v1/cargar/diagnosticos`,5,100)
-    }
-    
-    
-    
-  },[formDatadiagnosticos])*/
-
-  return {loadCaso,loadCasoRehidrated}
+  return {loadCaso,loadCasos,loadCasoPromise}
 
 }
 
 export default useCargarCaso
 
 
-
-/**
- * 
- * const handleChange = (event) => {
-    setValues({
-      ...values,
-      [event.target.name]: event.target.value,
-    });
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    // Lógica para enviar el formulario
-    console.log(values);
-  };
- */

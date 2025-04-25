@@ -11,28 +11,36 @@ import {
   Tr,
   useColorModeValue
 } from "@chakra-ui/react";
+
 import { ChakraProvider, SimpleGrid, Container } from '@chakra-ui/react';
 // Custom components
-import Card from "components/Card/Card.js";
-import CardBody from "components/Card/CardBody.js";
-import CardHeader from "components/Card/CardHeader.js";
-import TablesProjectRow from "components/Tables/TablesProjectRow";
-import CasosTableRow from "components/Casos/CasosTableRow";
-import React, { useEffect, useState, useContext} from "react";
+import Card from "@components/Card/Card.js";
+import CardBody from "@components/Card/CardBody.js";
+import CardHeader from "@components/Card/CardHeader.js";
+import TablesProjectRow from "@components/Tables/TablesProjectRow";
+import CasosTableRow from "@components/Casos/CasosTableRow";
+import React, { useEffect, useState, useMemo} from "react";
 import { tablesProjectData, tablesTableData } from "variables/general";
 
 import { FaUserAlt,FaCheckCircle, FaTasks } from "react-icons/fa";
 
-import CasoSummary from "components/Casos/CasoSummary";
+import CasoSummary from "@components/Casos/CasoSummary";
 
-import CasoDetail from "components/Casos/CasoDetail";
+import CasoDetail from "@components/Casos/CasoDetail";
 
-import SqlContext from "sqlContext";
+import { useDataBaseContext } from 'dataBaseContext';
+import useCaso from '@hooks/caso/useCaso';
 
 import FilterCase from 'components/Casos/FilterCase';
 
 
+
+
+
+
 import useTransladoDb from "hookDB/transladoDB";
+
+import useCargarCaso from 'hookDB/cargarCaso';
 
 function Casos() {
  
@@ -71,7 +79,9 @@ function Casos() {
   const [segmentoSelected,setSegmentoSelected] = useState('')
   
 
-  const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
+  const {dbReady} = useDataBaseContext()
+
+  const {findCasesByFilters } = useCaso(dbReady,false); // Hook para manejar la sincronización de casos
 
   const caseData = {
     id: 12345,
@@ -81,124 +91,126 @@ function Casos() {
     description: 'El dispositivo presenta fallas intermitentes de conexión.',
   };
 
-  // Rehidratar la base de datos db una sola vez
+  
   useEffect( () =>{
-    rehidratarDb()
-  },[])
-
-
-  useEffect( () =>{
-    if(db != null){
-      let query = ``
-      //filtros
-      const query_user = (usuarioSelected != '') ? ` AND usuario_ID = ${usuarioSelected} ` : ''
-      const query_prioridad = (prioridadSelected != '') ? ` AND prioridad = ${prioridadSelected} ` : ''
-      const query_segmento = (segmentoSelected != '') ? ` AND segmento_ID = ${segmentoSelected} ` : ''
-      
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 ${query_user} ${query_prioridad} ${query_segmento} ORDER BY start DESC`
-          break;
-        default:
-          query = `SELECT * FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento} ORDER BY start DESC`
-          break;
+    if(!dbReady) return // Esperar a que la base de datos esté lista
+   
+      const filters = {
+        usuarioSelected: usuarioSelected,
+        prioridadSelected: prioridadSelected,
+        segmentoSelected: segmentoSelected
       }
-      const casosData = db.exec(query).toArray();
-      
-      setData(casosData)
-    }
-  },[db,usuarioSelected,prioridadSelected,segmentoSelected])
+
+      const fetchData = async () => {
+        const casosData = await findCasesByFilters(userData.login,filters,{operador:"<>", value:"6"},{countOnly:false})
+        setData(casosData)
+      }
+      fetchData()
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
 
 
   useEffect( () =>{
-    if(db != null){
-      
-      let query = ``
-      //filtros
-      const query_user = (usuarioSelected != '') ? ` AND usuario_ID = ${usuarioSelected} ` : ''
-      const query_prioridad = (prioridadSelected != '') ? ` AND prioridad = ${prioridadSelected} ` : ''
-      const query_segmento = (segmentoSelected != '') ? ` AND segmento_ID = ${segmentoSelected} ` : ''
-      
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE 1=1 AND caso_estado_ID <> 6 ${query_user} ${query_prioridad} ${query_segmento}`
-          break;
-        default:
-          query = `SELECT count(*) AS cantidad FROM caso_v2 WHERE length(ID) = 36 AND caso_estado_ID <> 6 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
-          break;
+    if(!dbReady) return; // Esperar a que la base de datos esté lista
+    const filters = {
+        usuarioSelected: usuarioSelected,
+        prioridadSelected: prioridadSelected,
+        segmentoSelected: segmentoSelected
       }
-      const casos = db.exec(query).toObject();
+
+    const fetchData = async () => {
+      const casos = await findCasesByFilters(userData.login,filters,{operador:"<>", value:"6"},{countOnly:true})
       setCasosCant(casos.cantidad)
     }
-  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso,usuarioSelected,prioridadSelected,segmentoSelected])
+
+    fetchData()
+
+   
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
   
   
   useEffect( () =>{
-    if(db != null){
-      let query = ``
-      
-      //filtros
-      const query_user = (usuarioSelected != '') ? ` AND usuario_ID = ${usuarioSelected} ` : ''
-      const query_prioridad = (prioridadSelected != '') ? ` AND prioridad = ${prioridadSelected} ` : ''
-      const query_segmento = (segmentoSelected != '') ? ` AND segmento_ID = ${segmentoSelected} ` : ''
-
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT count(*) AS completados FROM caso_v2 where caso_estado_ID = 5 ${query_user} ${query_prioridad} ${query_segmento}`
-          break;
-        default:
-          query = `SELECT count(*) AS completados FROM caso_v2 WHERE caso_estado_ID = 5 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
-          break;
+    if(!dbReady) return; // Esperar a que la base de datos esté lista
+    const filters = {
+        usuarioSelected: usuarioSelected,
+        prioridadSelected: prioridadSelected,
+        segmentoSelected: segmentoSelected
       }
-
-
-      const casos = db.exec(query).toObject();
-      setCasosCompletados(casos.completados)
+    const fetchData = async () => {
+      const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"5"},{countOnly:true})
+      // completados
+      setCasosCompletados(casos.cantidad)
     }
-  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso,usuarioSelected,prioridadSelected,segmentoSelected])
+    fetchData()
+    
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
  
   useEffect( () =>{
-    if(db != null){
-
-      const query_user = (usuarioSelected != '') ? ` AND usuario_ID = ${usuarioSelected} ` : ''
-      const query_prioridad = (prioridadSelected != '') ? ` AND prioridad = ${prioridadSelected} ` : ''
-      const query_segmento = (segmentoSelected != '') ? ` AND segmento_ID = ${segmentoSelected} ` : ''
-
-      let query = ``
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1 ${query_user} ${query_prioridad} ${query_segmento}`
-          break;
-        default:
-          query = `SELECT count(*) AS pendientes FROM caso_v2 WHERE caso_estado_ID = 1 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} ) ${query_prioridad} ${query_segmento}`
-          break;
+    if(!dbReady) return; // Esperar a que la base de datos esté lista
+    
+    const filters = {
+        usuarioSelected: usuarioSelected,
+        prioridadSelected: prioridadSelected,
+        segmentoSelected: segmentoSelected
       }
 
-      const casos = db.exec(query).toObject();
-      setCasosPendientes(casos.pendientes)
-    }
-  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso,usuarioSelected,prioridadSelected,segmentoSelected])
+      const fetchData = async () => {
+        const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"1"},{countOnly:true})
+        // pendientes
+        setCasosPendientes(casos.cantidad)
+      }
+      fetchData()
+   
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
   
   
   useEffect( () =>{
-    if(db != null){
+    if(!dbReady) return; // Esperar a que la base de datos esté lista
 
-      let query = ``
-      switch(userData.login.perfil_ID){
-        case 3: // perfil admin
-           query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3`
-          break;
-        default:
-          query = `SELECT count(*) AS enproceso FROM caso_v2 WHERE caso_estado_ID = 3 AND length(ID) = 36 AND (usuario_ID = ${userData.login.ID} OR usuario_ID_assigned =  ${userData.login.ID} )`
-          break;
-      }
-      const casos = db.exec(query).toObject();
-      setCasosEnProceso(casos.enproceso)
+    const filters = {
+      usuarioSelected:'',
+      prioridadSelected:'',
+      segmentoSelected:''
     }
-  },[db,casosCant,casosCompletados,casosPendientes,casosEnProceso])
+
+    const fetchData = async () => {
+      const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"3"},{countOnly:true})
+      // enproceso
+      setCasosEnProceso(casos.cantidad)
+    }
+    fetchData()
+    
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
 
   
 
+  // Memorizar el mapeo de `data`
+  const memoizedCasoDetails = useMemo(() => {
+    return data.map((row, index) => {
+      const casoData = {
+        id: row.ID,
+        status_ID: row.caso_estado_ID,
+        createdAt: row.start,
+        closedAt: row.date_end,
+        assignedTechnician: "Juan Pérez",
+        usuario_ID_assigned: row.usuario_ID_assigned,
+        description: row.descripcion,
+        prioridad: row.prioridad,
+        segmento_ID: row.segmento_ID,
+        fecha: row.fecha,
+        usuario_ID: row.usuario_ID,
+        caso_uuid: row.uuid,
+        syncStatus: row.syncStatus,
+        equipos: row.equipos,
+
+      };
+      console.log('67c0ff94-05c2-405b-90be-6e090865393e')
+      return <CasoDetail key={index} caseData={casoData} />;
+    });
+  }, [data]); // Solo se recalcula cuando `data` cambia
   
   
   return (
@@ -262,27 +274,7 @@ function Casos() {
         setSegmentoSelected={setSegmentoSelected}
       />
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
-      {data?.map((row, index, arr) => {
-        const casoData = {
-          id: row.ID,
-          status_ID: row.caso_estado_ID,
-          createdAt: row.start,
-          closedAt: row.date_end,
-          assignedTechnician: 'Juan Pérez',
-          description: row.descripcion,
-          prioridad: row.prioridad,
-          segmento_ID: row.segmento_ID,
-          fecha:row.fecha,
-          usuario_ID: row.usuario_ID,
-          caso_uuid: row.uuid,
-          syncStatus: row.syncStatus
-        }
-        return(
-          <CasoDetail caseData={casoData} />
-        )
-
-      })}
-        
+        {memoizedCasoDetails}
       </SimpleGrid>
     </Flex>
 
