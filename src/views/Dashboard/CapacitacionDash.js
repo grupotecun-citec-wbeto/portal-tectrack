@@ -54,12 +54,21 @@ import {
 import CatalogoCapacitacion from "components/Capacitacion/CatalogoCapacitacion";
 import ClienteCapacitacion from "components/Capacitacion/ClienteCapacitacion";
 
+// base de datos
+import { useDataBaseContext } from "dataBaseContext";
+import useSistema from "hooks/sistema/useSistema";
+
   
   //*********************************************** FIN IMPORT ***************************************************** */
   
   function CapacitacionDash({ onSearch }) {
     
     const location = useLocation()
+
+
+    // dbReady
+    const { dbReady } = useDataBaseContext();
+    const { getNivel1 } = useSistema(dbReady,false);
 
     const typePrograma = (location.pathname == "/admin/pages/programa/capacitacion") ? 1 : 2
     console.log(typePrograma);
@@ -125,104 +134,6 @@ import ClienteCapacitacion from "components/Capacitacion/ClienteCapacitacion";
       { id: 2, name: 'Jane Smith', age: 25 },
     ];
 
-    /*=======================================================
-     BLOQUE: useEfect
-     DESCRIPTION: Solicitudes extenas acciones internas
-    =========================================================*/
-    
-    /*
-    useEffect (() =>{
-      if(!check){
-        const run = async() =>{
-          if(userData.casoActivo.code){
-            if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.hasOwnProperty("description")){
-              if(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description != ''){
-                setDescriptionValue(decodeURIComponent(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description))
-              }
-            }
-          }
-        }
-        run()
-      }
-    },[userData.casoActivo.code,changeReady])
-
-    // Obtener la lista de generalmachinessystem, obtine todos los systemas
-    useEffect(() => {
-        if(!check) {
-          //onSearch(debouncedSearchValue);
-          setDatos([])
-          const fetchData = async () => {
-            try {
-              const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generalmachinesystem`);
-              
-              let data = JSON.parse(response.data)
-              
-              const groupedData = {};
-
-              data.forEach(item => {
-                const { area_name, ID, system_name } = item;
-                if (!groupedData[area_name]) {
-                  groupedData[area_name] = [];
-                }
-                groupedData[area_name].push({ID:ID, system_name:system_name} );
-              });
-
-              setDatos(groupedData);
-            } catch (error) {
-              setDatos([])
-              console.error('Error al obtener datos:', error);
-              
-            }
-          };
-          fetchData();
-        }else{
-          setDatos([])
-        }
-      
-    }, [changeReady]);
-
-    useEffect(() =>{
-      if(!check){
-        if(debouncedSearchValue){
-          if(userData.casoActivo.code != ''){
-            const newUserData = structuredClone(userData);
-            newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description = encodeURIComponent(descriptionValue)
-            saveUserData(newUserData)
-          }
-        }
-      }
-    },[debouncedSearchValue,changeReady])
-
-    useEffect( () =>{
-      const isEqualPreDiagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico?.isEqualPreDiagnostico || false
-      if(isEqualPreDiagnostico){
-        setCheck(true)
-      }else{
-        setCheck(false)
-      }
-    },[])
-
-    useEffect( () =>{
-      
-      if(check){
-        const newUserData = structuredClone(userData)
-        newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico = newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].prediagnostico
-        newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico.isEqualPreDiagnostico = true
-        saveUserData(newUserData)
-        setChangeReady(!changeReady)
-      }else{
-        const assingDianostico = (Object.keys(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id]?.diagnostico_cpy || {}).length == 0 ) 
-          ? structuredClone(userData.stuctures.diagnostico)
-          : userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id]?.diagnostico_cpy
-        const newUserData = structuredClone(userData)
-        newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico = assingDianostico
-        saveUserData(newUserData)
-        setChangeReady(!changeReady)
-      }
-    },[check])
-    */
-
-    /*====================FIN BLOQUE: useEfect        ==============*/
   
     /**
      * SECTION: useEfect
@@ -230,14 +141,16 @@ import ClienteCapacitacion from "components/Capacitacion/ClienteCapacitacion";
 
     // Obtener la lista de generalmachinessystem, obtine todos los systemas
     useEffect(() => {
+      if(!dbReady) return; // Esperar a que la base de datos esté lista
       if(!check) {
         //onSearch(debouncedSearchValue);
         setDatos([])
         const fetchData = async () => {
           try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generalmachinesystem`);
+            //const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generalmachinesystem`);
+            const response = await getNivel1()
             
-            let data = JSON.parse(response.data)
+            let data = response
             
             const groupedData = {};
 
@@ -261,7 +174,7 @@ import ClienteCapacitacion from "components/Capacitacion/ClienteCapacitacion";
         setDatos([])
       }
     
-    }, [changeReady]);
+    }, [changeReady,dbReady]);
 
     useEffect(() =>{
       if(!check){

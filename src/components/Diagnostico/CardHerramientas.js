@@ -26,6 +26,7 @@ import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
 
+
 /*=======================================================
  BLOQUE: Import component TECTRACK
  DESCRIPTION: IMPORTAR TODOS LOS COMPONENTES MODIFICADOS PARA ESTE FIN
@@ -34,6 +35,11 @@ import AppContext from "appContext";
 import CheckboxHerramientas from "./CheckboxHerramientas";
 
 /*====================FIN BLOQUE: import component TECTRACK        ==============*/
+
+
+// base de datos
+import { useDataBaseContext } from "dataBaseContext";
+import useHerramienta from "hooks/herramienta/useHerramienta";
 
 
 //******************************************* FIN IMPORTS ************************** */
@@ -46,6 +52,11 @@ function CardHerramientas(props){
     const [necesitaEspecialista,setNecesitaEspecialista] = useState(false)
     const [selectedEspecialista,setSelectedEspecialista] = useState('')
     const [datos,setDatos] = useState([])
+
+
+    // dbReady
+    const { dbReady } = useDataBaseContext();
+    const { loadItems: loadHerramientas, findById: findByHerramientaId } = useHerramienta(dbReady, false); // Cambia a false para evitar sincronización
 
     // CONTEXTO
     const {casoActivo,setCasoActivo} = useContext(AppContext)
@@ -94,9 +105,10 @@ function CardHerramientas(props){
         setDatos([])
         const fetchData = async () => {
           try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generaltools`);
+            //const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generaltools`);
+            const response = await loadHerramientas();
             
-            let data = JSON.parse(response.data)
+            let data = response;
             
             setDatos(data);
             
@@ -108,7 +120,7 @@ function CardHerramientas(props){
         };
         fetchData();
       
-    }, []);
+    }, [dbReady]);
     
     /*====================FIN BLOQUE: useEfect        ==============*/
 

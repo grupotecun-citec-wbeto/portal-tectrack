@@ -54,6 +54,14 @@ import {
 
   import AppContext from "appContext";
 
+
+
+  // base de datos
+  import { useDataBaseContext } from "dataBaseContext";
+
+  // hook
+  import useSistema from "hooks/sistema/useSistema";
+
   
   //*********************************************** FIN IMPORT ***************************************************** */
   
@@ -66,6 +74,10 @@ import {
     const borderProfileColor = useColorModeValue("white", "transparent");
     const emailColor = useColorModeValue("gray.400", "gray.300");
 
+
+    // dbReady
+    const { dbReady } = useDataBaseContext();
+    const { getNivel1 } = useSistema(dbReady,false);
     
     /*=======================================================
      BLOQUE: variable hitory
@@ -193,14 +205,15 @@ import {
     },[userData.casoActivo.code])
     // Obtener la lista de generalmachinessystem, obtine todos los systemas
     useEffect(() => {
-
+        if(!dbReady) return; // Esperar a que la base de datos esté lista
         //onSearch(debouncedSearchValue);
         setDatos([])
         const fetchData = async () => {
           try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generalmachinesystem`);
+            //const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/generalmachinesystem`);
+            const response = await getNivel1()
             
-            let data = JSON.parse(response.data)
+            let data = response
             
             const groupedData = {};
 
@@ -221,7 +234,7 @@ import {
         };
         fetchData();
       
-    }, []);
+    }, [dbReady]);
 
     // Ingresar la descripcion del prediagnostico en redux
     useEffect(() =>{

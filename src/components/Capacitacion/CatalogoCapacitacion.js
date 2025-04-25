@@ -18,9 +18,9 @@ import Card from "components/Card/Card";
 import CardBody from "components/Card/CardBody";
 import CardHeader from "components/Card/CardHeader";
 import { useContext, useEffect, useState } from 'react';
-import SqlContext from 'sqlContext';
 
-  
+import { useDataBaseContext } from 'dataBaseContext';
+import useCatalogo from 'hooks/catalogo/useCatalogo';
   function CatalogoCapacitacion({typePrograma}) {
 
     /**
@@ -39,7 +39,9 @@ import SqlContext from 'sqlContext';
     };
     //**************** redux-persist ************************* */
 
-    const {db,rehidratarDb,saveToIndexedDB,} = useContext(SqlContext)
+    const {dbReady} = useDataBaseContext()
+    const { loadItems: loadCatalogos } = useCatalogo(dbReady,false)
+
     const [catalogos,setCatalogos] = useState([])
 
     const [catalogoSelected,setCatalogoSelected] = useState('')
@@ -51,19 +53,12 @@ import SqlContext from 'sqlContext';
 
 
     useEffect(() =>{
-      if(db != null){
-        const catalogos = db.exec(`
-          SELECT
-            C.ID,
-            C.business_name,
-            D.name division_name
-          FROM 
-            catalogo C
-            INNER JOIN division D ON D.ID = C.division_ID
-          `).toArray()
-        setCatalogos(catalogos)
-      }
-    },[db])
+      if(!dbReady) return; // Esperar a que la base de datos esté lista
+      
+      const catalogos = loadCatalogos()
+      setCatalogos(catalogos)
+      
+    },[dbReady])
 
     useEffect( () =>{
       setCatalogoSelected(userData.casos[userData.casoActivo.code].programa.catalogo_ID)
