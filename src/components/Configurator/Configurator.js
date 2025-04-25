@@ -14,9 +14,12 @@ import {
   useColorModeValue
 } from "@chakra-ui/react";
 import { HSeparator } from "components/Separator/Separator";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import GitHubButton from "react-github-btn";
 import { FaFacebook, FaTwitter } from "react-icons/fa";
+
+import { useDataBaseContext } from "dataBaseContext";
+import syncRepositoryLocale from "repositories/local/syncRepository"
 
 export default function Configurator(props) {
   const {
@@ -28,7 +31,12 @@ export default function Configurator(props) {
     fixed,
     ...rest
   } = props;
+
+  const { dbReady } = useDataBaseContext();
+
   const [switched, setSwitched] = useState(props.isChecked);
+
+  const [localSqlVersion, setLocalSqlVersion] = useState('');
 
   const { colorMode, toggleColorMode } = useColorMode();
 
@@ -42,6 +50,19 @@ export default function Configurator(props) {
   const secondaryButtonColor = useColorModeValue("gray.700", "white");
   const bgDrawer = useColorModeValue("white", "navy.800");
   const settingsRef = React.useRef();
+
+  useEffect(() => {
+    if(!dbReady) return
+    
+    const data = async() => {
+      const data = await syncRepositoryLocale.localSqlVersion()
+      setLocalSqlVersion(data)
+    }
+    
+    data()
+  },[dbReady]);
+
+
   return (
     <>
       <Drawer
@@ -55,10 +76,10 @@ export default function Configurator(props) {
           <DrawerHeader pt="24px" px="24px">
             <DrawerCloseButton />
             <Text fontSize="xl" fontWeight="bold" mt="16px">
-              Argon Chakra Configurator
+              TECTRACK Configuración
             </Text>
             <Text fontSize="md" mb="16px">
-              See your dashboard options.
+              Mira tus opciones de dashboard
             </Text>
             <HSeparator />
           </DrawerHeader>
@@ -97,89 +118,27 @@ export default function Configurator(props) {
                   Toggle {colorMode === "light" ? "Dark" : "Light"}
                 </Button>
               </Flex>
+              <Flex
+                justifyContent="space-between"
+                alignItems="center"
+                mb="24px"
+              >
+                <Text fontSize="md" fontWeight="600" mb="4px">
+                  SQLITE identifier
+                </Text>
+                <Button
+                  onClick={() => {
+                    navigator.clipboard.writeText(localSqlVersion);
+                  }}
+                  colorScheme="blue"
+                  size="sm"
+                >
+                  Copiar
+                </Button>
+              </Flex>
 
               <HSeparator />
-              <Box mt="24px">
-                <Box>
-                  <Link
-                    href="https://www.creative-tim.com/product/argon-dashboard-chakra?ref=creativetim-pud"
-                    w="100%"
-                    mb="16px"
-                  >
-                    <Button
-                      w="100%"
-                      mb="16px"
-                      bg={bgButton}
-                      color={colorButton}
-                      fontSize="xs"
-                      variant="no-effects"
-                      px="30px"
-                    >
-                      Free Download2
-                    </Button>
-                  </Link>
-                  <Link
-                    href="https://demos.creative-tim.com/docs-argon-dashboard-chakra/?ref=creativetim-pud"
-                    w="100%"
-                  >
-                    <Button
-                      w="100%"
-                      bg={secondaryButtonBg}
-                      border="1px solid"
-                      borderColor={secondaryButtonBorder}
-                      color={secondaryButtonColor}
-                      fontSize="xs"
-                      variant="no-effects"
-                      px="20px"
-                      mb="16px"
-                    >
-                      <Text textDecorationColor="none">Documentation</Text>
-                    </Button>
-                  </Link>
-                </Box>
-                <Flex
-                  justifyContent="center"
-                  alignItems="center"
-                  w="100%"
-                  mb="16px"
-                >
-                  <GitHubButton
-                    href="https://github.com/creativetimofficial/argon-dashboard-chakra"
-                    data-icon="octicon-star"
-                    data-show-count="true"
-                    aria-label="Star creativetimofficial/argon-dashboard-chakra on GitHub"
-                  >
-                    Star
-                  </GitHubButton>
-                </Flex>
-                <Box w="100%">
-                  <Text mb="6px" textAlign="center">
-                    Thank you for sharing!
-                  </Text>
-                  <Flex justifyContent="center" alignContent="center">
-                    <Link
-                      isExternal="true"
-                      href="https://twitter.com/intent/tweet?url=https://www.creative-tim.com/product/argon-dashboard-chakra/&text=Check%20Argon%20Dashboard%20Chakra%20made%20by%20@simmmple_web%20and%20@CreativeTim"
-                    >
-                      <Button
-                        colorScheme="twitter"
-                        leftIcon={<FaTwitter />}
-                        me="10px"
-                      >
-                        <Text>Tweet</Text>
-                      </Button>
-                    </Link>
-                    <Link
-                      isExternal="true"
-                      href="https://www.facebook.com/sharer/sharer.php?u=https://www.creative-tim.com/product/argon-dashboard-chakra/"
-                    >
-                      <Button colorScheme="facebook" leftIcon={<FaFacebook />}>
-                        <Text>Share</Text>
-                      </Button>
-                    </Link>
-                  </Flex>
-                </Box>
-              </Box>
+              
             </Flex>
           </DrawerBody>
         </DrawerContent>

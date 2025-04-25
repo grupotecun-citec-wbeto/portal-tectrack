@@ -399,7 +399,7 @@ const repository = {
         
     },
     
-    unsynchronizedCases: async (id) => {
+    unsynchronizedCase: async (id) => {
         const db = getDB();
         const stmt = db.prepare( 
             `SELECT
@@ -424,6 +424,37 @@ const repository = {
             `);
         const searchPattern = `%${id}%`;
         stmt.bind([searchPattern])
+        const results = [];
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
+    },
+
+    unsynchronizedCases: async () => {
+        const db = getDB();
+        const stmt = db.prepare( 
+            `SELECT
+                ID,
+                usuario_ID,
+                usuario_ID_assigned,
+                comunicacion_ID,
+                segmento_ID,
+                caso_estado_ID,
+                fecha,
+                start,
+                date_end,
+                description,
+                prioridad,
+                uuid,
+                equipos
+            FROM 
+                ${repository.tableName} 
+            WHERE 
+                syncStatus = ?
+            `);
+        stmt.bind([1])
         const results = [];
         while (stmt.step()) {
             results.push(stmt.getAsObject());

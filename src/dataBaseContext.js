@@ -30,7 +30,10 @@ import useVehiculo from 'hooks/vehiculo/useVehiculo';
 import useUsuario from 'hooks/usuario/useUsuario';
 import useCasoEstado from 'hooks/caso_estado/useCasoEstado';
 import useSegmento from 'hooks/segmento/useSegmento';
-
+import useArea from 'hooks/area/useArea';
+import useSistemaMarca from 'hooks/sistema_marca/useSistemaMarca';
+import useServicioTipo from 'hooks/servicio_tipo/useServicioTipo';
+import useSistema from 'hooks/sistema/useSistema';
 
 
 // Crear el contexto
@@ -72,6 +75,10 @@ export const DataBaseProvider = ({ children }) => {
     const { } = useUsuario(dbReady); // Hook para manejar la sincronización de usuarios
     const { } = useCasoEstado(dbReady); // Hook para manejar la sincronización de casos de estado
     const { } = useSegmento(dbReady); // Hook para manejar la sincronización de segmentos
+    const { } = useArea(dbReady); // Hook para manejar la sincronización de áreas
+    const { } = useSistemaMarca(dbReady); // Hook para manejar la sincronización de sistemas de marca
+    const { } = useServicioTipo (dbReady); // Hook para manejar la sincronización de tipos de asistencia
+    const { } = useSistema(dbReady); // Hook para manejar la sincronización de sistemas
     
 
     const updateData = (newData) => {

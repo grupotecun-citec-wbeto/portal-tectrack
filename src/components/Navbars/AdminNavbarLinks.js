@@ -60,6 +60,9 @@ export default function HeaderLinks(props) {
     ...rest
   } = props;
 
+
+  const [onLine, setOnLine] = useState(false);
+
   /*=======================================================
      BLOQUE: REDUX-PERSIST
      DESCRIPTION: 
@@ -104,6 +107,15 @@ export default function HeaderLinks(props) {
     }
   },[userData])
 
+  useEffect(() => {
+      if(!navigator.onLine){
+        setOnLine(false);
+      }else{
+        setOnLine(true);
+      }
+      
+  },[navigator.onLine]);
+
 
   const handleLogout = async() =>{
     const newUserData = structuredClone(userData)
@@ -126,7 +138,20 @@ export default function HeaderLinks(props) {
       w={{xs:"100%", sm: "100%", md: "auto" }}
       alignItems='center'
       flexDirection='row'>
-      <SearchBar me='18px' w={{xs:"auto", sm:"auto"}} display={{xs:"block",sm:"block"}} />
+      
+      {/*<SearchBar me='18px' w={{xs:"auto", sm:"auto"}} display={{xs:"block",sm:"block"}} />*/}
+      <Box
+        bg={onLine ? "green.500" : "red.500"}
+        color="white"
+        px="10px"
+        py="5px"
+        borderRadius="md"
+        fontWeight="bold"
+        fontSize="sm"
+        display="inline-block"
+      >
+        {onLine ? "Online" : "Offline"} 
+      </Box>
       
       {
         Object.keys(userData?.login || {}).length == 0 ? (

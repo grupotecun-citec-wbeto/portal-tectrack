@@ -13,11 +13,15 @@ import repository from '../../repositories/local/caso/repository';
 // servicios
 import syncService from '../../services/caso/syncService';
 
+import useCargarCaso from 'hookDB/cargarCaso';
+
 
 function useCaso(dbReady = false,syncActive = true) {
   
     // code de la tabla in mysql
     const codigo = 7, tabla = 'categoria'
+
+    const {loadCasos} = useCargarCaso()
     
     const [items, setItems] = useState([]);
     const [item, setItem] = useState(null);
@@ -106,8 +110,14 @@ function useCaso(dbReady = false,syncActive = true) {
         }
     }
 
-    const unsynchronizedCases = async (id) => {
-        const Items = repository.unsynchronizedCases(id);
+    const unsynchronizedCase = async (id) => {
+        const Items = repository.unsynchronizedCase(id);
+        setItems(Items);
+        return Items
+    }
+
+    const unsynchronizedCases = async () => {
+        const Items = repository.unsynchronizedCases();
         setItems(Items);
         return Items
     }
@@ -126,8 +136,13 @@ function useCaso(dbReady = false,syncActive = true) {
         const fetchDataWithTimeout = async () => {
             if (isFetching) return; // Evitar múltiples llamadas simultáneas
             isFetching = true;
-            isFetching = await syncService.run();
-            setTimeout(fetchDataWithTimeout, time); // 5 minutos
+            try{
+                await loadCasos()
+                isFetching = await syncService.run();
+            }catch(err){
+                console.log('No se encontro ningun caso no sincronizado',err,'dbf7fc9b-d36d-4484-8617-cbb2351edd1e')
+            }
+            //setTimeout(fetchDataWithTimeout, time); // 5 minutos
         };
         fetchDataWithTimeout();
         return () => clearTimeout(fetchDataWithTimeout);
@@ -148,6 +163,7 @@ function useCaso(dbReady = false,syncActive = true) {
         stop,
         endCaseWithoutDiagnosis,
         unsynchronizedCases,
+        unsynchronizedCase,
     };
 }
 

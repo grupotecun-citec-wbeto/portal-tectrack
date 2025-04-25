@@ -37,6 +37,15 @@ function useEquipo(dbReady = false,syncActive = true) {
         loadItems();
     };
 
+    const search = (cadena,seleccionados) => {
+        const allSearch = repository.search(cadena,seleccionados);
+        //const filteredItems = allCategorias.filter(item => {
+        //    return item.name.toLowerCase().includes(cadena.toLowerCase()) && !seleccionados.includes(item.id);
+        //});
+        setItems(allSearch);
+        return allSearch;
+    }
+
     useEffect(() => {
         if(!syncActive) return; // Evitar sincronización si syncActive es false
         if(!dbReady) return; // Esperar a que la base de datos esté lista
@@ -46,7 +55,7 @@ function useEquipo(dbReady = false,syncActive = true) {
             if (isFetching) return; // Evitar múltiples llamadas simultáneas
             isFetching = true;
             isFetching = await syncService.run();
-            setTimeout(fetchDataWithTimeout, time); // 5 minutos
+            //setTimeout(fetchDataWithTimeout, time); // 5 minutos
         };
         fetchDataWithTimeout();
         return () => clearTimeout(fetchDataWithTimeout);
@@ -57,6 +66,7 @@ function useEquipo(dbReady = false,syncActive = true) {
         loadItems,
         createItem,
         deleteItem,
+        search,
     };
 }
 

@@ -46,7 +46,7 @@ function useUnidadNegocio(dbReady = false,syncActive = true) {
             if (isFetching) return; // Evitar múltiples llamadas simultáneas
             isFetching = true;
             isFetching = await syncService.run();
-            setTimeout(fetchDataWithTimeout, time); // 5 minutos
+            //setTimeout(fetchDataWithTimeout, time); // 5 minutos
         };
         fetchDataWithTimeout();
         return () => clearTimeout(fetchDataWithTimeout);

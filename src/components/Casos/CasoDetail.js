@@ -80,6 +80,7 @@ import Timer from './Timer';
 import { useHistory } from 'react-router-dom';
 
 import useCargarCaso from 'hookDB/cargarCaso';
+import { use } from 'react';
 
 
 
@@ -115,6 +116,7 @@ const CasoDetail = React.memo(({ caseData }) => {
     usuario_ID,
     usuario_ID_assigned,
     equipos,
+    syncStatus,
   } = caseData;
 
 
@@ -140,7 +142,7 @@ const CasoDetail = React.memo(({ caseData }) => {
   const {items: prediagnostico,findByCasoId: getDiagnosticoByCasoId} = useDiagnostico(dbReady,false)
 
   // HOOKS
-  const {loadCaso} = useCargarCaso(id)
+  const {loadCasoPromise} = useCargarCaso(id)
 
   // COLORS
   const textColor = useColorModeValue("gray.500", "white");
@@ -221,6 +223,7 @@ const CasoDetail = React.memo(({ caseData }) => {
 
     const [cantEquipos,setCantEquipos] = useState(0)
 
+    const [syncStatusDetail,setSyncStatusDetail] = useState(0)
 
   //=======================================================
   // SECTION: USEMENO
@@ -307,8 +310,11 @@ const CasoDetail = React.memo(({ caseData }) => {
   // SECTION: useEfect
   //=======================================================
 
+  useEffect(() => {
+    setSyncStatusDetail(syncStatus)
+  },[])
 
-  // loadCaso() Verificar como se esta actualizando el caso en base de datos remota
+  // loadCasoPromise() Verificar como se esta actualizando el caso en base de datos remota
   /**
    * CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
    */
@@ -398,7 +404,14 @@ const CasoDetail = React.memo(({ caseData }) => {
     try{
       if(slcUsuario != null && slcUsuario != ""){
         await assignTechnician(id,slcUsuario)
-        loadCaso()
+        setSyncStatusDetail(1)
+        const changeCaso = async() =>{
+          try{
+            await loadCasoPromise()
+            setSyncStatusDetail(0)
+          }catch(err){}
+        }
+        changeCaso()
         // Establecer el usuario que va resolver el caso
         const estado_a_asignar = 2
         setEstado(estado_a_asignar)
@@ -417,7 +430,15 @@ const CasoDetail = React.memo(({ caseData }) => {
     
     
     unAssignTechnician(id)
-    loadCaso()
+    
+    setSyncStatusDetail(1)
+    const changeCaso = async() =>{
+      try{
+        await loadCasoPromise()
+        setSyncStatusDetail(0)
+      }catch(err){}
+    }
+    changeCaso()
     
     setSlcUsuario(null)
     const estado_a_establecer = 1
@@ -446,7 +467,14 @@ const CasoDetail = React.memo(({ caseData }) => {
       const visita_ID = uuidv4()
       try{
         await startCase(id,visita_ID,isVehiculoSelected,userData.login,kmInicial)
-        loadCaso()
+        setSyncStatusDetail(1)
+        const changeCaso = async() =>{
+          try{
+            await loadCasoPromise()
+            setSyncStatusDetail(0)
+          }catch(err){}
+        }
+        changeCaso()
       }catch(err){
         console.error('Error al iniciar el caso: b1d6a763-9495-4d3e-b4b5-3c49207f2b2b', err);
       }
@@ -502,6 +530,7 @@ const CasoDetail = React.memo(({ caseData }) => {
             
 
             saveUserData(newUserData)
+            setSyncStatusDetail(1)
             history.push('/admin/pages/searchbox')
           }else{
             alert('er[1fffd590] - Ingresar kilometraje final ')
@@ -514,7 +543,16 @@ const CasoDetail = React.memo(({ caseData }) => {
             //id,kmFinal,currentDateTime
             const currentDateTime = getCurrentDateTime()
             await endCaseWithoutDiagnosis(id,kmFinal,currentDateTime)
-            loadCaso()
+            
+            setSyncStatusDetail(1)
+            const changeCaso = async() =>{
+              try{
+                await loadCasoPromise()
+                setSyncStatusDetail(0)
+              }catch(err){}
+            }
+            changeCaso()
+
             const estado_a_establecer = 5
             setEstado(estado_a_establecer)
           }else{
@@ -562,25 +600,27 @@ const CasoDetail = React.memo(({ caseData }) => {
       rounded="lg"
       p={6}
       overflow="hidden"
+      position="relative" // Add position relative to position the icon
     >
+      {/* Icon for unsynchronized case */}
+      {syncStatusDetail == 1 && (
+        
+        <Icon
+          as={FaInfoCircle}
+          color="red.500"
+          boxSize="20px"
+          position="absolute"
+          top="10px"
+          left="10px"
+        />
+        
+      )}
       <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
         
           
           <Tooltip label="Estado del caso" aria-label="A tooltip" >
             <Badge
               bg={statusColor}
-              color={"white"}
-              fontSize="0.8em"
-              p="3px 10px"
-              borderRadius="8px"
-            >
-              {estadoName == 'Pendiente asignación' ? 'Pend Asig' : estadoName }
-            </Badge>
-          </Tooltip>
-        
-          <Tooltip label="Prioridad del caso" aria-label="A tooltip" >
-            <Badge
-              bg={prioridadColor}
               color={"white"}
               fontSize="0.8em"
               p="3px 10px"

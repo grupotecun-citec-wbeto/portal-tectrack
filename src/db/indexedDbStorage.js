@@ -1,8 +1,14 @@
 const DB_NAME = 'TECTRACK_DB';
 const DB_STORE_NAME = 'TECTRACK_STORE';
 //const DB_KEY = '2c882398-914b-4c16-926f-24ec828ac1b3';
-const DB_KEY = '0b28eecd-1287-4fe3-bc4a-6ff955973df2';
-const DB_VERSION = 1;
+//const DB_KEY = '0b28eecd-1287-4fe3-bc4a-6ff955973df2';
+//const DB_KEY = 'c6d70365-edb8-40de-a77e-5937d681705f';
+//const DB_KEY = '20927b3b-69e7-4304-b20a-6aa3549bb48a';
+//const DB_KEY = '20502aa4-d222-4f6a-89e1-766aaa42cde4';
+//const DB_KEY = '809bf071-c330-4453-9e18-f2e87be97150';
+//const DB_KEY = '257bb0e7-4359-45e5-aaec-443b4c803111';
+const DB_KEY = 'd22e2fc8-2db2-4ff4-b57b-6f804647f53a';
+const DB_VERSION = 2;
 
 function upgradeDatabase(db) {
   if (!db.objectStoreNames.contains(DB_STORE_NAME)) {

@@ -11,11 +11,16 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import AdminNavbarLinks from "./AdminNavbarLinks";
 
+
+
 import { NavLink, useLocation } from "react-router-dom";
 
 export default function AdminNavbar(props) {
+
+  
   const [scrolled, setScrolled] = useState(false);
   const [onLine, setOnLine] = useState(false);
+  const [localSqlVersion, setLocalSqlVersion] = useState(false);
 
   // W: location
   let location = useLocation();
@@ -29,15 +34,6 @@ export default function AdminNavbar(props) {
       window.removeEventListener("scroll", changeNavbar);
     }
   })
-
-  useEffect(() => {
-    if(!navigator.onLine){
-      setOnLine(false);
-    }else{
-      setOnLine(true);
-    }
-    
-  },[]);
   
 
   const {
@@ -143,6 +139,7 @@ export default function AdminNavbar(props) {
         alignItems={{ xl: "center" }}
       >
         <Box mb={{ sm: "8px", md: "0px" }}>
+        
           <Breadcrumb>
             <BreadcrumbItem color={mainText}>
               <BreadcrumbLink href="#" color={secondaryText}>
@@ -184,21 +181,9 @@ export default function AdminNavbar(props) {
           >
             {brandText}
           </Link>
+          
         </Box>
-        <Box display="flex" alignItems="center" ms="auto">
-          <Box
-            bg={onLine ? "green.500" : "red.500"}
-            color="white"
-            px="10px"
-            py="5px"
-            borderRadius="md"
-            fontWeight="bold"
-            fontSize="xl"
-            display="inline-block"
-          >
-            {onLine ? "Online" : "Offline"}
-          </Box>
-        </Box>
+        
         <Box ms="auto" w={{sm: "100%", md: "unset" }}>
           <AdminNavbarLinks
             onOpen={props.onOpen}
@@ -209,6 +194,7 @@ export default function AdminNavbar(props) {
           />
         </Box>
       </Flex>
+      
     </Flex>
   );
 }

@@ -387,3 +387,71 @@ CREATE TABLE IF NOT EXISTS equipamiento (
     FOREIGN KEY (herramienta_ID) REFERENCES herramienta (ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
     FOREIGN KEY (diagnostico_equipo_ID) REFERENCES diagnostico (equipo_ID) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
+
+-- 24/04/2025
+
+CREATE TABLE IF NOT EXISTS area (
+  ID INTEGER PRIMARY KEY,
+  name TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sistema_marca (
+  ID INTEGER PRIMARY KEY,
+  name TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS sistema (
+  ID INTEGER PRIMARY KEY,
+  area_ID INTEGER NULL,
+  sistema_ID INTEGER NULL,
+  nivel INTEGER NULL,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
+  FOREIGN KEY (area_ID) REFERENCES area(ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+  FOREIGN KEY (sistema_ID) REFERENCES sistema (ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE TABLE IF NOT EXISTS servicio_tipo (
+  ID INTEGER PRIMARY KEY,
+  name TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS servicio (
+  sistema_ID INTEGER NOT NULL,
+  sistema_servicio_ID INTEGER NOT NULL,
+  diagnostico_equipo_ID INTEGER NOT NULL,
+  diagnostico_caso_ID TEXT NOT NULL,
+  diagnostico_diagnostico_tipo_ID INTEGER NOT NULL,
+  "check" INTEGER,
+  sistema_marca_ID INTEGER,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP,
+  PRIMARY KEY (
+    sistema_ID,
+    sistema_servicio_ID,
+    diagnostico_equipo_ID,
+    diagnostico_caso_ID,
+    diagnostico_diagnostico_tipo_ID
+  ),
+  FOREIGN KEY (sistema_servicio_ID) REFERENCES sistema_servicio(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  FOREIGN KEY (sistema_marca_ID) REFERENCES sistema_marca(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  FOREIGN KEY (sistema_ID) REFERENCES sistema(ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+  FOREIGN KEY (diagnostico_equipo_ID, diagnostico_caso_ID, diagnostico_diagnostico_tipo_ID)
+    REFERENCES diagnostico(equipo_ID, caso_ID, diagnostico_tipo_ID)
+    ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+CREATE TABLE IF NOT EXISTS sistema_servicio (
+  ID INTEGER PRIMARY KEY,
+  sistema_ID INTEGER NOT NULL,
+  servicio_tipo_ID INTEGER NOT NULL,
+  FOREIGN KEY (sistema_ID) REFERENCES sistema(ID) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  FOREIGN KEY (servicio_tipo_ID) REFERENCES servicio_tipo(ID) ON DELETE NO ACTION ON UPDATE NO ACTION
+);

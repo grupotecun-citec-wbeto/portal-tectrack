@@ -13,10 +13,10 @@ import repositoryPrograma from 'repositories/local/programa/repository';
 import repositoryCasoVisita from 'repositories/local/caso_visita/repository';
 import repositoryCaso from 'repositories/local/caso/repository';
 
-function useCargarCaso(caso_id) {
+function useCargarCaso(caso_id = false) {
   
   // Preparar la base de datos
-  const {dbReady} = useDataBaseContext()
+  //const {dbReady} = useDataBaseContext()
 
     // *********************************** HOOK CASO **************************************
     // ************* HOOOK CASO *************************************HOOK CASO ************
@@ -41,6 +41,52 @@ function useCargarCaso(caso_id) {
 
   const [times,setTimes] = useState({'caso':300000})
 
+  const loadCasoPromise = async() =>{
+    //rehidratarDb();
+    if(caso_id == '') return;
+    const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
+    
+
+    return new Promise(async(resolve, reject) => {
+      
+        try {
+          const casosNoSincronizados = await repositoryCaso.unsynchronizedCase(caso_id)
+          
+          console.log('casosNoSincronizados: 9ef51e92-feb1-4a2e-b178-8f9af10f7ed5', casosNoSincronizados,caso_id);
+            
+          if(casosNoSincronizados.length != 0){  
+            console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
+            const uuids = casosNoSincronizados.map(objeto => objeto.ID);
+            
+            const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
+            const formDataMerge = await getDataMerge(listaCasos)
+            await syncCloud(formDataMerge)
+            resolve(true)
+          }else{
+            console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
+            reject(false)
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 400) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data: 70983d04-a730-4b3c-963d-e07872845b27', error);
+          reject(error) 
+        }
+        
+      
+    });
+
+    // Llamar a la función de inmediato
+    //fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    //const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  }
+
+
   /**
    * Obtener lista de casos no sincronizados
    */
@@ -49,8 +95,9 @@ function useCargarCaso(caso_id) {
     if(caso_id == '') return;
     const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
     
+
     const fetchData = async (synctable_ID) => {
-      if(dbReady){
+      //if(dbReady){
         try {
           const casosNoSincronizados = await repositoryCaso.unsynchronizedCases(caso_id)
           
@@ -73,10 +120,10 @@ function useCargarCaso(caso_id) {
           console.error('Error fetching data: 70983d04-a730-4b3c-963d-e07872845b27', error);
         }
         
-      }else{
+      /*}else{
         console.log('cadb0a6c-385b-4caf-89e5-f79ed4b6fc27');
         
-      }
+      }*/
     };
 
     // Llamar a la función de inmediato
@@ -87,6 +134,57 @@ function useCargarCaso(caso_id) {
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
   }
+
+
+  const loadCasos = async() =>{
+    //rehidratarDb();
+    const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
+
+    return new Promise(async(resolve, reject) => {
+      /*if(dbReady){*/
+        try {
+          const casosNoSincronizados = await repositoryCaso.unsynchronizedCases()
+          
+          console.log('casosNoSincronizados: f9bee5eb-9ef5-434c-9598-fe7c54437074', casosNoSincronizados,caso_id);
+            
+          if(casosNoSincronizados.length != 0){  
+            console.log('loadCaso a880314f-5d74-460b-aacd-bfbd00ba7e57', casosNoSincronizados); 
+            const uuids = casosNoSincronizados.map(objeto => objeto.ID);
+            
+            const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
+            const formDataMerge = await getDataMerge(listaCasos)
+            await syncCloud(formDataMerge)
+            resolve(true)
+          }else{
+            console.log('loadCaso fail 3ba8b4c2-fa61-45ee-b29c-ce8e22e4f350', casosNoSincronizados);
+            reject(false)
+          }
+        } catch (error) {
+          if (error.response && error.response.status === 400) {
+            setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
+          }
+          console.error('Error fetching data: 6263ae81-e343-439a-82db-2a2e496b2fda', error);
+          reject(error)
+        }
+        
+      /*}else{
+        console.log('b331b681-b213-447c-b0b7-bda3d2fb68ed');
+        reject(false)
+        
+      }*/
+    });
+
+    // Llamar a la función de inmediato
+    fetchData(codigo);
+    // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
+    const intervalId = setInterval(() => fetchData(codigo), time);
+
+    // Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(intervalId);
+  }
+
+
+
 
 
 
@@ -172,7 +270,7 @@ function useCargarCaso(caso_id) {
 
 
 
-  return {loadCaso}
+  return {loadCaso,loadCasos,loadCasoPromise}
 
 }
 
