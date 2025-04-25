@@ -45,6 +45,12 @@ function useEquipo(dbReady = false,syncActive = true) {
         setItems(allSearch);
         return allSearch;
     }
+    
+    const searchList = (seleccionados) => {
+        const allSearch = repository.searchList(seleccionados);
+        setItems(allSearch);
+        return allSearch;
+    }
 
     useEffect(() => {
         if(!syncActive) return; // Evitar sincronización si syncActive es false
@@ -67,6 +73,7 @@ function useEquipo(dbReady = false,syncActive = true) {
         createItem,
         deleteItem,
         search,
+        searchList,
     };
 }
 
