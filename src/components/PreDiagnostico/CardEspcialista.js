@@ -24,9 +24,7 @@ import CardBody from "components/Card/CardBody";
 import CardHeader from "components/Card/CardHeader";
 
 import AppContext from "appContext";
-
-import { useDataBaseContext } from "dataBaseContext"; 
-import useUsuario from "hooks/usuario/useUsuario";
+import SqlContext from "sqlContext";
 
 
 
@@ -37,8 +35,7 @@ function CardEspecialista(props){
     
     const {...rest} = props
 
-    const {dbReady} = useDataBaseContext()
-    const { findByPerfilIds } = useUsuario(dbReady,false)
+    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
 
     const [necesitaEspecialista,setNecesitaEspecialista] = useState(false)
     const [selectedEspecialista,setSelectedEspecialista] = useState('')
@@ -81,15 +78,15 @@ function CardEspecialista(props){
 
     // cargar especialistas
     useEffect(() =>{
-        if(!dbReady) return;
+        if(!db) return;
         const getUsuario = async() =>{
-          const usuarios = await findByPerfilIds({ perfilIds : [1,2], config: { countOnly : false } })
+          const usuarios = db.exec(`SELECT * FROM usuario WHERE perfil_ID = 1 OR perfil_ID = 2`).toArray()
         if(usuarios.length != 0)
           setUsuarios(usuarios)
         }
 
         getUsuario()
-    },[dbReady])
+    },[db])
 
     const actionCheckEspecialista = () =>{
         getUserData()

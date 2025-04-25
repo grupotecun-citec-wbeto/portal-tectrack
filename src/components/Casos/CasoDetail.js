@@ -18,10 +18,6 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 
-import { Skeleton, SkeletonCircle, SkeletonText } from '@chakra-ui/react'
-
-
-
 import {
   FormControl,
   FormLabel,
@@ -39,9 +35,7 @@ import {
 
 // ICONOS
 import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose   } from 'react-icons/fa';
-import { FaHeadset } from "react-icons/fa6";
-import { FaBookOpen } from "react-icons/fa";
-import { IoMdPerson } from "react-icons/io";
+import { BiUserVoice } from "react-icons/bi";
 import { FaUserPen,FaUserMinus,FaEye } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
@@ -61,17 +55,7 @@ import { NavLink } from 'react-router-dom';
  DESCRIPTION: 
 =========================================================*/
 import AppContext from "appContext";
-
-
-// BASE DE DATOS
-import { useDataBaseContext } from 'dataBaseContext';
-import { useCasoContext } from 'casoContext';
-import  {useUsuarioContext}  from 'usuarioContext';
-import useVehiculo from 'hooks/vehiculo/useVehiculo';
-import useCaso from 'hooks/caso/useCaso';
-import useDiagnostico from 'hooks/diagnostico/useDiagnostico';
-
-
+import SqlContext from "sqlContext";
 
 import { format } from "date-fns";
 import { es } from 'date-fns/locale';
@@ -80,9 +64,6 @@ import Timer from './Timer';
 import { useHistory } from 'react-router-dom';
 
 import useCargarCaso from 'hookDB/cargarCaso';
-import { use } from 'react';
-
-
 
 
 /**
@@ -104,73 +85,56 @@ import { use } from 'react';
  * @param {CaseData} props.caseData - Objeto que contiene la información del caso.
  * @returns {JSX.Element} - El componente renderizado.
  */
-const CasoDetail = React.memo(({ caseData }) => {
+const CasoDetail = ({ caseData }) => {
 
   const {
     id,
     status_ID, // caso_estado_ID
     createdAt,
     closedAt,
+    description,
     prioridad,
     segmento_ID,
+    fecha,
     usuario_ID,
-    usuario_ID_assigned,
-    equipos,
-    syncStatus,
+    caso_uuid,
+    syncStatus
   } = caseData;
 
-
-  // CHANGE DATABASE
-  const {dbReady} = useDataBaseContext()
-  const {estados,segmentos} = useCasoContext()
-  const {usuarios,vehiculos} = useUsuarioContext();
+  // MODAL
+  const { isOpen, onOpen, onClose } = useDisclosure()
   
-  
-  // *********************************** HOOK CASO **************************************
-  // ************* HOOOK CASO *************************************HOOK CASO ************
-  // *********************************** HOOK CASO **************************************
-  const {
-    assignTechnician,
-    unAssignTechnician,
-    findById,
-    endCaseWithoutDiagnosis,
-    start: startCase, 
-    item: stateCaso} = useCaso(dbReady,false)
-   
-  // HOOKS AND REPOSITORIES
-  //const {items: caso,findById: getCasoById} = useCaso(dbReady,false)
-  const {items: prediagnostico,findByCasoId: getDiagnosticoByCasoId} = useDiagnostico(dbReady,false)
 
-  // HOOKS
-  const {loadCasoPromise} = useCargarCaso(id)
-
-  // COLORS
   const textColor = useColorModeValue("gray.500", "white");
   const titleColor = useColorModeValue("gray.700", "white");
   const bgStatus = useColorModeValue("gray.400", "navy.900");
   const borderColor = useColorModeValue("gray.200", "gray.600");
 
-  // NAVEGATION
+  //const {slcCasoId,setSlcCasoId} = useContext(AppContext)
+  
+  // Se esta elimiando para utilizar redux-persist directamente
+    //const {casoActivo,setCasoActivo} = useContext(AppContext)
+
+  
   const history = useHistory()
-  
-  
+  const {loadCaso} = useCargarCaso(id)
 
   /*=======================================================
-    BLOQUE: REDUX-PERSIST
-    DESCRIPTION: 
-  =========================================================*/
-  const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
-  const dispatch = useDispatch();
+     BLOQUE: REDUX-PERSIST
+     DESCRIPTION: 
+    =========================================================*/
+    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+    const dispatch = useDispatch();
 
-  const saveUserData = (json) => {
-      dispatch({ type: 'SET_USER_DATA', payload: json });
+    const saveUserData = (json) => {
+        dispatch({ type: 'SET_USER_DATA', payload: json });
+      };
+  
+    const getUserData = () => {
+        dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
     };
 
-  const getUserData = () => {
-      dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
-  };
-
-  /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+    /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
     
   // ==========================================================
   // SECTION: Estados (useState)
@@ -191,19 +155,20 @@ const CasoDetail = React.memo(({ caseData }) => {
     /**
      * 
      */
-    //const [estados,setEstados] = useState([])
+    const [estados,setEstados] = useState([])
 
     /**
      * Lista de usuarios obtenida desde la base de datos.
      * @type {Array<Object>}
      */
-    //const [usuarios, setUsuarios] = useState([]);
+    const [usuarios, setUsuarios] = useState([]);
 
     /**
      * Usuario seleccionado en el caso actual.
      * @type {Object|null}
      */
-    const [slcUsuario, setSlcUsuario] = useState(usuario_ID_assigned ?? null);
+    const [slcUsuario, setSlcUsuario] = useState(null);
+    const [lblUsuario,setLblUsuario] = useState(null)
 
     /**
      * Indica si el modo de edición para el técnico asignado está activo.
@@ -212,8 +177,11 @@ const CasoDetail = React.memo(({ caseData }) => {
      */
     const [isEditTecnico, setIsEditTecnico] = useState(false);
 
+    const [prediagnostico,setPrediagnostico] = useState([])
 
     const [isEmpezado,setIsEmpezado] = useState(false)
+
+    const [vehiculos,setVehiculos] = useState([])
 
     const [isVehiculoSelected,setIsVehiculoSelected] = useState('')
 
@@ -223,10 +191,20 @@ const CasoDetail = React.memo(({ caseData }) => {
 
     const [cantEquipos,setCantEquipos] = useState(0)
 
-    const [syncStatusDetail,setSyncStatusDetail] = useState(0)
+    //const [startLoad,loadCaso] = useState(false) // Inicio de carga de información
+
+    /**
+     * Desestructurar objeto del contexto sqlContext
+     * @property {Objeto} - Contiene las funciones para ejecutar sqlite
+     * @property {saveToIndexedDB} - Salvar el objeto db dentro de indexdb para persistir la data
+     */
+    const { db,rehidratarDb, saveToIndexedDB } = useContext(SqlContext);
+
+  
+
 
   //=======================================================
-  // SECTION: USEMENO
+  // SECTION: useMemo
   //=======================================================
 
   /**
@@ -249,11 +227,14 @@ const CasoDetail = React.memo(({ caseData }) => {
    * nombre del estado activo
    */
   const estadoName  = useMemo ( () =>{
-    if (!estado || !estados || estados.length === 0) return; // Verificar si el estado o la lista de estados están disponibles
+     
     if(estados.length != 0){
       
       return estados.reduce((acc, obj) => {
-        return estados.find(obj => obj.ID === estado)?.name || estados[0]?.name || '';
+        // Si ya hemos encontrado el objeto, lo devolvemos (acc no es null)
+        if (acc) return acc;
+        // Si el objeto actual cumple la condición, lo devolvemos como acumulador
+        return obj.ID == estado ? obj.name : acc;
       }, null) || estados[0].name;
     }else{
       return '' 
@@ -289,17 +270,12 @@ const CasoDetail = React.memo(({ caseData }) => {
     }[prioridad] || bgStatus
   },[prioridad])
   
-  const segmentosMap = useMemo(() => {
-    if (!segmentos || segmentos.length === 0) return {}; // Verificar si la lista de segmentos está disponible
-    return segmentos.reduce((acc, segmento) => {
-      acc[segmento.ID] = segmento.name;
-      return acc;
-    }, {});
-  },[segmentos])
-
   const segmentoName = useMemo ( () =>{
-    if (!segmento_ID || !segmentos || segmentos.length === 0) return; // Verificar si el estado o la lista de estados están disponible
-    return segmentosMap[segmento_ID] || 'Desconocido';
+    return {
+      "1":"Soporte",
+      "2":"Proyectos",
+      "3":"Capacitación"
+    }[segmento_ID] || bgStatus
   },[segmento_ID])
 
   
@@ -310,54 +286,131 @@ const CasoDetail = React.memo(({ caseData }) => {
   // SECTION: useEfect
   //=======================================================
 
-  useEffect(() => {
-    setSyncStatusDetail(syncStatus)
-  },[])
 
-  // loadCasoPromise() Verificar como se esta actualizando el caso en base de datos remota
+  
+  useEffect(() =>{
+    const run = async() =>{
+      loadCaso()
+    }
+
+    run()
+    
+  },[db])
+
+
   /**
    * CONSULTAR CASO ESTADO - obtiene la lista de todos los estados del caso
    */
   useEffect( () =>{
-    //CONSULTAR CASO - obtiene la lista de todos los estados del caso
-    //getCasoById(id)
+    const consultarCasoEstado = async() =>{
+      const casoEstados = db.exec(`SELECT * FROM  caso_estado`).toArray()
+      if(casoEstados.length != 0){
+        setEstados(casoEstados)
+      }
+    }
+
+    consultarCasoEstado()
+  },[])
+
+  // LISTA DE USUARIOS - obtener la lista de usuarios
+  useEffect(() =>{
+    const getUsuario = async() =>{
+      const usuarios = db.exec(`SELECT * FROM usuario WHERE perfil_ID = 1 OR perfil_ID = 2`).toArray()
+    if(usuarios.length != 0)
+      setUsuarios(usuarios)
+    }
+
+    getUsuario()
+  },[])
+
+  // LISTA DE VEHICULOS
+  useEffect(() =>{
+    const run = async() =>{
+      const vehiculos = db.exec(`SELECT * FROM vehiculo`).toArray()
+      
+      if(vehiculos.length != 0)
+        setVehiculos(vehiculos)
+    }
+
+    run()
   },[])
 
   
   /**
    * CONSULTAR ASIGNACION
    */
-  // useEffect( () =>{
-  //   if (!caso || (Array.isArray(caso) && caso.length === 0)) return
-  //   const consultarAsigancion = async() =>{
-  //     if(Object.keys(caso || {}).length != 0){
-  //       setSlcUsuario(caso.usuario_ID_assigned)
-  //     }
-  //   }
-  //   consultarAsigancion()
-  // },[caso])
+  useEffect( () =>{
+    const consultarAsigancion = async() =>{
+      
+      /*const result = db.toObject(db.exec(`SELECT * FROM  asignacion WHERE caso_ID = '${id}' ORDER BY fecha DESC LIMIT 1;`) || {})
+      if(typeof result !== 'undefined'){
+        if(Object.keys(result).length != 0){
+          setSlcUsuario(result.usuario_ID)
+        }
+      }*/
+      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso_v2 WHERE ID = '${id}'`).toObject()
+      if(Object.keys(caso || {}).length != 0){
+        setSlcUsuario(caso.usuario_ID_assigned)
+      }
+      
+      
+    }
+
+    consultarAsigancion()
+  },[])
 
   // CONSULTAR DIAGANOSTICO
   useEffect( () =>{
-    if(!id) return
     const consultarDiagnostico = async() =>{
-      getDiagnosticoByCasoId({
-        casoId: id,
-        config: { countOnly: false }
-      })
+      try{
+        const sql = `
+          SELECT
+            AT.name as asistencia_tipo, 
+            E.codigo_finca,
+            D.equipo_ID,
+            D.caso_ID,
+            D.diagnostico_tipo_ID,
+            D.description
+          FROM  
+            diagnostico_v2 D
+            INNER JOIN Equipo E ON D.equipo_ID = E.ID
+            INNER JOIN asistencia_tipo AT ON D.asistencia_tipo_ID = AT.ID
+          WHERE caso_ID = '${id}'`
+          
+        const diagnosticos = db.exec(sql).toArray()
+          if(diagnosticos.length != 0){
+            setPrediagnostico(diagnosticos)        
+          }
+      }catch(err){
+        console.error('c5a8827b-7fa0-4572-88db-e52326aed799',err)
+      }
       
     }
 
     consultarDiagnostico()
-  },[id])
+  },[])
 
   useEffect( () =>{
-    if(!prediagnostico || prediagnostico.length === 0) return
+    if(typeof id !== 'undefined'){
+      
 
-    setCantEquipos(prediagnostico.length)
+
+      const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
+            
+      const equipos = JSON.parse(caso.equipos)
+
+      const areKeysNumbers = Object.keys(equipos || {}).every(key => !isNaN(Number(key)));
+      
+      if(areKeysNumbers){
+        const cantKeys = Object.keys(equipos).length
+        setCantEquipos(cantKeys)
+      }else{
+        setCantEquipos(0)
+      }
+    }
     
     
-  },[prediagnostico])
+  },[id])
 
   
 
@@ -387,36 +440,37 @@ const CasoDetail = React.memo(({ caseData }) => {
     return format(now.toUTCString(), 'yyyy-MM-dd');
   }
 
-   /**
-   * Asigna un técnico a un caso y actualiza su estado en la base de datos.
-   * 
-   * @async
-   * @function asignar
-   * @throws {Error} Si ocurre un error durante la asignación o actualización del caso.
-   * 
-   * Variables utilizadas en la función `assignTechnician`:
-   * @param {string} id - El identificador único del caso que se está asignando.
-   * @param {number} estado_a_asignar - El estado que se asignará al caso (por ejemplo, 2 para "Asignado").
-   * @param {string} slcUsuario - El identificador del usuario/técnico que será asignado al caso.
+  /**
+   * Asingar un usuario(técnico) al caso
+   * @property {number} slcUsuario identificador unico de usuario como estado
    */
   const asignar = async() =>{
     
     try{
       if(slcUsuario != null && slcUsuario != ""){
-        await assignTechnician(id,slcUsuario)
-        setSyncStatusDetail(1)
-        const changeCaso = async() =>{
-          try{
-            await loadCasoPromise()
-            setSyncStatusDetail(0)
-          }catch(err){}
-        }
-        changeCaso()
-        // Establecer el usuario que va resolver el caso
+        /**
+         * Estado el caso que se va colocar cuando el usuario es asignado a un caso
+         * @type {number}
+         */
         const estado_a_asignar = 2
+        // Insertar asignacion de usuario al caso, para establecer que usuario que resolver el caso
+        //const result = await db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},'${id}','${getCurrentDateTime()}','')`)
+        //db.exec(`INSERT INTO asignacion VALUES (${slcUsuario},'${id}','${getCurrentDateTime()}','')`)
+        
+        // Actualizar a estado asignado cuando se agigna un caso hacia estado 2: Asignado
+        const db_aux = db
+        db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar},usuario_ID_assigned = ${slcUsuario}, syncStatus=1  where ID = '${id}'`)
+        saveToIndexedDB(db)
+        // Establecer el usuario que va resolver el caso
         setEstado(estado_a_asignar)
         setIsEditTecnico(!isEditTecnico)
-        // verificar
+        
+        // rehidratar db
+        rehidratarDb()
+        // sicronizar caso
+        loadCaso()
+
+        // Diaparar la sincronizacion
         
       }
     }catch(err){
@@ -427,28 +481,30 @@ const CasoDetail = React.memo(({ caseData }) => {
   }
 
   const desasignar = async() =>{
+    // 
+    const estado_a_establecer = 1
+    // Se elimina el usuario que estaba seleccionado
+    //db.exec(`DELETE FROM asignacion WHERE usuario_ID = ${slcUsuario} AND caso_ID = '${id}'`)
+
+    // actualizar el estado en el caso
     
-    
-    unAssignTechnician(id)
-    
-    setSyncStatusDetail(1)
-    const changeCaso = async() =>{
-      try{
-        await loadCasoPromise()
-        setSyncStatusDetail(0)
-      }catch(err){}
-    }
-    changeCaso()
+    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, usuario_ID_assigned = NULL, syncStatus=1  where ID = '${id}'`)
     
     setSlcUsuario(null)
-    const estado_a_establecer = 1
     setEstado(estado_a_establecer)
+    // persistir db
+    saveToIndexedDB(db)
+    
+    // rehidratar db
+    rehidratarDb()
+    // Diaparar la sincronizacion
+    loadCaso()
   }
 
   const empezar = async() =>{
-    const caso = await findById(id)
     const verificar = () =>{
       // verificar si ya tiene asignado a un tecnico el caso
+      const caso = db.exec(`SELECT usuario_ID_assigned FROM caso_v2 where ID = '${id}'`).toObject()
       const isUsuario = (caso.usuario_ID_assigned == null) ? false : true
       if(!isUsuario) return 'Ingresar tecnico'
       // Verificar que tenga vehiculo asignado
@@ -462,39 +518,46 @@ const CasoDetail = React.memo(({ caseData }) => {
     }
     const message = verificar()
     if(message == ''){
-      
-      
-      const visita_ID = uuidv4()
       try{
-        await startCase(id,visita_ID,isVehiculoSelected,userData.login,kmInicial)
-        setSyncStatusDetail(1)
-        const changeCaso = async() =>{
-          try{
-            await loadCasoPromise()
-            setSyncStatusDetail(0)
-          }catch(err){}
-        }
-        changeCaso()
+        await db.exec('BEGIN TRANSACTION');
+          setIsEmpezado(true)
+          const estado_a_establecer = 3
+          db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer},syncStatus=1 where ID = '${id}'`)
+          
+          const visita_ID = uuidv4()
+          db.run(`INSERT INTO visita_v2 (ID,vehiculo_ID,usuario_ID,km_inicial) VALUES ('${visita_ID}',${isVehiculoSelected},${userData?.login?.ID},${kmInicial})`)
+          
+          db.run(`INSERT INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ('${id}','${visita_ID}')`)
+          await db.exec('COMMIT');
+
+          // gurdar en base de datos sqlite
+          saveToIndexedDB(db)
+
+          // rehidratar db
+          rehidratarDb()
+          // Diaparar la sincronizacion
+          loadCaso()
+
+          setEstado(estado_a_establecer)
+          
+        
       }catch(err){
-        console.error('Error al iniciar el caso: b1d6a763-9495-4d3e-b4b5-3c49207f2b2b', err);
+        await db.exec('ROLLBACK');
+        console.log('f45ebaa5-8d54-4634-a2cd-efda1cb2a8bd',err)
       }
-      
-      const estado_a_establecer = 3
-      setEstado(estado_a_establecer)
       
     }else{
       alert(message)
     }
 
+    /**/
     
   }
 
   
-  /**
-   * Finaliza un caso y actualiza su estado en la base de datos.
-   */
+
   const terminar = async() => {
-    const caso = await findById(id)
+    
     try{
       if((cantEquipos != 0 && segmento_ID == 1) || segmento_ID != 1){
         
@@ -505,6 +568,7 @@ const CasoDetail = React.memo(({ caseData }) => {
           
             const newUserData = structuredClone(userData)
             
+            const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${id}'`).toObject()
             newUserData.casoActivo.caso_id = id
             newUserData.casoActivo.code = caso.ID
             newUserData.casoActivo.busqueda_terminada = 1
@@ -530,7 +594,6 @@ const CasoDetail = React.memo(({ caseData }) => {
             
 
             saveUserData(newUserData)
-            setSyncStatusDetail(1)
             history.push('/admin/pages/searchbox')
           }else{
             alert('er[1fffd590] - Ingresar kilometraje final ')
@@ -539,24 +602,23 @@ const CasoDetail = React.memo(({ caseData }) => {
           // SECCION PARA PROYECTOS Y CAPACITACIONES
           
           if(kmFinal != ''){
-            
-            //id,kmFinal,currentDateTime
-            const currentDateTime = getCurrentDateTime()
-            await endCaseWithoutDiagnosis(id,kmFinal,currentDateTime)
-            
-            setSyncStatusDetail(1)
-            const changeCaso = async() =>{
-              try{
-                await loadCasoPromise()
-                setSyncStatusDetail(0)
-              }catch(err){}
-            }
-            changeCaso()
-
             const estado_a_establecer = 5
+            
+            //Actualiar estado
+            db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_establecer}, date_end = '${getCurrentDateTime()}', syncStatus=1 where ID = '${id}'`)
+          
+            // Registrando km final
+            db.run(`UPDATE visita_v2 SET km_final = '${kmFinal}' WHERE ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${id}' LIMIT 1) `)
+            saveToIndexedDB(db)
+
+            //rehidratar db
+            rehidratarDb()
+            // Diaparar la sincronizacion
+            loadCaso()
+
             setEstado(estado_a_establecer)
           }else{
-            alert('Ingresar kilometraje final')
+            alert('er[c24a4c93] Ingresar kilometraje final')
           }
         } 
       }else{
@@ -574,23 +636,6 @@ const CasoDetail = React.memo(({ caseData }) => {
    
   }
 
-
-  const usuariosList = useMemo(() => {
-    if(!usuarios || usuarios.length === 0) return; // Verificar si la lista de usuarios está disponible
-    return usuarios.map((usuario) => (
-      <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
-    ));
-  },[usuarios])
-
-  const vehiculosList = useMemo(() => {
-
-    if(!vehiculos || vehiculos.length === 0) return; // Verificar si la lista de usuarios está disponible
-    return vehiculos.map( (vehiculo) => (
-      <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
-    ));
-
-  },[vehiculos])
-
   return (
     <Box
       maxW="lg"
@@ -600,27 +645,25 @@ const CasoDetail = React.memo(({ caseData }) => {
       rounded="lg"
       p={6}
       overflow="hidden"
-      position="relative" // Add position relative to position the icon
     >
-      {/* Icon for unsynchronized case */}
-      {syncStatusDetail == 1 && (
-        
-        <Icon
-          as={FaInfoCircle}
-          color="red.500"
-          boxSize="20px"
-          position="absolute"
-          top="10px"
-          left="10px"
-        />
-        
-      )}
       <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
         
           
           <Tooltip label="Estado del caso" aria-label="A tooltip" >
             <Badge
               bg={statusColor}
+              color={"white"}
+              fontSize="0.8em"
+              p="3px 10px"
+              borderRadius="8px"
+            >
+              {estadoName == 'Pendiente asignación' ? 'Pend Asig' : estadoName }
+            </Badge>
+          </Tooltip>
+        
+          <Tooltip label="Prioridad del caso" aria-label="A tooltip" >
+            <Badge
+              bg={prioridadColor}
               color={"white"}
               fontSize="0.8em"
               p="3px 10px"
@@ -755,7 +798,7 @@ const CasoDetail = React.memo(({ caseData }) => {
                     </Tooltip>
                     <Tooltip label="Reporte" aria-label="A tooltip" >
                       <NavLink to={`/admin/pages/pdf/${id}`} >
-                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} >
+                        <Button ms={{lg:"10px"}} my={{sm:"5px"}} onClick={onOpen} >
                           <Icon as={ HiOutlineDocumentReport } color="gray.500" boxSize={{sm:"24px",lg:"24px"}} />
                         </Button>
                       </NavLink>
@@ -784,7 +827,10 @@ const CasoDetail = React.memo(({ caseData }) => {
             <Flex direction={'columns'} >
                 <FormControl maxW={{xl:'250px'}} key={id}>
                   <Select id='country' placeholder='Seleccionar Vehiculo' onChange={(e) => setIsVehiculoSelected(e.target.value)} value={isVehiculoSelected}>
-                    {vehiculosList}
+                    {vehiculos.map( (vehiculo) => (
+                      <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
+                    ))}
+                    
                   </Select>
                 </FormControl>
                 
@@ -821,7 +867,9 @@ const CasoDetail = React.memo(({ caseData }) => {
             onChange={(e) => setSlcUsuario(e.target.value)}
             value={slcUsuario}
           >
-            {usuariosList}
+            {usuarios.map( (usuario) =>(
+              <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
+            ))}
           </Select>
         ):(
           <>
@@ -844,22 +892,7 @@ const CasoDetail = React.memo(({ caseData }) => {
                   <AccordionPanel pb={4}>
                     {prediagnostico.map( (diagnostico) => (
                       <Box key={diagnostico.ID} border="1px" borderColor={borderColor} p={3} rounded="md">
-                        <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='5px'>
-                          <Badge
-                            bg="yellow.400"
-                            color={"black"}
-                            fontSize="0.8em"
-                            p="3px 10px"
-                            borderRadius="8px"
-                          >
-                            
-                            <Flex align="center" direction={{sm:"row",lg:"row"}}>
-                              <Icon as={FaBookOpen } color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
-                              {diagnostico.catalogo}     
-                              
-                            </Flex>
-                            
-                          </Badge>
+                        <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
                           <Badge
                             bg="yellow.400"
                             color={"black"}
@@ -882,23 +915,8 @@ const CasoDetail = React.memo(({ caseData }) => {
                             borderRadius="8px"
                           >
                             <Flex align="center" direction={{sm:"row",lg:"row"}}>
-                              <Icon as={FaHeadset} color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
+                              <Icon as={BiUserVoice} color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
                               {diagnostico.asistencia_tipo.replace(/Asistencia/g, '')}     
-                              
-                            </Flex>
-                            
-                          </Badge>
-                          <Badge
-                            bg="green.400"
-                            color={"black"}
-                            fontSize="0.8em"
-                            p="3px 10px"
-                            borderRadius="8px"
-                          >
-                            
-                            <Flex align="center" direction={{sm:"row",lg:"row"}}>
-                              <Icon as={IoMdPerson} color="blackAlpha.400" boxSize={{sm:"24px",lg:"24px"}} />
-                              {diagnostico.cliente}     
                               
                             </Flex>
                             
@@ -939,6 +957,6 @@ const CasoDetail = React.memo(({ caseData }) => {
     </Box>
     
   );
-});
+};
 
 export default CasoDetail;

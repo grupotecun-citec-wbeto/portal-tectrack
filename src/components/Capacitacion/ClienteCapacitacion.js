@@ -18,10 +18,8 @@ import Card from "components/Card/Card";
 import CardBody from "components/Card/CardBody";
 import CardHeader from "components/Card/CardHeader";
 import { useContext, useEffect, useState } from 'react';
+import SqlContext from 'sqlContext';
 
-
-import { useDataBaseContext } from 'dataBaseContext';
-import useCliente from 'hooks/cliente/useCliente';
   
   function ClienteCapacitacion({typePrograma}) {
 
@@ -42,14 +40,7 @@ import useCliente from 'hooks/cliente/useCliente';
     //**************** redux-persist ************************* */
 
 
-    
-    // ****************** BASE DE DATOS ****************************
-    
-    const { dbReady } = useDataBaseContext()
-    const { loadItems: loadClientes } = useCliente(dbReady,false)
-
-    
-
+    const {db,rehidratarDb,saveToIndexedDB,} = useContext(SqlContext)
     const [clientes,setClientes] = useState([])
 
     const [clienteSelected,setClienteSelected] = useState('')
@@ -62,12 +53,13 @@ import useCliente from 'hooks/cliente/useCliente';
     },[db,rehidratarDb])*/
 
     useEffect(() =>{
-      if(!dbReady) return;
-
-      const all = loadClientes()
-      setClientes(all)
-    
-    },[dbReady])
+      if(db != null){
+        const catalogos = db.exec(`
+          SELECT * FROM cliente
+          `).toArray()
+        setClientes(catalogos)
+      }
+    },[db])
 
     useEffect( () =>{
       setClienteSelected(userData.casos[userData.casoActivo.code].programa.catalogo_ID)

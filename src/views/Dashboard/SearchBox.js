@@ -42,10 +42,6 @@ import {
   import { FaCheck } from "react-icons/fa"; // Icono de check
 
   import { useHistory } from 'react-router-dom';
-
-  // base de datos
-  import { useDataBaseContext } from 'dataBaseContext';
-  import useEquipo from "hooks/equipo/useEquipo";
   
   
   function SearchBox({ onSearch }) {
@@ -56,13 +52,6 @@ import {
     const bgProfile = useColorModeValue("hsla(0,0%,100%,.8)", "navy.800");
     const borderProfileColor = useColorModeValue("white", "transparent");
     const emailColor = useColorModeValue("gray.400", "gray.300");
-
-
-    //dbReady
-    const { dbReady } = useDataBaseContext();
-
-    const { search : searchEquipos } = useEquipo(dbReady,false);
-
 
     const history = useHistory()
     /**
@@ -144,8 +133,7 @@ import {
   
     // Simulamos una función de búsqueda (reemplaza con tu lógica real)
     useEffect(() => {
-        if(!dbReady) return; // Esperar a que la base de datos esté lista
-        
+    
         setDatos([])
         const fetchData = async () => {
           if (debouncedSearchValue || isBusquedaTerminada) {
@@ -158,14 +146,10 @@ import {
             
             const equiposSelect = (lista_equipos != '') ? lista_equipos : 'all'
             try {
-              //const cad = `${process.env.REACT_APP_API_URL}/api/v1/machine/${(!isBusquedaTerminada) ? searchValue : 'ALL'}/${equiposSelect}`
-              //const response = await axios.get(cad);
-              const cadena = (!isBusquedaTerminada) ? searchValue : 'ALL'
-              console.log(cadena,equiposSelect,'d760f107-d86e-4d5a-9525-2d26e2bef060')
-              const response = await searchEquipos(cadena,equiposSelect)
+              const cad = `${process.env.REACT_APP_API_URL}/api/v1/machine/${(!isBusquedaTerminada) ? searchValue : 'ALL'}/${equiposSelect}`
+              const response = await axios.get(cad);
               
-              
-              let data = response
+              let data = JSON.parse(response.data)
               setDatos(data);
             } catch (error) {
               setDatos([])
@@ -176,7 +160,7 @@ import {
         };
         fetchData()
       
-    }, [debouncedSearchValue,isBusquedaTerminada,refresh,dbReady]);
+    }, [debouncedSearchValue,isBusquedaTerminada,refresh]);
 
     useEffect( () =>{
       if(userData?.casoActivo?.busqueda_terminada == 1){
@@ -353,7 +337,7 @@ import {
             {isSuccessAlertCaso ?(
               <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid}/>
             ):(
-              <CardCrearCaso openAlert={openAlert} key='CardCrearCaso' />
+              <CardCrearCaso openAlert={openAlert} />
             )}
           </>
         ):(

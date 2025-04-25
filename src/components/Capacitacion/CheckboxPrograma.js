@@ -28,47 +28,21 @@ import { column } from 'stylis';
 import AppContext from 'appContext';
 import { jsx } from '@emotion/react';
 
-// base de datos
-import { useDataBaseContext } from 'dataBaseContext';
-import useServicioTipo from 'hooks/servicio_tipo/useServicioTipo';
-import useSistemaMarca from 'hooks/sistema_marca/useSistemaMarca';
+
 
 function CheckboxPrograma(props){
     const {name,id,...rest} = props
 
     
-    // dbReady
-    const { dbReady } = useDataBaseContext();
-    const { loadItems : getAllItemsServicioTipo } = useServicioTipo(dbReady,false);
-    const { loadItems : getAllItemsServicioMarca } = useSistemaMarca(dbReady,false);
-
-
 
     const [check,setCheck] = useState(false)
     const [selectedService,setSelectedService] = useState('')
     const [selectedMarca,setSelectedMarca] = useState('')
-    const [serviceTypeData,setServiceTypeData] = useState([])
-    const [serviceMarcaData,setServiceMarcaData] = useState([])
 
     const {
+      serviceTypeData,setServiceTypeData,
       casoActivo,setCasoActivo
     } = useContext(AppContext)
-
-    useEffect(()=>{
-      if(!dbReady) return; // Esperar a que la base de datos esté lista 
-      const data = async() => {
-        const data = await getAllItemsServicioTipo()
-        setServiceTypeData(data)
-      }
-
-      data()
-      const dataSistemaMarca = async() => {
-        const data = await getAllItemsServicioMarca()
-        setServiceMarcaData(data)
-      }
-
-      dataSistemaMarca()
-    },[dbReady])
 
     /**
      * SECTION: redux-persist
@@ -164,7 +138,7 @@ function CheckboxPrograma(props){
                 <FormLabel htmlFor='country'>Tipo de servicio</FormLabel>
                 <Select id='country' placeholder='Seleccionar servicio' onChange={(e) => actionService(e.target.value)} value={selectedService}>
                   {serviceTypeData.map( (data) =>(
-                    <option key={data.ID} value={data.ID}>{data.name}</option>
+                    <option key={data.ID} value={data.ID}>{data.servicio_tipo_name}</option>
                   ))}
                 </Select>
               </FormControl>
@@ -174,9 +148,8 @@ function CheckboxPrograma(props){
               <FormControl maxW={{xl:'250px'}} key={id}>
                 <FormLabel htmlFor='country'>Tipo de Marca</FormLabel>
                 <Select id='country' placeholder='Seleccionar Marca' onChange={(e) => actionMarca(e.target.value)} value={selectedMarca}>
-                  {serviceMarcaData?.map( (data) =>(
-                    <option key={data.ID} value={data.ID}>{data.name}</option>
-                  ))}
+                  <option key='1' value='1'>RAVEN</option>
+                  <option key='2' value='2'>TRIMBLE</option>
                 </Select>
               </FormControl>
             </Flex>
