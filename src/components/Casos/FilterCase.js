@@ -90,14 +90,12 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
         <Heading size="md">Filtros de Casos</Heading>
         <HStack spacing={4} mb={{xl:"15px",sm:"15px"}}>
           {/* Filtros básicos */}
-          {userData?.login?.perfil_ID == 3 ? (
+          {userData?.login?.perfil_ID == 3 && (
             <Select placeholder="Todos los usuarios" value={userSelected} onChange={(e) => setUserSelected(e.target.value)}>
               {usuarios?.map((usuario, key) => (
                 <option key={key} value={usuario.ID}>{usuario.display_name}</option>
               ))}
             </Select>
-          ) : (
-            window.location.href = '/login' // Redirigir al login si no existe perfil_ID
           )}
           
           <Select placeholder="Ordenado Prioridad mas urgente" value={prioriSelected} onChange={(e) => setPrioriSelected(e.target.value)}>

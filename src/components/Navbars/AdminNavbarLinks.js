@@ -125,7 +125,7 @@ export default function HeaderLinks(props) {
     saveUserData(newUserData)
 
     if(Object.keys(userData?.login || {}).length == 0){ 
-      history.push('/auth/login')
+      history.push('/auth/signin')
     }
   }
  
