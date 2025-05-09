@@ -75,6 +75,7 @@ function Casos() {
 
   // filtros
   const [usuarioSelected,setUsuarioSelected] = useState('')
+  const [clienteSelected,setClienteSelected] = useState('')
   const [prioridadSelected,setPrioridadSelected] = useState('')
   const [segmentoSelected,setSegmentoSelected] = useState('')
   
@@ -98,7 +99,8 @@ function Casos() {
       const filters = {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
-        segmentoSelected: segmentoSelected
+        segmentoSelected: segmentoSelected,
+        clienteSelected: clienteSelected
       }
 
       const fetchData = async () => {
@@ -108,7 +110,7 @@ function Casos() {
       }
       fetchData()
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
 
 
   useEffect( () =>{
@@ -116,7 +118,8 @@ function Casos() {
     const filters = {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
-        segmentoSelected: segmentoSelected
+        segmentoSelected: segmentoSelected,
+        clienteSelected: clienteSelected
       }
 
     const fetchData = async () => {
@@ -128,7 +131,7 @@ function Casos() {
 
    
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
   
   
   useEffect( () =>{
@@ -136,7 +139,8 @@ function Casos() {
     const filters = {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
-        segmentoSelected: segmentoSelected
+        segmentoSelected: segmentoSelected,
+        clienteSelected: clienteSelected
       }
     const fetchData = async () => {
       const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"5"},{countOnly:true})
@@ -146,7 +150,7 @@ function Casos() {
     fetchData()
     
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
  
   useEffect( () =>{
     if(!dbReady) return; // Esperar a que la base de datos esté lista
@@ -154,7 +158,8 @@ function Casos() {
     const filters = {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
-        segmentoSelected: segmentoSelected
+        segmentoSelected: segmentoSelected,
+        clienteSelected: clienteSelected
       }
 
       const fetchData = async () => {
@@ -165,7 +170,7 @@ function Casos() {
       fetchData()
    
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
   
   
   useEffect( () =>{
@@ -174,7 +179,8 @@ function Casos() {
     const filters = {
       usuarioSelected:'',
       prioridadSelected:'',
-      segmentoSelected:''
+      segmentoSelected:'',
+      clienteSelected: ''
     }
 
     const fetchData = async () => {
@@ -184,7 +190,7 @@ function Casos() {
     }
     fetchData()
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
 
   
 
@@ -273,6 +279,8 @@ function Casos() {
         setPrioridadSelected = {setPrioridadSelected}
         segmentoSelected={segmentoSelected}
         setSegmentoSelected={setSegmentoSelected}
+        clienteSelected={clienteSelected}
+        setClienteSelected={setClienteSelected}
       />
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
         {memoizedCasoDetails}

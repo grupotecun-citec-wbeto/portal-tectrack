@@ -11,6 +11,7 @@ import repositoryVisita from '../visita/repository';
 import repositoryCasoVisita from '../caso_visita/repository';
 import repositoryPrograma from '../programa/repository';
 import repositoryDiagnostico from '../diagnostico/repository';
+import repositoryEquipo from '../equipo/repository';
 const repository = {
     tableCode:4,
     tableName:'caso',
@@ -231,14 +232,39 @@ const repository = {
             const query_user = (filters.usuarioSelected != '') ? ` AND usuario_ID = ? ` : ''
             const query_prioridad = (filters.prioridadSelected != '') ? ` AND prioridad = ? ` : ''
             const query_segmento = (filters.segmentoSelected != '') ? ` AND segmento_ID = ? ` : ''
+            const query_cliente = (filters.clienteSelected != '') ? ` AND ${repositoryEquipo.tableName}.cliente_ID = ?` : ''
             
-            // definir si se necesita solo contar
-            const query_count = (config.countOnly) ? ` COUNT(*) AS cantidad ` : ` * `
+            const select = []
+            select.push(`${repository.tableName}.ID`)
+            select.push(`${repository.tableName}.syncStatus`)
+            select.push(`${repository.tableName}.usuario_ID`)
+            select.push(`${repository.tableName}.usuario_ID_assigned`)
+            select.push(`${repository.tableName}.comunicacion_ID`)
+            select.push(`${repository.tableName}.segmento_ID`)
+            select.push(`${repository.tableName}.caso_estado_ID`)
+            select.push(`${repository.tableName}.fecha`)
+            select.push(`${repository.tableName}.start`)
+            select.push(`${repository.tableName}.date_end`)
+            select.push(`${repository.tableName}.description`)
+            select.push(`${repository.tableName}.prioridad`)    
+            select.push(`${repository.tableName}.uuid`)
+            select.push(`${repository.tableName}.equipos`)
+
+            const from = []
+            from.push(` ${repository.tableName} `)
+        
+
+
+
+            
 
             const estadoFilter = ` ${estado.operador} ? `;
 
             const parameters = []
+           
             
+            
+
             if(query_user != ''){
                 parameters.push(filters.usuarioSelected)
             }
@@ -249,12 +275,34 @@ const repository = {
                 parameters.push(filters.segmentoSelected)
             }
 
+            if(query_cliente != ''){ 
+                console.log(filters,"c5e4a5db-0cc7-498d-b6f1-1482ddcbffb8") 
+                parameters.push(filters.clienteSelected)
+                from.push( ` INNER JOIN ${repositoryDiagnostico.tableName} ON ${repositoryDiagnostico.tableName}.caso_ID = ${repository.tableName}.ID `)
+                from.push( ` INNER JOIN ${repositoryEquipo.tableName} ON ${repositoryEquipo.tableName}.ID = ${repositoryDiagnostico.tableName}.equipo_ID `)
+            }
+
+            // definir si se necesita solo contar
+            const query_count = (config.countOnly) ? ` COUNT(*) AS cantidad ` : ` ${select.join(', ')} `
+
             let results = [];
             
             switch(userDataLogin.perfil_ID){
                 case 3: // perfil admin 
                     parameters.unshift(estado.value)   
-                    query = `SELECT ${query_count} FROM ${repository.tableName} WHERE 1=1 AND caso_estado_ID ${estadoFilter} ${query_user} ${query_prioridad} ${query_segmento} ORDER BY start DESC`
+                    query = `
+                        SELECT 
+                            ${query_count} 
+                        FROM 
+                           ${from.join(' ')}
+                        WHERE 
+                            1=1 AND 
+                            caso_estado_ID ${estadoFilter} 
+                            ${query_user} 
+                            ${query_prioridad} 
+                            ${query_segmento} 
+                            ${query_cliente}
+                        ORDER BY start DESC`
                     console.log(query,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
                     break;
                 default:
