@@ -11,8 +11,14 @@ import CardHeader from "components/Card/CardHeader";
 
 import { useDataBaseContext } from 'dataBaseContext';
 import useUsuario from 'hooks/usuario/useUsuario';
+import useCliente from 'hooks/cliente/useCliente';
 
-const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPrioridadSelected,segmentoSelected,setSegmentoSelected}) => {
+const FilterCase = ({
+  usuarioSelected,setUsuarioSelected,
+  prioridadSelected,setPrioridadSelected,
+  segmentoSelected,setSegmentoSelected,
+  clienteSelected,setClienteSelected
+}) => {
   // ... estado para manejar los valores de los filtros
 
   // ************************** REDUX-PRESIST ****************************
@@ -31,16 +37,19 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
 
   const { dbReady } = useDataBaseContext(); // Obtener la base de datos desde el contexto
   const { loadItems: usuariosLoadItems } = useUsuario(dbReady,false); // Obtener la función findAll desde el hook de usuario
+  const { loadItems: clientesLoadItems } = useCliente(dbReady,false); // Obtener la función findAll desde el hook de cliente
 
   // useState
 
   const [userSelected,setUserSelected] = useState('')
+  const [clienteSelectedInter,setClienteSelectedInter] = useState('')
   const [prioriSelected,setPrioriSelected] = useState('')
   const [segmentSelected,setSegmentSelected] = useState('')
 
    // useState
 
-   const [usuarios,setUsuarios] = useState([]) 
+   const [usuarios,setUsuarios] = useState([])
+   const [clientes,setClientes] = useState([])
    const [segmentos,setSegmentos] = useState([]) 
 
   // useRef
@@ -57,6 +66,7 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
     setUsuarioSelected(userSelected)
     setPrioridadSelected(prioriSelected)
     setSegmentoSelected(segmentSelected)
+    setClienteSelected(clienteSelectedInter) // seleccionar cliente
   }
   
   // useEffect
@@ -68,7 +78,8 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
     
     const run = async () => {
       const users = await usuariosLoadItems()
-      console.log(users,"9b3c1432-e9bf-4c97-bca7-30f2746010bf")
+      const clients = await clientesLoadItems()
+      setClientes(clients)
       
       //console.log(cont => cont + 1);
       if(JSON.stringify(usuarios_ref.current) !== JSON.stringify(users)){
@@ -94,6 +105,14 @@ const FilterCase = ({usuarioSelected,setUsuarioSelected,prioridadSelected,setPri
             <Select placeholder="Todos los usuarios" value={userSelected} onChange={(e) => setUserSelected(e.target.value)}>
               {usuarios?.map((usuario, key) => (
                 <option key={key} value={usuario.ID}>{usuario.display_name}</option>
+              ))}
+            </Select>
+          )}
+
+          {userData?.login?.perfil_ID == 3 && (
+            <Select placeholder="Todos los clientes" value={clienteSelectedInter} onChange={(e) => setClienteSelectedInter(e.target.value)}>
+              {clientes?.map((cliente, key) => (
+                <option key={key} value={cliente.ID}>{cliente.name.charAt(0).toUpperCase() + cliente.name.slice(1).toLowerCase()}</option>
               ))}
             </Select>
           )}
