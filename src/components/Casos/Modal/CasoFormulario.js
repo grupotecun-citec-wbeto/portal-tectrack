@@ -43,13 +43,21 @@ import CasoModalInput from './CasoModalInput'
 import ImgLoader from "./ImgLoader";
 
 
+import { useDataBaseContext } from 'dataBaseContext';
+import useCaso from '@hooks/caso/useCaso';
+import useDiagnostico from '@hooks/diagnostico/useDiagnostico';
+
+
 
 
 
 const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubicacion,lugar,nameUsuario,codigo,fecha,celular,proyecto,equipos,sistemas,elaboradoPor,revisadoPor,fechaEmision,images,imagesRef,handle}) =>{
     
     const timeZone = 'America/Guatemala'; // Define tu zona horaria
-    const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
+
+    const { dbReady } = useDataBaseContext(); // Obtener la base de datos desde el contexto
+    const { findById: findByCasoId } = useCaso(dbReady,false); // Obtener la función findAll desde el hook de usuario
+    const { findByCasoId : findDisnosticosByCasoId } = useDiagnostico(dbReady,false); // Obtener la función findAll desde el hook de usuario
     
 
     const [sCaso,setScaso] = useState({})
@@ -106,18 +114,19 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
     const addImgLoader = () => {
         setImgLoaders([...imgLoaders, <ImgLoader key={imgLoaders.length} imagesRef={imagesRef} />]);
     };
-
-    // Rehidratar la base de datos
-    /*useEffect( () =>{
-        if(!db) rehidratarDb()
-    },[db,rehidratarDb])*/
     
     // ************ useEffect ************
     useEffect( () =>{
-        if(!db) return;
-        const caso = db.exec(`SELECT * FROM caso_v2 WHERE ID = '${caso_ID}' `).toObject()
-        setScaso(caso)
-    },[db])
+        if(!dbReady) return;
+        
+        const run = async () => {
+            const caso = await findByCasoId(caso_ID)
+            const shortUuid = caso_ID.substring(0, 8);
+            codigo.set(sCaso.usuario_ID + '-' + shortUuid)  // cambiar estado de codigo
+            setScaso(caso)
+        }
+        run()
+    },[dbReady,caso_ID])
 
     useEffect( () =>{  
         if(Object.keys(sCaso).length == 0) return;
@@ -127,50 +136,75 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
 
 
     useEffect( () =>{
-        if(!db) return;
+        if(!dbReady) return;
         if(Object.keys(sCaso).length == 0) return;
-        const equiposData = db.exec(` 
-            SELECT 
-                E.codigo_finca,E.ID,C.business_name,E.chasis,M.name as marca
-            FROM 
-                equipo E
-                INNER JOIN catalogo C ON E.catalogo_ID = C.ID
-                INNER JOIN marca M ON C.marca_ID = M.ID
-            WHERE 
-                E.ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}') `).toArray()
-        
-        
+       
+        const run = async () => {
+            ////findByCasoId = (args = { casoId :'', config: { countOnly : false } })
+            const diagnosticos = await findDisnosticosByCasoId({casoId: caso_ID, config: { countOnly : false }})
 
-        const clientes = db.exec(` SELECT DISTINCT name FROM cliente where ID IN (SELECT cliente_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
-        equipos.set({codigos:equiposData})
-        nameUsuario.set(clientes.map(cliente => cliente.name).join(', '))
+            const listEquipos = diagnosticos.map(diagnostico => diagnostico.equipo_ID).join(', ')
+            const listClientes = diagnosticos.map(diagnostico => diagnostico.cliente).join(', ')
+            const subdivision_names = diagnosticos.map(diagnostico => diagnostico.subdivision_name).join(', ')
+            const proyectos_names = diagnosticos.map(diagnostico => diagnostico.proyecto_name).join(', ')
+            
+            /*db.exec(` 
+                SELECT 
+                    E.codigo_finca,E.ID,C.business_name,E.chasis,M.name as marca
+                FROM 
+                    equipo E
+                    INNER JOIN catalogo C ON E.catalogo_ID = C.ID
+                    INNER JOIN marca M ON C.marca_ID = M.ID
+                WHERE 
+                    E.ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}') `).toArray()*/
+            const equiposData = []
+            
+            diagnosticos.forEach(equipo => {
+                const equipoData = {
+                    codigo_finca: equipo.codigo_finca,
+                    ID: equipo.equipo_ID,
+                    business_name: equipo.catalogo,
+                    chasis: equipo.chasis,
+                    marca: equipo.marca
+                }
+                equiposData.push(equipoData)
+            })
+            
+            
 
-        const departamentos = db.exec(` SELECT DISTINCT subdivision_name FROM departamento where code IN (SELECT departamento_code FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
-        lugar.set(departamentos.map(departamento => departamento.subdivision_name).join(', '))
-        
-        const proyectos = db.exec(` SELECT DISTINCT name FROM proyecto where ID IN (SELECT proyecto_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
-        proyecto.set(proyectos.map(proyecto => proyecto.name).join(', '))
+            //const clientes = db.exec(` SELECT DISTINCT name FROM cliente where ID IN (SELECT cliente_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
+            equipos.set({codigos:equiposData})
+            nameUsuario.set(listClientes)
 
-        const data = JSON.parse(sCaso?.equipos)
+            //const departamentos = db.exec(` SELECT DISTINCT subdivision_name FROM departamento where code IN (SELECT departamento_code FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
+            lugar.set(subdivision_names)
+            
+            //const proyectos = db.exec(` SELECT DISTINCT name FROM proyecto where ID IN (SELECT proyecto_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
+            proyecto.set(proyectos_names)
 
-        const result = Object.keys(data).reduce((acc, equipoID) => {
-            // Agregar sistemas del prediagnostico
-            Object.keys(data[equipoID].prediagnostico.sistemas).forEach(sistema => {
-              acc.add(sistema);
-            });
-          
-            // Agregar sistemas del diagnostico
-            Object.keys(data[equipoID].diagnostico.sistemas).forEach(sistema => {
-              acc.add(sistema);
-            });
-          
-            return acc;
-          }, new Set());
-        
-        const result2 = Array.from(result).join(", ")
-        sistemas.set(result2)
+            const data = JSON.parse(sCaso?.equipos)
 
-    },[db,sCaso])
+            const result = Object.keys(data).reduce((acc, equipoID) => {
+                // Agregar sistemas del prediagnostico
+                Object.keys(data[equipoID].prediagnostico.sistemas).forEach(sistema => {
+                acc.add(sistema);
+                });
+            
+                // Agregar sistemas del diagnostico
+                Object.keys(data[equipoID].diagnostico.sistemas).forEach(sistema => {
+                acc.add(sistema);
+                });
+            
+                return acc;
+            }, new Set());
+            
+            const result2 = Array.from(result).join(", ")
+            sistemas.set(result2)
+        }
+
+        run()
+
+    },[dbReady,sCaso])
     
     useEffect( () =>{
         fecha.set( fecha.value ? fecha.value : formatInTimeZone ( toZonedTime(new Date(), timeZone), timeZone, 'yyyy-MM-dd HH:mm:ssXXX' ) )

@@ -40,7 +40,14 @@ function useDiagnostico(dbReady = false,syncActive = true) {
     const findByCasoId = (args = { casoId :'', config: { countOnly : false } }) => {
         const all = repository.findByCasoId(args);
         setItems(all);
+        return all;
     }
+
+    /**
+     * Search items by a list of UUIDs of cases
+     * @param {*} uuids 
+     * @returns 
+     */
     const findByListCaseIds = async (uuids) => {
         const all = await repository.findByListCaseIds(uuids);
         setItems(all);
@@ -67,7 +74,7 @@ function useDiagnostico(dbReady = false,syncActive = true) {
         loadItems,
         createItem,
         deleteItem,
-        findByCasoId,
+        findByCasoId
     };
 }
 

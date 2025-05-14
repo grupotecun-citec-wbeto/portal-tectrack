@@ -13,6 +13,8 @@ import repositoryCliente from '../cliente/repository';
 import repositoryProyecto from '../proyecto/repository';
 import repositoryCatalogo from '../catalogo/repository';
 import repositoryCaso from '../caso/repository';
+import repositoryMarca from '../marca/repository';
+import repositoryDepartamento from '../departamento/repository';
 
 
 const repository = {
@@ -70,17 +72,23 @@ const repository = {
             SELECT
                 AT.name as asistencia_tipo, 
                 E.codigo_finca,
+                E.chasis,
+                E.serie,
                 D.equipo_ID,
                 (SELECT name FROM ${repositoryCliente.tableName} WHERE ID = E.cliente_ID) as cliente,
                 (SELECT name FROM ${repositoryAsistenciaTipo.tableName} WHERE ID = D.asistencia_tipo_ID) as asistencia_tipo,
                 (SELECT name FROM ${repositoryProyecto.tableName} WHERE ID = E.proyecto_ID) as proyecto,
                 (SELECT business_name FROM ${repositoryCatalogo.tableName} WHERE ID = E.catalogo_ID) as catalogo,
+                (SELECT name FROM ${repositoryMarca.tableName} WHERE ID = C.marca_ID) as marca,
+                (SELECT subdivision_name FROM ${repositoryDepartamento.tableName} WHERE code = E.departamento_code) as subdivision_name,
+                (SELECT name FROM ${repositoryProyecto.tableName} WHERE ID = E.proyecto_ID) as proyecto_name,
                 D.caso_ID,
                 D.diagnostico_tipo_ID,
                 D.description
             FROM  
                 ${repository.tableName} D
                 INNER JOIN ${repositoryEquipo.tableName} E ON D.equipo_ID = E.ID
+                INNER JOIN ${repositoryCatalogo.tableName} C ON E.catalogo_ID = C.ID
                 INNER JOIN ${repositoryAsistenciaTipo.tableName} AT ON D.asistencia_tipo_ID = AT.ID
             WHERE caso_ID = ?
         `
