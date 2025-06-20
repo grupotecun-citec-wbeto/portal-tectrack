@@ -22,6 +22,8 @@ import ResultTableSqlite from 'views/Pages/ResultTableSqlite';
 import CasoInfo from 'components/Casos/CasoInfo';
 import GenerarPDF from 'components/Casos/Modal/GenerarPDF';
 
+import TreeSistemas from 'views/Dashboard/TreeSistemas';
+
 import { PiLineSegmentsThin } from "react-icons/pi";
 import { IoBriefcaseOutline } from "react-icons/io5";
 import { VscServerProcess } from "react-icons/vsc";
@@ -265,6 +267,15 @@ var dashRoutes = [
         icon: <IoBriefcaseOutline color='inherit' />,
         secondaryNavbar: true,
         component: Casos,
+        layout: "/admin",
+      },
+      {
+        path: "/pages/tree-sistemas",
+        name: "Tree sistemas",
+        rtlName: "لوحة القيادة",
+        icon: <IoBriefcaseOutline color='inherit' />,
+        secondaryNavbar: true,
+        component: TreeSistemas,
         layout: "/admin",
       },
       {

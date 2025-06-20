@@ -1,8 +1,17 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
+    "target": "es6",
+    "jsx": "react",
+    "module": "commonjs",
+    "checkJs": true,
+    "baseUrl": "./src",
     "paths": {
-      "*": ["src/*"]
+      "@components/*": ["components/*"],
+      "@assets/*": ["assets/*"],
+      "@hooks/*": ["hooks/*"],
+      "@services/*": ["services/*"],
+      "@repositories/*":["repositories/*"],
+      "@db/*": ["db/*"]
     }
   }
 }

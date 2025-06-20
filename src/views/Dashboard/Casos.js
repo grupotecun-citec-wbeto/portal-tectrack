@@ -14,9 +14,9 @@ import {
 
 import { ChakraProvider, SimpleGrid, Container } from '@chakra-ui/react';
 // Custom components
-import Card from "@components/Card/Card.js";
-import CardBody from "@components/Card/CardBody.js";
-import CardHeader from "@components/Card/CardHeader.js";
+import Card from "@components/Card/Card";
+import CardBody from "@components/Card/CardBody";
+import CardHeader from "@components/Card/CardHeader";
 import TablesProjectRow from "@components/Tables/TablesProjectRow";
 import CasosTableRow from "@components/Casos/CasosTableRow";
 import React, { useEffect, useState, useMemo} from "react";

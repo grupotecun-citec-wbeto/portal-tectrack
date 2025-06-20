@@ -11,6 +11,12 @@ const syncRepository = {
         return incrementalDate
     },
 
+    /**
+     * Obtiene los datos incrementales de la tabla sincronizada desde el servidor
+     * @param {number} synctable_ID identificador de la base de datos sqlite sincronizada en la nube 
+     * @param {string} incrementalDate fecha de los datos incrementales a obtener, si es null se obtienen todos los datos 
+     * @returns {Promise<Object[]>} Retorna un array de objetos con los datos incrementales 
+     */
     findIncrementalsTuples: async (synctable_ID, incrementalDate) => {
         const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/entidad/${synctable_ID}/${incrementalDate}`);
         const json = JSON.parse(response.data)

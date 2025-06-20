@@ -34,6 +34,7 @@ import useArea from 'hooks/area/useArea';
 import useSistemaMarca from 'hooks/sistema_marca/useSistemaMarca';
 import useServicioTipo from 'hooks/servicio_tipo/useServicioTipo';
 import useSistema from 'hooks/sistema/useSistema';
+import useSistemaServicio from '@hooks/sistema_servicio/useSistemaServicio';
 
 
 // Crear el contexto
@@ -79,6 +80,7 @@ export const DataBaseProvider = ({ children }) => {
     const { } = useSistemaMarca(dbReady); // Hook para manejar la sincronización de sistemas de marca
     const { } = useServicioTipo (dbReady); // Hook para manejar la sincronización de tipos de asistencia
     const { } = useSistema(dbReady); // Hook para manejar la sincronización de sistemas
+    const { } = useSistemaServicio(dbReady); // Hook para manejar la sincronización de sistemas de marca
     
 
     const updateData = (newData) => {

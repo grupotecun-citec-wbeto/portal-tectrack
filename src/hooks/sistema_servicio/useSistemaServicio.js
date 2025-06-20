@@ -1,20 +1,31 @@
 /**
- * @package hooks/area
- * @description Hook para manejar la sincronización de area
+ * @package hooks/sistema_servicio
+ * @description Hook para manejar la sincronización de sistema_servicio
  * @author CITEC
  */
 
-const PACKAGE = 'hooks/area';
+const PACKAGE = 'hooks/sistema_servicio';
 
 
 import { useEffect, useState } from 'react';
-import repository from '../../repositories/local/area/repository';
+import repository from '../../repositories/local/sistema_servicio/repository';
 
 // servicios
-import syncService from '../../services/area/syncService';
+import syncService from '../../services/sistema_servicio/syncService';
 
-
-function useArea(dbReady = false,syncActive = true) {
+/**
+ * Hook para manejar la sincronización de sistema_servicio
+ * @param {boolean} dbReady - Indica si la base de datos está lista
+ * @param {boolean} syncActive - Indica si la sincronización está activa
+ * @return {{
+ *      items: any[],
+ *      loadItems: () => any[],
+ *      createItem: (name: string, email: string) => void,
+ *      deleteItem: (id: number) => void,
+ *      getServicesBySistemaId: (sistemaId: number) => any[]
+ * }} Retorna un objeto con los métodos y datos del hook
+ */
+function useSistemaServicio(dbReady = false,syncActive = true) {
   
     // code de la tabla in mysql
     const codigo = 7, tabla = 'categoria'
@@ -25,7 +36,7 @@ function useArea(dbReady = false,syncActive = true) {
     const loadItems = () => {
         const all = repository.findAll();
         setItems(all);
-        return all;
+        return all
     };
 
     const createItem = (name, email) => {
@@ -36,6 +47,11 @@ function useArea(dbReady = false,syncActive = true) {
     const deleteItem= (id) => {
         repository.deleteById(id);
         loadItems();
+    };
+
+    const getServicesBySistemaId = (sistemaId) => {
+        const services = repository.getServicesBySistemaId(sistemaId);
+        return services;
     };
 
     useEffect(() => {
@@ -50,7 +66,7 @@ function useArea(dbReady = false,syncActive = true) {
             //setTimeout(fetchDataWithTimeout, time); // 5 minutos
         };
         fetchDataWithTimeout();
-        return () => clearTimeout(fetchDataWithTimeout);
+        return () => {}//clearTimeout(fetchDataWithTimeout);
     }, [dbReady]);
 
     return {
@@ -58,8 +74,9 @@ function useArea(dbReady = false,syncActive = true) {
         loadItems,
         createItem,
         deleteItem,
+        getServicesBySistemaId,
     };
 }
 
-export default useArea;
+export default useSistemaServicio;
 

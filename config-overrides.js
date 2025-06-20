@@ -22,6 +22,7 @@ module.exports = function override(config) {
       "@db": path.resolve(__dirname, "src/db"),
       "@repositories": path.resolve(__dirname, "src/repositories"),
       "@hooks": path.resolve(__dirname, "src/hooks"),
+      "@services": path.resolve(__dirname, "src/services"),
     };
   
 
@@ -32,18 +33,18 @@ module.exports = function override(config) {
       "crypto": false
     }
     // Agregar fallbacks para módulos de Node.js
-    /*config.resolve.fallback = {
+    config.resolve.fallback = {
       fs: false, // No necesitas fs en el navegador
       path: require.resolve('path-browserify'), // Usar path-browserify como string
       crypto: require.resolve('crypto-browserify'), // Usar crypto-browserify
       buffer: require.resolve("buffer/"),
       stream: require.resolve("stream-browserify"),
       vm: require.resolve("vm-browserify"),
-    };*/
+    };
   
 
   // Aquí puedes agregar la configuración de Workbox como un plugin de Webpack
-  //if(process.env.NODE_ENV == "production"){
+  if(process.env.NODE_ENV == "production"){
   //NetworkFirst  
     config.plugins.push(
       new WorkboxPlugin.GenerateSW({
@@ -85,7 +86,7 @@ module.exports = function override(config) {
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // Aumenta el límite a 5 MB
       })
     );
-  //}
+  }
 
   
 

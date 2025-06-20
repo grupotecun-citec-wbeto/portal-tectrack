@@ -13,10 +13,10 @@ const repository = {
     tableCode:29,
     tableName:'sistema',
     /**
-     * 
-     * @param {string} id indentificator de categoria
-     * @param {string} name name of categoria
-     * @param {string} json json de categoria
+     * Crea o reemplaza los registros de la tabla sistema, para actualizar los datos de la tabla en forma incremental
+     * @package repositories/local/sistema
+     * @param {object[]} json Array de objetos que contienen los datos a insertar o reemplazar en la tabla sistema
+     * @returns {Promise<void>}
      */
     createOrRemplace: async (json) => {
         const db = getDB();
@@ -29,26 +29,45 @@ const repository = {
         await persistDatabase();
     },
 
-    create: async (id, area_ID, name) => {
+    /**
+     * Crear un nuevo registro en la tabla sistema
+     * @param {SistemaRaw} sistemaRaw Objeto que contiene los datos del sistema a crear
+     * @returns {Promise<void>}
+     */
+    create: async (sistemaRaw) => {
         const db = getDB();
-        const stmt = db.prepare(`INSERT INTO ${repository.tableName} (id, area_ID, name) VALUES (?, ?, ?)`);
+        const stmt = db.prepare(`INSERT INTO ${repository.tableName} (id, area_ID, name) VALUES (?, ?, ?, ?, ?)`);
 
-        stmt.run([id, area_ID,  name]);
+        stmt.run([sistemaRaw.ID, sistemaRaw.area_ID,  sistemaRaw.name, sistemaRaw.sistema_ID, sistemaRaw.nivel]);
         stmt.free();
         await persistDatabase();
     },
     
+   
+
+    /**
+     * Retorna todos los registros de la tabla sistema
+     * @package repositories/local/sistema
+     * @returns {SistemaRaw[]} Retorna un array de objetos con los datos de la tabla sistema
+     */
+
     findAll: () => {
         const db = getDB();
-        const stmt = db.prepare(`SELECT * FROM ${repository.tableName}`);
+        const stmt = db.prepare(`SELECT ID,area_ID,sistema_ID,nivel,name FROM ${repository.tableName}`);
         const results = [];
         while (stmt.step()) {
-        results.push(stmt.getAsObject());
+            results.push(stmt.getAsObject());
         }
         stmt.free();
         return results;
     },
     
+    /**
+     * Eliminar un sistema por su ID
+     * @package repositories/local/sistema
+     * @param {number} id - El ID del sistema a eliminar
+     * @returns {Promise<void>}
+     */
     deleteById: async (id) => {
         const db = getDB();
         const stmt = db.prepare(`DELETE FROM ${repository.tableName} WHERE id = ?`);
@@ -56,6 +75,13 @@ const repository = {
         stmt.free();
         await persistDatabase();
     },
+
+    
+    /**
+     * Retorna lista de sistemas por area de nivel 1
+     * @package repositories/local/sistema
+     * @returns {Promise<SystemByArea[]>}
+    */
     getNivel1: async() => {
         const db = getDB();
         const stmt = db.prepare(`
