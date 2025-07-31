@@ -3,7 +3,7 @@
     "target": "es6",
     "jsx": "react",
     "module": "commonjs",
-    "checkJs": true,
+    "checkJs": false,
     "baseUrl": "./src",
     "paths": {
       "@components/*": ["components/*"],
@@ -11,6 +11,7 @@
       "@hooks/*": ["hooks/*"],
       "@services/*": ["services/*"],
       "@repositories/*":["repositories/*"],
+      "@types/*":["types/*"],
       "@db/*": ["db/*"]
     }
   }

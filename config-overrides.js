@@ -23,6 +23,7 @@ module.exports = function override(config) {
       "@repositories": path.resolve(__dirname, "src/repositories"),
       "@hooks": path.resolve(__dirname, "src/hooks"),
       "@services": path.resolve(__dirname, "src/services"),
+      "@types": path.resolve(__dirname, "src/types"),
     };
   
 
