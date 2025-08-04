@@ -73,6 +73,7 @@ const repository = {
             OR UPPER(serie_extra) LIKE UPPER('%${cadena}%')
             OR UPPER(chasis) LIKE UPPER('%${cadena}%')
             OR UPPER(E.codigo_finca) LIKE UPPER('%${cadena}%')
+            OR UPPER(CL.name) LIKE UPPER('%${cadena}%')
             OR UPPER(P.name) LIKE UPPER('%${cadena}%'))`
             : seleccionadosCondition;
 
