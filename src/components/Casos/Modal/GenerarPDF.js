@@ -435,7 +435,7 @@ const GenerarPDF2 = () => {
     const [sistemasValue,setSistemasValue] = useState('')
 
     // revisadoPor
-    const [revisadoPorValue,setRevisadoPorValue] = useState('Marlon Flores')
+    const [revisadoPorValue,setRevisadoPorValue] = useState('Jefatura de CITEC')
 
     // fechaEmision
     const [fechaEmisionValue,setFechaEmisionValue] = useState(formatInTimeZone(toZonedTime(new Date(), timeZone), timeZone, 'yyyy-MM-dd'));
