@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     },
     technicianData: {
       preparedBy: "Billy Guillen",
-      reviewedBy: "Marlon Flores",
+      reviewedBy: "Jefatura de CITEC",
       reportDate: "2024-06-10",
     },
   };
