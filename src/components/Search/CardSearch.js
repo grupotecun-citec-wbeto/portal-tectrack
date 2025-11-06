@@ -49,6 +49,7 @@ function SearchCard(props) {
         infos,
         isSelected, 
         isPost,
+        isBusquedaTerminada,
         ...rest } = props;
     
     const history = useHistory();
@@ -128,32 +129,12 @@ function SearchCard(props) {
             setIsSelectedEquipo(false)
         }
     },[])
-
-    /*useEffect( ()=>{
-        getUserData()
-                
-        
-            const equipos = Object?.keys(userData?.casos[userData?.casoActivo?.code]?.equipos ?? {}).map(key => parseInt(key, 10))
-            if(!equipos.includes(maquina_id)){
-                setIsSelectedEquipo(false)
-            }
-    
-        
-    },[userData])*/
     
 
    
 
    
-
-    const btnCreateCase = () =>{
-        // ESTA FUNCIONALIAD LA VAMOS A MOVER DE LUGAR HACIA
-        /*setCasoActivo({code:uuidv4(),maquina_id:maquina_id,categoria_id:categoria_id,cliente_name:cliente_name})
-        setTimeout(() => {
-            history.push('/admin/pages/prediagnostico');
-        }, 800);*/
-        
-    }
+    // -> Elimino btnCreateCase no tiene funcionalidad en este componente
 
 
     const btnAgregar = async() =>{
@@ -242,7 +223,7 @@ function SearchCard(props) {
                     <CardBodyFlexText title={info.title} text={info.text}/>    
                 ))}
             </CardBody>
-            <Flex justifyContent='space-between'>
+            <Flex justifyContent={!isBusquedaTerminada ? "center" : "space-between"} p={2}>
                
                     {!isSelectedEquipo ?(
                         <IconButton
@@ -250,6 +231,7 @@ function SearchCard(props) {
                             aria-label="Agregar" // Etiqueta accesible para lectores de pantalla
                             colorScheme="blue" // Cambia el esquema de color
                             size="md" // Tamaño del botón (opciones: "xs", "sm", "md", "lg")
+                            style={{ width: !isBusquedaTerminada ? "100%" : "0%" }}
                             onClick={btnAgregar} // Acción al hacer clic
                         />
                     ):(
@@ -261,33 +243,37 @@ function SearchCard(props) {
                                         aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
                                         colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
                                         size="md" // Tamaño del botón
+                                        style={{ width: !isBusquedaTerminada ? "100%" : "0%" }}
                                         onClick={(!isPost) ? eliminarEquipoEnBusqueda : eliminarEquipo} // Acción al hacer clic
                                     />
                                 </Tooltip>
                             )}
                             
                             
-                            
-                            {( (!isCreatedPreDiagnostico && !isPost) || (!isCreatedDiagnostico && isPost) ) ? (
-                                <Tooltip label={(!isPost) ? "Agregar pre-diagnostico" : "Agregar diagnostico" } aria-label="Tooltip para el botón">
-                                    <IconButton
-                                        icon={<FaPlus />} // Icono para crear diagnóstico
-                                        aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
-                                        colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
-                                        size="md" // Tamaño del botón
-                                        onClick={(!isPost) ? ir_prediganostico : ir_diagnostico} // Acción al hacer clic
-                                    />
-                                </Tooltip>
-                            ):(
-                                <Tooltip label={(!isPost) ? "Editar pre-diagnostico" : "Editar Diagnostico"} aria-label="Tooltip para el botón">
-                                    <IconButton
-                                        icon={<FaEdit />} // Icono para crear diagnóstico
-                                        aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
-                                        colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
-                                        size="md" // Tamaño del botón
-                                        onClick={(!isPost) ? ir_prediganostico : ir_diagnostico} // Acción al hacer clic
-                                    />
-                                </Tooltip>
+                            {isBusquedaTerminada && (
+                                <>
+                                    {( (!isCreatedPreDiagnostico && !isPost) || (!isCreatedDiagnostico && isPost) ) ? (
+                                        <Tooltip label={(!isPost) ? "Agregar pre-diagnostico" : "Agregar diagnostico" } aria-label="Tooltip para el botón">
+                                            <IconButton
+                                                icon={<FaPlus />} // Icono para crear diagnóstico
+                                                aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
+                                                colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
+                                                size="md" // Tamaño del botón
+                                                onClick={(!isPost) ? ir_prediganostico : ir_diagnostico} // Acción al hacer clic
+                                            />
+                                        </Tooltip>
+                                    ):(
+                                        <Tooltip label={(!isPost) ? "Editar pre-diagnostico" : "Editar Diagnostico"} aria-label="Tooltip para el botón">
+                                            <IconButton
+                                                icon={<FaEdit />} // Icono para crear diagnóstico
+                                                aria-label="Crear diagnóstico" // Etiqueta accesible para lectores de pantalla
+                                                colorScheme="teal" // Cambia el esquema de color (puedes ajustarlo según tus preferencias)
+                                                size="md" // Tamaño del botón
+                                                onClick={(!isPost) ? ir_prediganostico : ir_diagnostico} // Acción al hacer clic
+                                            />
+                                        </Tooltip>
+                                    )}
+                                </>
                             )}
                             
                             
