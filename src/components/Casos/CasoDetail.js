@@ -46,7 +46,7 @@ import { FaUserPen,FaUserMinus,FaEye } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
 import { IoIosBusiness } from "react-icons/io";
-import { MdWorkspaces } from "react-icons/md";
+import { MdWorkspaces,MdOutlineSyncProblem,MdOutlineWbCloudy,MdSync   } from "react-icons/md";
 import { LiaTractorSolid } from "react-icons/lia"; 
 import { HiOutlineDocumentReport } from "react-icons/hi";
 
@@ -602,22 +602,65 @@ const CasoDetail = React.memo(({ caseData }) => {
       overflow="hidden"
       position="relative" // Add position relative to position the icon
     >
-      {/* Icon for unsynchronized case */}
-      {syncStatusDetail == 1 && (
-        
-        <Icon
-          as={FaInfoCircle}
-          color="red.500"
-          boxSize="20px"
+      {/* Overlay when sync error */}
+      {syncStatusDetail == 3 && (
+        <Box
           position="absolute"
-          top="10px"
-          left="10px"
-        />
-        
+          top="0"
+          left="0"
+          w="full"
+          h="full"
+          bg="blackAlpha.600"
+          zIndex="overlay"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          pointerEvents="auto"
+          borderRadius="lg"
+        >
+          <Flex direction="column" align="center" color="white">
+            <Icon as={MdOutlineSyncProblem} boxSize={{ base: "40px", md: "48px" }} />
+            <Text fontSize="lg" fontWeight="bold" mt={2}>
+              Sincronización con errores
+            </Text>
+          </Flex>
+        </Box>
       )}
+
       <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
         
-          
+          <Tooltip label="Estado de sincronización" aria-label="A tooltip" >
+            <Badge
+              bg={syncStatusDetail == 0 ? "green.400" : syncStatusDetail == 1 ? "yellow.400" : "red.400"}
+              color={"white"}
+              fontSize="0.8em"
+              p="3px 10px"
+              borderRadius="8px"
+            >
+              <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                {syncStatusDetail == 0 && (
+                  <>
+                    <Icon as={MdOutlineWbCloudy } color="white" boxSize={{sm:"24px",lg:"24px"}} />
+                    {"Sync"}
+                  </>
+                )}
+                {syncStatusDetail == 1 && (
+                  <>
+                    <Icon as={MdSync } color="white" boxSize={{sm:"24px",lg:"24px"}} />
+                    {"Sincronizando"}
+                  </>
+                )}
+                {syncStatusDetail == 3 && (
+                  <>
+                    <Icon as={MdOutlineSyncProblem } color="white" boxSize={{sm:"24px",lg:"24px"}} />
+                    {"Con problema"}
+                  </>
+                )}
+              </Flex>
+              
+            </Badge>
+          </Tooltip>
+
           <Tooltip label="Estado del caso" aria-label="A tooltip" >
             <Badge
               bg={statusColor}
@@ -692,7 +735,7 @@ const CasoDetail = React.memo(({ caseData }) => {
                         </Tooltip>
                       
                     
-                      ):(
+                      ):[
                         <>
                           
                             <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
@@ -714,7 +757,7 @@ const CasoDetail = React.memo(({ caseData }) => {
                         
                         
                         
-                      )}
+                      ]}
                     
                     
                       <Tooltip label="Detalles del caso" aria-label="A tooltip" >
@@ -731,7 +774,7 @@ const CasoDetail = React.memo(({ caseData }) => {
                         </Button>
                       </Tooltip>
                     </>
-                  ):(
+                  ):[
                     <>
                       
 
@@ -742,9 +785,9 @@ const CasoDetail = React.memo(({ caseData }) => {
                         </Tooltip>
                       
                     </>
-                  )}
+                  ]}
                 </>
-              ):(
+              ):[
                 <>
                    <Tooltip label="Detalles del caso" aria-label="A tooltip" >
                       <NavLink to={`/admin/pages/casoinfo/${id}`} >
@@ -771,9 +814,9 @@ const CasoDetail = React.memo(({ caseData }) => {
                     </Text>
                 </>
                 
-              )}
+              ]}
               
-                
+                 
 
               
             </Flex>
@@ -795,7 +838,7 @@ const CasoDetail = React.memo(({ caseData }) => {
             
             </>
             
-          ):(
+          ):[
             
             <>
               {estado == 3 && (
@@ -804,7 +847,7 @@ const CasoDetail = React.memo(({ caseData }) => {
               
             </>
             
-          )}
+          ]}
          
           
         
@@ -823,7 +866,7 @@ const CasoDetail = React.memo(({ caseData }) => {
           >
             {usuariosList}
           </Select>
-        ):(
+        ):[
           <>
             {/* Se va eliminar esto porque prediagnostico es una array  
             <Text fontSize="2xl" fontWeight="bold">
@@ -932,7 +975,7 @@ const CasoDetail = React.memo(({ caseData }) => {
               </Text>
             </Stack>
           </>
-        )}
+        ]}
         
       </Stack>
       {/*<CasoModal isOpen={isOpen} onOpen={onOpen} onClose={onClose}  />*/}

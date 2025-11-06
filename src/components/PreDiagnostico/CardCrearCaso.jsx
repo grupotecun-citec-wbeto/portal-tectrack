@@ -101,9 +101,13 @@ function CardCrearCaso({openAlert,key}){
         for (const maquina_id of equiposArray) {
             // indica cuando un pre-diagnostico no esta completo de la lista de maquinas
             const diagnostico = {};
-                
-            const prediagnostico = userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico;
+            const caso = userData.casos[userData.casoActivo?.code];
+            const prediagnostico = caso.equipos[maquina_id].prediagnostico;
             
+            if(caso.comunicacion_ID == 0){
+                casoCompelto = false;
+            }
+
             diagnostico.maquina_id = maquina_id;
             diagnostico.uuid = uuid;
             diagnostico.diagnostico_tipo_ID = 1; // diagnostico pre
@@ -117,7 +121,9 @@ function CardCrearCaso({openAlert,key}){
 
             if (
                 Object.keys(prediagnostico.sistemas).length === 0 ||
-                Object.keys(prediagnostico.herramientas).length === 0
+                Object.keys(prediagnostico.herramientas).length === 0 ||
+                prediagnostico.asistencia_tipo_ID == 0 ||
+                prediagnostico.prioridad == 0
             ) {
             casoCompelto = false;
             }
@@ -150,7 +156,19 @@ function CardCrearCaso({openAlert,key}){
                
                 caseId = uuid
                 
-                await createSupportCaseItem(uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos)
+                await createSupportCaseItem(
+                    uuid, 
+                    usuario_ID,
+                    usuario_ID_assigned,
+                    comunicacion_ID,
+                    segmento_ID,
+                    caso_estado_ID,
+                    fecha,
+                    start,
+                    prioridad,
+                    equiposIfy,
+                    diagnosticos
+                ) // load case local
                 loadCaso()
             }catch(err){
                 console.error('5651c782-9238-46a2-884e-b35991ed7e5a',err)

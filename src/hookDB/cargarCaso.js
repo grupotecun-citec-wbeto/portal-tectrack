@@ -60,7 +60,13 @@ function useCargarCaso(caso_id = false) {
             
             const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
             const formDataMerge = await getDataMerge(listaCasos)
-            await syncCloud(formDataMerge)
+            try{
+              await syncCloud(formDataMerge) // sincroniza con la nube
+            }catch(err){
+              await repositoryCaso.markAsErrorSynchronized(listaCasos)
+              console.warn('Error sincronizando caso: 955a6aa9-67b4-4877-af02-6fbd43b401f4',err)
+              
+            }
             resolve(true)
           }else{
             console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
@@ -70,7 +76,7 @@ function useCargarCaso(caso_id = false) {
           if (error.response && error.response.status === 400) {
             setTime((prevTime) => Math.min(prevTime + 300000, 3600000));
           }
-          console.error('Error fetching data: 70983d04-a730-4b3c-963d-e07872845b27', error);
+          console.error('Error fetching data: e8ed6720-8a86-463e-88a1-de1eda9254a4', error);
           reject(error) 
         }
         
@@ -100,8 +106,9 @@ function useCargarCaso(caso_id = false) {
       //if(dbReady){
         try {
           const casosNoSincronizados = await repositoryCaso.unsynchronizedCases(caso_id)
+          //const casosErrorSincronizados = await repositoryCaso.errorSynchronizedCases()
           
-          console.log('casosNoSincronizados: 9ef51e92-feb1-4a2e-b178-8f9af10f7ed5', casosNoSincronizados,caso_id);
+          console.log('casosNoSincronizados: 90fc269c-e903-4dc6-a4fc-a73c7afa8d99', casosNoSincronizados,caso_id);
             
           if(casosNoSincronizados.length != 0){  
             console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
@@ -109,7 +116,27 @@ function useCargarCaso(caso_id = false) {
             
             const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
             const formDataMerge = await getDataMerge(listaCasos)
-            await syncCloud(formDataMerge)
+            try{
+              await syncCloud(formDataMerge) // sincroniza con la nube
+            }catch(err){
+              //await repositoryCaso.markAsErrorSynchronized(listaCasos)
+              for (const uuid of uuids) {
+                await repositoryCaso.setAsUnSynchronized(uuid) // colocar en estado 1
+                const casoNoSincronizado = await repositoryCaso.unsynchronizedCase(uuid)
+                const uuids = casosNoSincronizados.map(objeto => objeto.ID);
+                
+                const caso = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
+                const formDataMerge = await getDataMerge(caso)
+                try{
+                  await syncCloud(formDataMerge)
+                }catch(err){
+                  await repositoryCaso.markAsErrorSynchronized(caso)
+                }
+                
+              }
+              console.warn('Error sincronizando caso: 955a6aa9-67b4-4877-af02-6fbd43b401f4',err)
+
+            }
           }else{
             console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
           }

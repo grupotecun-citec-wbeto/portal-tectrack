@@ -349,17 +349,22 @@ import {
             
           </Grid>
         )}
-        {!isPost ? (
+        {isBusquedaTerminada && (
           <>
-            {isSuccessAlertCaso ?(
-              <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid}/>
+            {!isPost ? (
+              <>
+                {isSuccessAlertCaso ?(
+                  <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid}/>
+                ):(
+                  <CardCrearCaso openAlert={openAlert} key='CardCrearCaso' />
+                )}
+              </>
             ):(
-              <CardCrearCaso openAlert={openAlert} key='CardCrearCaso' />
+              <CardTerminarCaso refresh={refresh} />
             )}
           </>
-        ):(
-          <CardTerminarCaso refresh={refresh} />
         )}
+        
        
         <CardCommand />
       </Flex>

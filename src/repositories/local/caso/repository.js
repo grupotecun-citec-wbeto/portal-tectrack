@@ -118,13 +118,26 @@ const repository = {
         }
     },
 
-    createSupport: async (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos) => {
+    createSupport: async (
+        uuid,
+        usuario_ID,
+        usuario_ID_assigned,
+        comunicacion_ID,
+        segmento_ID,
+        caso_estado_ID,
+        fecha,
+        start,
+        prioridad,
+        equiposIfy,
+        diagnosticos
+    ) => {
         const db = getDB();
         try{
             db.exec('BEGIN TRANSACTION');
             const stmt = db.prepare(`
             INSERT INTO ${repository.tableName} (
                 ID,
+
                 syncStatus,
                 usuario_ID,
                 usuario_ID_assigned,
@@ -515,10 +528,64 @@ const repository = {
         return results;
     },
 
+    errorSynchronizedCases: async () => {
+        const db = getDB();
+        const stmt = db.prepare( 
+            `SELECT
+                ID,
+                usuario_ID,
+                usuario_ID_assigned,
+                comunicacion_ID,
+                segmento_ID,
+                caso_estado_ID,
+                fecha,
+                start,
+                date_end,
+                description,
+                prioridad,
+                uuid,
+                equipos
+            FROM 
+                ${repository.tableName} 
+            WHERE 
+                syncStatus = ?
+            `);
+        stmt.bind([3])
+        const results = [];
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
+    },
+
     setAsSynchronized: async (id) => {
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET syncStatus = 0 WHERE ID = ?`);
         stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
+    setAsUnSynchronized: async (id) => {
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET syncStatus = 1 WHERE ID = ?`);
+        stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
+    /**
+     * Establece el caso como error de sincronización
+     * @param {*} id identificador de caso
+     * @description establece el caso como error de sincronización
+     */
+    markAsErrorSynchronized: async (listaCasos) => {
+        console.log(    `[${PACKAGE}] markAsErrorSynchronized a2157e20-035e-45af-96d8-44d87083cc6a`, listaCasos);
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET syncStatus = 3 WHERE ID IN (${listaCasos.uuids.map(() => '?').join(',')})`);
+        //stmt.bind(listaCasos.uuids);
+        stmt.run(listaCasos.uuids);
         stmt.free();
         await persistDatabase();
     }
