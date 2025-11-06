@@ -297,6 +297,7 @@ import {
                   cliente_name={maquina.cliente_name}
                   isSelected={maquina.isSelected}
                   isPost={isPost}
+                  isBusquedaTerminada={isBusquedaTerminada}
                   onRefresh={{set:setRefresh, get: refresh}}
                   infos={[
                     {title:"Categoria",text:maquina.categoria_name},
