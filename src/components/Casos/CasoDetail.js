@@ -116,6 +116,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
     segmento_ID,
     usuario_ID,
     usuario_ID_assigned,
+    comunicacion_ID,
     equipos,
     syncStatus
   } = caseData;
@@ -571,13 +572,16 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
           openLoader(false);
         } 
       }else{
+        openLoader(false);
         alert('No tiene equipos procesar, por favor contactar al administrador para revisar el caso')
       }
       
     }catch(err){
       console.log(err);
     }finally{
-      //openLoader(false);
+      setTimeout(() => {
+         openLoader(false);
+      }, 800);
     }
     
     
@@ -658,7 +662,8 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                     Por favor, verifica la conexión antes de eliminar.
                   </Text>
 
-                  <Button
+                  
+                  {<Button
                     mt={4}
                     colorScheme="red"
                     leftIcon={<Icon as={FaRegWindowClose} color="white" />}
@@ -681,7 +686,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                     size="sm"
                   >
                     Eliminar caso
-                  </Button>
+                  </Button>}
                 </>
               </>
             )}

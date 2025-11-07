@@ -82,6 +82,7 @@ function Casos() {
   const [segmentoSelected,setSegmentoSelected] = useState('')
   const [rangeFechaSelected,setRangeFechaSelected] = useState({start:'',end:''})
   const [limitSelected,setLimitSelected] = useState('50')
+  const [syncStatusSelected,setSyncStatusSelected] = useState('')
 
   // fullscreen loader
   const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
@@ -110,6 +111,7 @@ function Casos() {
         clienteSelected: clienteSelected,
         rangeFechaSelected: rangeFechaSelected,
         limitSelected: limitSelected,
+        syncStatusSelected: syncStatusSelected,
       }
 
       const fetchData = async () => {
@@ -131,6 +133,7 @@ function Casos() {
         clienteSelected: clienteSelected,
         rangeFechaSelected: rangeFechaSelected,
         limitSelected: limitSelected,
+        syncStatusSelected: syncStatusSelected,
       }
 
     const fetchData = async () => {
@@ -154,6 +157,7 @@ function Casos() {
         clienteSelected: clienteSelected,
         rangeFechaSelected: rangeFechaSelected,
         limitSelected: limitSelected,
+        syncStatusSelected: syncStatusSelected,
       }
     const fetchData = async () => {
       const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"5"},{countOnly:true})
@@ -174,7 +178,8 @@ function Casos() {
         segmentoSelected: segmentoSelected,
         clienteSelected: clienteSelected,
         rangeFechaSelected: rangeFechaSelected,
-        limitSelected: limitSelected
+        limitSelected: limitSelected,
+        syncStatusSelected: syncStatusSelected
       }
 
       const fetchData = async () => {
@@ -197,7 +202,8 @@ function Casos() {
       segmentoSelected:'',
       clienteSelected: '',
       rangeFechaSelected: {start:'',end:''},
-      limitSelected: limitSelected
+      limitSelected: limitSelected,
+      syncStatusSelected: ''
     }
 
     const fetchData = async () => {
@@ -228,6 +234,7 @@ function Casos() {
         usuario_ID: row.usuario_ID,
         caso_uuid: row.uuid,
         syncStatus: row.syncStatus,
+        comunicacion_ID: row.comunicacion_ID,
         equipos: row.equipos,
 
       };
@@ -303,6 +310,8 @@ function Casos() {
         setRangeFechaSelected={setRangeFechaSelected}
         limitSelected={limitSelected}
         setLimitSelected={setLimitSelected}
+        syncStatusSelected={syncStatusSelected}
+        setSyncStatusSelected={setSyncStatusSelected}
         openLoader={setFullscreenLoaderVisible}
       />
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>

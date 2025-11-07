@@ -248,6 +248,7 @@ const repository = {
             const query_cliente = (filters.clienteSelected != '') ? ` AND ${repositoryEquipo.tableName}.cliente_ID = ?` : ''
             const query_fecha = (filters.rangeFechaSelected.start != '' && filters.rangeFechaSelected.end != '') ? ` AND DATE(start) BETWEEN ? AND ?` : ''
             const query_limit = ( filters.limitSelected != '') ? ` LIMIT ? ` : ''
+            const query_syncStatus = ( filters.syncStatusSelected != '') ? ` AND syncStatus = ? ` : ''
 
             const select = []
             select.push(`${repository.tableName}.ID`)
@@ -302,9 +303,15 @@ const repository = {
                 parameters.push(filters.rangeFechaSelected.end)
             }
 
+            if(query_syncStatus != ''){
+                parameters.push(filters.syncStatusSelected)
+            }
+
             if(query_limit != ''){
                 parameters.push(filters.limitSelected)
             }
+
+            
 
             // definir si se necesita solo contar
             const query_count = (config.countOnly) ? ` COUNT(*) AS cantidad ` : ` ${select.join(', ')} `
@@ -327,6 +334,7 @@ const repository = {
                             ${query_segmento} 
                             ${query_cliente}
                             ${query_fecha}
+                            ${query_syncStatus}
                         ORDER BY start DESC
                         ${query_limit}`
                     console.log(query,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
@@ -447,10 +455,12 @@ const repository = {
         try{
             db.exec("BEGIN TRANSACTION")
             const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ?, date_end = ? , equipos = ?, syncStatus=1 where ID = ?`);
+            console.log([estado_a_asignar,currentDateTime,equipos,id], "b24a1fd5-9549-41b3-b865-63dd6fc84b14")
             stmt.run([estado_a_asignar,currentDateTime,equipos,id]);
             stmt.free();
 
             const stmt2 = db.prepare(`UPDATE ${repositoryVisita.tableName} SET km_final = ? where ID = (SELECT visita_ID FROM ${repositoryCasoVisita.tableName} WHERE caso_ID = ? LIMIT 1) `);
+            console.log([kmFinal,id], "4baa164a-22f3-4497-9352-0d60abd5496a")
             stmt2.run([kmFinal,id]);
             stmt2.free();
 

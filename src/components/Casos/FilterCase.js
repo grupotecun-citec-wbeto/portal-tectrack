@@ -20,6 +20,7 @@ const FilterCase = React.memo(({
   clienteSelected,setClienteSelected,
   rangeFechaSelected,setRangeFechaSelected,
   limitSelected,setLimitSelected,
+  syncStatusSelected,setSyncStatusSelected,
   openLoader
 }) => {
   // ************************** REDUX-PRESIST ****************************
@@ -49,6 +50,7 @@ const FilterCase = React.memo(({
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [limitFilterSelected, setLimitFilterSelected] = useState('50');
+  const [syncStatusSelect, setSyncStatusSelect] = useState('');
 
    // useState
 
@@ -74,13 +76,15 @@ const FilterCase = React.memo(({
     setClienteSelected(clienteSelectedInter) // seleccionar cliente
     setRangeFechaSelected({start:startDate,end:endDate}) // seleccionar rango de fechas
     setLimitSelected(limitFilterSelected)
+    setSyncStatusSelected(syncStatusSelect)
 
     console.log('Límite de Casos:', limitFilterSelected);
+    console.log('Estado de Sincronización:', syncStatusSelect);
 
     setTimeout(() => {
       openLoader(false)
     }, 500);
-  }, [userSelected, prioriSelected, segmentSelected, clienteSelectedInter, startDate, endDate, limitFilterSelected, openLoader])
+  }, [userSelected, prioriSelected, segmentSelected, clienteSelectedInter, startDate, endDate, limitFilterSelected, syncStatusSelect, openLoader])
   
   // useEffect
   
@@ -212,6 +216,18 @@ const FilterCase = React.memo(({
                       <option value="1000">1000</option>
                       <option value="5000">5000</option>
                       <option value="10000">10000</option>
+                    </Select>
+                  </FormControl>
+                </GridItem>
+
+                {/* Synchronization Status Filter */}
+                <GridItem>
+                  <FormControl>
+                    <FormLabel>Estado de Sincronización</FormLabel>
+                    <Select placeholder="Seleccionar estado" value={syncStatusSelect} onChange={(e) => setSyncStatusSelect(e.target.value)}>
+                      <option value="0">Sincronizado</option>
+                      <option value="1">Sin sincronizar</option>
+                      <option value="3">Con problema</option>
                     </Select>
                   </FormControl>
                 </GridItem>
