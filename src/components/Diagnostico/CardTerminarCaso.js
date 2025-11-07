@@ -50,7 +50,7 @@ function CardTerminarCaso(props){
     const {stop: stopCase} = useCaso(dbReady,false)
 
 
-    const {refresh} = props
+    const {refresh, openLoader} = props
     /*const {
         casoActivo,setCasoActivo,
         slcCasoId,setSlcCasoId
@@ -144,7 +144,12 @@ function CardTerminarCaso(props){
                     
                     
                         // sincronizar caso con rehidratación
+                        openLoader(true)
                         loadCaso()
+                        setTimeout(() => {
+                            openLoader(false)
+                            history.push('/admin/pages/casos')
+                        }, 2000);
                     }catch(err){
                         console.warn('Error al terminar el caso 07506205-36c1-4767-a2cc-1b5a301754bf',err)
                     }
@@ -155,73 +160,9 @@ function CardTerminarCaso(props){
                     saveUserData(newUserData)
                     
                     
-                    // Mostrar overlay full-screen "Terminando caso" por 1300ms y luego redirigir
-                    const overlay = document.createElement('div');
-                    overlay.id = 'terminando-caso-overlay';
-                    Object.assign(overlay.style, {
-                        position: 'fixed',
-                        top: '0',
-                        left: '0',
-                        width: '100%',
-                        height: '100%',
-                        background: 'rgba(0,0,0,0.6)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 9999,
-                        color: '#fff',
-                        fontSize: '1.6rem',
-                        fontWeight: '600',
-                    });
-                    overlay.innerText = 'Terminando caso';
-                    document.body.appendChild(overlay);
-
-                    // Mostrar loader debajo del texto "Terminando caso"
-                    overlay.innerHTML = `
-                      <div style="display:flex;align-items:center;justify-content:center;min-height:120px;">
-                        <div style="background:#ffffff; color:#111; padding:24px 28px; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.25); text-align:center; max-width:420px; width:90%;">
-                          <div style="font-size:1.25rem; font-weight:700; margin-bottom:8px;">Terminando caso</div>
-                          <div style="font-size:0.95rem; color:#666; margin-bottom:18px;">
-                            Guardando datos y sincronizando con el servidor. Esto puede tardar unos segundos.
-                          </div>
-
-                          <div style="display:flex; align-items:center; justify-content:center; gap:18px;">
-                            <svg width="48" height="48" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                              <circle class="ring" cx="25" cy="25" r="20" stroke="#2b6cb0" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="90" stroke-dashoffset="0"/>
-                            </svg>
-
-                            <div style="width:140px; height:8px; background:#eef2f7; border-radius:6px; overflow:hidden;">
-                              <div class="progress" style="height:100%; background:linear-gradient(90deg,#2b6cb0,#48bb78); width:36%;"></div>
-                            </div>
-                          </div>
-
-                          <div style="font-size:0.85rem; color:#9aa4b2; margin-top:14px;">
-                            No cierre la aplicación hasta completar el proceso.
-                          </div>
-                        </div>
-                      </div>
-
-                      <style>
-                        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-                        @keyframes prog {
-                          0% { width: 10%; }
-                          50% { width: 70%; }
-                          100% { width: 10%; }
-                        }
-                        .ring { transform-origin: 25px 25px; animation: rotate 1s linear infinite; }
-                        .progress { animation: prog 2s ease-in-out infinite; }
-                      </style>
-                    `;
-                    setTimeout(() => {
-                        const el = document.getElementById('terminando-caso-overlay');
-                        if (el) el.remove();
-                        history.push('/admin/pages/casos');
-                    }, 2000);
-
-                    // Evitar que el flujo continúe y ejecute el history.push inmediato que viene después
-                    return;
                     
-                    history.push('/admin/pages/casos')
+                    
+                    //history.push('/admin/pages/casos')
                 }else{
                     alert('Elegir el caso')
                 }

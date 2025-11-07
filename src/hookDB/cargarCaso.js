@@ -79,6 +79,7 @@ function useCargarCaso(caso_id = false) {
                   }
                   
                 }
+                reject(err)
               }
              
               

@@ -41,7 +41,7 @@ import useCargarCaso from "hookDB/cargarCaso";
 
 //******************************************* FIN IMPORTS ************************** */
 
-function CardCrearCaso({openAlert,key}){
+function CardCrearCaso({openAlert,key, openLoader}){
 
     const {casoActivo,setCasoActivo} = useContext(AppContext)
    
@@ -70,7 +70,7 @@ function CardCrearCaso({openAlert,key}){
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
-    const {loadCaso} = useCargarCaso(userData?.casoActivo?.code)
+    const {loadCaso,loadCasoPromise} = useCargarCaso(userData?.casoActivo?.code)
 
     const getCurrentDateTime = () => {
         const now = new Date();
@@ -169,15 +169,23 @@ function CardCrearCaso({openAlert,key}){
                     equiposIfy,
                     diagnosticos
                 ) // load case local
-                loadCaso()
+                openLoader(true)
+                await loadCasoPromise()
+                try{
+                    openAlert(caseId,uuid,'success')
+                }catch(err){
+                    console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
+                }
             }catch(err){
                 console.error('5651c782-9238-46a2-884e-b35991ed7e5a',err)
+                try{
+                    openAlert(caseId,uuid,'error')
+                }catch(err){
+                    console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
+                }
             }
-            try{
-                openAlert(caseId,uuid)
-            }catch(err){
-                console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
-            }
+            
+            
         }else{
             alert('el caso ya existe')
         }

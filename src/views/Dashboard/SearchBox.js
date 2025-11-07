@@ -30,8 +30,9 @@ import {
   import CardSkeleton from "components/Search/CardSkeleton";
   import CardCommand from "components/PreDiagnostico/CadCommand";
   import CardCrearCaso from "components/PreDiagnostico/CardCrearCaso";
-  import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
+  import AlertCaso from "components/PreDiagnostico/AlertCrearCaso";
   import CardTerminarCaso from "components/Diagnostico/CardTerminarCaso";
+  import FullscreenLoader from "@components/Loaders/FullscreenLoader";
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -81,15 +82,18 @@ import {
     const [searchValue, setSearchValue] = useState('');
     const [debouncedSearchValue] = useDebounce(searchValue, 500);
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
-    const [isSuccessAlertCaso,setIsSuccessAlertCaso] = useState(false)
+    const [isOpenAlertCaso,setIsOpenAlertCaso] = useState(false)
     const [caseId,setCaseId] = useState(0)
     const [caseUuid,setCaseUuid] = useState('')
+    const [typeAlert,setTypeAlert] = useState('success')
 
     const [isPost,setIsPost] = useState(false)
 
     const [datos, setDatos] = useState([]);
 
     const [isBusquedaTerminada,setIsBusquedaTerminada] = useState(false)
+
+    const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
 
      // ************************** REDUX-PRESIST ****************************
      const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -192,13 +196,14 @@ import {
      */
 
     const closeAlert = () => {
-      setIsSuccessAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
+      setIsOpenAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
-    const openAlert = (caseId_in,uuid) => {
+    const openAlert = (caseId_in,uuid,type) => {
       setCaseId(caseId_in)
       setCaseUuid(uuid)
-      setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
+      setTypeAlert(type)
+      setIsOpenAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
 
@@ -217,6 +222,7 @@ import {
   
     return (
       <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
+        <FullscreenLoader visible={fullscreenLoaderVisible} message="Cargando..." />
         <Flex
           direction={{ sm: "column", md: "row" }}
           mb='24px'
@@ -238,6 +244,7 @@ import {
             textAlign={{ sm: "center", md: "start" }}
             p='24px'
           >
+          
 
           
 
@@ -353,14 +360,14 @@ import {
           <>
             {!isPost ? (
               <>
-                {isSuccessAlertCaso ?(
-                  <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid}/>
+                {isOpenAlertCaso ?(
+                  <AlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid} type={typeAlert} openLoader={setFullscreenLoaderVisible} />
                 ):(
-                  <CardCrearCaso openAlert={openAlert} key='CardCrearCaso' />
+                  <CardCrearCaso openAlert={openAlert} key='CardCrearCaso' openLoader={setFullscreenLoaderVisible} />
                 )}
               </>
             ):(
-              <CardTerminarCaso refresh={refresh} />
+              <CardTerminarCaso refresh={refresh} openLoader={setFullscreenLoaderVisible} />
             )}
           </>
         )}

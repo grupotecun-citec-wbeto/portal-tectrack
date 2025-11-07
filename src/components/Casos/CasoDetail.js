@@ -686,7 +686,7 @@ const CasoDetail = React.memo(({ caseData }) => {
         
           <Tooltip label="Estado de sincronización" aria-label="A tooltip" >
             <Badge
-              bg={syncStatusDetail == 0 ? "green.400" : syncStatusDetail == 1 ? "yellow.400" : "red.400"}
+              bg={"green.400"}
               color={"white"}
               fontSize="0.8em"
               p="3px 10px"
