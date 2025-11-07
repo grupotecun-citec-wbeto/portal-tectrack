@@ -247,7 +247,7 @@ const repository = {
             const query_segmento = (filters.segmentoSelected != '') ? ` AND segmento_ID = ? ` : ''
             const query_cliente = (filters.clienteSelected != '') ? ` AND ${repositoryEquipo.tableName}.cliente_ID = ?` : ''
             const query_fecha = (filters.rangeFechaSelected.start != '' && filters.rangeFechaSelected.end != '') ? ` AND DATE(start) BETWEEN ? AND ?` : ''
-            
+            const query_limit = (config.countOnly == false && filters.limitSelected != '' && query_fecha == '' ) ? ` LIMIT ? ` : ''
 
             const select = []
             select.push(`${repository.tableName}.ID`)
@@ -302,6 +302,10 @@ const repository = {
                 parameters.push(filters.rangeFechaSelected.end)
             }
 
+            if(query_limit != ''){
+                parameters.push(filters.limitSelected)
+            }
+
             // definir si se necesita solo contar
             const query_count = (config.countOnly) ? ` COUNT(*) AS cantidad ` : ` ${select.join(', ')} `
 
@@ -323,7 +327,8 @@ const repository = {
                             ${query_segmento} 
                             ${query_cliente}
                             ${query_fecha}
-                        ORDER BY start DESC`
+                        ORDER BY start DESC
+                        ${query_limit}`
                     console.log(query,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
                     break;
                 default:
@@ -335,7 +340,7 @@ const repository = {
                 break;
             }
 
-            console.log(query,parameters,"41a08892-a9b1-4c91-8e44-e83ab9351a3b")
+            console.log(query,parameters,filters,"41a08892-a9b1-4c91-8e44-e83ab9351a3b")
             const stmt = db.prepare(query);
 
             if(config.countOnly) {

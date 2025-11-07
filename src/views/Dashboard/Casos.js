@@ -81,6 +81,7 @@ function Casos() {
   const [prioridadSelected,setPrioridadSelected] = useState('')
   const [segmentoSelected,setSegmentoSelected] = useState('')
   const [rangeFechaSelected,setRangeFechaSelected] = useState({start:'',end:''})
+  const [limitSelected,setLimitSelected] = useState('50')
 
   // fullscreen loader
   const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
@@ -108,6 +109,7 @@ function Casos() {
         segmentoSelected: segmentoSelected,
         clienteSelected: clienteSelected,
         rangeFechaSelected: rangeFechaSelected,
+        limitSelected: limitSelected,
       }
 
       const fetchData = async () => {
@@ -128,6 +130,7 @@ function Casos() {
         segmentoSelected: segmentoSelected,
         clienteSelected: clienteSelected,
         rangeFechaSelected: rangeFechaSelected,
+        limitSelected: limitSelected,
       }
 
     const fetchData = async () => {
@@ -150,6 +153,7 @@ function Casos() {
         segmentoSelected: segmentoSelected,
         clienteSelected: clienteSelected,
         rangeFechaSelected: rangeFechaSelected,
+        limitSelected: limitSelected,
       }
     const fetchData = async () => {
       const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"5"},{countOnly:true})
@@ -170,6 +174,7 @@ function Casos() {
         segmentoSelected: segmentoSelected,
         clienteSelected: clienteSelected,
         rangeFechaSelected: rangeFechaSelected,
+        limitSelected: limitSelected
       }
 
       const fetchData = async () => {
@@ -191,7 +196,8 @@ function Casos() {
       prioridadSelected:'',
       segmentoSelected:'',
       clienteSelected: '',
-      rangeFechaSelected: {start:'',end:''}
+      rangeFechaSelected: {start:'',end:''},
+      limitSelected: limitSelected
     }
 
     const fetchData = async () => {
@@ -294,7 +300,9 @@ function Casos() {
         clienteSelected={clienteSelected}
         setClienteSelected={setClienteSelected}
         rangeFechaSelected={rangeFechaSelected}
-        setRangeFechaSelected={setRangeFechaSelected} 
+        setRangeFechaSelected={setRangeFechaSelected}
+        limitSelected={limitSelected}
+        setLimitSelected={setLimitSelected}
         openLoader={setFullscreenLoaderVisible}
       />
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>

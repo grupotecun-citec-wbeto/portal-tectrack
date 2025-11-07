@@ -19,6 +19,7 @@ const FilterCase = React.memo(({
   segmentoSelected,setSegmentoSelected,
   clienteSelected,setClienteSelected,
   rangeFechaSelected,setRangeFechaSelected,
+  limitSelected,setLimitSelected,
   openLoader
 }) => {
   // ************************** REDUX-PRESIST ****************************
@@ -47,6 +48,7 @@ const FilterCase = React.memo(({
   const [segmentSelected,setSegmentSelected] = useState('')
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [limitFilterSelected, setLimitFilterSelected] = useState('50');
 
    // useState
 
@@ -71,15 +73,14 @@ const FilterCase = React.memo(({
     setSegmentoSelected(segmentSelected)
     setClienteSelected(clienteSelectedInter) // seleccionar cliente
     setRangeFechaSelected({start:startDate,end:endDate}) // seleccionar rango de fechas
+    setLimitSelected(limitFilterSelected)
 
-    // Add logic for date range filters
-    console.log('Start Date:', startDate);
-    console.log('End Date:', endDate);
+    console.log('Límite de Casos:', limitFilterSelected);
 
     setTimeout(() => {
       openLoader(false)
     }, 500);
-  }, [userSelected, prioriSelected, segmentSelected, clienteSelectedInter, startDate, endDate, openLoader])
+  }, [userSelected, prioriSelected, segmentSelected, clienteSelectedInter, startDate, endDate, limitFilterSelected, openLoader])
   
   // useEffect
   
@@ -194,6 +195,24 @@ const FilterCase = React.memo(({
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
                     />
+                  </FormControl>
+                </GridItem>
+
+                {/* Case Limit Filter */}
+                <GridItem>
+                  <FormControl>
+                    <FormLabel>Límite de Casos</FormLabel>
+                    <Select placeholder="Seleccionar límite" value={limitFilterSelected} onChange={(e) => setLimitFilterSelected(e.target.value)}>
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="20">20</option>
+                      <option value="50">50</option>
+                      <option value="100">100</option>
+                      <option value="500">500</option>
+                      <option value="1000">1000</option>
+                      <option value="5000">5000</option>
+                      <option value="10000">10000</option>
+                    </Select>
                   </FormControl>
                 </GridItem>
               </Grid>
