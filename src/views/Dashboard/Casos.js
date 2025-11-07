@@ -22,6 +22,8 @@ import CasosTableRow from "@components/Casos/CasosTableRow";
 import React, { useEffect, useState, useMemo} from "react";
 import { tablesProjectData, tablesTableData } from "variables/general";
 
+import FullscreenLoader from '@components/Loaders/FullscreenLoader';
+
 import { FaUserAlt,FaCheckCircle, FaTasks } from "react-icons/fa";
 
 import CasoSummary from "@components/Casos/CasoSummary";
@@ -78,6 +80,9 @@ function Casos() {
   const [clienteSelected,setClienteSelected] = useState('')
   const [prioridadSelected,setPrioridadSelected] = useState('')
   const [segmentoSelected,setSegmentoSelected] = useState('')
+
+  // fullscreen loader
+  const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
   
 
   const {dbReady} = useDataBaseContext()
@@ -215,13 +220,14 @@ function Casos() {
 
       };
       console.log('67c0ff94-05c2-405b-90be-6e090865393e')
-      return <CasoDetail key={index} caseData={casoData} />;
+      return <CasoDetail key={index} caseData={casoData} openLoader={setFullscreenLoaderVisible} />;
     });
-  }, [data]); // Solo se recalcula cuando `data` cambia
+  }, [data,fullscreenLoaderVisible]); // Solo se recalcula cuando `data` cambia
   
   
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+      <FullscreenLoader visible={fullscreenLoaderVisible} message="Cargando..." />
       {/*<Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
         <CardHeader p="6px 0px 22px 0px">
           <Text fontSize="xl" color={textColor} fontWeight="bold">
@@ -281,6 +287,7 @@ function Casos() {
         setSegmentoSelected={setSegmentoSelected}
         clienteSelected={clienteSelected}
         setClienteSelected={setClienteSelected}
+        openLoader={setFullscreenLoaderVisible}
       />
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
         {memoizedCasoDetails}

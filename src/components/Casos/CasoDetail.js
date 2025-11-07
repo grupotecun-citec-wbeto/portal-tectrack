@@ -105,7 +105,7 @@ import { use } from 'react';
  * @param {CaseData} props.caseData - Objeto que contiene la información del caso.
  * @returns {JSX.Element} - El componente renderizado.
  */
-const CasoDetail = React.memo(({ caseData }) => {
+const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
   const {
     id,
@@ -117,7 +117,7 @@ const CasoDetail = React.memo(({ caseData }) => {
     usuario_ID,
     usuario_ID_assigned,
     equipos,
-    syncStatus,
+    syncStatus
   } = caseData;
 
 
@@ -499,7 +499,8 @@ const CasoDetail = React.memo(({ caseData }) => {
    * Finaliza un caso y actualiza su estado en la base de datos.
    */
   const terminar = async() => {
-    const caso = await findById(id)
+    openLoader(true);
+    const caso = await findById(id);
     try{
       if((cantEquipos != 0 && segmento_ID == 1) || segmento_ID != 1){
         
@@ -536,7 +537,11 @@ const CasoDetail = React.memo(({ caseData }) => {
 
             saveUserData(newUserData)
             setSyncStatusDetail(1)
-            history.push('/admin/pages/searchbox')
+            setTimeout(() => {
+              openLoader(false);
+              history.push('/admin/pages/searchbox');
+            }, 800);
+            
           }else{
             alert('er[1fffd590] - Ingresar kilometraje final ')
           }
@@ -563,13 +568,16 @@ const CasoDetail = React.memo(({ caseData }) => {
           }else{
             alert('Ingresar kilometraje final')
           }
+          openLoader(false);
         } 
       }else{
         alert('No tiene equipos procesar, por favor contactar al administrador para revisar el caso')
       }
+      
     }catch(err){
       console.log(err);
-      
+    }finally{
+      //openLoader(false);
     }
     
     

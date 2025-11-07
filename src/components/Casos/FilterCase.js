@@ -17,7 +17,8 @@ const FilterCase = ({
   usuarioSelected,setUsuarioSelected,
   prioridadSelected,setPrioridadSelected,
   segmentoSelected,setSegmentoSelected,
-  clienteSelected,setClienteSelected
+  clienteSelected,setClienteSelected,
+  openLoader
 }) => {
   // ... estado para manejar los valores de los filtros
 
@@ -67,6 +68,10 @@ const FilterCase = ({
     setPrioridadSelected(prioriSelected)
     setSegmentoSelected(segmentSelected)
     setClienteSelected(clienteSelectedInter) // seleccionar cliente
+    openLoader(true)
+    setTimeout(() => {
+      openLoader(false)
+    }, 500);
   }
   
   // useEffect
