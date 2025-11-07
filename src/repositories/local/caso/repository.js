@@ -118,13 +118,26 @@ const repository = {
         }
     },
 
-    createSupport: async (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos) => {
+    createSupport: async (
+        uuid,
+        usuario_ID,
+        usuario_ID_assigned,
+        comunicacion_ID,
+        segmento_ID,
+        caso_estado_ID,
+        fecha,
+        start,
+        prioridad,
+        equiposIfy,
+        diagnosticos
+    ) => {
         const db = getDB();
         try{
             db.exec('BEGIN TRANSACTION');
             const stmt = db.prepare(`
             INSERT INTO ${repository.tableName} (
                 ID,
+
                 syncStatus,
                 usuario_ID,
                 usuario_ID_assigned,
@@ -233,7 +246,10 @@ const repository = {
             const query_prioridad = (filters.prioridadSelected != '') ? ` AND prioridad = ? ` : ''
             const query_segmento = (filters.segmentoSelected != '') ? ` AND segmento_ID = ? ` : ''
             const query_cliente = (filters.clienteSelected != '') ? ` AND ${repositoryEquipo.tableName}.cliente_ID = ?` : ''
-            
+            const query_fecha = (filters.rangeFechaSelected.start != '' && filters.rangeFechaSelected.end != '') ? ` AND DATE(start) BETWEEN ? AND ?` : ''
+            const query_limit = ( filters.limitSelected != '') ? ` LIMIT ? ` : ''
+            const query_syncStatus = ( filters.syncStatusSelected != '') ? ` AND syncStatus = ? ` : ''
+
             const select = []
             select.push(`${repository.tableName}.ID`)
             select.push(`${repository.tableName}.syncStatus`)
@@ -282,6 +298,21 @@ const repository = {
                 from.push( ` INNER JOIN ${repositoryEquipo.tableName} ON ${repositoryEquipo.tableName}.ID = ${repositoryDiagnostico.tableName}.equipo_ID `)
             }
 
+            if(query_fecha != ''){
+                parameters.push(filters.rangeFechaSelected.start)
+                parameters.push(filters.rangeFechaSelected.end)
+            }
+
+            if(query_syncStatus != ''){
+                parameters.push(filters.syncStatusSelected)
+            }
+
+            if(query_limit != ''){
+                parameters.push(filters.limitSelected)
+            }
+
+            
+
             // definir si se necesita solo contar
             const query_count = (config.countOnly) ? ` COUNT(*) AS cantidad ` : ` ${select.join(', ')} `
 
@@ -302,8 +333,10 @@ const repository = {
                             ${query_prioridad} 
                             ${query_segmento} 
                             ${query_cliente}
-                        ORDER BY start DESC`
-                    console.log(query,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
+                            ${query_fecha}
+                            ${query_syncStatus}
+                        ORDER BY start DESC
+                        ${query_limit}`
                     break;
                 default:
                     
@@ -314,6 +347,7 @@ const repository = {
                 break;
             }
 
+            console.log(query,parameters,filters,"41a08892-a9b1-4c91-8e44-e83ab9351a3b")
             const stmt = db.prepare(query);
 
             if(config.countOnly) {
@@ -340,6 +374,14 @@ const repository = {
     updateStatus: async (id,status) => {
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ${status}, syncStatus = 1 WHERE id = ?`);
+        stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
+    updateOnlyStatus: async (id,status) => {
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ${status} WHERE id = ?`);
         stmt.run([id]);
         stmt.free();
         await persistDatabase();
@@ -412,10 +454,12 @@ const repository = {
         try{
             db.exec("BEGIN TRANSACTION")
             const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ?, date_end = ? , equipos = ?, syncStatus=1 where ID = ?`);
+            console.log([estado_a_asignar,currentDateTime,equipos,id], "b24a1fd5-9549-41b3-b865-63dd6fc84b14")
             stmt.run([estado_a_asignar,currentDateTime,equipos,id]);
             stmt.free();
 
             const stmt2 = db.prepare(`UPDATE ${repositoryVisita.tableName} SET km_final = ? where ID = (SELECT visita_ID FROM ${repositoryCasoVisita.tableName} WHERE caso_ID = ? LIMIT 1) `);
+            console.log([kmFinal,id], "4baa164a-22f3-4497-9352-0d60abd5496a")
             stmt2.run([kmFinal,id]);
             stmt2.free();
 
@@ -515,10 +559,64 @@ const repository = {
         return results;
     },
 
+    errorSynchronizedCases: async () => {
+        const db = getDB();
+        const stmt = db.prepare( 
+            `SELECT
+                ID,
+                usuario_ID,
+                usuario_ID_assigned,
+                comunicacion_ID,
+                segmento_ID,
+                caso_estado_ID,
+                fecha,
+                start,
+                date_end,
+                description,
+                prioridad,
+                uuid,
+                equipos
+            FROM 
+                ${repository.tableName} 
+            WHERE 
+                syncStatus = ?
+            `);
+        stmt.bind([3])
+        const results = [];
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
+    },
+
     setAsSynchronized: async (id) => {
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET syncStatus = 0 WHERE ID = ?`);
         stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
+    setAsUnSynchronized: async (id) => {
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET syncStatus = 1 WHERE ID = ?`);
+        stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
+    /**
+     * Establece el caso como error de sincronización
+     * @param {*} id identificador de caso
+     * @description establece el caso como error de sincronización
+     */
+    markAsErrorSynchronized: async (listaCasos) => {
+        console.log(    `[${PACKAGE}] markAsErrorSynchronized a2157e20-035e-45af-96d8-44d87083cc6a`, listaCasos);
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET syncStatus = 3 WHERE ID IN (${listaCasos.uuids.map(() => '?').join(',')})`);
+        //stmt.bind(listaCasos.uuids);
+        stmt.run(listaCasos.uuids);
         stmt.free();
         await persistDatabase();
     }

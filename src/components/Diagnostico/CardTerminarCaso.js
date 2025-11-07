@@ -50,7 +50,7 @@ function CardTerminarCaso(props){
     const {stop: stopCase} = useCaso(dbReady,false)
 
 
-    const {refresh} = props
+    const {refresh, openLoader} = props
     /*const {
         casoActivo,setCasoActivo,
         slcCasoId,setSlcCasoId
@@ -144,7 +144,12 @@ function CardTerminarCaso(props){
                     
                     
                         // sincronizar caso con rehidratación
+                        openLoader(true)
                         loadCaso()
+                        setTimeout(() => {
+                            openLoader(false)
+                            history.push('/admin/pages/casos')
+                        }, 2000);
                     }catch(err){
                         console.warn('Error al terminar el caso 07506205-36c1-4767-a2cc-1b5a301754bf',err)
                     }
@@ -155,9 +160,9 @@ function CardTerminarCaso(props){
                     saveUserData(newUserData)
                     
                     
-                   
                     
-                    history.push('/admin/pages/casos')
+                    
+                    //history.push('/admin/pages/casos')
                 }else{
                     alert('Elegir el caso')
                 }

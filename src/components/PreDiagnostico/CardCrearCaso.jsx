@@ -41,7 +41,7 @@ import useCargarCaso from "hookDB/cargarCaso";
 
 //******************************************* FIN IMPORTS ************************** */
 
-function CardCrearCaso({openAlert,key}){
+function CardCrearCaso({openAlert,key, openLoader}){
 
     const {casoActivo,setCasoActivo} = useContext(AppContext)
    
@@ -70,7 +70,7 @@ function CardCrearCaso({openAlert,key}){
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
-    const {loadCaso} = useCargarCaso(userData?.casoActivo?.code)
+    const {loadCaso,loadCasoPromise} = useCargarCaso(userData?.casoActivo?.code)
 
     const getCurrentDateTime = () => {
         const now = new Date();
@@ -101,9 +101,13 @@ function CardCrearCaso({openAlert,key}){
         for (const maquina_id of equiposArray) {
             // indica cuando un pre-diagnostico no esta completo de la lista de maquinas
             const diagnostico = {};
-                
-            const prediagnostico = userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico;
+            const caso = userData.casos[userData.casoActivo?.code];
+            const prediagnostico = caso.equipos[maquina_id].prediagnostico;
             
+            if(caso.comunicacion_ID == 0){
+                casoCompelto = false;
+            }
+
             diagnostico.maquina_id = maquina_id;
             diagnostico.uuid = uuid;
             diagnostico.diagnostico_tipo_ID = 1; // diagnostico pre
@@ -117,7 +121,9 @@ function CardCrearCaso({openAlert,key}){
 
             if (
                 Object.keys(prediagnostico.sistemas).length === 0 ||
-                Object.keys(prediagnostico.herramientas).length === 0
+                Object.keys(prediagnostico.herramientas).length === 0 ||
+                prediagnostico.asistencia_tipo_ID == 0 ||
+                prediagnostico.prioridad == 0
             ) {
             casoCompelto = false;
             }
@@ -150,103 +156,36 @@ function CardCrearCaso({openAlert,key}){
                
                 caseId = uuid
                 
-                await createSupportCaseItem(uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos)
-                loadCaso()
+                await createSupportCaseItem(
+                    uuid, 
+                    usuario_ID,
+                    usuario_ID_assigned,
+                    comunicacion_ID,
+                    segmento_ID,
+                    caso_estado_ID,
+                    fecha,
+                    start,
+                    prioridad,
+                    equiposIfy,
+                    diagnosticos
+                ) // load case local
+                openLoader(true)
+                await loadCasoPromise()
+                try{
+                    openAlert(caseId,uuid,'success')
+                }catch(err){
+                    console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
+                }
             }catch(err){
                 console.error('5651c782-9238-46a2-884e-b35991ed7e5a',err)
+                try{
+                    openAlert(caseId,uuid,'error')
+                }catch(err){
+                    console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
+                }
             }
-            /*try {
-                
-                await db.exec('BEGIN TRANSACTION');
-                const sql = `
-                    INSERT INTO caso_v2 (
-                        ID,
-                        syncStatus,
-                        usuario_ID,
-                        usuario_ID_assigned,
-                        comunicacion_ID,
-                        segmento_ID,
-                        caso_estado_ID,
-                        fecha,
-                        start,
-                        date_end,
-                        description,
-                        prioridad,
-                        equipos
-                    )
-                    VALUES(
-                        '${uuid}',
-                        1,
-                        ${usuario_ID},
-                        ${usuario_ID_assigned},
-                        ${comunicacion_ID},
-                        ${segmento_ID},
-                        ${caso_estado_ID},
-                        '${fecha}',
-                        '${start}',
-                        NULL,
-                        NULL,
-                        ${prioridad},
-                        '${equiposIfy}'
-                        
-                    )
-                `
-                
-                
-                db.run(sql)
-                
-                //const resultInsert = await db.exec('SELECT last_insert_rowid() AS caseId').toObject()
-
-                caseId = uuid
-
-                equiposArray.forEach((maquina_id) =>{
-                    //userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad
-                    const diagnostico_tipo_ID = 1 // dianostico pre
-                    const prediagnostico = userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico;
-                    const asistencia_tipo_ID = prediagnostico.asistencia_tipo_ID;
-                    const especialista_ID = prediagnostico.especialista_ID;
-                    const description = decodeURIComponent(prediagnostico.description);
-                    const prioridad = prediagnostico.prioridad;
-                   
-                    const sql = `
-                        INSERT INTO diagnostico_v2
-                        VALUES
-                            (
-                                ${maquina_id},
-                                '${caseId}',
-                                ${diagnostico_tipo_ID},
-                                ${asistencia_tipo_ID},
-                                ${especialista_ID},
-                                '${description}'
-                            )
-                    `
             
-                    db.run(sql)
-
-                   
-                })
-                
-                
-                
-                await db.exec('COMMIT');
-
-                saveToIndexedDB(db)
-
-                // rehidratar db
-                rehidratarDb()
-                // sincronizar caso
-                loadCaso()
-            }catch(err){
-                console.error('0b6bc4bd-62ac-457c-97d7-6dc450e58fa9',err)
-                await db.exec("ROLLBACK");
-                
-            }*/
-
-            try{
-                openAlert(caseId,uuid)
-            }catch(err){
-                console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
-            }
+            
         }else{
             alert('el caso ya existe')
         }
