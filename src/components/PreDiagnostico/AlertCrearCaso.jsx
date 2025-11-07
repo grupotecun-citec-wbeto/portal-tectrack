@@ -116,7 +116,7 @@ const SuccessAlertCaso = ({ onClose,caseId,uuid }) => {
                       color: '#fff',
                       fontSize: '48px',
                       fontWeight: '700',
-                      background: 'rgba(0,0,0,0.6)',
+                      background: 'transparent',
                       padding: '12px 20px',
                       borderRadius: '8px',
                       pointerEvents: 'none',
@@ -146,7 +146,7 @@ const SuccessAlertCaso = ({ onClose,caseId,uuid }) => {
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
-                      bg="rgba(0,0,0,0.4)"
+                      bg="transparent"
                       zIndex="9999"
                       p="4"
                     >

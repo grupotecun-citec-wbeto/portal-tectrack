@@ -600,12 +600,13 @@ const CasoDetail = React.memo(({ caseData }) => {
     <Box
       maxW="lg"
       w="full"
-      bg={useColorModeValue('white', 'gray.800')}
+      bg={syncStatusDetail == 1 ? useColorModeValue('gray.200', 'gray.700') : useColorModeValue('white', 'gray.800')}
       boxShadow="2xl"
       rounded="lg"
       p={6}
       overflow="hidden"
       position="relative" // Add position relative to position the icon
+      border={syncStatusDetail == 1 ? '3px solid' : ''}
     >
       {/* Overlay when sync error */}
       {syncStatusDetail == 3 && (
