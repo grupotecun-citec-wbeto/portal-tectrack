@@ -99,6 +99,15 @@ function useCaso(dbReady = false,syncActive = true) {
         }
         
     }
+    const updateOnlyStatus = async (id,status) =>{
+        try{
+            repository.updateOnlyStatus(id,status)
+            return true
+        }catch(err){
+            return false
+        }
+        
+    }
 
     const assignTechnician = async (id,technicianID) =>{
         try{
@@ -183,6 +192,7 @@ function useCaso(dbReady = false,syncActive = true) {
         findCasesByFilters,
         findById,
         updateStatus,
+        updateOnlyStatus,
         assignTechnician,
         unAssignTechnician,
         start,

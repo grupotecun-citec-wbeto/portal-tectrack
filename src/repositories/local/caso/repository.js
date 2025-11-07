@@ -358,6 +358,14 @@ const repository = {
         await persistDatabase();
     },
 
+    updateOnlyStatus: async (id,status) => {
+        const db = getDB();
+        const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ${status} WHERE id = ?`);
+        stmt.run([id]);
+        stmt.free();
+        await persistDatabase();
+    },
+
     assignTechnician: async (id,technicianID) =>{
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 2, usuario_ID_assigned = ${technicianID}, syncStatus = 1 WHERE id = ?`);

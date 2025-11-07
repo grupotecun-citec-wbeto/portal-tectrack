@@ -63,8 +63,22 @@ function useCargarCaso(caso_id = false) {
             try{
               await syncCloud(formDataMerge) // sincroniza con la nube
             }catch(err){
-              await repositoryCaso.markAsErrorSynchronized(listaCasos)
-              console.warn('Error sincronizando caso: 955a6aa9-67b4-4877-af02-6fbd43b401f4',err)
+              //await repositoryCaso.markAsErrorSynchronized(listaCasos)
+              for (const uuid of uuids) {
+                await repositoryCaso.setAsUnSynchronized(uuid) // colocar en estado 1
+                const casoNoSincronizado = await repositoryCaso.unsynchronizedCase(uuid)
+                const uuids = casosNoSincronizados.map(objeto => objeto.ID);
+                
+                const caso = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
+                const formDataMerge = await getDataMerge(caso)
+                try{
+                  await syncCloud(formDataMerge)
+                }catch(err){
+                  await repositoryCaso.markAsErrorSynchronized(caso)
+                }
+                
+              }
+             
               
             }
             resolve(true)

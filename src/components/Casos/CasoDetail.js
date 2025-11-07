@@ -46,6 +46,7 @@ import { FaUserPen,FaUserMinus,FaEye } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
 import { IoIosBusiness } from "react-icons/io";
+import { CgRemoveR } from "react-icons/cg";
 import { MdWorkspaces,MdOutlineSyncProblem,MdOutlineWbCloudy,MdSync   } from "react-icons/md";
 import { LiaTractorSolid } from "react-icons/lia"; 
 import { HiOutlineDocumentReport } from "react-icons/hi";
@@ -134,15 +135,17 @@ const CasoDetail = React.memo(({ caseData }) => {
     unAssignTechnician,
     findById,
     endCaseWithoutDiagnosis,
+    updateOnlyStatus,
     start: startCase, 
-    item: stateCaso} = useCaso(dbReady,false)
+    item: stateCaso
+  } = useCaso(dbReady,false)
    
   // HOOKS AND REPOSITORIES
   //const {items: caso,findById: getCasoById} = useCaso(dbReady,false)
   const {items: prediagnostico,findByCasoId: getDiagnosticoByCasoId} = useDiagnostico(dbReady,false)
 
   // HOOKS
-  const {loadCasoPromise} = useCargarCaso(id)
+  const {loadCasoPromise,loadCaso} = useCargarCaso(id)
 
   // COLORS
   const textColor = useColorModeValue("gray.500", "white");
@@ -224,6 +227,8 @@ const CasoDetail = React.memo(({ caseData }) => {
     const [cantEquipos,setCantEquipos] = useState(0)
 
     const [syncStatusDetail,setSyncStatusDetail] = useState(0)
+
+    const [casoEliminado,setCasoEliminado] = useState(false)
 
   //=======================================================
   // SECTION: USEMENO
@@ -619,10 +624,59 @@ const CasoDetail = React.memo(({ caseData }) => {
           borderRadius="lg"
         >
           <Flex direction="column" align="center" color="white">
-            <Icon as={MdOutlineSyncProblem} boxSize={{ base: "40px", md: "48px" }} />
-            <Text fontSize="lg" fontWeight="bold" mt={2}>
-              Sincronización con errores
-            </Text>
+            {casoEliminado ? (
+              <> 
+              
+                <Icon as={CgRemoveR} boxSize={{ base: "40px", md: "48px" }} />
+                <Text fontSize="lg" fontWeight="bold" mt={2}>
+                  Caso eliminado
+                </Text>
+                <Text fontSize="lg" fontWeight="bold" mt={2}>
+                  Caso #: {usuario_ID}-{id?.split('-')[0]}
+                </Text>
+              </>
+            ):(
+              <>
+                <Icon as={MdOutlineSyncProblem} boxSize={{ base: "40px", md: "48px" }} />
+                <Text fontSize="lg" fontWeight="bold" mt={2}>
+                  Sincronización con errores
+                </Text>
+                <Text fontSize="lg" fontWeight="bold" mt={2}>
+                  Caso #: {usuario_ID}-{id?.split('-')[0]}
+                </Text>
+                <>
+                  <Text fontSize="md" mt={2} color="whiteAlpha.900" textAlign="center">
+                    Por favor, verifica la conexión antes de eliminar.
+                  </Text>
+
+                  <Button
+                    mt={4}
+                    colorScheme="red"
+                    leftIcon={<Icon as={FaRegWindowClose} color="white" />}
+                    onClick={async () => {
+                      const confirmed = window.confirm(
+                        '¿Confirma que desea eliminar este caso? Esta acción no se puede deshacer.'
+                      );
+                      if (!confirmed) return;
+
+                      try {
+                        // dispatch a delete request so reducers/middleware can handle it
+                        setCasoEliminado(true);
+                        await updateOnlyStatus(id, 6);
+                      } catch (err) {
+                        console.error('error-eliminar-caso 5e2ac692-b681-4371-acdf-67d085fdb25d', err);
+                        alert('Ocurrió un error al eliminar el caso.');
+                      }
+                    }}
+                    aria-label="Eliminar caso"
+                    size="sm"
+                  >
+                    Eliminar caso
+                  </Button>
+                </>
+              </>
+            )}
+            
           </Flex>
         </Box>
       )}
@@ -810,7 +864,10 @@ const CasoDetail = React.memo(({ caseData }) => {
                       color={"green.500"}
                       textAlign={"Center"}
                     >
-                      {"Caso Terminado"}
+                      <Flex align="center" justify="center">
+                        <Icon as={FaRegWindowClose} color="green.500" boxSize="6" mr={2} />
+                        {"Caso Terminado"}
+                      </Flex>
                     </Text>
                 </>
                 
