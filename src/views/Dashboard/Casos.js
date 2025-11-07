@@ -80,6 +80,7 @@ function Casos() {
   const [clienteSelected,setClienteSelected] = useState('')
   const [prioridadSelected,setPrioridadSelected] = useState('')
   const [segmentoSelected,setSegmentoSelected] = useState('')
+  const [rangeFechaSelected,setRangeFechaSelected] = useState({start:'',end:''})
 
   // fullscreen loader
   const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
@@ -105,17 +106,18 @@ function Casos() {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
         segmentoSelected: segmentoSelected,
-        clienteSelected: clienteSelected
+        clienteSelected: clienteSelected,
+        rangeFechaSelected: rangeFechaSelected,
       }
 
       const fetchData = async () => {
         const casosData = await findCasesByFilters(userData.login,filters,{operador:"<>", value:"6"},{countOnly:false})
-        console.log('casosData 471c03b2-ccc8-4c8c-95c4-91574ce59103',casosData)
+        //console.log('casosData 471c03b2-ccc8-4c8c-95c4-91574ce59103',casosData)
         setData(casosData)
       }
       fetchData()
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
 
 
   useEffect( () =>{
@@ -124,7 +126,8 @@ function Casos() {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
         segmentoSelected: segmentoSelected,
-        clienteSelected: clienteSelected
+        clienteSelected: clienteSelected,
+        rangeFechaSelected: rangeFechaSelected,
       }
 
     const fetchData = async () => {
@@ -136,7 +139,7 @@ function Casos() {
 
    
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
   
   
   useEffect( () =>{
@@ -145,7 +148,8 @@ function Casos() {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
         segmentoSelected: segmentoSelected,
-        clienteSelected: clienteSelected
+        clienteSelected: clienteSelected,
+        rangeFechaSelected: rangeFechaSelected,
       }
     const fetchData = async () => {
       const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"5"},{countOnly:true})
@@ -155,7 +159,7 @@ function Casos() {
     fetchData()
     
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
  
   useEffect( () =>{
     if(!dbReady) return; // Esperar a que la base de datos esté lista
@@ -164,7 +168,8 @@ function Casos() {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
         segmentoSelected: segmentoSelected,
-        clienteSelected: clienteSelected
+        clienteSelected: clienteSelected,
+        rangeFechaSelected: rangeFechaSelected,
       }
 
       const fetchData = async () => {
@@ -175,7 +180,7 @@ function Casos() {
       fetchData()
    
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
   
   
   useEffect( () =>{
@@ -185,7 +190,8 @@ function Casos() {
       usuarioSelected:'',
       prioridadSelected:'',
       segmentoSelected:'',
-      clienteSelected: ''
+      clienteSelected: '',
+      rangeFechaSelected: {start:'',end:''}
     }
 
     const fetchData = async () => {
@@ -195,13 +201,13 @@ function Casos() {
     }
     fetchData()
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
 
   
 
   // Memorizar el mapeo de `data`
   const memoizedCasoDetails = useMemo(() => {
-    return data.map((row, index) => {
+    return data?.map((row, index) => {
       const casoData = {
         id: row.ID,
         status_ID: row.caso_estado_ID,
@@ -287,6 +293,8 @@ function Casos() {
         setSegmentoSelected={setSegmentoSelected}
         clienteSelected={clienteSelected}
         setClienteSelected={setClienteSelected}
+        rangeFechaSelected={rangeFechaSelected}
+        setRangeFechaSelected={setRangeFechaSelected} 
         openLoader={setFullscreenLoaderVisible}
       />
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>

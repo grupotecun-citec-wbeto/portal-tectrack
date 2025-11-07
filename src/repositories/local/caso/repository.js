@@ -246,7 +246,9 @@ const repository = {
             const query_prioridad = (filters.prioridadSelected != '') ? ` AND prioridad = ? ` : ''
             const query_segmento = (filters.segmentoSelected != '') ? ` AND segmento_ID = ? ` : ''
             const query_cliente = (filters.clienteSelected != '') ? ` AND ${repositoryEquipo.tableName}.cliente_ID = ?` : ''
+            const query_fecha = (filters.rangeFechaSelected.start != '' && filters.rangeFechaSelected.end != '') ? ` AND DATE(start) BETWEEN ? AND ?` : ''
             
+
             const select = []
             select.push(`${repository.tableName}.ID`)
             select.push(`${repository.tableName}.syncStatus`)
@@ -295,6 +297,11 @@ const repository = {
                 from.push( ` INNER JOIN ${repositoryEquipo.tableName} ON ${repositoryEquipo.tableName}.ID = ${repositoryDiagnostico.tableName}.equipo_ID `)
             }
 
+            if(query_fecha != ''){
+                parameters.push(filters.rangeFechaSelected.start)
+                parameters.push(filters.rangeFechaSelected.end)
+            }
+
             // definir si se necesita solo contar
             const query_count = (config.countOnly) ? ` COUNT(*) AS cantidad ` : ` ${select.join(', ')} `
 
@@ -315,6 +322,7 @@ const repository = {
                             ${query_prioridad} 
                             ${query_segmento} 
                             ${query_cliente}
+                            ${query_fecha}
                         ORDER BY start DESC`
                     console.log(query,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
                     break;
@@ -327,6 +335,7 @@ const repository = {
                 break;
             }
 
+            console.log(query,parameters,"41a08892-a9b1-4c91-8e44-e83ab9351a3b")
             const stmt = db.prepare(query);
 
             if(config.countOnly) {

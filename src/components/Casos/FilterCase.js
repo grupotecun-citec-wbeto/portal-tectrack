@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useRef, useMemo, useCallback } from 'react';
-import {Button, Select, Accordion, AccordionItem, Heading, HStack, Input  } from '@chakra-ui/react';
+import {Button, Select, Accordion, AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Heading, HStack, Input, Box, Stack, FormControl, FormLabel, Grid, GridItem } from '@chakra-ui/react';
 
 //redux
 import { useSelector, useDispatch } from 'react-redux';
@@ -18,6 +18,7 @@ const FilterCase = React.memo(({
   prioridadSelected,setPrioridadSelected,
   segmentoSelected,setSegmentoSelected,
   clienteSelected,setClienteSelected,
+  rangeFechaSelected,setRangeFechaSelected,
   openLoader
 }) => {
   // ************************** REDUX-PRESIST ****************************
@@ -64,11 +65,12 @@ const FilterCase = React.memo(({
   // FUCTIONS
 
   const handleApplyFilter = useCallback(async() =>{
+    openLoader(true)
     setUsuarioSelected(userSelected)
     setPrioridadSelected(prioriSelected)
     setSegmentoSelected(segmentSelected)
     setClienteSelected(clienteSelectedInter) // seleccionar cliente
-    openLoader(true)
+    setRangeFechaSelected({start:startDate,end:endDate}) // seleccionar rango de fechas
 
     // Add logic for date range filters
     console.log('Start Date:', startDate);
@@ -106,58 +108,106 @@ const FilterCase = React.memo(({
   
 
   return (
-    <Card mb={{xl:"15px",sm:"15px"}}>
-      <CardBody>
-        <Heading size="md">Filtros de Casos</Heading>
-        <HStack spacing={4} mb={{xl:"15px",sm:"15px"}}>
-          {/* Filtros básicos */}
-          {userData?.login?.perfil_ID == 3 && (
-            <Select placeholder="Todos los usuarios" value={userSelected} onChange={(e) => setUserSelected(e.target.value)}>
-              {usuarios?.map((usuario, key) => (
-                <option key={key} value={usuario.ID}>{usuario.display_name}</option>
-              ))}
-            </Select>
-          )}
+    <Accordion allowToggle bg="white">
+      <AccordionItem>
+        <AccordionButton>
+          <Box flex="1" textAlign="left">
+            Filtros de Casos
+          </Box>
+          <AccordionIcon />
+        </AccordionButton>
+        <AccordionPanel pb={4}>
+          <Card mb={{ xl: "15px", sm: "15px" }}>
+            <CardBody>
+              <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} mb={4}>
+                {/* User Filter */}
+                {userData?.login?.perfil_ID == 3 && (
+                  <GridItem>
+                    <FormControl>
+                      <FormLabel>Usuarios</FormLabel>
+                      <Select placeholder="Todos los usuarios" value={userSelected} onChange={(e) => setUserSelected(e.target.value)}>
+                        {usuarios?.map((usuario, key) => (
+                          <option key={key} value={usuario.ID}>{usuario.display_name}</option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </GridItem>
+                )}
 
-          {userData?.login?.perfil_ID == 3 && (
-            <Select placeholder="Todos los clientes" value={clienteSelectedInter} onChange={(e) => setClienteSelectedInter(e.target.value)}>
-              {clientes?.map((cliente, key) => (
-                <option key={key} value={cliente.ID}>{cliente.name.charAt(0).toUpperCase() + cliente.name.slice(1).toLowerCase()}</option>
-              ))}
-            </Select>
-          )}
-          
-          <Select placeholder="Ordenado Prioridad mas urgente" value={prioriSelected} onChange={(e) => setPrioriSelected(e.target.value)}>
-            <option key="1" value="1">Alta</option>
-            <option key="2" value="2">Inter</option>
-            <option key="3" value="3">Baja</option>
-          </Select>
-          <Select placeholder="Todos los Segmentos" value={segmentSelected} onChange={(e) => setSegmentSelected(e.target.value)}>
-            <option key="1" value="1">Soporte</option>
-            <option key="2" value="2">Proyecto</option>
-            <option key="3" value="3">Capacitación</option>
-          </Select>
+                {/* Client Filter */}
+                {userData?.login?.perfil_ID == 3 && (
+                  <GridItem>
+                    <FormControl>
+                      <FormLabel>Clientes</FormLabel>
+                      <Select placeholder="Todos los clientes" value={clienteSelectedInter} onChange={(e) => setClienteSelectedInter(e.target.value)}>
+                        {clientes?.map((cliente, key) => (
+                          <option key={key} value={cliente.ID}>{cliente.name.charAt(0).toUpperCase() + cliente.name.slice(1).toLowerCase()}</option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </GridItem>
+                )}
 
-          {/* Date range filters */}
-          <Input
-            type="date"
-            placeholder="Fecha Inicio"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <Input
-            type="date"
-            placeholder="Fecha Fin"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </HStack>
-       
-        <Button colorScheme="blue" onClick={handleApplyFilter}>
-          Aplicar Filtros
-        </Button>
-      </CardBody>
-    </Card>
+                {/* Priority Filter */}
+                <GridItem>
+                  <FormControl>
+                    <FormLabel>Prioridad</FormLabel>
+                    <Select placeholder="Ordenado Prioridad más urgente" value={prioriSelected} onChange={(e) => setPrioriSelected(e.target.value)}>
+                      <option key="1" value="1">Alta</option>
+                      <option key="2" value="2">Inter</option>
+                      <option key="3" value="3">Baja</option>
+                    </Select>
+                  </FormControl>
+                </GridItem>
+
+                {/* Segment Filter */}
+                <GridItem>
+                  <FormControl>
+                    <FormLabel>Segmentos</FormLabel>
+                    <Select placeholder="Todos los Segmentos" value={segmentSelected} onChange={(e) => setSegmentSelected(e.target.value)}>
+                      <option key="1" value="1">Soporte</option>
+                      <option key="2" value="2">Proyecto</option>
+                      <option key="3" value="3">Capacitación</option>
+                    </Select>
+                  </FormControl>
+                </GridItem>
+
+                {/* Date Range Filters */}
+                <GridItem>
+                  <FormControl>
+                    <FormLabel>Fecha Inicio</FormLabel>
+                    <Input
+                      type="date"
+                      placeholder="Fecha Inicio"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </FormControl>
+                </GridItem>
+
+                <GridItem>
+                  <FormControl>
+                    <FormLabel>Fecha Fin</FormLabel>
+                    <Input
+                      type="date"
+                      placeholder="Fecha Fin"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                    />
+                  </FormControl>
+                </GridItem>
+              </Grid>
+
+              <Box textAlign="right">
+                <Button colorScheme="blue" onClick={handleApplyFilter}>
+                  Aplicar Filtros
+                </Button>
+              </Box>
+            </CardBody>
+          </Card>
+        </AccordionPanel>
+      </AccordionItem>
+    </Accordion>
   );
 });
 
