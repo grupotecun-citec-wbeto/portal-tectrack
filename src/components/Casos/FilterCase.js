@@ -215,6 +215,22 @@ const FilterCase = React.memo(({
                     </Select>
                   </FormControl>
                 </GridItem>
+
+                {/* Clear Date Range Filter Button */}
+                <GridItem colSpan={{ base: 1, md: 3 }}>
+                  <Box textAlign="right">
+                    <Button
+                      colorScheme="red"
+                      variant="outline"
+                      onClick={() => {
+                        setStartDate('');
+                        setEndDate('');
+                      }}
+                    >
+                      Borrar Rango de Fechas
+                    </Button>
+                  </Box>
+                </GridItem>
               </Grid>
 
               <Box textAlign="right">

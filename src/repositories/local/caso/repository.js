@@ -247,7 +247,7 @@ const repository = {
             const query_segmento = (filters.segmentoSelected != '') ? ` AND segmento_ID = ? ` : ''
             const query_cliente = (filters.clienteSelected != '') ? ` AND ${repositoryEquipo.tableName}.cliente_ID = ?` : ''
             const query_fecha = (filters.rangeFechaSelected.start != '' && filters.rangeFechaSelected.end != '') ? ` AND DATE(start) BETWEEN ? AND ?` : ''
-            const query_limit = (config.countOnly == false && filters.limitSelected != '' && query_fecha == '' ) ? ` LIMIT ? ` : ''
+            const query_limit = ( filters.limitSelected != '') ? ` LIMIT ? ` : ''
 
             const select = []
             select.push(`${repository.tableName}.ID`)
