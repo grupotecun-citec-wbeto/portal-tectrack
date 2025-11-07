@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     },
     gridItem: {
       width: "30%",        // Divide el contenedor en 3 columnas (33.33% cada una)
-      height: 75,             // Altura de las celdas
+      height: 85,             // Altura de las celdas
       border: "1pt solid #000", 
       justifyContent: "center",
       alignItems: "center",
@@ -265,6 +265,8 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
                                 <Text>Proyecto: {equipo.proyecto}</Text>
                                 <Text>{'\n'}</Text>
                                 <Text>Cliente: {equipo.cliente}</Text>
+                                <Text>{'\n'}</Text>
+                                <Text>Ubicación: {equipo.ubicacion}</Text>
                               </Text>
                             )
                       })}
