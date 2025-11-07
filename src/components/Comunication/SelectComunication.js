@@ -41,20 +41,21 @@ function SelectComunication(props){
     useEffect(() =>{
         const run = async() =>{
             getUserData()
-            if(casoActivo.code){
-                const comunicacion_ID = userData.casos[casoActivo.code].comunicacion_ID
+            if(userData.casoActivo?.code){
+            
+                const comunicacion_ID = userData.casos[userData.casoActivo?.code].comunicacion_ID
                 console.log(comunicacion_ID);
                 setComunicacionValue(comunicacion_ID)
             }
         }
         run()
         return () =>{}
-    },[casoActivo.code])
+    },[userData.casoActivo?.code])
 
     const handleComunicacion = (comunicacion_ID) =>{
         getUserData()
         const newUserData = structuredClone(userData)
-        newUserData.casos[casoActivo.code] && (newUserData.casos[casoActivo.code].comunicacion_ID = comunicacion_ID )
+        newUserData.casos[userData.casoActivo?.code] && (newUserData.casos[userData.casoActivo?.code].comunicacion_ID = comunicacion_ID )
         saveUserData(newUserData)
         setComunicacionValue(comunicacion_ID)
     }

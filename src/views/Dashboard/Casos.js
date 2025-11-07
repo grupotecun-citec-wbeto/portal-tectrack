@@ -22,6 +22,8 @@ import CasosTableRow from "@components/Casos/CasosTableRow";
 import React, { useEffect, useState, useMemo} from "react";
 import { tablesProjectData, tablesTableData } from "variables/general";
 
+import FullscreenLoader from '@components/Loaders/FullscreenLoader';
+
 import { FaUserAlt,FaCheckCircle, FaTasks } from "react-icons/fa";
 
 import CasoSummary from "@components/Casos/CasoSummary";
@@ -78,6 +80,12 @@ function Casos() {
   const [clienteSelected,setClienteSelected] = useState('')
   const [prioridadSelected,setPrioridadSelected] = useState('')
   const [segmentoSelected,setSegmentoSelected] = useState('')
+  const [rangeFechaSelected,setRangeFechaSelected] = useState({start:'',end:''})
+  const [limitSelected,setLimitSelected] = useState('50')
+  const [syncStatusSelected,setSyncStatusSelected] = useState('')
+
+  // fullscreen loader
+  const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
   
 
   const {dbReady} = useDataBaseContext()
@@ -100,17 +108,20 @@ function Casos() {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
         segmentoSelected: segmentoSelected,
-        clienteSelected: clienteSelected
+        clienteSelected: clienteSelected,
+        rangeFechaSelected: rangeFechaSelected,
+        limitSelected: limitSelected,
+        syncStatusSelected: syncStatusSelected,
       }
 
       const fetchData = async () => {
         const casosData = await findCasesByFilters(userData.login,filters,{operador:"<>", value:"6"},{countOnly:false})
-        console.log('casosData 471c03b2-ccc8-4c8c-95c4-91574ce59103',casosData)
+        //console.log('casosData 471c03b2-ccc8-4c8c-95c4-91574ce59103',casosData)
         setData(casosData)
       }
       fetchData()
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
 
 
   useEffect( () =>{
@@ -119,7 +130,10 @@ function Casos() {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
         segmentoSelected: segmentoSelected,
-        clienteSelected: clienteSelected
+        clienteSelected: clienteSelected,
+        rangeFechaSelected: rangeFechaSelected,
+        limitSelected: limitSelected,
+        syncStatusSelected: syncStatusSelected,
       }
 
     const fetchData = async () => {
@@ -131,7 +145,7 @@ function Casos() {
 
    
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
   
   
   useEffect( () =>{
@@ -140,7 +154,10 @@ function Casos() {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
         segmentoSelected: segmentoSelected,
-        clienteSelected: clienteSelected
+        clienteSelected: clienteSelected,
+        rangeFechaSelected: rangeFechaSelected,
+        limitSelected: limitSelected,
+        syncStatusSelected: syncStatusSelected,
       }
     const fetchData = async () => {
       const casos = await findCasesByFilters(userData.login,filters,{operador:"=", value:"5"},{countOnly:true})
@@ -150,7 +167,7 @@ function Casos() {
     fetchData()
     
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
  
   useEffect( () =>{
     if(!dbReady) return; // Esperar a que la base de datos esté lista
@@ -159,7 +176,10 @@ function Casos() {
         usuarioSelected: usuarioSelected,
         prioridadSelected: prioridadSelected,
         segmentoSelected: segmentoSelected,
-        clienteSelected: clienteSelected
+        clienteSelected: clienteSelected,
+        rangeFechaSelected: rangeFechaSelected,
+        limitSelected: limitSelected,
+        syncStatusSelected: syncStatusSelected
       }
 
       const fetchData = async () => {
@@ -170,7 +190,7 @@ function Casos() {
       fetchData()
    
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
   
   
   useEffect( () =>{
@@ -180,7 +200,10 @@ function Casos() {
       usuarioSelected:'',
       prioridadSelected:'',
       segmentoSelected:'',
-      clienteSelected: ''
+      clienteSelected: '',
+      rangeFechaSelected: {start:'',end:''},
+      limitSelected: limitSelected,
+      syncStatusSelected: ''
     }
 
     const fetchData = async () => {
@@ -190,13 +213,13 @@ function Casos() {
     }
     fetchData()
     
-  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected])
+  },[dbReady,usuarioSelected,prioridadSelected,segmentoSelected,clienteSelected,rangeFechaSelected])
 
   
 
   // Memorizar el mapeo de `data`
   const memoizedCasoDetails = useMemo(() => {
-    return data.map((row, index) => {
+    return data?.map((row, index) => {
       const casoData = {
         id: row.ID,
         status_ID: row.caso_estado_ID,
@@ -211,17 +234,19 @@ function Casos() {
         usuario_ID: row.usuario_ID,
         caso_uuid: row.uuid,
         syncStatus: row.syncStatus,
+        comunicacion_ID: row.comunicacion_ID,
         equipos: row.equipos,
 
       };
       console.log('67c0ff94-05c2-405b-90be-6e090865393e')
-      return <CasoDetail key={index} caseData={casoData} />;
+      return <CasoDetail key={index} caseData={casoData} openLoader={setFullscreenLoaderVisible} />;
     });
-  }, [data]); // Solo se recalcula cuando `data` cambia
+  }, [data,fullscreenLoaderVisible]); // Solo se recalcula cuando `data` cambia
   
   
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
+      <FullscreenLoader visible={fullscreenLoaderVisible} message="Cargando..." />
       {/*<Card overflowX={{ sm: "scroll", xl: "hidden" }} pb="0px">
         <CardHeader p="6px 0px 22px 0px">
           <Text fontSize="xl" color={textColor} fontWeight="bold">
@@ -281,6 +306,13 @@ function Casos() {
         setSegmentoSelected={setSegmentoSelected}
         clienteSelected={clienteSelected}
         setClienteSelected={setClienteSelected}
+        rangeFechaSelected={rangeFechaSelected}
+        setRangeFechaSelected={setRangeFechaSelected}
+        limitSelected={limitSelected}
+        setLimitSelected={setLimitSelected}
+        syncStatusSelected={syncStatusSelected}
+        setSyncStatusSelected={setSyncStatusSelected}
+        openLoader={setFullscreenLoaderVisible}
       />
       <SimpleGrid columns={{ base: 1, md: 4 }} spacing={5} p={1}>
         {memoizedCasoDetails}

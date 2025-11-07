@@ -46,7 +46,8 @@ import { FaUserPen,FaUserMinus,FaEye } from "react-icons/fa6";
 import { BsRocketTakeoff } from "react-icons/bs";
 import { FcLowPriority } from "react-icons/fc";
 import { IoIosBusiness } from "react-icons/io";
-import { MdWorkspaces } from "react-icons/md";
+import { CgRemoveR } from "react-icons/cg";
+import { MdWorkspaces,MdOutlineSyncProblem,MdOutlineWbCloudy,MdSync   } from "react-icons/md";
 import { LiaTractorSolid } from "react-icons/lia"; 
 import { HiOutlineDocumentReport } from "react-icons/hi";
 
@@ -104,7 +105,7 @@ import { use } from 'react';
  * @param {CaseData} props.caseData - Objeto que contiene la información del caso.
  * @returns {JSX.Element} - El componente renderizado.
  */
-const CasoDetail = React.memo(({ caseData }) => {
+const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
   const {
     id,
@@ -115,8 +116,9 @@ const CasoDetail = React.memo(({ caseData }) => {
     segmento_ID,
     usuario_ID,
     usuario_ID_assigned,
+    comunicacion_ID,
     equipos,
-    syncStatus,
+    syncStatus
   } = caseData;
 
 
@@ -134,15 +136,17 @@ const CasoDetail = React.memo(({ caseData }) => {
     unAssignTechnician,
     findById,
     endCaseWithoutDiagnosis,
+    updateOnlyStatus,
     start: startCase, 
-    item: stateCaso} = useCaso(dbReady,false)
+    item: stateCaso
+  } = useCaso(dbReady,false)
    
   // HOOKS AND REPOSITORIES
   //const {items: caso,findById: getCasoById} = useCaso(dbReady,false)
   const {items: prediagnostico,findByCasoId: getDiagnosticoByCasoId} = useDiagnostico(dbReady,false)
 
   // HOOKS
-  const {loadCasoPromise} = useCargarCaso(id)
+  const {loadCasoPromise,loadCaso} = useCargarCaso(id)
 
   // COLORS
   const textColor = useColorModeValue("gray.500", "white");
@@ -224,6 +228,8 @@ const CasoDetail = React.memo(({ caseData }) => {
     const [cantEquipos,setCantEquipos] = useState(0)
 
     const [syncStatusDetail,setSyncStatusDetail] = useState(0)
+
+    const [casoEliminado,setCasoEliminado] = useState(false)
 
   //=======================================================
   // SECTION: USEMENO
@@ -312,7 +318,7 @@ const CasoDetail = React.memo(({ caseData }) => {
 
   useEffect(() => {
     setSyncStatusDetail(syncStatus)
-  },[])
+  },[syncStatus])
 
   // loadCasoPromise() Verificar como se esta actualizando el caso en base de datos remota
   /**
@@ -494,7 +500,8 @@ const CasoDetail = React.memo(({ caseData }) => {
    * Finaliza un caso y actualiza su estado en la base de datos.
    */
   const terminar = async() => {
-    const caso = await findById(id)
+    openLoader(true);
+    const caso = await findById(id);
     try{
       if((cantEquipos != 0 && segmento_ID == 1) || segmento_ID != 1){
         
@@ -531,7 +538,11 @@ const CasoDetail = React.memo(({ caseData }) => {
 
             saveUserData(newUserData)
             setSyncStatusDetail(1)
-            history.push('/admin/pages/searchbox')
+            setTimeout(() => {
+              openLoader(false);
+              history.push('/admin/pages/searchbox');
+            }, 800);
+            
           }else{
             alert('er[1fffd590] - Ingresar kilometraje final ')
           }
@@ -558,13 +569,19 @@ const CasoDetail = React.memo(({ caseData }) => {
           }else{
             alert('Ingresar kilometraje final')
           }
+          openLoader(false);
         } 
       }else{
+        openLoader(false);
         alert('No tiene equipos procesar, por favor contactar al administrador para revisar el caso')
       }
+      
     }catch(err){
       console.log(err);
-      
+    }finally{
+      setTimeout(() => {
+         openLoader(false);
+      }, 800);
     }
     
     
@@ -595,29 +612,123 @@ const CasoDetail = React.memo(({ caseData }) => {
     <Box
       maxW="lg"
       w="full"
-      bg={useColorModeValue('white', 'gray.800')}
+      bg={syncStatusDetail == 1 ? useColorModeValue('gray.200', 'gray.700') : useColorModeValue('white', 'gray.800')}
       boxShadow="2xl"
       rounded="lg"
       p={6}
       overflow="hidden"
       position="relative" // Add position relative to position the icon
+      border={syncStatusDetail == 1 ? '3px solid' : ''}
     >
-      {/* Icon for unsynchronized case */}
-      {syncStatusDetail == 1 && (
-        
-        <Icon
-          as={FaInfoCircle}
-          color="red.500"
-          boxSize="20px"
+      {/* Overlay when sync error */}
+      {syncStatusDetail == 3 && (
+        <Box
           position="absolute"
-          top="10px"
-          left="10px"
-        />
-        
+          top="0"
+          left="0"
+          w="full"
+          h="full"
+          bg="blackAlpha.600"
+          zIndex="overlay"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          pointerEvents="auto"
+          borderRadius="lg"
+        >
+          <Flex direction="column" align="center" color="white">
+            {casoEliminado ? (
+              <> 
+              
+                <Icon as={CgRemoveR} boxSize={{ base: "40px", md: "48px" }} />
+                <Text fontSize="lg" fontWeight="bold" mt={2}>
+                  Caso eliminado
+                </Text>
+                <Text fontSize="lg" fontWeight="bold" mt={2}>
+                  Caso #: {usuario_ID}-{id?.split('-')[0]}
+                </Text>
+              </>
+            ):(
+              <>
+                <Icon as={MdOutlineSyncProblem} boxSize={{ base: "40px", md: "48px" }} />
+                <Text fontSize="lg" fontWeight="bold" mt={2}>
+                  Sincronización con errores
+                </Text>
+                <Text fontSize="lg" fontWeight="bold" mt={2}>
+                  Caso #: {usuario_ID}-{id?.split('-')[0]}
+                </Text>
+                <>
+                  <Text fontSize="md" mt={2} color="whiteAlpha.900" textAlign="center">
+                    Por favor, verifica la conexión antes de eliminar.
+                  </Text>
+
+                  
+                  {<Button
+                    mt={4}
+                    colorScheme="red"
+                    leftIcon={<Icon as={FaRegWindowClose} color="white" />}
+                    onClick={async () => {
+                      const confirmed = window.confirm(
+                        '¿Confirma que desea eliminar este caso? Esta acción no se puede deshacer.'
+                      );
+                      if (!confirmed) return;
+
+                      try {
+                        // dispatch a delete request so reducers/middleware can handle it
+                        setCasoEliminado(true);
+                        await updateOnlyStatus(id, 6);
+                      } catch (err) {
+                        console.error('error-eliminar-caso 5e2ac692-b681-4371-acdf-67d085fdb25d', err);
+                        alert('Ocurrió un error al eliminar el caso.');
+                      }
+                    }}
+                    aria-label="Eliminar caso"
+                    size="sm"
+                  >
+                    Eliminar caso
+                  </Button>}
+                </>
+              </>
+            )}
+            
+          </Flex>
+        </Box>
       )}
+
       <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
         
-          
+          <Tooltip label="Estado de sincronización" aria-label="A tooltip" >
+            <Badge
+              bg={"green.400"}
+              color={"white"}
+              fontSize="0.8em"
+              p="3px 10px"
+              borderRadius="8px"
+            >
+              <Flex align="center" direction={{sm:"row",lg:"row"}}>
+                {syncStatusDetail == 0 && (
+                  <>
+                    <Icon as={MdOutlineWbCloudy } color="white" boxSize={{sm:"24px",lg:"24px"}} />
+                    {"Sync"}
+                  </>
+                )}
+                {syncStatusDetail == 1 && (
+                  <>
+                    <Icon as={MdSync } color="white" boxSize={{sm:"24px",lg:"24px"}} />
+                    {"Sincronizando"}
+                  </>
+                )}
+                {syncStatusDetail == 3 && (
+                  <>
+                    <Icon as={MdOutlineSyncProblem } color="white" boxSize={{sm:"24px",lg:"24px"}} />
+                    {"Con problema"}
+                  </>
+                )}
+              </Flex>
+              
+            </Badge>
+          </Tooltip>
+
           <Tooltip label="Estado del caso" aria-label="A tooltip" >
             <Badge
               bg={statusColor}
@@ -692,7 +803,7 @@ const CasoDetail = React.memo(({ caseData }) => {
                         </Tooltip>
                       
                     
-                      ):(
+                      ):[
                         <>
                           
                             <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
@@ -714,7 +825,7 @@ const CasoDetail = React.memo(({ caseData }) => {
                         
                         
                         
-                      )}
+                      ]}
                     
                     
                       <Tooltip label="Detalles del caso" aria-label="A tooltip" >
@@ -731,7 +842,7 @@ const CasoDetail = React.memo(({ caseData }) => {
                         </Button>
                       </Tooltip>
                     </>
-                  ):(
+                  ):[
                     <>
                       
 
@@ -742,9 +853,9 @@ const CasoDetail = React.memo(({ caseData }) => {
                         </Tooltip>
                       
                     </>
-                  )}
+                  ]}
                 </>
-              ):(
+              ):[
                 <>
                    <Tooltip label="Detalles del caso" aria-label="A tooltip" >
                       <NavLink to={`/admin/pages/casoinfo/${id}`} >
@@ -767,13 +878,16 @@ const CasoDetail = React.memo(({ caseData }) => {
                       color={"green.500"}
                       textAlign={"Center"}
                     >
-                      {"Caso Terminado"}
+                      <Flex align="center" justify="center">
+                        <Icon as={FaRegWindowClose} color="green.500" boxSize="6" mr={2} />
+                        {"Caso Terminado"}
+                      </Flex>
                     </Text>
                 </>
                 
-              )}
+              ]}
               
-                
+                 
 
               
             </Flex>
@@ -795,7 +909,7 @@ const CasoDetail = React.memo(({ caseData }) => {
             
             </>
             
-          ):(
+          ):[
             
             <>
               {estado == 3 && (
@@ -804,7 +918,7 @@ const CasoDetail = React.memo(({ caseData }) => {
               
             </>
             
-          )}
+          ]}
          
           
         
@@ -823,7 +937,7 @@ const CasoDetail = React.memo(({ caseData }) => {
           >
             {usuariosList}
           </Select>
-        ):(
+        ):[
           <>
             {/* Se va eliminar esto porque prediagnostico es una array  
             <Text fontSize="2xl" fontWeight="bold">
@@ -932,7 +1046,7 @@ const CasoDetail = React.memo(({ caseData }) => {
               </Text>
             </Stack>
           </>
-        )}
+        ]}
         
       </Stack>
       {/*<CasoModal isOpen={isOpen} onOpen={onOpen} onClose={onClose}  />*/}

@@ -33,12 +33,38 @@ function useCaso(dbReady = false,syncActive = true) {
     };
 
 
-    const createItem = (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy,catalogo_ID,name) => {
-        repository.create(uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy,catalogo_ID,name);
+    const createItem = (uuid,
+        usuario_ID,
+        usuario_ID_assigned,
+        comunicacion_ID,
+        segmento_ID,
+        caso_estado_ID,
+        fecha,
+        start,
+        prioridad,
+        programaSistemasIfy,
+        catalogo_ID,
+        name
+    ) => {
+        repository.create(uuid,
+             usuario_ID,
+            usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy,catalogo_ID,name);
         loadItems();
     };
 
-    const createSupportItem = async (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos) => {
+    const createSupportItem = async (
+        uuid,
+        usuario_ID,
+        usuario_ID_assigned,
+        comunicacion_ID,
+        segmento_ID,
+        caso_estado_ID,
+        fecha,
+        start,
+        prioridad,
+        equiposIfy,
+        diagnosticos
+    ) => {
         try{
             await repository.createSupport(uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy,diagnosticos);
             loadItems();
@@ -67,6 +93,15 @@ function useCaso(dbReady = false,syncActive = true) {
     const updateStatus = async (id,status) =>{
         try{
             repository.updateStatus(id,status)
+            return true
+        }catch(err){
+            return false
+        }
+        
+    }
+    const updateOnlyStatus = async (id,status) =>{
+        try{
+            repository.updateOnlyStatus(id,status)
             return true
         }catch(err){
             return false
@@ -157,6 +192,7 @@ function useCaso(dbReady = false,syncActive = true) {
         findCasesByFilters,
         findById,
         updateStatus,
+        updateOnlyStatus,
         assignTechnician,
         unAssignTechnician,
         start,
