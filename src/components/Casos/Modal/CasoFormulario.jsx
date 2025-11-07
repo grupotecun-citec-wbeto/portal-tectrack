@@ -148,6 +148,7 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
             const subdivision_names = diagnosticos.map(diagnostico => diagnostico.subdivision_name).join(', ')
             const proyectos_names = diagnosticos.map(diagnostico => diagnostico.proyecto_name).join(', ')
             
+            
             /*db.exec(` 
                 SELECT 
                     E.codigo_finca,E.ID,C.business_name,E.chasis,M.name as marca
@@ -165,7 +166,9 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                     ID: equipo.equipo_ID,
                     business_name: equipo.catalogo,
                     chasis: equipo.chasis,
-                    marca: equipo.marca
+                    marca: equipo.marca,
+                    proyecto: equipo.proyecto_name,
+                    cliente: equipo.cliente
                 }
                 equiposData.push(equipoData)
             })
@@ -174,13 +177,13 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
 
             //const clientes = db.exec(` SELECT DISTINCT name FROM cliente where ID IN (SELECT cliente_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
             equipos.set({codigos:equiposData})
-            nameUsuario.set(listClientes)
+            nameUsuario.set((listClientes.includes(', ')) ? ['Ver detalle de equipos'] : listClientes)
 
             //const departamentos = db.exec(` SELECT DISTINCT subdivision_name FROM departamento where code IN (SELECT departamento_code FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
             lugar.set(subdivision_names)
             
             //const proyectos = db.exec(` SELECT DISTINCT name FROM proyecto where ID IN (SELECT proyecto_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
-            proyecto.set(proyectos_names)
+            proyecto.set((proyectos_names.includes(', ')) ? 'Ver detaller de equipos' : proyectos_names)
 
             const data = JSON.parse(sCaso?.equipos)
 
