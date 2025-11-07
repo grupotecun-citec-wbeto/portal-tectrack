@@ -318,7 +318,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
   useEffect(() => {
     setSyncStatusDetail(syncStatus)
-  },[])
+  },[syncStatus])
 
   // loadCasoPromise() Verificar como se esta actualizando el caso en base de datos remota
   /**

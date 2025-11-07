@@ -109,11 +109,48 @@ const FilterCase = React.memo(({
     
   },[dbReady])
 
- 
+  useEffect(() => {
+    // Load saved filters from local storage on component mount
+    const savedFilters = JSON.parse(localStorage.getItem('filterCaseSettings')) || {};
+    if (savedFilters) {
+      setUserSelected(savedFilters.userSelected || '');
+      setClienteSelectedInter(savedFilters.clienteSelectedInter || '');
+      setPrioriSelected(savedFilters.prioriSelected || '');
+      setSegmentSelected(savedFilters.segmentSelected || '');
+      setStartDate(savedFilters.startDate || '');
+      setEndDate(savedFilters.endDate || '');
+      setLimitFilterSelected(savedFilters.limitFilterSelected || '50');
+      setSyncStatusSelect(savedFilters.syncStatusSelect || '');
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save filters to local storage whenever they change
+    const filtersToSave = {
+      userSelected,
+      clienteSelectedInter,
+      prioriSelected,
+      segmentSelected,
+      startDate,
+      endDate,
+      limitFilterSelected,
+      syncStatusSelect,
+    };
+    localStorage.setItem('filterCaseSettings', JSON.stringify(filtersToSave));
+  }, [
+    userSelected,
+    clienteSelectedInter,
+    prioriSelected,
+    segmentSelected,
+    startDate,
+    endDate,
+    limitFilterSelected,
+    syncStatusSelect,
+  ]);
   
 
   return (
-    <Accordion allowToggle bg="white">
+    <Accordion defaultIndex={[0]} allowToggle bg="white">
       <AccordionItem>
         <AccordionButton>
           <Box flex="1" textAlign="left">
@@ -121,7 +158,7 @@ const FilterCase = React.memo(({
           </Box>
           <AccordionIcon />
         </AccordionButton>
-        <AccordionPanel pb={4}>
+        <AccordionPanel  pb={4}>
           <Card mb={{ xl: "15px", sm: "15px" }}>
             <CardBody>
               <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} mb={4}>

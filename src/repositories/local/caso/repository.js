@@ -337,7 +337,6 @@ const repository = {
                             ${query_syncStatus}
                         ORDER BY start DESC
                         ${query_limit}`
-                    console.log(query,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
                     break;
                 default:
                     
