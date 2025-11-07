@@ -1,5 +1,5 @@
-import React,{useEffect,useState, useContext,useRef} from 'react';
-import {Button, Select, Accordion, AccordionItem, Heading, HStack  } from '@chakra-ui/react';
+import React, { useEffect, useState, useContext, useRef, useMemo, useCallback } from 'react';
+import {Button, Select, Accordion, AccordionItem, Heading, HStack, Input  } from '@chakra-ui/react';
 
 //redux
 import { useSelector, useDispatch } from 'react-redux';
@@ -13,15 +13,13 @@ import { useDataBaseContext } from 'dataBaseContext';
 import useUsuario from 'hooks/usuario/useUsuario';
 import useCliente from 'hooks/cliente/useCliente';
 
-const FilterCase = ({
+const FilterCase = React.memo(({
   usuarioSelected,setUsuarioSelected,
   prioridadSelected,setPrioridadSelected,
   segmentoSelected,setSegmentoSelected,
   clienteSelected,setClienteSelected,
   openLoader
 }) => {
-  // ... estado para manejar los valores de los filtros
-
   // ************************** REDUX-PRESIST ****************************
    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
    const dispatch = useDispatch();
@@ -46,6 +44,8 @@ const FilterCase = ({
   const [clienteSelectedInter,setClienteSelectedInter] = useState('')
   const [prioriSelected,setPrioriSelected] = useState('')
   const [segmentSelected,setSegmentSelected] = useState('')
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
    // useState
 
@@ -63,16 +63,21 @@ const FilterCase = ({
 
   // FUCTIONS
 
-  const handleApplyFilter = async() =>{
+  const handleApplyFilter = useCallback(async() =>{
     setUsuarioSelected(userSelected)
     setPrioridadSelected(prioriSelected)
     setSegmentoSelected(segmentSelected)
     setClienteSelected(clienteSelectedInter) // seleccionar cliente
     openLoader(true)
+
+    // Add logic for date range filters
+    console.log('Start Date:', startDate);
+    console.log('End Date:', endDate);
+
     setTimeout(() => {
       openLoader(false)
     }, 500);
-  }
+  }, [userSelected, prioriSelected, segmentSelected, clienteSelectedInter, startDate, endDate, openLoader])
   
   // useEffect
   
@@ -132,6 +137,20 @@ const FilterCase = ({
             <option key="2" value="2">Proyecto</option>
             <option key="3" value="3">Capacitación</option>
           </Select>
+
+          {/* Date range filters */}
+          <Input
+            type="date"
+            placeholder="Fecha Inicio"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+          <Input
+            type="date"
+            placeholder="Fecha Fin"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
         </HStack>
        
         <Button colorScheme="blue" onClick={handleApplyFilter}>
@@ -140,6 +159,6 @@ const FilterCase = ({
       </CardBody>
     </Card>
   );
-};
+});
 
 export default FilterCase
