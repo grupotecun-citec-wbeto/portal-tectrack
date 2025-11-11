@@ -37,11 +37,14 @@ import {
   import CardEspecialista from "components/PreDiagnostico/CardEspcialista";
   import CardAsistencia from "components/PreDiagnostico/CardAsistencia";
   //import CardTerminarCaso from "components/Diagnostico/CardTerminarCaso";
-  import SuccessAlertCaso from "components/PreDiagnostico/AlertCrearCaso";
+  import AlertCaso from "components/PreDiagnostico/AlertCrearCaso";
   import CardHerramientas from "components/Diagnostico/CardHerramientas";
   import CardCommand from "components/PreDiagnostico/CadCommand";
   import CardPrioridad from "components/PreDiagnostico/CardPrioridad";
   import CardComunication from "components/Comunication/CardComunication";
+
+  import FullscreenLoader from "@components/Loaders/FullscreenLoader";
+
 
   import { SearchIcon } from '@chakra-ui/icons';
   import { useDebounce } from 'use-debounce';
@@ -90,7 +93,7 @@ import useSistema from "hooks/sistema/useSistema";
     const [descriptionValue, setDescriptionValue] = useState('');
     const [debouncedSearchValue] = useDebounce(descriptionValue, 500);
     const [searchResults,setSearchResults] = useState([{'id':1,'name':'humberto'}])
-    const [isSuccessAlertCaso,setIsSuccessAlertCaso] = useState(false)
+    const [isOpenAlertCaso,setIsOpenAlertCaso] = useState(false)
     const [caseId,setCaseId] = useState(0)
 
     const [datos, setDatos] = useState([]);
@@ -98,6 +101,10 @@ import useSistema from "hooks/sistema/useSistema";
 
     const [check,setCheck] = useState(false)
     const [changeReady,setChangeReady] = useState(false)
+
+    const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
+
+    const [typeAlert,setTypeAlert] = useState('success');
 
     const {casoActivo,setCasoActivo} = useContext(AppContext)
 
@@ -209,13 +216,14 @@ import useSistema from "hooks/sistema/useSistema";
      DESCRIPTION: Bloque de funciones
     =========================================================*/
     const closeAlert = () => {
-      setIsSuccessAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
+      setIsOpenAlertCaso(false); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
-    const openAlert = (caseId_in,uuid) => {
+    const openAlert = (caseId_in,uuid,type) => {
       setCaseId(caseId_in)
       setCaseUuid(uuid)
-      setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
+      setTypeAlert(type)
+      setIsOpenAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
     };
 
     
@@ -228,6 +236,7 @@ import useSistema from "hooks/sistema/useSistema";
       <>
         { Object.keys((typeof userData?.casos === 'undefined') ? {} : userData?.casos).length !== 0 ? (
           <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
+            <FullscreenLoader visible={fullscreenLoaderVisible} message="Cargando..." />
             <Flex
               direction={{ sm: "column", md: "row" }}
               mb='24px'
@@ -299,10 +308,10 @@ import useSistema from "hooks/sistema/useSistema";
               )}
               
 
-            {isSuccessAlertCaso ?(
-              <SuccessAlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid}/>
+            {isOpenAlertCaso ?(
+              <AlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid} type={typeAlert} openLoader={setFullscreenLoaderVisible}/>
             ):(
-              <CardCrearCasoPrograma openAlert={openAlert} />
+              <CardCrearCasoPrograma openAlert={openAlert} openLoader={setFullscreenLoaderVisible} />
             )}
 
               
