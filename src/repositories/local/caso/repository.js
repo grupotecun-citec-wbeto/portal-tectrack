@@ -343,7 +343,20 @@ const repository = {
                     parameters.unshift(userDataLogin.ID)
                     parameters.unshift(userDataLogin.ID)
                     parameters.unshift(estado.value)
-                    query = `SELECT ${query_count} FROM ${repository.tableName} WHERE 1=1 AND caso_estado_ID ${estadoFilter} AND (usuario_ID = ? OR usuario_ID_assigned =  ? ) ${query_prioridad} ${query_segmento} ORDER BY start DESC`
+                    query = `
+                        SELECT 
+                            ${query_count} 
+                        FROM 
+                            ${repository.tableName} 
+                        WHERE 
+                            1=1 AND 
+                            caso_estado_ID ${estadoFilter} AND 
+                            (usuario_ID = ? OR usuario_ID_assigned =  ? ) 
+                            ${query_prioridad} 
+                            ${query_segmento}
+                            ${query_fecha}
+                            ORDER BY start DESC
+                            ${query_limit}`
                 break;
             }
 
