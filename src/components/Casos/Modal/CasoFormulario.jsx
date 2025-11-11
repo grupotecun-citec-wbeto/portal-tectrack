@@ -190,14 +190,22 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
 
             const result = Object.keys(data).reduce((acc, equipoID) => {
                 // Agregar sistemas del prediagnostico
-                Object.keys(data[equipoID].prediagnostico.sistemas).forEach(sistema => {
-                acc.add(sistema);
-                });
+                try{
+                    Object.keys(data[equipoID].prediagnostico?.sistemas).forEach(sistema => {
+                    acc.add(sistema);
+                    });
+                }catch(err){
+                    console.warn('Error al agregar sistemas del prediagnostico',err)
+                }
             
                 // Agregar sistemas del diagnostico
-                Object.keys(data[equipoID].diagnostico.sistemas).forEach(sistema => {
-                acc.add(sistema);
+                try{
+                    Object.keys(data[equipoID].diagnostico?.sistemas).forEach(sistema => {
+                    acc.add(sistema);
                 });
+                }catch(err){
+                    console.warn('Error al agregar sistemas del diagnostico',err)
+                }
             
                 return acc;
             }, new Set());

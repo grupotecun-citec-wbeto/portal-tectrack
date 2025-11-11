@@ -40,7 +40,7 @@ import useCargarCaso from "hookDB/cargarCaso";
 
 //******************************************* FIN IMPORTS ************************** */
 
-function CardCrearCasoPrograma({openAlert}){
+function CardCrearCasoPrograma({openAlert, openLoader}){
 
     const {casoActivo,setCasoActivo} = useContext(AppContext)
     
@@ -134,17 +134,24 @@ function CardCrearCasoPrograma({openAlert}){
             
             try {
                 await createCaso(uuid, usuario_ID, usuario_ID_assigned, comunicacion_ID, segmento_ID, caso_estado_ID, fecha, start, prioridad, programaSistemasIfy, catalogo_ID, name);
+                openLoader(true)
                 loadCaso();
+                setTimeout(() => {
+                    openLoader(false)
+                    //history.push('/admin/pages/casos')
+                }, 2000);
             } catch (err) {
                 console.error('Error creating case:', err);
+                openAlert(caseId, uuid, 'error');
                 throw new Error('Failed to create case. Process stopped.');
             }
 
             try {
                 const caseId = uuid
-                openAlert(caseId, uuid);
+                openAlert(caseId, uuid, 'success');
             } catch (err) {
-            console.error('7575186c-9982-43b4-942a-81fe27cd22cc', err);
+                console.error('7575186c-9982-43b4-942a-81fe27cd22cc', err);
+                openAlert(caseId, uuid, 'error');
             }
         } else {
             alert('El caso ya existe');
