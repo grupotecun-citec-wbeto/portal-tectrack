@@ -138,7 +138,7 @@ function CardCrearCasoPrograma({openAlert, openLoader}){
                 loadCaso();
                 setTimeout(() => {
                     openLoader(false)
-                    history.push('/admin/pages/casos')
+                    //history.push('/admin/pages/casos')
                 }, 2000);
             } catch (err) {
                 console.error('Error creating case:', err);
@@ -174,7 +174,7 @@ function CardCrearCasoPrograma({openAlert, openLoader}){
               </CardHeader>
               <CardBody mt={{xl:'50px', sm:'50px'}}>
                   <Button variant='dark' minW='145px' h='36px' fontSize={{xl:'2em',sm:'1em'}} onClick={crearCaso}>
-                    Crear caso 3
+                    Crear caso
                   </Button>
                   
               </CardBody>
