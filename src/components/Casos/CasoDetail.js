@@ -38,7 +38,7 @@ import {
 } from '@chakra-ui/react'
 
 // ICONOS
-import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose   } from 'react-icons/fa';
+import { FaCalendarAlt, FaUser , FaInfoCircle, FaRegSave,FaRegWindowClose, FaUserCheck   } from 'react-icons/fa';
 import { FaHeadset } from "react-icons/fa6";
 import { FaBookOpen } from "react-icons/fa";
 import { IoMdPerson } from "react-icons/io";
@@ -54,6 +54,7 @@ import { HiOutlineDocumentReport } from "react-icons/hi";
 import InputKm from './InputKm';
 import InputFinalKm from './InputFinalKm';
 import CasoModal from './Modal/CasoModal';
+import LabeledDivider from './LabeledDivider';
 //import GenerarPDF from 'components/Documentos/GenerarPDF';
 
 import { NavLink } from 'react-router-dom';
@@ -201,13 +202,14 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
      * Lista de usuarios obtenida desde la base de datos.
      * @type {Array<Object>}
      */
-    //const [usuarios, setUsuarios] = useState([]);
+    //const [usuarios, setusuarios] = useState([]);
 
     /**
      * Usuario seleccionado en el caso actual.
      * @type {Object|null}
      */
     const [slcUsuario, setSlcUsuario] = useState(usuario_ID_assigned ?? null);
+
 
     /**
      * Indica si el modo de edición para el técnico asignado está activo.
@@ -598,6 +600,17 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
       <option key={usuario.ID} value={usuario.ID}>{usuario.display_name}</option>
     ));
   },[usuarios])
+
+  /**
+   * Obtener el nombre para mostrar del usuario por su ID.
+   * @param {number|string} userId - ID del usuario.
+   * @returns {string} - Nombre para mostrar del usuario.
+   */
+  const getUserDisplayName = React.useCallback((userId) => {
+    if (!usuarios || usuarios.length === 0 || userId == null) return '';
+    const user = usuarios.find(u => String(u.ID) === String(userId));
+    return user?.display_name || '';
+  }, [usuarios]);
 
   const vehiculosList = useMemo(() => {
 
@@ -1029,21 +1042,45 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                 
             )}
 
-            <Divider />
+            <LabeledDivider label="Información" />
             <Stack direction="row" align="center">
-              <Icon as={FaCalendarAlt} color="gray.500" />
-              <Text fontSize="sm" color="gray.500">
-                Creado el {format(createdAt, 'yyyy-MM-dd')}
-              </Text>
+              <Tooltip
+                label={`Fecha de creación: ${format(createdAt, 'yyyy-MM-dd')}`}
+              >
+                <Flex align="center">
+                  <Icon as={FaCalendarAlt} color="gray.500" />
+                  <Text fontSize="sm" ml="5px" color="gray.500">
+                    {format(createdAt, 'yyyy-MM-dd')}
+                  </Text>
+                </Flex>
+              </Tooltip>
+              {userData.login.perfil_ID === 3 && userData.login.ID != usuario_ID  && (
+                <Tooltip
+                label={'Creado por: ' + getUserDisplayName(usuario_ID)}
+                >
+                  <Flex align="center">
+                    <Icon as={FaUser } color="gray.500" />
+                    <Text fontSize="sm" ml="5px" color="gray.500">
+                      {getUserDisplayName(usuario_ID)}
+                    </Text>
+                  </Flex>
+              </Tooltip>
+              )}
             </Stack>
-
-            <Divider />
+           
+            <LabeledDivider label="Asignados" />
 
             <Stack direction="row" align="center">
-              <Icon as={FaUser } color="gray.500" />
-              <Text fontSize="sm" color="gray.500">
-                Técnico asignado: {assignedTechnician || 'No asignado'}
-              </Text>
+              <Tooltip
+                label={assignedTechnician ? `Técnico asignado: ${assignedTechnician}` : 'Sin técnico asignado'}
+              >
+                <Flex align="center">
+                  <Icon as={FaUserCheck} color="gray.500" mr={2} />
+                  <Text fontSize="sm" color="gray.500">
+                    {assignedTechnician || 'No asignado'}
+                  </Text>
+                </Flex>
+              </Tooltip>
             </Stack>
           </>
         ]}
