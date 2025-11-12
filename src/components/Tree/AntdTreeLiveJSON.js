@@ -1,0 +1,118 @@
+import React, { useMemo, useState } from "react";
+import { Tree, Input } from "antd";
+import "antd/dist/reset.css";
+
+const { Search } = Input;
+
+const treeData = [
+  {
+    title: "Sistema de Inspecciones",
+    key: "inspecciones",
+    children: [
+      { title: "DOA", key: "inspecciones-doa" },
+      { title: "SMC", key: "inspecciones-smc" },
+      { title: "PQC", key: "inspecciones-pqc" },
+    ],
+  },
+  {
+    title: "Sistema de Taller",
+    key: "taller",
+    children: [
+      { title: "Diagnóstico", key: "taller-diagnostico" },
+      { title: "Mantenimiento", key: "taller-mantenimiento" },
+      { title: "Reportes", key: "taller-reportes" },
+    ],
+  },
+];
+
+/** Construye un árbol SOLO con lo seleccionado/semiseleccionado */
+function buildSelectedTree(nodes, checkedSet, halfSet) {
+  const walk = (arr) =>
+    arr
+      .map((n) => {
+        const children = n.children ? walk(n.children) : [];
+        const checked = checkedSet.has(n.key);
+        const halfChecked =
+          !checked && (halfSet.has(n.key) || children.some((c) => c.checked || c.halfChecked));
+
+        // incluir si está checked o si algún hijo quedó incluido
+        if (checked || halfChecked || children.length > 0) {
+          return {
+            key: n.key,
+            title: n.title,
+            checked,
+            halfChecked,
+            ...(children.length ? { children } : {}),
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+  return walk(nodes);
+}
+
+/** Filtro simple por texto que mantiene la jerarquía */
+function filterTreeByText(nodes, q) {
+  if (!q) return nodes;
+  const term = q.toLowerCase();
+  const walk = (arr) =>
+    arr
+      .map((n) => {
+        const self = n.title.toLowerCase().includes(term);
+        const kids = n.children ? walk(n.children) : [];
+        if (self || kids.length) {
+          return { ...n, ...(kids.length ? { children: kids } : { children: undefined }) };
+        }
+        return null;
+      })
+      .filter(Boolean);
+  return walk(nodes);
+}
+
+export default function AntdTreeLiveJSON() {
+  const [checkedKeys, setCheckedKeys] = useState([]); // solo los checked reales
+  const [halfCheckedKeys, setHalfCheckedKeys] = useState([]); // semiseleccionados (padres)
+  const [search, setSearch] = useState("");
+
+  const filtered = useMemo(() => filterTreeByText(treeData, search), [search]);
+
+  const selectedJson = useMemo(() => {
+    const checkedSet = new Set(checkedKeys);
+    const halfSet = new Set(halfCheckedKeys);
+    return buildSelectedTree(treeData, checkedSet, halfSet);
+  }, [checkedKeys, halfCheckedKeys]);
+
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      <Search
+        placeholder="Buscar sistema/subsistema…"
+        allowClear
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      <Tree
+        checkable
+        defaultExpandAll
+        treeData={filtered}
+        checkedKeys={checkedKeys}
+        onCheck={(keys, info) => {
+          // `keys` puede ser array o objeto { checked, halfChecked } según modo.
+          if (Array.isArray(keys)) {
+            setCheckedKeys(keys);
+            setHalfCheckedKeys(info.halfCheckedKeys || []);
+          } else {
+            setCheckedKeys(keys.checked || []);
+            setHalfCheckedKeys(keys.halfChecked || []);
+          }
+        }}
+      />
+
+      <div style={{ border: "1px solid #eee", borderRadius: 8, padding: 12 }}>
+        <div style={{ fontWeight: 600, marginBottom: 8 }}>Selección (JSON)</div>
+        <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
+{JSON.stringify(selectedJson, null, 2)}
+        </pre>
+      </div>
+    </div>
+  );
+}
