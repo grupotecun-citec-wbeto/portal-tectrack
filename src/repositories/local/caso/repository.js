@@ -353,13 +353,14 @@ const repository = {
                         SELECT 
                             ${query_count} 
                         FROM 
-                            ${repository.tableName} 
+                            ${from.join(' ')}
                         WHERE 
                             1=1 AND 
                             caso_estado_ID ${estadoFilter} AND 
                             (usuario_ID = ? OR usuario_ID_assigned =  ? ) 
                             ${query_prioridad} -- 3
                             ${query_segmento} -- 4
+                            ${query_cliente} -- 5
                             ${query_fecha} --6
                             ${query_syncStatus} -- 7
                             ORDER BY start DESC
