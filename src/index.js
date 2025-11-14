@@ -134,6 +134,8 @@ import { store, persistor } from './redux/store.js';
 
 import { Spinner } from '@chakra-ui/react'
 
+import '@domain/dto';
+
 const UserProfile = () => {
   const { userId } = useParams();
 

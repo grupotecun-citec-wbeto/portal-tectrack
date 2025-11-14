@@ -4,7 +4,7 @@ import "antd/dist/reset.css";
 
 const { Search } = Input;
 
-const treeData = [
+/*const treeData = [
   {
     title: "Sistema de Inspecciones",
     key: "inspecciones",
@@ -23,7 +23,7 @@ const treeData = [
       { title: "Reportes", key: "taller-reportes" },
     ],
   },
-];
+];*/
 
 /** Construye un árbol SOLO con lo seleccionado/semiseleccionado */
 function buildSelectedTree(nodes, checkedSet, halfSet) {
@@ -69,11 +69,11 @@ function filterTreeByText(nodes, q) {
   return walk(nodes);
 }
 
-export default function AntdTreeLiveJSON() {
+export default function AntdTreeLiveJSON(prop) {
   const [checkedKeys, setCheckedKeys] = useState([]); // solo los checked reales
   const [halfCheckedKeys, setHalfCheckedKeys] = useState([]); // semiseleccionados (padres)
   const [search, setSearch] = useState("");
-
+  const { treeData } = prop;
   const filtered = useMemo(() => filterTreeByText(treeData, search), [search]);
 
   const selectedJson = useMemo(() => {

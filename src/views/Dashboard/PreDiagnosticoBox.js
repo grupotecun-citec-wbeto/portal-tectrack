@@ -67,6 +67,7 @@ import {
 
   // hook
   import useSistema from "hooks/sistema/useSistema";
+  import useSistemasChildrens from "@hooks/sistema/useSistemasChildrens";
 
   
   //*********************************************** FIN IMPORT ***************************************************** */
@@ -83,7 +84,9 @@ import {
 
     // dbReady
     const { dbReady } = useDataBaseContext();
-    const { getNivel1 } = useSistema(dbReady,false);
+    const { getNivel1,  items:sistemas } = useSistema(dbReady,false);
+
+    const {loading: sistemasLoading, data: sistemasData, error: sistemasError} = useSistemasChildrens(dbReady)
     
     /*=======================================================
      BLOQUE: variable hitory
@@ -272,6 +275,11 @@ import {
 
     /*====================FIN BLOQUE: FUNCTIONS        ==============*/
 
+    useEffect(() => {
+      if (!sistemasLoading) {
+        console.log('Sistemas cargados: 9c058540-82eb-44b1-853b-228335acec63', sistemasData,sistemasError);
+      }     
+    }, [sistemasLoading,sistemasData,sistemasError]);
     
     return (
       <>
@@ -368,10 +376,15 @@ import {
                     <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
                   </CardHeader>
                   <CardBody mt={{xl:'10px'}}>
-                    
-                      
-                    <AntdTreeLiveJSON />
-                      
+
+                    {sistemasLoading ? (
+                      <Text>Cargando sistemas...</Text>
+                    ) : sistemasError ? (
+                      <Text>Error al cargar los sistemas: {sistemasError.message}</Text>
+                    ) : (
+                      <AntdTreeLiveJSON treeData={sistemasData} />
+                    )}
+
                   </CardBody>
                   
               </Card>
