@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Tree, Input } from "antd";
 import "antd/dist/reset.css";
+import { isEmptyArray } from "formik";
 
 const { Search } = Input;
 
@@ -52,14 +53,23 @@ function buildSelectedTree(nodes, checkedSet, halfSet) {
 }
 
 /** Filtro simple por texto que mantiene la jerarquía */
+/**
+ * @param {Array<SystemNode>} nodes
+ * @param {string} q
+ * @returns {Array<SystemNode>}
+ */
 function filterTreeByText(nodes, q) {
   if (!q) return nodes;
   const term = q.toLowerCase();
+  /**
+   * @param {Array<SystemNode>} arr 
+   * @returns {Array<SystemNode>}
+   */
   const walk = (arr) =>
     arr
       .map((n) => {
         const self = n.title.toLowerCase().includes(term);
-        const kids = n.children ? walk(n.children) : [];
+        const kids = self ? n.children : n.children.length > 0 ? walk(n.children) : [];
         if (self || kids.length) {
           return { ...n, ...(kids.length ? { children: kids } : { children: undefined }) };
         }
@@ -69,6 +79,11 @@ function filterTreeByText(nodes, q) {
   return walk(nodes);
 }
 
+/**
+ * 
+ * @param {*} prop 
+ * @returns 
+ */
 export default function AntdTreeLiveJSON(prop) {
   const [checkedKeys, setCheckedKeys] = useState([]); // solo los checked reales
   const [halfCheckedKeys, setHalfCheckedKeys] = useState([]); // semiseleccionados (padres)
@@ -89,7 +104,7 @@ export default function AntdTreeLiveJSON(prop) {
         allowClear
         onChange={(e) => setSearch(e.target.value)}
       />
-
+      {console.log("filtered c50720cd-8881-40f0-95e5-a75320f115e2", filtered)}
       <Tree
         checkable
         defaultExpandAll
