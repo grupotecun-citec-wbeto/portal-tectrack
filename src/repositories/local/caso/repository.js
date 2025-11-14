@@ -280,17 +280,20 @@ const repository = {
            
             
             
-
+            // ${query_user} --2
             if(query_user != ''){
                 parameters.push(filters.usuarioSelected)
             }
+            // ${query_prioridad} --3
             if(query_prioridad != ''){
                 parameters.push(filters.prioridadSelected)
             }
+            // ${query_segmento} 4
             if(query_segmento != ''){
                 parameters.push(filters.segmentoSelected)
             }
 
+            // ${query_cliente} -- 5
             if(query_cliente != ''){ 
                 console.log(filters,"c5e4a5db-0cc7-498d-b6f1-1482ddcbffb8") 
                 parameters.push(filters.clienteSelected)
@@ -298,15 +301,19 @@ const repository = {
                 from.push( ` INNER JOIN ${repositoryEquipo.tableName} ON ${repositoryEquipo.tableName}.ID = ${repositoryDiagnostico.tableName}.equipo_ID `)
             }
 
+            // ${query_fecha} --6
             if(query_fecha != ''){
                 parameters.push(filters.rangeFechaSelected.start)
                 parameters.push(filters.rangeFechaSelected.end)
             }
 
+            // ${query_syncStatus} -- 7
             if(query_syncStatus != ''){
                 parameters.push(filters.syncStatusSelected)
             }
 
+            
+            //  ${query_limit} -- 8` 
             if(query_limit != ''){
                 parameters.push(filters.limitSelected)
             }
@@ -320,7 +327,7 @@ const repository = {
             
             switch(userDataLogin.perfil_ID){
                 case 3: // perfil admin 
-                    parameters.unshift(estado.value)   
+                    parameters.unshift(estado.value)  // --1
                     query = `
                         SELECT 
                             ${query_count} 
@@ -328,35 +335,36 @@ const repository = {
                            ${from.join(' ')}
                         WHERE 
                             1=1 AND 
-                            caso_estado_ID ${estadoFilter} 
-                            ${query_user} 
-                            ${query_prioridad} 
-                            ${query_segmento} 
-                            ${query_cliente}
-                            ${query_fecha}
-                            ${query_syncStatus}
+                            caso_estado_ID ${estadoFilter} -- 1
+                            ${query_user} -- 2
+                            ${query_prioridad} -- 3 
+                            ${query_segmento} -- 4
+                            ${query_cliente} -- 5
+                            ${query_fecha} --6
+                            ${query_syncStatus} -- 7
                         ORDER BY start DESC
-                        ${query_limit}`
+                        ${query_limit} -- 8` 
                     break;
                 default:
                     
-                    parameters.unshift(userDataLogin.ID)
-                    parameters.unshift(userDataLogin.ID)
-                    parameters.unshift(estado.value)
+                    parameters.unshift(estado.value, userDataLogin.ID, userDataLogin.ID)
+                    
                     query = `
                         SELECT 
                             ${query_count} 
                         FROM 
-                            ${repository.tableName} 
+                            ${from.join(' ')}
                         WHERE 
                             1=1 AND 
                             caso_estado_ID ${estadoFilter} AND 
                             (usuario_ID = ? OR usuario_ID_assigned =  ? ) 
-                            ${query_prioridad} 
-                            ${query_segmento}
-                            ${query_fecha}
+                            ${query_prioridad} -- 3
+                            ${query_segmento} -- 4
+                            ${query_cliente} -- 5
+                            ${query_fecha} --6
+                            ${query_syncStatus} -- 7
                             ORDER BY start DESC
-                            ${query_limit}`
+                            ${query_limit} -- 8`
                 break;
             }
 
