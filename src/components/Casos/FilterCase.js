@@ -177,7 +177,7 @@ const FilterCase = React.memo(({
                 )}
 
                 {/* Client Filter */}
-                {userData?.login?.perfil_ID == 3 && (
+                {(userData?.login?.perfil_ID == 1 || userData?.login?.perfil_ID == 3) && (
                   <GridItem>
                     <FormControl>
                       <FormLabel>Clientes</FormLabel>
