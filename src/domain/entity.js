@@ -19,3 +19,10 @@
  * @property {Function} [map] - Optional function to iterate over elements (e.g., for arrays or collections).
  */
 
+/**
+ * @typedef {Object} AreaORM
+ * @property {number} ID - Primary key of the area table.
+ * @property {string} name - Name of the area.
+ * @property {string} created_at - Timestamp when the record was created.
+ * @property {string|null} updated_at - Timestamp when the record was last updated.
+ */

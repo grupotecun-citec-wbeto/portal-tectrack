@@ -27,7 +27,16 @@
  * @property {string} title - Título del nodo del sistema.
  * @property {string} key - Clave única del nodo.
  * @property {number} sistemaId - Foreign key referencing the sistema table.
+ * @property {number|null} areaId - Foreign key referencing the area table (optional).
  * @property {boolean} leafNode - Indica si el nodo es una hoja (sin hijos).
  * @property {Array<SystemNode>} [children] - Lista de nodos hijos (opcional).
  */
 
+
+/**
+ * @typedef {Object} AreaDTO
+ * @property {number} id - Primary key of the area table.
+ * @property {string} name - Name of the area.
+ * @property {string} createdAt - Timestamp when the record was created.
+ * @property {string|null} updatedAt - Timestamp when the record was last updated.
+ */

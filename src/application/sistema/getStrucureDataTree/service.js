@@ -8,8 +8,8 @@ import {toOTree} from './mapper';
  * @returns {Array<SystemNode>}
  */
 
-function getStrucureDataTree(systems , services) {
-    return toOTree(systems, services)
+function getStrucureDataTree(systems , services, areas) {
+    return toOTree(systems, services, areas)
 }
 
 export default getStrucureDataTree;

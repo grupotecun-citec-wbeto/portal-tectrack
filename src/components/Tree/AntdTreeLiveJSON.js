@@ -89,6 +89,8 @@ export default function AntdTreeLiveJSON(prop) {
   const [halfCheckedKeys, setHalfCheckedKeys] = useState([]); // semiseleccionados (padres)
   const [search, setSearch] = useState("");
   const { treeData } = prop;
+
+
   const filtered = useMemo(() => filterTreeByText(treeData, search), [search]);
 
   const selectedJson = useMemo(() => {
@@ -125,7 +127,11 @@ export default function AntdTreeLiveJSON(prop) {
       <div style={{ border: "1px solid #eee", borderRadius: 8, padding: 12 }}>
         <div style={{ fontWeight: 600, marginBottom: 8 }}>Selección (JSON)</div>
         <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
-{JSON.stringify(selectedJson, null, 2)}
+{JSON.stringify(
+  selectedJson.filter((node) => node.key.startsWith("A-") && node.key.length !== 2),
+  null,
+  2
+)}
         </pre>
       </div>
     </div>

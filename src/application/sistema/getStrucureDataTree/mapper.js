@@ -1,3 +1,4 @@
+import { node } from "stylis";
 
 
 
@@ -6,10 +7,11 @@
  * 
  * @param {Array<SistemaDTO>} systems 
  * @param {Array<SistemaServicioDTO>} services 
+ * @param {Array<AreaDTO>} areas
  * @returns {Array<SystemNode>}
  * 
  */
-export function toOTree(systems, services) {
+export function toOTree(systems, services, areas) {
     
     /**
      * 
@@ -17,14 +19,26 @@ export function toOTree(systems, services) {
      * @returns {Array<SystemNode>}
      */
     const buildSystemLevel1 = (systems) => {
-        return systems.filter(sistema => sistema.nivel === null || sistema.nivel === 1).map(item => ({
-            title: item.name,
-            key: item.id.toString(),
-            sistemaId: item.sistemaId,
+        return areas.map(area => ({
+            title: area.name,
+            key: `A-${area.id.toString()}`,
+            sistemaId: null,
+            areaId: area.id,
             leafNode: true,
-            children: []
+            children: systems
+            .filter(sistema => sistema.areaId === area.id)
+            .map(item => ({
+                title: item.name,
+                key: item.id.toString(),
+                sistemaId: item.sistemaId,
+                areaId: item.areaId,
+                leafNode: true,
+                children: []
+            }))
         }));
     }
+
+    
     
     /**
      * @type {Array<SystemNode>}
@@ -40,8 +54,11 @@ export function toOTree(systems, services) {
      * @returns {Array<SystemNode> | undefined}
      */
     const buildHierarchy = (parent, allSystems) => {
+        
         if(parent.leafNode){
-            const children = allSystems.filter(child => child.sistemaId === parseInt(parent.key));
+            const children = (!parent.key.startsWith('A-')) 
+                ? allSystems.filter(child => child.sistemaId === parseInt(parent.key))
+                : parent.children;
             return children.map(child => ({
                 ...child,
                 children: [
@@ -52,6 +69,7 @@ export function toOTree(systems, services) {
         }else{
             return [];
         }
+        
     };
 
     /**
@@ -67,6 +85,7 @@ export function toOTree(systems, services) {
             title: servicio.name,
             key: `S-${servicio.id.toString()}`,
             sistemaId: servicio.sistemaId,
+            areaId: null,
             leafNode: false,
             children: []
         }));
@@ -81,6 +100,7 @@ export function toOTree(systems, services) {
             title: item.name,  
             key: item.id.toString(),
             sistemaId: item.sistemaId,
+            areaId: item.areaId,
             leafNode: true,
             children: []
         }));
