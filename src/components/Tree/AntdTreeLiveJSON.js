@@ -80,6 +80,25 @@ function filterTreeByText(nodes, q) {
 }
 
 /**
+ * Recorre todos los nodos y devuelve una lista de keys.
+ * @param {Array<SystemNode>} nodes
+ * @returns {Array<string>}
+ */
+function getAllKeys(nodes) {
+  const keys = [];
+  const walk = (arr) => {
+    arr.forEach((n) => {
+      keys.push(n.key);
+      if (n.children && n.children.length > 0) {
+        walk(n.children);
+      }
+    });
+  };
+  walk(nodes);
+  return keys;
+}
+
+/**
  * 
  * @param {*} prop 
  * @returns 
@@ -88,10 +107,11 @@ export default function AntdTreeLiveJSON(prop) {
   const [checkedKeys, setCheckedKeys] = useState([]); // solo los checked reales
   const [halfCheckedKeys, setHalfCheckedKeys] = useState([]); // semiseleccionados (padres)
   const [search, setSearch] = useState("");
+
   const { treeData } = prop;
 
 
-  const filtered = useMemo(() => filterTreeByText(treeData, search), [search]);
+  const filtered = useMemo(() => getAllKeys(filterTreeByText(treeData, search)), [search]);
 
   const selectedJson = useMemo(() => {
     const checkedSet = new Set(checkedKeys);
@@ -103,14 +123,18 @@ export default function AntdTreeLiveJSON(prop) {
     <div style={{ display: "grid", gap: 12 }}>
       <Search
         placeholder="Buscar sistema/subsistema…"
-        allowClear
-        onChange={(e) => setSearch(e.target.value)}
+        //allowClear
+        onChange={(e) => {
+          setSearch(e.target.value)
+        }}
       />
-      {console.log("filtered c50720cd-8881-40f0-95e5-a75320f115e2", filtered)}
+      {console.log("filtered 62318ad4-9729-4e07-800e-79f02aad5bbb", filtered.length > 0  )}
       <Tree
         checkable
-        defaultExpandAll
-        treeData={filtered}
+        expandedKeys={filtered}
+        onExpand={(keys) => {console.log("Expanded keys: 10b2c4bb-009d-486d-8a00-b77d18045787", keys)}}
+        autoExpandParent
+        treeData={treeData}
         checkedKeys={checkedKeys}
         onCheck={(keys, info) => {
           // `keys` puede ser array o objeto { checked, halfChecked } según modo.
@@ -122,6 +146,7 @@ export default function AntdTreeLiveJSON(prop) {
             setHalfCheckedKeys(keys.halfChecked || []);
           }
         }}
+        showLine
       />
 
       <div style={{ border: "1px solid #eee", borderRadius: 8, padding: 12 }}>

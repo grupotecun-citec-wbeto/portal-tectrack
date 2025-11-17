@@ -62,8 +62,9 @@ export function toOTree(systems, services, areas) {
             return children.map(child => ({
                 ...child,
                 children: [
+                    ...buildServices(child),
                     ...buildHierarchy(child, allSystems),
-                    ...buildServices(child)
+                    
                 ]
             }));
         }else{
