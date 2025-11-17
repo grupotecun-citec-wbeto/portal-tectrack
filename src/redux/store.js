@@ -11,7 +11,7 @@ import caseReducer from './caseReducer';
 // Configuración de Redux-Persist
 const persistConfig = {
   key: 'root',
-  storage: indexedDBStorage('myAppDB'), // Aquí defines tu IndexedDB
+  storage: indexedDBStorage('TECTRACK_REDUX'), // Aquí defines tu IndexedDB
   transforms: [compress()], // Comprime el estado antes de persistirlo
 };
 
