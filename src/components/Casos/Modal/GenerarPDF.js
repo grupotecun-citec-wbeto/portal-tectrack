@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
       borderRadius: 3,
       marginTop: 5,
       backgroundColor:"#FFFFFF",
+      objectFit: "contain"
     },
     input: {
       border: "1px solid #000",
@@ -146,11 +147,11 @@ const styles = StyleSheet.create({
         zIndex: 1, // Eleva el contenido por encima del fondo
     },
     imageContent: {
-        border: "2pt solid #000",
+        border: "1pt solid #000",
         borderRadius:5,
         backgroundColor:"#FFFFFF",
-        padding: 10,
-        marginBottom: 5,
+        padding: 2,
+        //marginBottom: 5,
     },
   });
   
@@ -306,6 +307,7 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
                         style={styles.textArea}
                         key={"accionesEjecutadas"}
                         src={accionesEjecutadas?.img}
+                        
                       />
                     )}
                   </View>
@@ -344,15 +346,23 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
                     </View>
                 </View>
                 
+                <Text style={styles.labelTitle}>DOCUMENTACIÓN VISUAL</Text>
+                    
+                <View style={styles.separator} />
                 
                     {images.value.map((image,index) => (
-                        <View style={{ flexDirection: "column", alignItems: "center",paddingTop:"5px"}} wrap={false} minPresenceAhead={100}>
+                        <View style={{ flexDirection: "column", alignItems: "center",paddingTop:"10px"}} wrap={false} minPresenceAhead={100}>
                           
                           <View key={index} style={styles.imageContent} >
                             <Image
                               key={index}
                               src={image.src}
-                              style={{ width: 474, height: 360, marginBottom: 5 }}
+                              style={{ 
+                                width: 570, 
+                                height: 375, 
+                                objectFit: "contain"
+                              }}
+                              
                             />
                           </View>
                           
