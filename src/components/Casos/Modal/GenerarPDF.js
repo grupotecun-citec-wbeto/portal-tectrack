@@ -229,10 +229,10 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
                                 <Text style={styles.input}>{(fecha.value != '') ? format(fecha.value, 'yyyy-MM-dd') : ''}</Text>
                             </View>
             
-                            <View style={styles.sectionInput}>
+                            {/*<View style={styles.sectionInput}>
                                 <Text style={styles.labelInput}>Celular:</Text>
                                 <Text style={styles.input}>{celular.value}</Text>
-                            </View>
+                            </View>*/}
             
                         </View>
                     </View>
