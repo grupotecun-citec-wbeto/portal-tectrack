@@ -136,6 +136,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
     assignTechnician,
     unAssignTechnician,
     findById,
+    findById_service,
     endCaseWithoutDiagnosis,
     updateOnlyStatus,
     start: startCase, 
@@ -454,7 +455,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
   }
 
   const empezar = async() =>{
-    const caso = await findById(id)
+    const caso = await findById_service(id)
     const verificar = () =>{
       // verificar si ya tiene asignado a un tecnico el caso
       const isUsuario = (caso.usuario_ID_assigned == null) ? false : true
@@ -503,7 +504,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
    */
   const terminar = async() => {
     openLoader(true);
-    const caso = await findById(id);
+    const caso = await findById_service(id);
     try{
       if((cantEquipos != 0 && segmento_ID == 1) || segmento_ID != 1){
         
