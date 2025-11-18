@@ -289,18 +289,38 @@ const MyPDFDocument = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubi
                   
                   <Text style={styles.labelSubTitle}>Hallazgos Encontrados</Text>
                   <View style={styles.separatorSubTitle} />
-                  <Text style={styles.textArea}>{hallazgos.current?.value}</Text>
+                  {hallazgos?.img && (
+                    <Image
+                      style={styles.textArea}
+                      key={"hallazgos"}
+                      src={hallazgos?.img}
+                    />
+                  )}
                   
                   <View style={styles.section}>
                     <Text style={styles.labelSubTitle}>Acciones Ejecutadas</Text>
                     <View style={styles.separatorSubTitle} />
-                    <Text style={styles.textArea}>{accionesEjecutadas.current?.value}</Text>
+                    {/*<Text style={styles.textArea}>{accionesEjecutadas.current?.value}</Text>*/}
+                    {accionesEjecutadas?.img && (
+                      <Image
+                        style={styles.textArea}
+                        key={"accionesEjecutadas"}
+                        src={accionesEjecutadas?.img}
+                      />
+                    )}
                   </View>
                   
                   <View style={styles.section}>
                     <Text style={styles.labelSubTitle}>Recomendaciones</Text>
                     <View style={styles.separatorSubTitle} />
-                    <Text style={styles.textArea}>{recomendaciones.current.value}</Text>
+                    {/*<Text style={styles.textArea}>{recomendaciones.current.value}</Text>*/}
+                    {recomendaciones?.img && (
+                      <Image 
+                        style={styles.textArea}
+                        key={"recomendaciones"}
+                        src={recomendaciones?.img}
+                      />
+                    )}
                   </View>
                 </View>
 

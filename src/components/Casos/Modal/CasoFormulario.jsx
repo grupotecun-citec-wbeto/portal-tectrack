@@ -16,6 +16,9 @@ import {
   FormControl,
 } from '@chakra-ui/react';
 
+// CSS
+import 'react-quill/dist/quill.snow.css';
+
 import { useDebounce } from 'use-debounce';
 
 import DatePicker from 'react-datepicker';
@@ -46,6 +49,9 @@ import ImgLoader from "./ImgLoader";
 import { useDataBaseContext } from 'dataBaseContext';
 import useCaso from '@hooks/caso/useCaso';
 import useDiagnostico from '@hooks/diagnostico/useDiagnostico';
+
+// Editor de texto
+import CasoRichEditor from './CasoRichEditor';
 
 
 
@@ -301,11 +307,19 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                         reference={accionesEjecutadas}
                         placeholder="Ingresar los Acciones ejecutadas"
                     />
+                    
                     <CasoModalTextArea 
                         title="Recomendaciones" 
                         reference={recomendaciones}
                         placeholder="Ingresar las Recomendaciones"
                     />
+                    
+
+                     
+
+                     
+
+                       
 
                     
 
