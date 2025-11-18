@@ -84,6 +84,11 @@ function useCaso(dbReady = false,syncActive = true) {
         return item;
     }
 
+    const findById_service = async (id) => {  
+        const item = await repository.findById(id);
+        return item;
+    }
+
     const findCasesByFilters = async (userDataLogin,filters,estado = {operador:"<>", value:"6"},config = {countOnly:false}) => {
         
         const allCases = await repository.findAllByFilters(userDataLogin,filters,estado,config);
@@ -191,6 +196,7 @@ function useCaso(dbReady = false,syncActive = true) {
         deleteItem,
         findCasesByFilters,
         findById,
+        findById_service,
         updateStatus,
         updateOnlyStatus,
         assignTechnician,

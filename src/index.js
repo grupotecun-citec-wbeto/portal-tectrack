@@ -132,7 +132,7 @@ import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './redux/store.js';
 
-import { Spinner } from '@chakra-ui/react'
+import FullscreenLoader from "@components/Loaders/FullscreenLoader.jsx";
 
 import '@domain/dto';
 
@@ -158,7 +158,7 @@ const UserProfile = () => {
 
 ReactDOM.render(
   <Provider store={store}>
-    <PersistGate loading={<Spinner />} persistor={persistor}>
+    <PersistGate loading={<FullscreenLoader visible={true} />} persistor={persistor}>
       <ChakraProvider theme={theme} resetCss={false} position="relative">
         <DataBaseProvider>
           <AppProvider>
