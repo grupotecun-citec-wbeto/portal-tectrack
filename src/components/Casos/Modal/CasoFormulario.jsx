@@ -166,12 +166,15 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                     E.ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}') `).toArray()*/
             const equiposData = []
             
+            console.log(diagnosticos,'9592847b-daea-4326-9e01-3df82bd61a8f')
+
             diagnosticos.forEach(equipo => {
                 const equipoData = {
                     codigo_finca: equipo.codigo_finca,
                     ID: equipo.equipo_ID,
                     business_name: equipo.catalogo,
                     chasis: equipo.chasis,
+                    serie: equipo.serie,
                     marca: equipo.marca,
                     proyecto: equipo.proyecto_name,
                     cliente: equipo.cliente,
