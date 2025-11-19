@@ -353,29 +353,6 @@ import {
                     <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
                   </CardHeader>
                   <CardBody mt={{xl:'10px'}}>
-                    
-                      
-                        {Object.keys(datos).map( (key,index) =>(
-                          <>
-                            <Text fontSize='sm' color='gray.400' fontWeight='600' mb='20px' >
-                            {key}
-                            </Text>
-                            <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'  >
-                              {datos[key].map( (element) =>(
-                                <CheckboxPreDiagnostico name={element.system_name} id={element.ID} section={key} key={element.ID}/>
-                              ))}
-                            </Grid>
-                          </>
-                        ))}
-                      
-                  </CardBody>
-                  
-              </Card>
-              <Card>
-                  <CardHeader>
-                    <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
-                  </CardHeader>
-                  <CardBody mt={{xl:'10px'}}>
 
                     {sistemasLoading ? (
                       <Text>Cargando sistemas...</Text>

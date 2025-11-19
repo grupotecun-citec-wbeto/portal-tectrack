@@ -40,3 +40,14 @@
  * @property {string} createdAt - Timestamp when the record was created.
  * @property {string|null} updatedAt - Timestamp when the record was last updated.
  */
+
+
+/**
+ * @typedef {Object} SistemaMarcaDTO
+ * @property {number} id - Primary key of the area table.
+ * @property {string} name - Name of the area.
+ * @property {string} createdAt - Timestamp when the record was created.
+ * @property {string|null} updatedAt - Timestamp when the record was last updated.
+ */
+
+

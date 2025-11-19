@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 
 const PACKAGE = 'sistema';
 
-import { getAllSistemas, getAllSistemasServicios, getStrucureDataTree, getAllAreas } from '@application/sistema';
+import { getAllSistemas, getAllSistemasServicios, getStrucureDataTree, getAllAreas,getAllMarcas } from '@application/sistema';
 
 
 
@@ -31,10 +31,15 @@ const useSistemasChildrens = (dbReady) => {
                  * @type {Array<AreaDTO>}
                  */
                 const areas = await getAllAreas();
+
+                /**
+                 * @type {Array<SistemaMarcaDTO>}
+                 */
+                const marcas = await getAllMarcas();
                 /**
                  * @type {Array<SystemNode>}
                  */
-                const combinedData = getStrucureDataTree(result, servicios,areas);
+                const combinedData = getStrucureDataTree(result, servicios,areas,marcas);
                 
                 setData(combinedData);
             } catch (err) {

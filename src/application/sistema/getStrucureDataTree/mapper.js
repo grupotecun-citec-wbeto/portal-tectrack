@@ -8,10 +8,11 @@ import { node } from "stylis";
  * @param {Array<SistemaDTO>} systems 
  * @param {Array<SistemaServicioDTO>} services 
  * @param {Array<AreaDTO>} areas
+ * @param {Array<SistemaMarcaDTO>} marcas
  * @returns {Array<SystemNode>}
  * 
  */
-export function toOTree(systems, services, areas) {
+export function toOTree(systems, services, areas, marcas) {
     
     /**
      * 
@@ -28,7 +29,7 @@ export function toOTree(systems, services, areas) {
             children: systems
             .filter(sistema => sistema.areaId === area.id)
             .map(item => ({
-                title: item.name,
+                title: item.id.toString() + " - " + item.name,
                 key: item.id.toString(),
                 sistemaId: item.sistemaId,
                 areaId: item.areaId,
@@ -98,7 +99,7 @@ export function toOTree(systems, services, areas) {
      */
     const buildAllSystems = (systems) => {
         return systems.map(item => ({
-            title: item.name,  
+            title: item.id.toString() + " - " + item.name,  
             key: item.id.toString(),
             sistemaId: item.sistemaId,
             areaId: item.areaId,
