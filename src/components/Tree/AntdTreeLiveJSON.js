@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Tree, Input } from "antd";
 import "antd/dist/reset.css";
 import { isEmptyArray } from "formik";
@@ -107,17 +107,25 @@ export default function AntdTreeLiveJSON(prop) {
   const [checkedKeys, setCheckedKeys] = useState([]); // solo los checked reales
   const [halfCheckedKeys, setHalfCheckedKeys] = useState([]); // semiseleccionados (padres)
   const [search, setSearch] = useState("");
-
   const { treeData } = prop;
 
+  const filtered = useMemo(() => getAllKeys(filterTreeByText(treeData, search)), [treeData, search]);
 
-  const filtered = useMemo(() => getAllKeys(filterTreeByText(treeData, search)), [search]);
+  const [expandedKeys, setExpandedKeys] = useState([]);
+
+  useEffect(() => {
+    if (search) {
+      setExpandedKeys(filtered);
+    } else {
+      setExpandedKeys([]);
+    }
+  }, [filtered, search]);
 
   const selectedJson = useMemo(() => {
     const checkedSet = new Set(checkedKeys);
     const halfSet = new Set(halfCheckedKeys);
     return buildSelectedTree(treeData, checkedSet, halfSet);
-  }, [checkedKeys, halfCheckedKeys]);
+  }, [treeData, checkedKeys, halfCheckedKeys]);
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
@@ -128,11 +136,11 @@ export default function AntdTreeLiveJSON(prop) {
           setSearch(e.target.value)
         }}
       />
-      {console.log("filtered 62318ad4-9729-4e07-800e-79f02aad5bbb", filtered.length > 0  )}
+      {console.log("filtered 62318ad4-9729-4e07-800e-79f02aad5bbb", filtered.length > 0)}
       <Tree
         checkable
-        expandedKeys={filtered}
-        onExpand={(keys) => {console.log("Expanded keys: 10b2c4bb-009d-486d-8a00-b77d18045787", keys)}}
+        expandedKeys={expandedKeys}
+        onExpand={setExpandedKeys}
         autoExpandParent
         treeData={treeData}
         checkedKeys={checkedKeys}
@@ -152,11 +160,11 @@ export default function AntdTreeLiveJSON(prop) {
       <div style={{ border: "1px solid #eee", borderRadius: 8, padding: 12 }}>
         <div style={{ fontWeight: 600, marginBottom: 8 }}>Selección (JSON)</div>
         <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
-{JSON.stringify(
-  selectedJson.filter((node) => node.key.startsWith("A-") && node.key.length !== 2),
-  null,
-  2
-)}
+          {JSON.stringify(
+            selectedJson.filter((node) => node.key.startsWith("A-") && node.key.length !== 2),
+            null,
+            2
+          )}
         </pre>
       </div>
     </div>
