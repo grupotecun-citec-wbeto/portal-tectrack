@@ -53,7 +53,7 @@ const ResultTableSqlite = () => {
       try {
         
         const results = await db.exec(query).toArray()
-        console.log(results);
+        //console.log(results);
         
         setColumns(Object.keys(results[0] || []))
         

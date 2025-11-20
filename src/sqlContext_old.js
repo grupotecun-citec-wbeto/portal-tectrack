@@ -231,7 +231,7 @@ export function SqlProvider({ children }) {
       if(resgistro?.ID || '' == iden){
         db_init.run(`DELETE FROM caso WHERE ID = ${iden}`)
       }else{
-        console.log('131a5455-705d-4dfa-8f68-40ff96694416');
+        //console.log('131a5455-705d-4dfa-8f68-40ff96694416');
         
       }*/
       
@@ -2872,7 +2872,7 @@ export function SqlProvider({ children }) {
 
           const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,code,placa,year,name) VALUES ${values};`
           const run = db_init.run(insertar)
-          console.log(run);
+          //console.log(run);
           
           // imporante simpres salvar en en indexdb_init
           
@@ -2890,7 +2890,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db_init.exec(`SELECT * FROM ${tabla}`);
-        console.log(result);
+        //console.log(result);
         
       }
     };
@@ -2959,7 +2959,7 @@ export function SqlProvider({ children }) {
 
           const insertar = `INSERT OR REPLACE INTO ${tabla} (ID,nombre,apellido,display_name,password,perfil_ID) VALUES ${values};`
           const run = db_init.run(insertar)
-          console.log(run);
+          //console.log(run);
           
           // imporante simpres salvar en en indexdb_init
           
@@ -2977,7 +2977,7 @@ export function SqlProvider({ children }) {
         }
           // Aquí puedes actualizar el estado con la información recibida si es necesario
         const result = db_init.exec(`SELECT * FROM ${tabla}`);
-        console.log(result);
+        //console.log(result);
         
       }
     };

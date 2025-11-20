@@ -78,8 +78,8 @@ const FilterCase = React.memo(({
     setLimitSelected(limitFilterSelected)
     setSyncStatusSelected(syncStatusSelect)
 
-    console.log('Límite de Casos:', limitFilterSelected);
-    console.log('Estado de Sincronización:', syncStatusSelect);
+    //console.log('Límite de Casos:', limitFilterSelected);
+    //console.log('Estado de Sincronización:', syncStatusSelect);
 
     setTimeout(() => {
       openLoader(false)

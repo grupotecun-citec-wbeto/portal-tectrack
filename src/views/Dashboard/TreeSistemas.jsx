@@ -494,7 +494,7 @@ function TreeSistemas() {
       const areasAll = await loadAreas();
       setRawAreas(areasAll);
       const servicesAll = await loadServiciosTipo();
-      console.log("SERVICIOS b5c62374-251b-499b-9c22-719dfad9994a", servicesAll)
+      //console.log("SERVICIOS b5c62374-251b-499b-9c22-719dfad9994a", servicesAll)
       setRawServices(servicesAll)
     };
     fetchSistemas();

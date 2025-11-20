@@ -6,7 +6,7 @@ const CasoModalTextArea = ({title,value,placeholder,handleChange,reference}) =>{
     
     return(
         <>
-            {console.log(title,'c0a54e40-3ca9-4c0c-b370-77374898d127',reference)}
+            {/*console.log(title,'c0a54e40-3ca9-4c0c-b370-77374898d127',reference)*/}
             <Text mb='8px' fontSize="sm">{title}</Text>
             <Textarea
                 onChange={handleChange}

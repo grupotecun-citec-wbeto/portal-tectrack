@@ -52,10 +52,10 @@ function useCargarCaso(caso_id = false) {
         try {
           const casosNoSincronizados = await repositoryCaso.unsynchronizedCase(caso_id)
           
-          console.log('casosNoSincronizados: 9ef51e92-feb1-4a2e-b178-8f9af10f7ed5', casosNoSincronizados,caso_id);
+          //console.log('casosNoSincronizados: 9ef51e92-feb1-4a2e-b178-8f9af10f7ed5', casosNoSincronizados,caso_id);
             
           if(casosNoSincronizados.length != 0){  
-            console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
+            //console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
             const uuids = casosNoSincronizados.map(objeto => objeto.ID);
             
             const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
@@ -86,7 +86,7 @@ function useCargarCaso(caso_id = false) {
             }
             resolve(true)
           }else{
-            console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
+            console.error('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
             reject(false)
           }
         } catch (error) {
@@ -125,10 +125,10 @@ function useCargarCaso(caso_id = false) {
           const casosNoSincronizados = await repositoryCaso.unsynchronizedCases(caso_id)
           //const casosErrorSincronizados = await repositoryCaso.errorSynchronizedCases()
           
-          console.log('casosNoSincronizados: 90fc269c-e903-4dc6-a4fc-a73c7afa8d99', casosNoSincronizados,caso_id);
+          //console.log('casosNoSincronizados: 90fc269c-e903-4dc6-a4fc-a73c7afa8d99', casosNoSincronizados,caso_id);
             
           if(casosNoSincronizados.length != 0){  
-            console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
+            //console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
             const uuids = casosNoSincronizados.map(objeto => objeto.ID);
             
             const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
@@ -157,7 +157,7 @@ function useCargarCaso(caso_id = false) {
 
             }
           }else{
-            console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
+            //console.log('loadCaso fail 699d355d-15f8-4c54-b900-cad9c08b67a9', casosNoSincronizados);
           }
         } catch (error) {
           if (error.response && error.response.status === 400) {
@@ -191,10 +191,10 @@ function useCargarCaso(caso_id = false) {
         try {
           const casosNoSincronizados = await repositoryCaso.unsynchronizedCases()
           
-          console.log('casosNoSincronizados: f9bee5eb-9ef5-434c-9598-fe7c54437074', casosNoSincronizados,caso_id);
+          //console.log('casosNoSincronizados: f9bee5eb-9ef5-434c-9598-fe7c54437074', casosNoSincronizados,caso_id);
             
           if(casosNoSincronizados.length != 0){  
-            console.log('loadCaso a880314f-5d74-460b-aacd-bfbd00ba7e57', casosNoSincronizados); 
+            //console.log('loadCaso a880314f-5d74-460b-aacd-bfbd00ba7e57', casosNoSincronizados); 
             const uuids = casosNoSincronizados.map(objeto => objeto.ID);
             
             const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
@@ -202,7 +202,7 @@ function useCargarCaso(caso_id = false) {
             await syncCloud(formDataMerge)
             resolve(true)
           }else{
-            console.log('loadCaso fail 3ba8b4c2-fa61-45ee-b29c-ce8e22e4f350', casosNoSincronizados);
+            console.error('loadCaso fail 3ba8b4c2-fa61-45ee-b29c-ce8e22e4f350', casosNoSincronizados);
             reject(false)
           }
         } catch (error) {
@@ -213,11 +213,6 @@ function useCargarCaso(caso_id = false) {
           reject(error)
         }
         
-      /*}else{
-        console.log('b331b681-b213-447c-b0b7-bda3d2fb68ed');
-        reject(false)
-        
-      }*/
     });
 
     // Llamar a la función de inmediato

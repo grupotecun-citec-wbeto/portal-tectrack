@@ -23,35 +23,37 @@ const syncService = {
             const tableCode = repository.tableCode
             try {
                 const incrementalDate = await apiSyncRepository.syncVerifyTable(tableCode);
-                
+
                 const allcases = await apiSyncRepository.findIncrementalsTuples(tableCode, incrementalDate);
-                
-                console.log(`[${PACKAGE}] Table ${repository.tableName} c8c1a931-4502-4d40-b5e4-587e40c9ee06`,allcases)
+
+                //console.log(`[${PACKAGE}] Table ${repository.tableName} c8c1a931-4502-4d40-b5e4-587e40c9ee06`,allcases)
 
                 // Search for cases being edited
                 // This is a temporary fix to avoid conflicts with the local database
                 const caseBeingEdited = await repository.searchForCasesBeingEdited()
 
                 const caseNotEdited = allcases.filter(({ ID: remoteID }) => !caseBeingEdited.some(({ ID: localID }) => localID === remoteID));
-                
-                
+
+
                 repository.createOrRemplace(caseNotEdited);
-        
+
                 await apiSyncRepository.syncTerminate(tableCode);
-        
+
                 const result = repository.findAll()
-                console.log(`[${PACKAGE}] Tabla ${repository.tableName} sincronizadas:`, result);
+                //console.log(`[${PACKAGE}] Tabla ${repository.tableName} sincronizadas:`, result);
                 resolve(false)
-        
+
             } catch (error) {
                 const result = repository.findAll()
-                console.error(`[${PACKAGE}] Error al sincronizar las ${repository.tableName}:`, error,result);
+                if (process.env.REACT_APP_ENVIRONMENT === "development") {
+                    console.error(`[${PACKAGE}] Error al sincronizar las ${repository.tableName}:`, error, result);
+                }
                 resolve(false)
-            }finally{
+            } finally {
                 resolve(false)
             }
         });
-    
+
     }
 
 }

@@ -67,7 +67,7 @@ import {
 
     const handleImageUpload = () => {
       // Aquí puedes hacer algo con la imagen base64, por ejemplo, enviarla a un servidor
-      console.log('Imagen base64:', base64Image);
+      //console.log('Imagen base64:', base64Image);
       toast({
         title: 'Imagen cargada',
         description: 'La imagen se ha cargado correctamente.',

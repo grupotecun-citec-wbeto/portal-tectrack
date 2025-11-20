@@ -228,7 +228,7 @@ import {
             setDatos(groupedData);
           } catch (error) {
             setDatos([])
-            console.error('Error al obtener datos:', error);
+            console.error('Error al obtener datos:', error, 'd791a89d-2940-44fd-bfb1-85826a312e70');
             
           }
         };

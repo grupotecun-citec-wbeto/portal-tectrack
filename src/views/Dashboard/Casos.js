@@ -238,7 +238,7 @@ function Casos() {
         equipos: row.equipos,
 
       };
-      console.log('67c0ff94-05c2-405b-90be-6e090865393e')
+      //console.log('67c0ff94-05c2-405b-90be-6e090865393e')
       return <CasoDetail key={index} caseData={casoData} openLoader={setFullscreenLoaderVisible} />;
     });
   }, [data,fullscreenLoaderVisible]); // Solo se recalcula cuando `data` cambia

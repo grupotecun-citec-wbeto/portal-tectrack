@@ -459,7 +459,7 @@ const GenerarPDF2 = () => {
     }
 
     const handleGuardar = () =>{
-        console.log("Guardar")
+        //console.log("Guardar")
     }
     
 

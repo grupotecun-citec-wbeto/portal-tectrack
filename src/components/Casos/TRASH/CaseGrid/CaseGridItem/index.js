@@ -426,7 +426,7 @@ const CaseGridItem = ({ caseData, dataSets,vehiculosOptions,usuariosOptions,sqlC
         
       }catch(err){
         await db.exec('ROLLBACK');
-        console.log('f45ebaa5-8d54-4634-a2cd-efda1cb2a8bd',err)
+        //console.log('f45ebaa5-8d54-4634-a2cd-efda1cb2a8bd',err)
       }
       
     }else{
@@ -462,7 +462,7 @@ const CaseGridItem = ({ caseData, dataSets,vehiculosOptions,usuariosOptions,sqlC
             newUserData.casos[caso.ID] = caso
 
             const equipos = JSON.parse(newUserData.casos[caso.ID].equipos)
-            console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
+            //console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
             
             newUserData.casos[caso.ID].equipos = equipos
             newUserData.casos[caso.ID].km_final = kmFinal
@@ -508,7 +508,7 @@ const CaseGridItem = ({ caseData, dataSets,vehiculosOptions,usuariosOptions,sqlC
         alert('No tiene equipos procesar, por favor contactar al administrador para revisar el caso')
       }
     }catch(err){
-      console.log(err);
+      console.error('Error al finalizar el caso: 1fffd590', err);
       
     }
     

@@ -108,7 +108,7 @@ const repository = {
         const db = getDB();
         const placeholders = uuids.map(() => '?').join(', '); // Genera "?, ?, ?" según la cantidad de UUIDs
         
-        console.log('1462faa4-acd1-4728-b885-028c257f0e3f', placeholders);
+        //console.log('1462faa4-acd1-4728-b885-028c257f0e3f', placeholders);
 
         const stmt = db.prepare(
             `

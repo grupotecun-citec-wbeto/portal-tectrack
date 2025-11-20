@@ -113,7 +113,7 @@ import { Link, useHistory   } from 'react-router-dom';
             setDatos(data);
           } catch (error) {
             setDatos([])
-            console.error('Error al obtener datos:', error);
+            console.error('Error al obtener datos:', error,'915891a1-7ea8-481d-adce-c36db1fd55bf');
             
           }
         };

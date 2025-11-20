@@ -8,26 +8,28 @@ const syncService = {
             const tableCode = repository.tableCode
             try {
                 const incrementalDate = await apiSyncRepository.syncVerifyTable(tableCode);
-                
+
                 const json = await apiSyncRepository.findIncrementalsTuples(tableCode, incrementalDate);
-                
+
                 repository.createOrRemplace(json);
-        
+
                 await apiSyncRepository.syncTerminate(tableCode);
-        
+
                 const result = repository.findAll()
-                console.log('Categorias sincronizadas:', result);
+                //console.log('Categorias sincronizadas:', result);
                 resolve(false)
-        
+
             } catch (error) {
                 const result = repository.findAll()
-                console.error('Error al sincronizar las categorias:', error,result);
+                if (process.env.REACT_APP_ENVIRONMENT === "development") {
+                    console.error(`Error al sincronizar las categorias:`, error, result);
+                }
                 resolve(false)
-            }finally{
+            } finally {
                 resolve(false)
             }
         });
-    
+
     }
 
 }

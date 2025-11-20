@@ -99,7 +99,7 @@ import {
             setDatos(data);
           } catch (error) {
             setDatos([])
-            console.error('Error al obtener datos:', error);
+            console.error('Error al obtener datos:', error,'13979e9b-ad93-4c2c-b2c1-e45296296ccd');
             
           }
         };

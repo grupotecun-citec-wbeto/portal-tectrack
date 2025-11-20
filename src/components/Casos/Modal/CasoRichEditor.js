@@ -116,7 +116,7 @@ const bakeOrderedListNumbers = (root, level = 1) => {
                 logging: false,
                 removeContainer: true,
             },0.85);
-            console.log(canvas.toDataURL('image/png'), el,'a80ecb75-3d91-4e03-acf6-a4771092a44b')
+            //console.log(canvas.toDataURL('image/png'), el,'a80ecb75-3d91-4e03-acf6-a4771092a44b')
             return canvas.toDataURL('image/png');
         };
         
