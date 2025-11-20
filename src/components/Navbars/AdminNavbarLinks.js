@@ -32,13 +32,13 @@ import avatar1 from "assets/img/avatars/avatar1.png";
 import avatar2 from "assets/img/avatars/avatar2.png";
 import avatar3 from "assets/img/avatars/avatar3.png";
 // Custom Icons
-import { ArgonLogoDark, ArgonLogoLight, ChakraLogoDark, ChakraLogoLight, ProfileIcon, SettingsIcon, TecTrackCaseDark, TecTrackCaseLight  } from "components/Icons/Icons";
+import { ArgonLogoDark, ArgonLogoLight, ChakraLogoDark, ChakraLogoLight, ProfileIcon, SettingsIcon, TecTrackCaseDark, TecTrackCaseLight } from "components/Icons/Icons";
 // Custom Components
 import { ItemContent } from "components/Menu/ItemContent";
 import { LoginItemContent } from "components/MenuLogin/LoginItemContent";
 import { SearchBar } from "components/Navbars/SearchBar/SearchBar";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
-import React,{useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import routes from "routes.js";
 
@@ -48,6 +48,7 @@ import { useHistory } from "react-router-dom";
 
 
 import CasoListEquiposNavbar from "components/Casos/CasoListEquiposNavbar";
+import packageJson from "../../../package.json";
 
 export default function HeaderLinks(props) {
   const {
@@ -67,26 +68,26 @@ export default function HeaderLinks(props) {
      BLOQUE: REDUX-PERSIST
      DESCRIPTION: 
     =========================================================*/
-    const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
-    const dispatch = useDispatch();
+  const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+  const dispatch = useDispatch();
 
-    const saveUserData = (json) => {
-        dispatch({ type: 'SET_USER_DATA', payload: json });
-      };
-  
-    const getUserData = () => {
-        dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
-    };
+  const saveUserData = (json) => {
+    dispatch({ type: 'SET_USER_DATA', payload: json });
+  };
 
-    /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+  const getUserData = () => {
+    dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
+  };
 
-    const history = useHistory()
-  
-    const display_perfil = {
-      '1': 'Técnio',
-      '2': 'Especialista',
-      '3': 'admin'
-    }[userData?.login?.perfil_ID || '1']
+  /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+
+  const history = useHistory()
+
+  const display_perfil = {
+    '1': 'Técnio',
+    '2': 'Especialista',
+    '3': 'admin'
+  }[userData?.login?.perfil_ID || '1']
 
   const { colorMode } = useColorMode();
 
@@ -101,44 +102,44 @@ export default function HeaderLinks(props) {
   }
 
 
-  useEffect( () =>{
-    if(Object.keys(userData?.login || {}).length == 0){ 
+  useEffect(() => {
+    if (Object.keys(userData?.login || {}).length == 0) {
       history.push('/auth/signin')
     }
-  },[userData])
+  }, [userData])
 
   useEffect(() => {
-      if(!navigator.onLine){
-        setOnLine(false);
-      }else{
-        setOnLine(true);
-      }
-      
-  },[navigator.onLine]);
+    if (!navigator.onLine) {
+      setOnLine(false);
+    } else {
+      setOnLine(true);
+    }
+
+  }, [navigator.onLine]);
 
 
-  const handleLogout = async() =>{
+  const handleLogout = async () => {
     const newUserData = structuredClone(userData)
 
     newUserData.login = {}
 
     saveUserData(newUserData)
 
-    if(Object.keys(userData?.login || {}).length == 0){ 
+    if (Object.keys(userData?.login || {}).length == 0) {
       history.push('/auth/signin')
     }
   }
- 
 
-  
+
+
 
   return (
     <Flex
-      pe={{sm: "0px", md: "16px" }}
-      w={{xs:"100%", sm: "100%", md: "auto" }}
+      pe={{ sm: "0px", md: "16px" }}
+      w={{ xs: "100%", sm: "100%", md: "auto" }}
       alignItems='center'
       flexDirection='row'>
-      
+
       {/*<SearchBar me='18px' w={{xs:"auto", sm:"auto"}} display={{xs:"block",sm:"block"}} />*/}
       <Box
         bg={onLine ? "green.500" : "red.500"}
@@ -150,9 +151,23 @@ export default function HeaderLinks(props) {
         fontSize="sm"
         display="inline-block"
       >
-        {onLine ? "Online" : "Offline"} 
+        {onLine ? "Online" : "Offline"}
       </Box>
-      
+
+      <Box
+        bg="gray.500"
+        color="white"
+        px="10px"
+        py="5px"
+        borderRadius="md"
+        fontWeight="bold"
+        fontSize="sm"
+        display="inline-block"
+        ms="10px"
+      >
+        v{packageJson.version}
+      </Box>
+
       {
         Object.keys(userData?.login || {}).length == 0 ? (
           <NavLink to='/auth/signin'>
@@ -176,10 +191,10 @@ export default function HeaderLinks(props) {
                   ""
                 )
               }>
-              <Text display={{ xs:"none", sm: "none", md: "block"}}>{userData?.login?.display_name || ''}</Text>
+              <Text display={{ xs: "none", sm: "none", md: "block" }}>{userData?.login?.display_name || ''}</Text>
             </Button>
           </NavLink>
-        ):(
+        ) : (
           <Menu>
             <MenuButton>
               <Button
@@ -202,7 +217,7 @@ export default function HeaderLinks(props) {
                     ""
                   )
                 }>
-                <Text display={{ xs:"none", sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
+                <Text display={{ xs: "none", sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
               </Button>
             </MenuButton>
             <MenuList p='16px 8px' bg={menuBg}>
@@ -210,7 +225,7 @@ export default function HeaderLinks(props) {
                 <MenuItem borderRadius='8px' mb='10px'>
                   <LoginItemContent
                     time={userData?.login?.display_name || ''}
-                    info= {`Codigo: ${userData.login.ID}`} 
+                    info={`Codigo: ${userData.login.ID}`}
                     boldInfo={display_perfil}
                     aName='Alicia'
                     aSrc={avatar1}
@@ -232,11 +247,11 @@ export default function HeaderLinks(props) {
           </Menu>
         )
       }
-      
-      
-      
-      
-    
+
+
+
+
+
 
       <CasoListEquiposNavbar props={props} />
 
@@ -292,19 +307,19 @@ export default function HeaderLinks(props) {
         logo={
           <Stack direction='row' spacing='12px' align='center' justify='center'>
             {colorMode === "dark" ? (
-                <Image
-                  src={citec_png}
-                  alt="Imagen de ejemplo"
-                  borderRadius="lg"
-                  w={{xs:"75px",sm:"50px",md:"75px"}}
-                />
+              <Image
+                src={citec_png}
+                alt="Imagen de ejemplo"
+                borderRadius="lg"
+                w={{ xs: "75px", sm: "50px", md: "75px" }}
+              />
             ) : (
-                <Image
-                  src={citec_png}
-                  alt="Imagen de ejemplo"
-                  borderRadius="lg"
-                  w={{xs:"75px",sm:"50px",md:"75px"}}
-                />
+              <Image
+                src={citec_png}
+                alt="Imagen de ejemplo"
+                borderRadius="lg"
+                w={{ xs: "75px", sm: "50px", md: "75px" }}
+              />
             )}
             <Box
               w='1px'
@@ -316,14 +331,14 @@ export default function HeaderLinks(props) {
                 src={tecun_png}
                 alt="Imagen de ejemplo"
                 borderRadius="lg"
-                w={{xs:"75px",sm:"50px",md:"75px"}}
+                w={{ xs: "75px", sm: "50px", md: "75px" }}
               />
             ) : (
               <Image
                 src={medallon_naranja}
                 alt="Imagen de ejemplo"
                 borderRadius="lg"
-                w={{xs:"75px",sm:"50px",md:"75px"}}
+                w={{ xs: "75px", sm: "50px", md: "75px" }}
               />
             )}
           </Stack>
