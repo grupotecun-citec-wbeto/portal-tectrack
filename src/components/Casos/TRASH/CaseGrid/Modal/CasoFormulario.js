@@ -59,7 +59,7 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
     const [debouncedHallazgosValue] = useDebounce(hallazgos.value, 1000);
     useEffect(() => {
         if (debouncedHallazgosValue) {
-            console.log(debouncedHallazgosValue)
+            //console.log(debouncedHallazgosValue)
         }
     }, [debouncedHallazgosValue]);
 

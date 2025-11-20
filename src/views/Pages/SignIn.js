@@ -72,7 +72,7 @@ function SignIn() {
       if(Object.keys(userData?.login || {}).length == 0){ 
         try {
           const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/login`, formData);
-          console.log(response.data[0]); // Manejar la respuesta del servidor
+          //console.log(response.data[0]); // Manejar la respuesta del servidor
           const newUserData = structuredClone(userData)
           newUserData.login = response.data[0]
           saveUserData(newUserData)
@@ -81,7 +81,7 @@ function SignIn() {
             if (error.response && error.response.status === 404) {
               alert("No coincide el usuario o la contraseña")
             }else{
-              console.error(error);
+              console.error(error,'ede2897d-9779-47fd-8996-cd2905b7668a');
             }
         }
       }else{

@@ -172,7 +172,7 @@ import useSistema from "hooks/sistema/useSistema";
             setDatos(groupedData);
           } catch (error) {
             setDatos([])
-            console.error('Error al obtener datos:', error);
+            console.error('Error al obtener datos:', error, '14ccb40b-e343-4713-938b-bc4cdbbb3718');
             
           }
         };

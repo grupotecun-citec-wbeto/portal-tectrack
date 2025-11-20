@@ -525,7 +525,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
             newUserData.casos[caso.ID] = caso
 
             const equipos = JSON.parse(newUserData.casos[caso.ID].equipos)
-            console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
+            //console.log('972d94fc-775a-4bca-8a50-5de8018b3817',equipos,caso);
             
             newUserData.casos[caso.ID].equipos = equipos
             newUserData.casos[caso.ID].km_final = kmFinal
@@ -580,7 +580,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
       }
       
     }catch(err){
-      console.log(err);
+      console.error('Error al finalizar el caso: 1fffd590', err);
     }finally{
       setTimeout(() => {
          openLoader(false);

@@ -67,7 +67,7 @@ const repository = {
         const placeholders = perfilIds.map(() => '?').join(', ');
 
         const sql = `SELECT ${select} FROM ${repository.tableName} WHERE perfil_ID in ( ${placeholders} )`
-        console.log('4772052c-1fb6-4440-a76e-56438c0546b5',sql, perfilIds);
+        //console.log('4772052c-1fb6-4440-a76e-56438c0546b5',sql, perfilIds);
         const stmt = db.prepare(sql);
         const results = [];
 

@@ -3,7 +3,7 @@ import React,{Fragment} from 'react';
 import BsRocketTakeoff from "react-icons/bs";
 const CaseStart = () => {
     const handleStart = () => {
-        console.log('Case started');
+        //console.log('Case started');
     };
 
     return (

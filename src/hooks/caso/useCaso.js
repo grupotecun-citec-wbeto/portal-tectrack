@@ -180,7 +180,7 @@ function useCaso(dbReady = false,syncActive = true) {
             try{
                 await loadCasos()
             }catch(err){
-                console.log('No se encontro ningun caso no sincronizado',err,'dbf7fc9b-d36d-4484-8617-cbb2351edd1e')
+                console.error('No se encontro ningun caso no sincronizado',err,'dbf7fc9b-d36d-4484-8617-cbb2351edd1e')
             }
             //setTimeout(fetchDataWithTimeout, time); // 5 minutos
         };

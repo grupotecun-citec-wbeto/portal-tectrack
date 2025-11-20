@@ -13,7 +13,7 @@ if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
         navigator.serviceWorker
           .register('/service-worker.js')
           .then((registration) => {
-        console.log('Service Worker registrado con éxito:', registration);
+        //console.log('Service Worker registrado con éxito:', registration);
           })
           .catch((error) => {
         console.error('Error al registrar el Service Worker:', error);
@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
         if (!existingSW) {
           registrations.forEach((registration) => {
         registration.unregister().then(() => {
-          console.log('Service Worker viejo desregistrado:', registration);
+          //console.log('Service Worker viejo desregistrado:', registration);
         }).catch((error) => {
           console.error('Error al desregistrar el Service Worker viejo:', error);
         });
@@ -32,13 +32,13 @@ if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
           navigator.serviceWorker
         .register('/service-worker.js')
         .then((registration) => {
-          console.log('Nuevo Service Worker registrado con éxito:', registration);
+          //console.log('Nuevo Service Worker registrado con éxito:', registration);
         })
         .catch((error) => {
           console.error('Error al registrar el nuevo Service Worker:', error);
         });
         } else {
-          console.log('El Service Worker actual ya está registrado y activo.');
+          //console.log('El Service Worker actual ya está registrado y activo.');
         }
       }
     }).catch((error) => {
@@ -46,7 +46,7 @@ if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
     });
   }
 } else {
-  console.log('Modo de desarrollo: no se registra el Service Worker.');
+  //console.log('Modo de desarrollo: no se registra el Service Worker.');
 }
 
 /*if (!navigator.onLine) {
@@ -55,20 +55,20 @@ if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
       navigator.serviceWorker
         .register('/service-worker.js')
         .then((registration) => {
-          console.log('Service Worker registrado con éxito:', registration);
+          //console.log('Service Worker registrado con éxito:', registration);
         })
         .catch((error) => {
           console.error('Error al registrar el Service Worker:', error);
         });
     }
   } else {
-    console.log('Modo de desarrollo: no se registra el Service Worker.');
+    //console.log('Modo de desarrollo: no se registra el Service Worker.');
   }
 }else{
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     registrations.forEach((registration) => {
       registration.unregister().then(() => {
-      console.log('Service Worker viejo desregistrado:', registration);
+      //console.log('Service Worker viejo desregistrado:', registration);
       }).catch((error) => {
       console.error('Error al desregistrar el Service Worker viejo:', error);
       }).finally(() => {
@@ -77,14 +77,14 @@ if (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "test") {
             navigator.serviceWorker
               .register('/service-worker.js')
               .then((registration) => {
-                console.log('Service Worker registrado con éxito:', registration);
+                //console.log('Service Worker registrado con éxito:', registration);
               })
               .catch((error) => {
                 console.error('Error al registrar el Service Worker:', error);
               });
           }
         } else {
-          console.log('Modo de desarrollo: no se registra el Service Worker.');
+          //console.log('Modo de desarrollo: no se registra el Service Worker.');
         }
       });
     });

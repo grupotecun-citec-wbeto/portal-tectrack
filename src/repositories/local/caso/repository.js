@@ -32,7 +32,7 @@ const repository = {
             }
             stmt.free();
         }catch(err){
-            console.log(`[${PACKAGE}] Error al crear o reemplazar los datos:`, err);
+            console.error(`[${PACKAGE}] Error al crear o reemplazar los datos:`, err);
         }
         
         await persistDatabase();
@@ -295,7 +295,7 @@ const repository = {
 
             // ${query_cliente} -- 5
             if(query_cliente != ''){ 
-                console.log(filters,"c5e4a5db-0cc7-498d-b6f1-1482ddcbffb8") 
+                //console.log(filters,"c5e4a5db-0cc7-498d-b6f1-1482ddcbffb8") 
                 parameters.push(filters.clienteSelected)
                 from.push( ` INNER JOIN ${repositoryDiagnostico.tableName} ON ${repositoryDiagnostico.tableName}.caso_ID = ${repository.tableName}.ID `)
                 from.push( ` INNER JOIN ${repositoryEquipo.tableName} ON ${repositoryEquipo.tableName}.ID = ${repositoryDiagnostico.tableName}.equipo_ID `)
@@ -368,16 +368,16 @@ const repository = {
                 break;
             }
 
-            console.log(query,parameters,filters,"41a08892-a9b1-4c91-8e44-e83ab9351a3b")
+            //console.log(query,parameters,filters,"41a08892-a9b1-4c91-8e44-e83ab9351a3b")
             const stmt = db.prepare(query);
 
             if(config.countOnly) {
                 stmt.bind(parameters)
-                console.log(parameters,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
+                //console.log(parameters,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
                 stmt.step()
                 results = stmt.getAsObject()
             }else{
-                console.log(parameters,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c-2")
+                //console.log(parameters,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c-2")
                 stmt.bind(parameters)
                 while (stmt.step()) {
                     results.push(stmt.getAsObject());
@@ -475,12 +475,12 @@ const repository = {
         try{
             db.exec("BEGIN TRANSACTION")
             const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ?, date_end = ? , equipos = ?, syncStatus=1 where ID = ?`);
-            console.log([estado_a_asignar,currentDateTime,equipos,id], "b24a1fd5-9549-41b3-b865-63dd6fc84b14")
+            //console.log([estado_a_asignar,currentDateTime,equipos,id], "b24a1fd5-9549-41b3-b865-63dd6fc84b14")
             stmt.run([estado_a_asignar,currentDateTime,equipos,id]);
             stmt.free();
 
             const stmt2 = db.prepare(`UPDATE ${repositoryVisita.tableName} SET km_final = ? where ID = (SELECT visita_ID FROM ${repositoryCasoVisita.tableName} WHERE caso_ID = ? LIMIT 1) `);
-            console.log([kmFinal,id], "4baa164a-22f3-4497-9352-0d60abd5496a")
+            //console.log([kmFinal,id], "4baa164a-22f3-4497-9352-0d60abd5496a")
             stmt2.run([kmFinal,id]);
             stmt2.free();
 
@@ -633,7 +633,7 @@ const repository = {
      * @description establece el caso como error de sincronización
      */
     markAsErrorSynchronized: async (listaCasos) => {
-        console.log(    `[${PACKAGE}] markAsErrorSynchronized a2157e20-035e-45af-96d8-44d87083cc6a`, listaCasos);
+        //console.log(    `[${PACKAGE}] markAsErrorSynchronized a2157e20-035e-45af-96d8-44d87083cc6a`, listaCasos);
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET syncStatus = 3 WHERE ID IN (${listaCasos.uuids.map(() => '?').join(',')})`);
         //stmt.bind(listaCasos.uuids);

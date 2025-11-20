@@ -73,7 +73,7 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
     const [debouncedHallazgosValue] = useDebounce(hallazgos.value, 1000);
     useEffect(() => {
         if (debouncedHallazgosValue) {
-            console.log(debouncedHallazgosValue)
+            //console.log(debouncedHallazgosValue)
         }
     }, [debouncedHallazgosValue]);
 
@@ -166,7 +166,7 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                     E.ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}') `).toArray()*/
             const equiposData = []
             
-            console.log(diagnosticos,'9592847b-daea-4326-9e01-3df82bd61a8f')
+            //console.log(diagnosticos,'9592847b-daea-4326-9e01-3df82bd61a8f')
 
             diagnosticos.forEach(equipo => {
                 const equipoData = {

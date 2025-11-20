@@ -165,7 +165,7 @@ import {
               //const cad = `${process.env.REACT_APP_API_URL}/api/v1/machine/${(!isBusquedaTerminada) ? searchValue : 'ALL'}/${equiposSelect}`
               //const response = await axios.get(cad);
               const cadena = (!isBusquedaTerminada) ? searchValue : 'ALL'
-              console.log(cadena,equiposSelect,'d760f107-d86e-4d5a-9525-2d26e2bef060')
+              //console.log(cadena,equiposSelect,'d760f107-d86e-4d5a-9525-2d26e2bef060')
               const response = await searchEquipos(cadena,equiposSelect)
               
               
@@ -173,7 +173,7 @@ import {
               setDatos(data);
             } catch (error) {
               setDatos([])
-              console.error('Error al obtener datos:', error);
+              console.error('Error al obtener datos:', error, 'e7e32d8d-5ecd-4809-8713-547d38061390');
               
             }
           }

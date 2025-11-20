@@ -47,5 +47,5 @@ export function getDB() {
 export async function persistDatabase() {
   const binaryArray = db.export();
   const rest = await saveToIndexedDB(binaryArray);
-  console.log('7abf8756-55e2-44bb-b478-0d3c19e22dc8',rest);
+  //console.log('7abf8756-55e2-44bb-b478-0d3c19e22dc8',rest);
 }

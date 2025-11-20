@@ -111,7 +111,7 @@ function SearchCard(props) {
                 }
 
                 const sistemas = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas
-                console.log(sistemas);
+                //console.log(sistemas);
                 
                 if(Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas || {}).length != 0){
                     setIsCreatedDiagnostico(true)

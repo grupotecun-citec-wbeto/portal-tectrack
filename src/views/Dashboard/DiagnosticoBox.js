@@ -171,7 +171,7 @@ import {
               setDatos(groupedData);
             } catch (error) {
               setDatos([])
-              console.error('Error al obtener datos:', error);
+              console.error('Error al obtener datos:', error,'34655dd1-6604-48fc-bc1f-b44c1017eb15');
               
             }
           };
