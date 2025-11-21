@@ -27,6 +27,10 @@ import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
 // Estilos para impresión
 const printStyles = `
+  #print-root {
+    display: none;
+  }
+
   @media print {
     @page {
       size: A4;
