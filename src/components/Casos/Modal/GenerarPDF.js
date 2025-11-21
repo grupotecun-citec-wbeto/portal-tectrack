@@ -124,13 +124,14 @@ const ReportTemplate = ({
 
   const renderHTML = (htmlContent) => {
     if (!htmlContent) return null;
-    return <div dangerouslySetInnerHTML={{ __html: htmlContent }} className="rich-text-content" style={{ fontSize: "11px", fontFamily: "Helvetica, Arial, sans-serif" }} />;
+    return <div dangerouslySetInnerHTML={{ __html: htmlContent }} className="rich-text-content" style={{ fontSize: "12px", fontFamily: "Helvetica, Arial, sans-serif" }} />;
   };
 
-  const labelStyle = { fontWeight: "bold", fontSize: "11px", marginBottom: "2px", marginTop: "5px" };
-  const inputStyle = { border: "1px solid #000", padding: "5px", borderRadius: "5px", minHeight: "20px", fontSize: "11px", backgroundColor: "#fff" };
-  const sectionTitleStyle = { fontWeight: "bold", fontSize: "16px", textAlign: "center", margin: "10px 0", padding: "5px", borderRadius: "5px" };
-  const subTitleStyle = { fontWeight: "bold", fontSize: "12px", marginBottom: "5px", marginTop: "10px", padding: "5px", borderRadius: "5px", display: "inline-block" };
+  const labelStyle = { fontWeight: "bold", fontSize: "12px", marginBottom: "4px", marginTop: "6px", marginRight: "2px" };
+  const inputStyle = { border: "1px solid #000", padding: "6px", borderRadius: "5px", minHeight: "24px", fontSize: "12px", backgroundColor: "#fff", lineHeight: "1.4" };
+  const sectionTitleStyle = { fontWeight: "bold", fontSize: "16px", textAlign: "center", borderRadius: "5px" };
+  const subTitleStyle = { fontWeight: "bold", fontSize: "12px", marginBottom: "6px", marginTop: "12px", padding: "5px", borderRadius: "5px", display: "inline-block" };
+  const boxStyle = { display: "flex", flexDirection: "row", alignItems: "center", marginBottom: "6px" };
 
   return (
     <Box id="report-content" bg="white" p="10mm" maxW="210mm" mx="auto" fontFamily="Helvetica, Arial, sans-serif" color="#333">
@@ -140,33 +141,33 @@ const ReportTemplate = ({
         w="100%"
         h="150px"
         objectFit="cover"
-        mb="10px"
+        mb="15px"
         ml="-10px"
         width="calc(100% + 20px)"
       />
 
       {/* Primera Sección: Datos Principales */}
-      <Flex mb="10px">
+      <Flex mb="0px">
         <Box w="50%" pr="2">
-          <Box mb="2">
-            <Text style={labelStyle}>Ubicación</Text>
+          <Box style={boxStyle}>
+            <Text style={labelStyle}>Ubicación:</Text>
             <Box style={inputStyle}>{ubicacion}</Box>
           </Box>
-          <Box mb="2">
-            <Text style={labelStyle}>Lugar</Text>
+          <Box style={boxStyle}>
+            <Text style={labelStyle}>Lugar:</Text>
             <Box style={inputStyle}>{lugar}</Box>
           </Box>
-          <Box mb="2">
-            <Text style={labelStyle}>Nombre de Usuario</Text>
+          <Box style={boxStyle}>
+            <Text style={labelStyle}>Nombre de Usuario:</Text>
             <Box style={inputStyle}>{nameUsuario}</Box>
           </Box>
         </Box>
         <Box w="50%" pl="2">
-          <Box mb="2">
+          <Box style={boxStyle}>
             <Text style={labelStyle}>Número:</Text>
             <Box style={inputStyle}>{codigo}</Box>
           </Box>
-          <Box mb="2">
+          <Box style={boxStyle}>
             <Text style={labelStyle}>Fecha:</Text>
             <Box style={inputStyle}>{(fecha !== '' && fecha) ? format(new Date(fecha), 'yyyy-MM-dd') : ''}</Box>
           </Box>
@@ -174,12 +175,12 @@ const ReportTemplate = ({
       </Flex>
 
       {/* Segunda Sección: Detalle de Equipos */}
-      <Box mb="10px">
+      <Box mb="0px">
         <Text style={sectionTitleStyle}>DETALLE DE EQUIPOS</Text>
         <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
 
-        <Box mb="2">
-          <Text style={labelStyle}>Proyecto</Text>
+        <Box style={boxStyle}>
+          <Text style={labelStyle}>Proyecto:</Text>
           <Box style={inputStyle}>{proyecto}</Box>
         </Box>
 
@@ -203,14 +204,24 @@ const ReportTemplate = ({
       </Box>
 
       {/* Tercera Sección: Detalle de la Visita */}
-      <Box mb="10px">
+      <Box mb="0px">
         <Text style={sectionTitleStyle}>DETALLE DE LA VISITA</Text>
         <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
 
-        <Box mb="2">
+        <Box mb="0">
           <Text style={labelStyle}>Sistema del Equipo</Text>
-          <Box style={inputStyle}>{sistemas}</Box>
         </Box>
+        <Flex wrap="wrap" mx="-5px">
+          {sistemas.split(",")?.map((sistema, index) => {
+            return (
+              <Box key={index} w="33.33%" p="5px">
+                <Box border="1px solid #000" borderRadius="5px" p="5px" fontSize="10px" h="100%">
+                  <Text fontWeight="bold">{sistema}</Text>
+                </Box>
+              </Box>
+            )
+          })}
+        </Flex>
 
         <Box className="page-break-avoid">
           <Text style={subTitleStyle}>Hallazgos Encontrados</Text>
@@ -220,7 +231,7 @@ const ReportTemplate = ({
           </Box>
         </Box>
 
-        <Box mt="10px" className="page-break-avoid">
+        <Box mt="0px" className="page-break-avoid">
           <Text style={subTitleStyle}>Acciones Ejecutadas</Text>
           <Divider borderColor="black" w="35%" mb="5px" />
           <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
@@ -228,7 +239,7 @@ const ReportTemplate = ({
           </Box>
         </Box>
 
-        <Box mt="10px" className="page-break-avoid">
+        <Box mt="0px" className="page-break-avoid">
           <Text style={subTitleStyle}>Recomendaciones</Text>
           <Divider borderColor="black" w="35%" mb="5px" />
           <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
@@ -238,21 +249,23 @@ const ReportTemplate = ({
       </Box>
 
       {/* Cuarta Sección: Datos del Técnico */}
-      <Box mb="10px" className="page-break-avoid">
+      <Box mb="0px" className="page-break-avoid">
         <Text style={sectionTitleStyle}>DATOS DEL TÉCNICO</Text>
         <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
 
-        <Box mb="2">
-          <Text style={labelStyle}>Elaborado por</Text>
-          <Box style={inputStyle}>{elaboradoPor}</Box>
-        </Box>
-        <Box mb="2">
-          <Text style={labelStyle}>Revisado por</Text>
-          <Box style={inputStyle}>{revisadoPor}</Box>
-        </Box>
-        <Box mb="2">
-          <Text style={labelStyle}>Fecha de emisión</Text>
-          <Box style={inputStyle}>{fechaEmision}</Box>
+        <Box style={boxStyle}>
+          <Box style={boxStyle}>
+            <Text style={labelStyle}>Elaborado por</Text>
+            <Box style={inputStyle}>{elaboradoPor}</Box>
+          </Box>
+          <Box style={boxStyle} marginLeft={"5px"}>
+            <Text style={labelStyle}>Revisado por</Text>
+            <Box style={inputStyle}>{revisadoPor}</Box>
+          </Box>
+          <Box style={boxStyle} marginLeft={"5px"}>
+            <Text style={labelStyle}>Fecha de emisión</Text>
+            <Box style={inputStyle}>{fechaEmision}</Box>
+          </Box>
         </Box>
       </Box>
 
