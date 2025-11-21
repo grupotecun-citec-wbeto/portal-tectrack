@@ -24,6 +24,7 @@ import portada_reporte_citec from 'assets/img/portadas/portada_reporte_citec.png
 //CUSTOM IMPORTS
 import CasoFormulario from "./CasoFormulario";
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
+import html2pdf from 'html2pdf.js';
 
 // Estilos para impresión
 const printStyles = `
@@ -51,9 +52,7 @@ const printStyles = `
     /* Mostrar solo el portal de impresión */
     #print-root {
       display: block !important;
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
+      position: static !important; /* Changed from absolute to static for better flow control */
       width: 100% !important;
       height: auto !important;
       z-index: 9999 !important;
@@ -64,6 +63,7 @@ const printStyles = `
       width: 100% !important;
       margin: 0 !important;
       padding: 0 !important;
+      padding-bottom: 50px !important; /* Increased padding for footer */
     }
 
     .no-print {
@@ -84,6 +84,28 @@ const printStyles = `
       max-width: 100% !important;
       page-break-inside: avoid !important;
     }
+
+    .print-footer {
+      display: flex !important;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 30px !important;
+      font-size: 10px !important;
+      color: #000 !important;
+      background-color: white !important;
+      border-top: 2px solid #000 !important;
+      padding: 0 10mm !important;
+      z-index: 2147483647 !important;
+    }
+  }
+  
+  /* Ocultar footer en pantalla normal */
+  .print-footer {
+    display: none;
   }
   
   .rich-text-content ul, .rich-text-content ol {
@@ -252,6 +274,13 @@ const ReportTemplate = ({
           ))}
         </VStack>
       </Box>
+
+      {/* Footer para impresión */}
+      <div className="print-footer">
+        <span>Reporte Técnico: {codigo}</span>
+        <span>Generado el: {fechaEmision}</span>
+        <span>Continúa en la siguiente página...</span>
+      </div>
     </Box>
   );
 };
@@ -325,6 +354,39 @@ const GenerarPDF = () => {
     window.print();
   }
 
+  const handleDownloadPDF = () => {
+    const element = document.getElementById('report-content');
+    const opt = {
+      margin: [10, 10, 15, 10], // Increased bottom margin for footer
+      filename: `Reporte_${codigoValue || 'CITEC'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+      const totalPages = pdf.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(100);
+
+        // Footer Text
+        const footerText = `Reporte Técnico: ${codigoValue || 'N/A'} | Generado el: ${fechaEmisionValue}`;
+        pdf.text(footerText, 10, 285);
+
+        // Continuation Text
+        if (i < totalPages) {
+          pdf.text('Continúa en la siguiente página...', 10, 290);
+        }
+
+        // Page Numbers
+        pdf.text(`Página ${i} de ${totalPages}`, 180, 290);
+      }
+    }).save();
+  };
+
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
       <style>{printStyles}</style>
@@ -355,14 +417,22 @@ const GenerarPDF = () => {
       </Box>
 
       <Flex direction="column" pt="20px" mb="20px" alignItems="center" className="no-print">
-        <Button
-          colorScheme="blue"
-          size="lg"
-          onClick={handlePrint}
-          mb="20px"
-        >
-          Imprimir / Guardar como PDF
-        </Button>
+        <HStack spacing={4} mb="20px">
+          <Button
+            colorScheme="blue"
+            size="lg"
+            onClick={handlePrint}
+          >
+            Imprimir / Guardar como PDF
+          </Button>
+          <Button
+            colorScheme="green"
+            size="lg"
+            onClick={handleDownloadPDF}
+          >
+            Descargar PDF Directo
+          </Button>
+        </HStack>
         <Text mb="10px" fontWeight="bold">Vista Previa del Reporte:</Text>
       </Flex>
 
