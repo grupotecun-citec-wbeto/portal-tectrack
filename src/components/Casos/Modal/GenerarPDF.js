@@ -26,6 +26,9 @@ import CasoModalInput from './CasoModalInput'
 import CasoFormulario from "./CasoFormulario";
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
+import { parseHTMLtoReactPDF } from './htmlToReactPdf';
+
+
 // Estilos del reporte
 const styles = StyleSheet.create({
   page: {
@@ -290,25 +293,20 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
 
           <Text style={styles.labelSubTitle}>Hallazgos Encontrados</Text>
           <View style={styles.separatorSubTitle} />
-          {hallazgos?.img && (
-            <Image
-              style={styles.textArea}
-              key={"hallazgos"}
-              src={hallazgos?.img}
-            />
+          {hallazgos?.html && (
+            <View style={styles.textArea}>
+              {parseHTMLtoReactPDF(hallazgos?.html)}
+            </View>
           )}
 
           <View style={styles.section}>
             <Text style={styles.labelSubTitle}>Acciones Ejecutadas</Text>
             <View style={styles.separatorSubTitle} />
             {/*<Text style={styles.textArea}>{accionesEjecutadas.current?.value}</Text>*/}
-            {accionesEjecutadas?.img && (
-              <Image
-                style={styles.textArea}
-                key={"accionesEjecutadas"}
-                src={accionesEjecutadas?.img}
-
-              />
+            {accionesEjecutadas?.html && (
+              <View style={styles.textArea}>
+                {parseHTMLtoReactPDF(accionesEjecutadas?.html)}
+              </View>
             )}
           </View>
 
@@ -316,12 +314,10 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
             <Text style={styles.labelSubTitle}>Recomendaciones</Text>
             <View style={styles.separatorSubTitle} />
             {/*<Text style={styles.textArea}>{recomendaciones.current.value}</Text>*/}
-            {recomendaciones?.img && (
-              <Image
-                style={styles.textArea}
-                key={"recomendaciones"}
-                src={recomendaciones?.img}
-              />
+            {recomendaciones?.html && (
+              <View style={styles.textArea}>
+                {parseHTMLtoReactPDF(recomendaciones?.html)}
+              </View>
             )}
           </View>
         </View>
