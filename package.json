@@ -29,6 +29,7 @@
 		"html2canvas": "^1.4.1",
 		"match-sorter": "6.3.0",
 		"moment": "2.29.1",
+		"node-html-parser": "^7.0.1",
 		"nouislider": "15.0.0",
 		"path-browserify": "^1.0.1",
 		"raw-loader": "^4.0.2",
