@@ -129,12 +129,12 @@ const ReportTemplate = ({
 
   const labelStyle = { fontWeight: "bold", fontSize: "12px", marginBottom: "4px", marginTop: "6px", marginRight: "2px" };
   const inputStyle = { border: "1px solid #000", padding: "6px", borderRadius: "5px", minHeight: "24px", fontSize: "12px", backgroundColor: "#fff", lineHeight: "1.4" };
-  const sectionTitleStyle = { fontWeight: "bold", fontSize: "16px", textAlign: "center", borderRadius: "5px" };
+  const sectionTitleStyle = { fontWeight: "bold", fontSize: "16px", textAlign: "center", borderRadius: "5px", marginBottom: "10px" };
   const subTitleStyle = { fontWeight: "bold", fontSize: "12px", marginBottom: "6px", marginTop: "12px", padding: "5px", borderRadius: "5px", display: "inline-block" };
   const boxStyle = { display: "flex", flexDirection: "row", alignItems: "center", marginBottom: "6px" };
 
   return (
-    <Box id="report-content" bg="white" maxW="210mm" mx="auto" fontFamily="Helvetica, Arial, sans-serif" color="#333">
+    <Box id="report-content" bg="white" p="10mm" maxW="210mm" mx="auto" fontFamily="Helvetica, Arial, sans-serif" color="#333">
       
       {/* Encabezado */}
       <Image
@@ -373,7 +373,7 @@ const GenerarPDF = () => {
       margin: [0, 0, 10, 0], // Increased bottom margin for footer
       filename: `Reporte_${codigoValue || 'CITEC'}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     };
