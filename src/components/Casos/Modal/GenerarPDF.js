@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from 'react-dom';
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams } from "react-router-dom";
@@ -29,27 +30,55 @@ const printStyles = `
   @media print {
     @page {
       size: A4;
-      margin: 0;
+      margin: 10mm;
     }
-    body * {
-      visibility: hidden;
-    }
-    #report-content, #report-content * {
-      visibility: visible;
-    }
-    #report-content {
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 100%;
-      margin: 0;
-      padding: 0;
+    
+    html, body {
+      height: auto !important;
+      overflow: visible !important;
       background-color: white !important;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
     }
+
+    /* Ocultar la aplicación principal */
+    #root {
+      display: none !important;
+    }
+
+    /* Mostrar solo el portal de impresión */
+    #print-root {
+      display: block !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: auto !important;
+      z-index: 9999 !important;
+    }
+
+    /* Asegurar que el contenido del reporte sea visible */
+    #report-content {
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
     .no-print {
       display: none !important;
+    }
+    
+    .page-break-avoid {
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+    
+    .page-break-before {
+      page-break-before: always !important;
+      break-before: always !important;
+    }
+
+    img {
+      max-width: 100% !important;
+      page-break-inside: avoid !important;
     }
   }
   
@@ -62,8 +91,7 @@ const printStyles = `
 `;
 
 const ReportTemplate = ({
-  ubicacion, lugar, nameUsuario, codigo, fecha,
-  proyecto, equipos, sistemas,
+  ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas,
   hallazgos, accionesEjecutadas, recomendaciones,
   elaboradoPor, revisadoPor, fechaEmision, images
 }) => {
@@ -158,7 +186,7 @@ const ReportTemplate = ({
           <Box style={inputStyle}>{sistemas}</Box>
         </Box>
 
-        <Box>
+        <Box className="page-break-avoid">
           <Text style={subTitleStyle}>Hallazgos Encontrados</Text>
           <Divider borderColor="black" w="35%" mb="5px" />
           <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
@@ -166,7 +194,7 @@ const ReportTemplate = ({
           </Box>
         </Box>
 
-        <Box mt="10px">
+        <Box mt="10px" className="page-break-avoid">
           <Text style={subTitleStyle}>Acciones Ejecutadas</Text>
           <Divider borderColor="black" w="35%" mb="5px" />
           <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
@@ -174,7 +202,7 @@ const ReportTemplate = ({
           </Box>
         </Box>
 
-        <Box mt="10px">
+        <Box mt="10px" className="page-break-avoid">
           <Text style={subTitleStyle}>Recomendaciones</Text>
           <Divider borderColor="black" w="35%" mb="5px" />
           <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
@@ -184,7 +212,7 @@ const ReportTemplate = ({
       </Box>
 
       {/* Cuarta Sección: Datos del Técnico */}
-      <Box mb="10px" sx={{ pageBreakInside: "avoid" }}>
+      <Box mb="10px" className="page-break-avoid">
         <Text style={sectionTitleStyle}>DATOS DEL TÉCNICO</Text>
         <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
 
@@ -203,13 +231,13 @@ const ReportTemplate = ({
       </Box>
 
       {/* Documentación Visual */}
-      <Box sx={{ pageBreakBefore: "always" }}>
+      <Box className="page-break-before">
         <Text style={sectionTitleStyle}>DOCUMENTACIÓN VISUAL</Text>
         <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
 
         <VStack spacing="20px">
           {images && images.map((image, index) => (
-            <Box key={index} border="1px solid #000" borderRadius="5px" p="2px" bg="white" w="100%" maxW="600px">
+            <Box key={index} border="1px solid #000" borderRadius="5px" p="2px" bg="white" w="100%" maxW="600px" className="page-break-avoid">
               <Image
                 src={image.src}
                 w="100%"
@@ -239,6 +267,9 @@ const GenerarPDF = () => {
   const [refresh, setRefresh] = useState(false);
   const forceUpdate = () => setRefresh(prev => !prev);
 
+  // Estado para el nodo del portal de impresión
+  const [printNode, setPrintNode] = useState(null);
+
   // Refs para contenido HTML
   const hallazgos = useRef({ value: '' })
   const accionesEjecutadas = useRef({ value: '' })
@@ -264,6 +295,18 @@ const GenerarPDF = () => {
 
   //trigger Generar PDF (ahora solo actualiza la vista previa)
   const [triggerGenerarPdf, setTriggerGenerarPdf] = useState(false)
+
+  // Efecto para crear el nodo del portal de impresión
+  useEffect(() => {
+    const node = document.createElement('div');
+    node.id = 'print-root';
+    document.body.appendChild(node);
+    setPrintNode(node);
+
+    return () => {
+      document.body.removeChild(node);
+    };
+  }, []);
 
   const handleGenerarPdf = () => {
     setImagesValue(imagesRef.current)
@@ -319,7 +362,7 @@ const GenerarPDF = () => {
         <Text mb="10px" fontWeight="bold">Vista Previa del Reporte:</Text>
       </Flex>
 
-      {/* Reporte Visible (y para impresión) */}
+      {/* Reporte Visible (Vista Previa) */}
       <Box border="1px solid #e2e8f0" boxShadow="lg" mb="50px">
         <ReportTemplate
           hallazgos={hallazgos.current.value}
@@ -340,6 +383,29 @@ const GenerarPDF = () => {
           images={imagesRef.current}
         />
       </Box>
+
+      {/* Reporte para Impresión (Portal) */}
+      {printNode && ReactDOM.createPortal(
+        <ReportTemplate
+          hallazgos={hallazgos.current.value}
+          accionesEjecutadas={accionesEjecutadas.current.value}
+          recomendaciones={recomendaciones.current.value}
+          ubicacion={ubicacionValue}
+          lugar={lugarValue}
+          nameUsuario={nameUsuarioValue}
+          codigo={codigoValue}
+          fecha={fechaValue}
+          celular={celularValue}
+          proyecto={proyectoValue}
+          equipos={equiposValue}
+          sistemas={sistemasValue}
+          elaboradoPor={elaboradoPorValue}
+          revisadoPor={revisadoPorValue}
+          fechaEmision={fechaEmisionValue}
+          images={imagesRef.current}
+        />,
+        printNode
+      )}
     </Flex>
   )
 }
