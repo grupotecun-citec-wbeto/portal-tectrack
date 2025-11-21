@@ -127,13 +127,16 @@ const ReportTemplate = ({
     return <div dangerouslySetInnerHTML={{ __html: htmlContent }} className="rich-text-content" style={{ fontSize: "12px", fontFamily: "Helvetica, Arial, sans-serif" }} />;
   };
 
-  const labelStyle = { fontWeight: "bold", fontSize: "12px", marginBottom: "4px", marginTop: "6px", marginRight: "2px" };
+  const textStyle = {marginTop: "-10px"}
+  const labelStyle = {fontWeight: "bold", fontSize: "12px", marginBottom: "4px", marginTop: "6px", marginRight: "0px" };
+  const labelStyleDownload = {fontWeight: "bold", fontSize: "12px", marginBottom: "4px", marginTop: "-10px", marginRight: "0px" };
   const inputStyle = { border: "1px solid #000", padding: "6px", borderRadius: "5px", minHeight: "24px", fontSize: "12px", backgroundColor: "#fff", lineHeight: "1.4" };
   const sectionTitleStyle = { fontWeight: "bold", fontSize: "16px", textAlign: "center", borderRadius: "5px", marginBottom: "10px" };
   const subTitleStyle = { fontWeight: "bold", fontSize: "12px", marginBottom: "6px", marginTop: "12px", padding: "5px", borderRadius: "5px", display: "inline-block" };
   const boxStyle = { display: "flex", flexDirection: "row", alignItems: "center", marginBottom: "6px" };
 
   return (
+    <>
     <Box id="report-content" bg="white" p="10mm" maxW="210mm" mx="auto" fontFamily="Helvetica, Arial, sans-serif" color="#333">
       
       {/* Encabezado */}
@@ -294,7 +297,184 @@ const ReportTemplate = ({
           <span>Generado el: {fechaEmision}</span>
           <span>Continúa en la siguiente página...</span>
         </div>
-      </Box>
+    </Box>
+        <Box h="50px" bg="gray.100" my="20px" borderTop="1px solid lightgray" borderBottom="1px solid lightgray" display="flex" alignItems="center" justifyContent="center">
+          <Text fontSize="lg" fontWeight="bold" color="gray.600">FIN DEL REPORTE</Text>
+        </Box>
+    
+    <Box id="report-content-direct" bg="white" p="10mm" maxW="210mm" mx="auto" fontFamily="Helvetica, Arial, sans-serif" color="#333">
+      
+      {/* Encabezado */}
+      <Image
+        src={portada_reporte_citec}
+        w="100%"
+        h="150px"
+        objectFit="cover"
+        mb="15px"
+        width="calc(100% + 20px)"
+      />
+      
+        {/* Primera Sección: Datos Principales */}
+        <Flex mb="0px">
+          <Box w="50%" pr="2">
+            <Box style={boxStyle}>
+              <Text style={labelStyleDownload}>Ubicación:</Text>
+              <Box style={inputStyle}><Text style={textStyle}>{ubicacion}</Text></Box>
+            </Box>
+            <Box style={boxStyle}>
+              <Text style={labelStyleDownload}>Lugar:</Text>
+              <Box style={inputStyle}><Text style={textStyle}>{lugar}</Text></Box>
+            </Box>
+            <Box style={boxStyle}>
+              <Text style={labelStyleDownload}>Nombre de Usuario:</Text>
+              <Box style={inputStyle}> <Text style={textStyle}>{nameUsuario}</Text></Box>
+            </Box>
+          </Box>
+          <Box w="50%" pl="2">
+            <Box style={boxStyle}>
+              <Text style={labelStyleDownload}>Número:</Text>
+              <Box style={inputStyle}> <Text style={textStyle}>{codigo}</Text></Box>
+            </Box>
+            <Box style={boxStyle}>
+              <Text style={labelStyleDownload}>Fecha:</Text>
+              <Box style={inputStyle}> 
+                <Text style={textStyle}>{(fecha !== '' && fecha) ? format(new Date(fecha), 'yyyy-MM-dd') : ''}</Text>
+              </Box>
+            </Box>
+          </Box>
+        </Flex>
+
+        {/* Segunda Sección: Detalle de Equipos */}
+        <Box mb="0px">
+          <Text style={sectionTitleStyle}>DETALLE DE EQUIPOS</Text>
+          <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
+
+          <Box style={boxStyle}>
+            <Text style={labelStyleDownload}>Proyecto:</Text>
+            <Box style={inputStyle}>
+              <Text style={textStyle}>{proyecto}</Text>
+            </Box>
+          </Box>
+
+          <Flex wrap="wrap" mx="-5px">
+            {equipos?.codigos?.map((equipo, index) => {
+              const chasisValue = equipo.chasis ? (equipo.chasis.includes('|') ? equipo.chasis.split('|')[0] : equipo.chasis) : (equipo.serie ? (equipo.serie.includes('|') ? equipo.serie.split('|')[0] : equipo.serie) : "N/D");
+              return (
+                <Box key={index} w="33.33%" p="5px">
+                  <Box border="1px solid #000" borderRadius="5px" p="5px" fontSize="10px" h="100%">
+                    <Text fontWeight="bold">{equipo?.business_name} {equipo?.marca}</Text>
+                    <Text>Serie: {chasisValue}</Text>
+                    <Text>Cod: {equipo.codigo_finca}</Text>
+                    <Text>Proyecto: {equipo.proyecto}</Text>
+                    <Text>Cliente: {equipo.cliente}</Text>
+                    <Text>Ubicación: {equipo.ubicacion}</Text>
+                  </Box>
+                </Box>
+              )
+            })}
+          </Flex>
+        </Box>
+
+        {/* Tercera Sección: Detalle de la Visita */}
+        <Box mb="0px">
+          <Text style={sectionTitleStyle}>DETALLE DE LA VISITA</Text>
+          <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
+
+          <Box mb="0">
+            <Text style={labelStyleDownload}>Sistema del Equipo</Text>
+          </Box>
+          <Flex wrap="wrap" mx="-5px">
+            {sistemas.split(",")?.map((sistema, index) => {
+              return (
+                <Box key={index} w="33.33%" p="5px">
+                  <Box border="1px solid #000" borderRadius="5px" p="5px" fontSize="10px" h="100%">
+                    <Text fontWeight="bold" style={textStyle}>{sistema}</Text>
+                  </Box>
+                </Box>
+              )
+            })}
+          </Flex>
+
+          <Box className="page-break-avoid">
+            <Text style={subTitleStyle}>Hallazgos Encontrados</Text>
+            <Divider borderColor="black" w="35%" mb="5px" />
+            <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
+              {renderHTML(hallazgos)}
+            </Box>
+          </Box>
+
+          <Box mt="0px" className="page-break-avoid">
+            <Text style={subTitleStyle}>Acciones Ejecutadas</Text>
+            <Divider borderColor="black" w="35%" mb="5px" />
+            <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
+              {renderHTML(accionesEjecutadas)}
+            </Box>
+          </Box>
+
+          <Box mt="0px" className="page-break-avoid">
+            <Text style={subTitleStyle}>Recomendaciones</Text>
+            <Divider borderColor="black" w="35%" mb="5px" />
+            <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
+              {renderHTML(recomendaciones)}
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Cuarta Sección: Datos del Técnico */}
+        <Box mb="0px" className="page-break-avoid">
+          <Text style={sectionTitleStyle}>DATOS DEL TÉCNICO</Text>
+          <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
+
+          <Box style={boxStyle}>
+            <Box style={boxStyle}>
+              <Text style={labelStyleDownload}>Elaborado por</Text>
+              <Box style={inputStyle}>
+                <Text style={textStyle}>{elaboradoPor}</Text>
+              </Box>
+            </Box>
+            <Box style={boxStyle} marginLeft={"5px"}>
+              <Text style={labelStyleDownload}>Revisado por</Text>
+              <Box style={inputStyle}>
+                <Text style={textStyle}>{revisadoPor}</Text>
+              </Box>
+            </Box>
+            <Box style={boxStyle} marginLeft={"5px"}>
+              <Text style={labelStyleDownload}>Fecha de emisión</Text>
+              <Box style={inputStyle}>
+                <Text style={textStyle}>{fechaEmision}</Text>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Documentación Visual */}
+        <Box className="page-break-before">
+          <Text style={sectionTitleStyle}>DOCUMENTACIÓN VISUAL</Text>
+          <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
+
+          <VStack spacing="20px">
+            {images && images.map((image, index) => (
+              <Box key={index} border="1px solid #000" borderRadius="5px" p="2px" bg="white" w="100%" maxW="600px" className="page-break-avoid">
+                <Image
+                  src={image.src}
+                  w="100%"
+                  h="auto"
+                  objectFit="contain"
+                />
+              </Box>
+            ))}
+          </VStack>
+        </Box>
+
+        {/* Footer para impresión */}
+        <div className="print-footer">
+          <span>Reporte Técnico: {codigo}</span>
+          <span>Generado el: {fechaEmision}</span>
+          <span>Continúa en la siguiente página...</span>
+        </div>
+    </Box>
+    </>
+    
   );
 };
 
@@ -368,7 +548,7 @@ const GenerarPDF = () => {
   }
 
   const handleDownloadPDF = () => {
-    const element = document.getElementById('report-content');
+    const element = document.getElementById('report-content-direct');
     const opt = {
       margin: [0, 0, 10, 0], // Increased bottom margin for footer
       filename: `Reporte_${codigoValue || 'CITEC'}.pdf`,
