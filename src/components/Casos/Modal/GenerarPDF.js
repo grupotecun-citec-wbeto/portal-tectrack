@@ -1,579 +1,293 @@
 import React, { useState, useEffect, useRef } from "react";
 //redux
 import { useSelector, useDispatch } from 'react-redux';
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Image, PDFViewer } from "@react-pdf/renderer";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
 // Chakra imports
 import {
   Flex,
-  flexbox,
-  Table,
-  Tbody,
-  Th,
-  Thead,
-  Tr,
-  useColorModeValue
+  Box,
+  Text,
+  Image,
+  Button,
+  Grid,
+  GridItem,
+  Divider,
+  VStack,
+  HStack
 } from "@chakra-ui/react";
 
 //images
 import portada_reporte_citec from 'assets/img/portadas/portada_reporte_citec.png'
-import fondo from 'assets/img/portadas/fondo_reporte.jpg'
 
 //CUSTOM IMPORTS
-import CasoModalTextArea from './CasoModalTextArea'
-import CasoModalInput from './CasoModalInput'
 import CasoFormulario from "./CasoFormulario";
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
-// Estilos del reporte
-const styles = StyleSheet.create({
-  page: {
-    paddingVertical: 0,
-    paddingHorizontal: 10,
-    fontFamily: "Helvetica",
-    fontSize: 11,
-    color: "#333",
-    lineHeight: 0,
-    backgroundColor: "#f5f5f5"
-  },
-  header: {
-    fontSize: 16,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  section: {
-    borderRadius: 5,
-  },
-  sectionInput: {
-    flexDirection: "row",
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  column: {
-    width: "48%", // Ajusta el ancho para dos columnas
-  },
-  label: {
+// Estilos para impresión
+const printStyles = `
+  @media print {
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    body * {
+      visibility: hidden;
+    }
+    #report-content, #report-content * {
+      visibility: visible;
+    }
+    #report-content {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background-color: white !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .no-print {
+      display: none !important;
+    }
+  }
+  
+  .rich-text-content ul, .rich-text-content ol {
+    margin-left: 20px;
+  }
+  .rich-text-content p {
+    margin-bottom: 5px;
+  }
+`;
 
-    fontWeight: "bold",
-    marginBottom: 0,
+const ReportTemplate = ({
+  ubicacion, lugar, nameUsuario, codigo, fecha,
+  proyecto, equipos, sistemas,
+  hallazgos, accionesEjecutadas, recomendaciones,
+  elaboradoPor, revisadoPor, fechaEmision, images
+}) => {
 
-  },
+  const renderHTML = (htmlContent) => {
+    if (!htmlContent) return null;
+    return <div dangerouslySetInnerHTML={{ __html: htmlContent }} className="rich-text-content" style={{ fontSize: "11px", fontFamily: "Helvetica, Arial, sans-serif" }} />;
+  };
 
-  labelTitle: {
-    fontWeight: "bold",
-    marginBottom: 2,
-    marginTop: 2,
-    fontSize: 16,
-    padding: 5,
-    borderRadius: 5,
-    textAlign: "center"
-  },
-  labelSubTitle: {
-    fontWeight: "bold",
-    marginBottom: 2,
-    fontSize: 12,
-    padding: 5,
-    borderRadius: 5,
-    maxWidth: "25%",
-  },
-  textArea: {
-    border: "1px solid #000",
-    padding: 5,
-    minHeight: 50,
-    borderRadius: 3,
-    marginTop: 5,
-    backgroundColor: "#FFFFFF",
-    objectFit: "contain"
-  },
-  input: {
-    border: "1px solid #000",
-    padding: 5,
-    minHeight: 2,
-    borderRadius: 5,
-    marginTop: 5,
-    marginLeft: 5,
-    backgroundColor: "#FFFFFF",
-  },
-  labelInput: {
-    //border: "2pt solid #000",
-    fontWeight: "bold",
-    marginTop: 5,
-    paddingTop: 5,
-    //backgroundColor:"#FFFFFF",
-    //borderRadius:5,
-    //paddingLeft:5
-
-  },
-  separator: {
-    borderBottom: "2px solid #000",
-  },
-  separatorSubTitle: {
-    borderBottom: "1px solid #000",
-    maxWidth: "35%",
-  },
-  gridContainer: {
-    display: "flex",
-    flexDirection: "row", // Para crear filas horizontales
-    flexWrap: "wrap",     // Permite que las columnas se envuelvan en una nueva fila
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  gridItem: {
-    width: "30%",        // Divide el contenedor en 3 columnas (33.33% cada una)
-    height: 85,             // Altura de las celdas
-    border: "1pt solid #000",
-    justifyContent: "center",
-    alignItems: "center",
-    display: "flex",
-    marginLeft: 5,
-    marginTop: 5,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 5,
-    padding: 3.6
-  },
-  imageCover: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    objectFit: 'cover',
-  },
-  content: {
-    position: "relative", // Asegura que el contenido se renderice sobre la imagen
-    zIndex: 1, // Eleva el contenido por encima del fondo
-  },
-  imageContent: {
-    border: "1pt solid #000",
-    borderRadius: 5,
-    backgroundColor: "#FFFFFF",
-    padding: 2,
-    //marginBottom: 5,
-  },
-});
-
-// Datos de ejemplo
-const reportData = {
-  location: "Ciudad de Guatemala",
-  place: "Edificio Torre 4",
-  username: "Juan Pérez",
-  number: "123456",
-  date: "2024-06-10",
-  phone: "555-123-4567",
-  equipmentDetail: {
-    text: "Los equipos se encuentran en condiciones operativas. Se verificó el sistema y se documentaron todas las piezas críticas.",
-    proyecto: "FRENTE 16"
-  },
-  visitDetail: {
-    system: "Sistema principal de climatización todo es posible",
-    findings: "Se encontraron filtros sucios y fugas menores en el ducto principal. .",
-    actions: "Limpieza de filtros y sellado de fugas con material aprobado. ",
-    recommendations:
-      "Recomendar mantenimiento periódico y reemplazo de filtros cada 6 meses.",
-  },
-  technicianData: {
-    preparedBy: "Billy Guillen",
-    reviewedBy: "Jefatura de CITEC",
-    reportDate: "2024-06-10",
-  },
-};
-
-// Componente de Documento
-const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones, ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas, elaboradoPor, revisadoPor, fechaEmision, images }) => {
-
+  const labelStyle = { fontWeight: "bold", fontSize: "11px", marginBottom: "2px", marginTop: "5px" };
+  const inputStyle = { border: "1px solid #000", padding: "5px", borderRadius: "5px", minHeight: "20px", fontSize: "11px", backgroundColor: "#fff" };
+  const sectionTitleStyle = { fontWeight: "bold", fontSize: "16px", textAlign: "center", margin: "10px 0", padding: "5px", borderRadius: "5px" };
+  const subTitleStyle = { fontWeight: "bold", fontSize: "12px", marginBottom: "5px", marginTop: "10px", padding: "5px", borderRadius: "5px", display: "inline-block" };
 
   return (
-    <Document minPresenceAhead={100}>
-      <Page size="A4" style={styles.page}>
-        {/* Encabezado Principal 
-          
-          <Image
-                src={fondo} // Reemplaza con la ruta de tu imagen
-                style={styles.imageCover}
-            />*/}
+    <Box id="report-content" bg="white" p="10mm" maxW="210mm" mx="auto" fontFamily="Helvetica, Arial, sans-serif" color="#333">
+      {/* Encabezado */}
+      <Image
+        src={portada_reporte_citec}
+        w="100%"
+        h="150px"
+        objectFit="cover"
+        mb="10px"
+        ml="-10px"
+        width="calc(100% + 20px)"
+      />
 
-        <Image
-          src={portada_reporte_citec} // Reemplaza con la ruta de tu imagen
-          style={{ width: "104%", height: 150, marginLeft: -10, }}
-        />
-        {/* Primera Sección: Datos Principales */}
-        <View style={styles.section}>
-          <View style={styles.row}>
-            {/* Primera Columna */}
-            <View style={styles.column}>
-              <View style={styles.sectionInput}>
-                <Text style={styles.labelInput}>Ubicación</Text>
-                <Text style={styles.input}>{ubicacion.value}</Text>
-              </View>
-              <View style={styles.sectionInput}>
-                <Text style={styles.labelInput}>Lugar</Text>
-                <Text style={styles.input}>{lugar.value}</Text>
-              </View>
-              <View style={styles.sectionInput}>
-                <Text style={styles.labelInput}>Nombre de Usuario</Text>
-                <Text style={styles.input}>{nameUsuario.value}</Text>
-              </View>
+      {/* Primera Sección: Datos Principales */}
+      <Flex mb="10px">
+        <Box w="50%" pr="2">
+          <Box mb="2">
+            <Text style={labelStyle}>Ubicación</Text>
+            <Box style={inputStyle}>{ubicacion}</Box>
+          </Box>
+          <Box mb="2">
+            <Text style={labelStyle}>Lugar</Text>
+            <Box style={inputStyle}>{lugar}</Box>
+          </Box>
+          <Box mb="2">
+            <Text style={labelStyle}>Nombre de Usuario</Text>
+            <Box style={inputStyle}>{nameUsuario}</Box>
+          </Box>
+        </Box>
+        <Box w="50%" pl="2">
+          <Box mb="2">
+            <Text style={labelStyle}>Número:</Text>
+            <Box style={inputStyle}>{codigo}</Box>
+          </Box>
+          <Box mb="2">
+            <Text style={labelStyle}>Fecha:</Text>
+            <Box style={inputStyle}>{(fecha !== '' && fecha) ? format(new Date(fecha), 'yyyy-MM-dd') : ''}</Box>
+          </Box>
+        </Box>
+      </Flex>
 
-            </View>
+      {/* Segunda Sección: Detalle de Equipos */}
+      <Box mb="10px">
+        <Text style={sectionTitleStyle}>DETALLE DE EQUIPOS</Text>
+        <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
 
-            {/* Segunda Columna */}
-            <View style={styles.column}>
-              <View style={styles.sectionInput}>
-                <Text style={styles.labelInput}>Número:</Text>
-                <Text style={styles.input}>{codigo.value}</Text>
-              </View>
-              <View style={styles.sectionInput}>
-                <Text style={styles.labelInput}>Fecha:</Text>
-                <Text style={styles.input}>{(fecha.value != '') ? format(fecha.value, 'yyyy-MM-dd') : ''}</Text>
-              </View>
+        <Box mb="2">
+          <Text style={labelStyle}>Proyecto</Text>
+          <Box style={inputStyle}>{proyecto}</Box>
+        </Box>
 
-              {/*<View style={styles.sectionInput}>
-                                <Text style={styles.labelInput}>Celular:</Text>
-                                <Text style={styles.input}>{celular.value}</Text>
-                            </View>*/}
-
-            </View>
-          </View>
-        </View>
-
-        {/* Separador <View style={styles.separator} /> */}
-
-
-        {/* Segunda Sección: Detalle del Equipo */}
-        <View style={styles.section}>
-          <Text style={styles.labelTitle}>DETALLE DE EQUIPOS</Text>
-
-          <View style={styles.separator} />
-
-          <View style={styles.sectionInput}>
-            <Text style={styles.labelInput}>Proyecto</Text>
-            <Text style={styles.input}>{proyecto.value}</Text>
-          </View>
-          <View style={styles.gridContainer}>
-            {equipos?.value?.codigos?.map((equipo) => {
-              const chasisValue = equipo.chasis ? (equipo.chasis.includes('|') ? equipo.chasis.split('|')[0] : equipo.chasis) : (equipo.serie ? (equipo.serie.includes('|') ? equipo.serie.split('|')[0] : equipo.serie) : "N/D");
-              return (
-                <Text style={styles.gridItem}>
-                  <Text>{equipo?.business_name} {equipo?.marca}</Text>
-                  <Text>{'\n'}</Text>
+        <Flex wrap="wrap" mx="-5px">
+          {equipos?.codigos?.map((equipo, index) => {
+            const chasisValue = equipo.chasis ? (equipo.chasis.includes('|') ? equipo.chasis.split('|')[0] : equipo.chasis) : (equipo.serie ? (equipo.serie.includes('|') ? equipo.serie.split('|')[0] : equipo.serie) : "N/D");
+            return (
+              <Box key={index} w="33.33%" p="5px">
+                <Box border="1px solid #000" borderRadius="5px" p="5px" fontSize="10px" h="100%">
+                  <Text fontWeight="bold">{equipo?.business_name} {equipo?.marca}</Text>
                   <Text>Serie: {chasisValue}</Text>
-                  <Text>{'\n'}</Text>
                   <Text>Cod: {equipo.codigo_finca}</Text>
-                  <Text>{'\n'}</Text>
                   <Text>Proyecto: {equipo.proyecto}</Text>
-                  <Text>{'\n'}</Text>
                   <Text>Cliente: {equipo.cliente}</Text>
-                  <Text>{'\n'}</Text>
                   <Text>Ubicación: {equipo.ubicacion}</Text>
-                </Text>
-              )
-            })}
-          </View>
-        </View>
+                </Box>
+              </Box>
+            )
+          })}
+        </Flex>
+      </Box>
 
-        {/* Separador <View style={styles.separator} /> */}
+      {/* Tercera Sección: Detalle de la Visita */}
+      <Box mb="10px">
+        <Text style={sectionTitleStyle}>DETALLE DE LA VISITA</Text>
+        <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
 
+        <Box mb="2">
+          <Text style={labelStyle}>Sistema del Equipo</Text>
+          <Box style={inputStyle}>{sistemas}</Box>
+        </Box>
 
-        {/* Tercera Sección: Detalle de la Visita */}
-        <View style={styles.section} wrap={false}>
-          <Text style={styles.labelTitle}>DETALLE DE LA VISITA</Text>
+        <Box>
+          <Text style={subTitleStyle}>Hallazgos Encontrados</Text>
+          <Divider borderColor="black" w="35%" mb="5px" />
+          <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
+            {renderHTML(hallazgos)}
+          </Box>
+        </Box>
 
-          <View style={styles.separator} />
+        <Box mt="10px">
+          <Text style={subTitleStyle}>Acciones Ejecutadas</Text>
+          <Divider borderColor="black" w="35%" mb="5px" />
+          <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
+            {renderHTML(accionesEjecutadas)}
+          </Box>
+        </Box>
 
-          <View style={styles.sectionInput}>
-            <Text style={styles.labelInput}>Sistema del Equipo</Text>
-            <Text style={styles.input}>{sistemas.value}</Text>
-          </View>
+        <Box mt="10px">
+          <Text style={subTitleStyle}>Recomendaciones</Text>
+          <Divider borderColor="black" w="35%" mb="5px" />
+          <Box border="1px solid #000" borderRadius="3px" p="5px" minH="50px" bg="white">
+            {renderHTML(recomendaciones)}
+          </Box>
+        </Box>
+      </Box>
 
-          <Text style={styles.labelSubTitle}>Hallazgos Encontrados</Text>
-          <View style={styles.separatorSubTitle} />
-          {hallazgos?.img && (
-            <Image
-              style={styles.textArea}
-              key={"hallazgos"}
-              src={hallazgos?.img}
-            />
-          )}
+      {/* Cuarta Sección: Datos del Técnico */}
+      <Box mb="10px" sx={{ pageBreakInside: "avoid" }}>
+        <Text style={sectionTitleStyle}>DATOS DEL TÉCNICO</Text>
+        <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
 
-          <View style={styles.section}>
-            <Text style={styles.labelSubTitle}>Acciones Ejecutadas</Text>
-            <View style={styles.separatorSubTitle} />
-            {/*<Text style={styles.textArea}>{accionesEjecutadas.current?.value}</Text>*/}
-            {accionesEjecutadas?.img && (
+        <Box mb="2">
+          <Text style={labelStyle}>Elaborado por</Text>
+          <Box style={inputStyle}>{elaboradoPor}</Box>
+        </Box>
+        <Box mb="2">
+          <Text style={labelStyle}>Revisado por</Text>
+          <Box style={inputStyle}>{revisadoPor}</Box>
+        </Box>
+        <Box mb="2">
+          <Text style={labelStyle}>Fecha de emisión</Text>
+          <Box style={inputStyle}>{fechaEmision}</Box>
+        </Box>
+      </Box>
+
+      {/* Documentación Visual */}
+      <Box sx={{ pageBreakBefore: "always" }}>
+        <Text style={sectionTitleStyle}>DOCUMENTACIÓN VISUAL</Text>
+        <Divider borderColor="black" borderBottomWidth="2px" mb="10px" />
+
+        <VStack spacing="20px">
+          {images && images.map((image, index) => (
+            <Box key={index} border="1px solid #000" borderRadius="5px" p="2px" bg="white" w="100%" maxW="600px">
               <Image
-                style={styles.textArea}
-                key={"accionesEjecutadas"}
-                src={accionesEjecutadas?.img}
-
-              />
-            )}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.labelSubTitle}>Recomendaciones</Text>
-            <View style={styles.separatorSubTitle} />
-            {/*<Text style={styles.textArea}>{recomendaciones.current.value}</Text>*/}
-            {recomendaciones?.img && (
-              <Image
-                style={styles.textArea}
-                key={"recomendaciones"}
-                src={recomendaciones?.img}
-              />
-            )}
-          </View>
-        </View>
-
-        {/* Cuarta Sección Datos del Técnico */}
-        <View style={styles.section} wrap={false} >
-          <Text style={styles.labelTitle}>DATOS DEL TÉCNICO</Text>
-
-          <View style={styles.separator} />
-
-          <View style={styles.sectionInput}>
-            <Text style={styles.labelInput}>Elaborado por</Text>
-            <Text style={styles.input}>{elaboradoPor.value}</Text>
-          </View>
-          <View style={styles.sectionInput}>
-            <Text style={styles.labelInput}>Revisado por</Text>
-            <Text style={styles.input}>{revisadoPor.value}</Text>
-          </View>
-          <View style={styles.sectionInput}>
-            <Text style={styles.labelInput}>Fecha de emisión</Text>
-            <Text style={styles.input}>{fechaEmision.value}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.labelTitle}>DOCUMENTACIÓN VISUAL</Text>
-
-        <View style={styles.separator} />
-
-        {images.value.map((image, index) => (
-          <View style={{ flexDirection: "column", alignItems: "center", paddingTop: "10px" }} wrap={false} minPresenceAhead={100}>
-
-            <View key={index} style={styles.imageContent} >
-              <Image
-                key={index}
                 src={image.src}
-                style={{
-                  width: 570,
-                  height: 375,
-                  objectFit: "contain"
-                }}
-
+                w="100%"
+                h="auto"
+                objectFit="contain"
               />
-            </View>
-
-          </View>
-        ))}
-
-
-
-
-      </Page>
-    </Document>
-  )
-};
-
-const GenerarPDF2 = () => {
-
-
-  return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-
-      <div>
-        <h1>Generador de PDF en ReactJS</h1>
-        <PDFDownloadLink
-          document={<MyPDFDocument />}
-          fileName="reporte.pdf"
-          style={{
-            textDecoration: "none",
-            padding: "10px 20px",
-            color: "#fff",
-            backgroundColor: "#007bff",
-            borderRadius: "5px",
-          }}
-        >
-          {({ blob, url, loading, error }) =>
-            loading ? "Generando documento..." : "Descargar PDF"
-          }
-        </PDFDownloadLink>
-      </div>
-    </Flex>
+            </Box>
+          ))}
+        </VStack>
+      </Box>
+    </Box>
   );
 };
 
 const GenerarPDF = () => {
 
   const { id } = useParams();
-  const timeZone = 'America/Guatemala'; // Define tu zona horaria
+  const timeZone = 'America/Guatemala';
 
   /*=======================================================
    BLOQUE: REDUX-PERSIST
-   DESCRIPTION: 
   =========================================================*/
-  const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+  const userData = useSelector((state) => state.userData);
   const dispatch = useDispatch();
-
-  const saveUserData = (json) => {
-    dispatch({ type: 'SET_USER_DATA', payload: json });
-  };
-
-  const getUserData = () => {
-    dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
-  };
-
-  /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
   // ************** useState **************
   const [refresh, setRefresh] = useState(false);
-  // hallazgos
-  const hallazgos = useRef(null)
-  //const [hallazgosValue,setHallazgosValue] = useState('')
+  const forceUpdate = () => setRefresh(prev => !prev);
 
-  const accionesEjecutadas = useRef(null)
-  //const [accionesEjecutadasValue,setaccionesEjecutadasValue] = useState('')
+  // Refs para contenido HTML
+  const hallazgos = useRef({ value: '' })
+  const accionesEjecutadas = useRef({ value: '' })
+  const recomendaciones = useRef({ value: '' })
 
-  // recomendaciones
-  const recomendaciones = useRef(null)
-  //const [recomendacionesValue,setRecomendacionesValue] = useState('')
-
-  // ubiccaion
+  // Estados simples
   const [ubicacionValue, setUbicacionValue] = useState('Guatemala, Guatemala')
-
-  // lugar
   const [lugarValue, setLugarValue] = useState('')
-
-  // nameUusuario
   const [nameUsuarioValue, setNameUsuarioValue] = useState('')
-
-  // codigo 
   const [codigoValue, setCodigoValue] = useState('')
-
-  // fecha
   const [fechaValue, setFechaValue] = useState(null)
-
-  // celular
   const [celularValue, setCelularValue] = useState('')
-
-  // proyecto
   const [proyectoValue, setProyectoValue] = useState('')
-
-  // equipos - lista de codigos de funca de equipos
   const [equiposValue, setEquiposValue] = useState([])
-
-  // elaboradoPor
   const [elaboradoPorValue, setElaboradoPorValue] = useState(userData?.login?.display_name)
-
-  //sistemas
   const [sistemasValue, setSistemasValue] = useState('')
-
-  // revisadoPor
   const [revisadoPorValue, setRevisadoPorValue] = useState('Jefatura de CITEC')
-
-  // fechaEmision
   const [fechaEmisionValue, setFechaEmisionValue] = useState(formatInTimeZone(toZonedTime(new Date(), timeZone), timeZone, 'yyyy-MM-dd'));
-
-  //images  
   const [imagesValue, setImagesValue] = useState([]);
 
-  // ************** useRef **************
-
-  //images
+  //images ref
   const imagesRef = useRef(imagesValue)
 
-  //trigger Generar PDF
+  //trigger Generar PDF (ahora solo actualiza la vista previa)
   const [triggerGenerarPdf, setTriggerGenerarPdf] = useState(false)
-
-  // ************** functions **************
 
   const handleGenerarPdf = () => {
     setImagesValue(imagesRef.current)
-    setTriggerGenerarPdf(!triggerGenerarPdf)
+    setTriggerGenerarPdf(prev => !prev)
   }
 
   const handleGuardar = () => {
     //console.log("Guardar")
   }
 
-
-
+  const handlePrint = () => {
+    window.print();
+  }
 
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-      <CasoFormulario
-        caso_ID={id}
-        hallazgos={hallazgos}
-        accionesEjecutadas={accionesEjecutadas}
-        recomendaciones={recomendaciones}
-        ubicacion={{ value: ubicacionValue, set: setUbicacionValue }}
-        lugar={{ value: lugarValue, set: setLugarValue }}
-        nameUsuario={{ value: nameUsuarioValue, set: setNameUsuarioValue }}
-        codigo={{ value: codigoValue, set: setCodigoValue }}
-        fecha={{ value: fechaValue, set: setFechaValue }}
-        celular={{ value: celularValue, set: setCelularValue }}
-        proyecto={{ value: proyectoValue, set: setProyectoValue }}
-        equipos={{ value: equiposValue, set: setEquiposValue }}
-        sistemas={{ value: sistemasValue, set: setSistemasValue }}
-        elaboradoPor={{ value: elaboradoPorValue, set: setElaboradoPorValue }}
-        revisadoPor={{ value: revisadoPorValue, set: setRevisadoPorValue }}
-        fechaEmision={{ value: fechaEmisionValue, set: setFechaEmisionValue }}
-        images={{ value: imagesValue, set: setImagesValue }}
-        imagesRef={imagesRef}
-        handle={{ generarPdf: handleGenerarPdf, guardar: handleGuardar }}
+      <style>{printStyles}</style>
 
-      />
-
-      <Flex direction="column" pt={{ base: "120px", md: "75px" }} mb="20px">
-
-        <div>
-          <PDFDownloadLink
-            document={
-              <MyPDFDocument
-                caso_ID={id}
-                hallazgos={hallazgos}
-                accionesEjecutadas={accionesEjecutadas}
-                recomendaciones={recomendaciones}
-                ubicacion={{ value: ubicacionValue, set: setUbicacionValue }}
-                lugar={{ value: lugarValue, set: setLugarValue }}
-                nameUsuario={{ value: nameUsuarioValue, set: setNameUsuarioValue }}
-                codigo={{ value: codigoValue, set: setCodigoValue }}
-                fecha={{ value: fechaValue, set: setFechaValue }}
-                celular={{ value: celularValue, set: setCelularValue }}
-                proyecto={{ value: proyectoValue, set: setProyectoValue }}
-                equipos={{ value: equiposValue, set: setEquiposValue }}
-                sistemas={{ value: sistemasValue, set: setSistemasValue }}
-                elaboradoPor={{ value: elaboradoPorValue, set: setElaboradoPorValue }}
-                revisadoPor={{ value: revisadoPorValue, set: setRevisadoPorValue }}
-                fechaEmision={{ value: fechaEmisionValue, set: setFechaEmisionValue }}
-                images={{ value: imagesValue, set: setImagesValue }}
-
-              />
-            }
-            fileName="reporte.pdf"
-            style={{
-              textDecoration: "none",
-              padding: "10px 20px",
-              color: "#fff",
-              backgroundColor: "#007bff",
-              borderRadius: "5px",
-            }}
-          >
-            {({ blob, url, loading, error }) =>
-              loading ? "Generando documento..." : "Descargar PDF"
-            }
-          </PDFDownloadLink>
-        </div>
-      </Flex>
-
-      <PDFViewer style={{ height: '800px' }} >
-        <MyPDFDocument
+      <Box className="no-print">
+        <CasoFormulario
           caso_ID={id}
-          hallazgos={hallazgos}
-          accionesEjecutadas={accionesEjecutadas}
-          recomendaciones={recomendaciones}
+          hallazgos={hallazgos.current}
+          accionesEjecutadas={accionesEjecutadas.current}
+          recomendaciones={recomendaciones.current}
           ubicacion={{ value: ubicacionValue, set: setUbicacionValue }}
           lugar={{ value: lugarValue, set: setLugarValue }}
           nameUsuario={{ value: nameUsuarioValue, set: setNameUsuarioValue }}
@@ -587,11 +301,45 @@ const GenerarPDF = () => {
           revisadoPor={{ value: revisadoPorValue, set: setRevisadoPorValue }}
           fechaEmision={{ value: fechaEmisionValue, set: setFechaEmisionValue }}
           images={{ value: imagesValue, set: setImagesValue }}
-
+          imagesRef={imagesRef}
+          handle={{ generarPdf: handleGenerarPdf, guardar: handleGuardar }}
+          onDataChange={forceUpdate}
         />
-      </PDFViewer>
+      </Box>
 
+      <Flex direction="column" pt="20px" mb="20px" alignItems="center" className="no-print">
+        <Button
+          colorScheme="blue"
+          size="lg"
+          onClick={handlePrint}
+          mb="20px"
+        >
+          Imprimir / Guardar como PDF
+        </Button>
+        <Text mb="10px" fontWeight="bold">Vista Previa del Reporte:</Text>
+      </Flex>
 
+      {/* Reporte Visible (y para impresión) */}
+      <Box border="1px solid #e2e8f0" boxShadow="lg" mb="50px">
+        <ReportTemplate
+          hallazgos={hallazgos.current.value}
+          accionesEjecutadas={accionesEjecutadas.current.value}
+          recomendaciones={recomendaciones.current.value}
+          ubicacion={ubicacionValue}
+          lugar={lugarValue}
+          nameUsuario={nameUsuarioValue}
+          codigo={codigoValue}
+          fecha={fechaValue}
+          celular={celularValue}
+          proyecto={proyectoValue}
+          equipos={equiposValue}
+          sistemas={sistemasValue}
+          elaboradoPor={elaboradoPorValue}
+          revisadoPor={revisadoPorValue}
+          fechaEmision={fechaEmisionValue}
+          images={imagesRef.current}
+        />
+      </Box>
     </Flex>
   )
 }

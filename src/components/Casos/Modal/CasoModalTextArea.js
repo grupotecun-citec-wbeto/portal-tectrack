@@ -1,12 +1,12 @@
 import React from 'react'
-import { Textarea,Text } from '@chakra-ui/react'
+import { Textarea, Text } from '@chakra-ui/react'
 import CasoRichEditor from './CasoRichEditor'
 
 
 
-const CasoModalTextArea = ({title,value,placeholder,handleChange,reference}) =>{
-    
-    return(
+const CasoModalTextArea = ({ title, value, placeholder, handleChange, reference, onSave }) => {
+
+    return (
         <>
             <Text mb='8px' fontSize="sm">{title}</Text>
             <Textarea
@@ -17,12 +17,13 @@ const CasoModalTextArea = ({title,value,placeholder,handleChange,reference}) =>{
                 ref={reference}
                 display={"none"}
             />
-            <CasoRichEditor 
+            <CasoRichEditor
                 title={title}
                 reference={reference}
                 placeholder={placeholder}
+                onSave={onSave}
             />
-      </>
+        </>
     )
 }
 
