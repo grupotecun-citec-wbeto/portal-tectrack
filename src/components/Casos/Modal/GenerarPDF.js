@@ -145,7 +145,7 @@ const ReportTemplate = ({
         mb="15px"
         width="calc(100% + 20px)"
       />
-      <Box p="10mm">  
+      
         {/* Primera Sección: Datos Principales */}
         <Flex mb="0px">
           <Box w="50%" pr="2">
@@ -295,7 +295,6 @@ const ReportTemplate = ({
           <span>Continúa en la siguiente página...</span>
         </div>
       </Box>
-    </Box>
   );
 };
 
