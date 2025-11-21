@@ -103,6 +103,10 @@ const bakeOrderedListNumbers = (root, level = 1) => {
 
   useEffect(() =>{
     if(hasContent && !isOpen){
+      const el = editorHtml.current
+      reference.html = el.innerHTML.trim();
+    }
+    /*if(hasContent && !isOpen){
         const capture = async () => {
             const el = editorHtml.current
             if (!el) return null;
@@ -126,7 +130,7 @@ const bakeOrderedListNumbers = (root, level = 1) => {
         }).catch(error => {
             console.error("Error: 580d8fb5-5c51-4cc5-ba3e-79411c466d46", error);
         });
-    }
+    }*/
   },[hasContent,isOpen])
 
     const modules = {
