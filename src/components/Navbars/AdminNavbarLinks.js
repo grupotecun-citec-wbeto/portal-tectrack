@@ -155,8 +155,8 @@ export default function HeaderLinks(props) {
       </Box>
 
       <Box
-        bg="gray.500"
-        color="white"
+        bg="yellow.400"
+        color="black"
         px="10px"
         py="5px"
         borderRadius="md"
@@ -247,11 +247,6 @@ export default function HeaderLinks(props) {
           </Menu>
         )
       }
-
-
-
-
-
 
       <CasoListEquiposNavbar props={props} />
 
