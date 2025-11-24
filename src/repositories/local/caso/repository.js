@@ -507,7 +507,7 @@ const repository = {
      * @param {*} currentDateTime 
      * @param {*} equipos 
      */
-    stop: async (id, kmFinal, estado_a_asignar, currentDateTime, equipos) => {
+    stop: async (id, kmFinal, estado_a_asignar, currentDateTime, equiposIfy,diagnosticos) => {
        
 
         const db = getDB();
@@ -524,7 +524,7 @@ const repository = {
                     syncStatus=1 
                 WHERE 
                     ID = ?`);
-            stmt.run([estado_a_asignar, currentDateTime, equipos, id]);
+            stmt.run([estado_a_asignar, currentDateTime, equiposIfy, id]);
             stmt.free();
 
             const stmt2 = db.prepare(`
@@ -541,6 +541,60 @@ const repository = {
                     LIMIT 1) `);
             stmt2.run([kmFinal, id]);
             stmt2.free();
+
+
+            // Ingreso de diagnostico
+            
+            const stmtDiagnostico = db.prepare(`
+                INSERT INTO ${repositoryDiagnostico.tableName}
+                    (equipo_ID, caso_ID, diagnostico_tipo_ID, asistencia_tipo_ID, especialista_ID, description)
+                VALUES
+                    (
+                        ?, ?, ?, ?, ?, ?
+                    )
+            `);
+            
+            
+            for (const { maquina_id, uuid, diagnostico_tipo_ID, asistencia_tipo_ID, especialista_ID, description } of diagnosticos) {
+                stmtDiagnostico.run([maquina_id, uuid, diagnostico_tipo_ID, asistencia_tipo_ID, especialista_ID, description]);
+            }
+            stmtDiagnostico.free();
+
+
+
+            const equipos = JSON.parse(equiposIfy);
+            const stmtServicio = db.prepare(`
+                 INSERT INTO ${repositoryServicio.tableName} (
+                    sistema_ID,
+                    sistema_servicio_ID,
+                    diagnostico_equipo_ID,
+                    diagnostico_caso_ID,
+                    diagnostico_diagnostico_tipo_ID,
+                    "check",
+                    sistema_marca_ID
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+            Object.keys(equipos).map(equipoId => {
+                const equipo = equipos[equipoId]; // aquí ya tienes el objeto interno
+                const diagnostico = equipo?.diagnostico;
+
+                /** @type {Array<SystemNode>} */
+                const sistemasSelected = diagnostico?.sistemasSelectedJson || [];
+                /** @type {Array<ServicioORM>} */
+                const servicios = getStuctureEntity(sistemasSelected, id, equipoId, "2")
+                for (const servicio of servicios) {
+                    stmtServicio.run([
+                        servicio.sistema_ID,
+                        servicio.sistema_servicio_ID,
+                        servicio.diagnostico_equipo_ID,
+                        servicio.diagnostico_caso_ID,
+                        servicio.diagnostico_diagnostico_tipo_ID,
+                        servicio.check,
+                        servicio.sistema_marca_ID
+                    ]);
+                }
+            });
+            stmtServicio.free();
 
             db.exec("COMMIT")
             await persistDatabase();

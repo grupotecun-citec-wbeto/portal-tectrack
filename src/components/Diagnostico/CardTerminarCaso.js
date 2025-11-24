@@ -137,10 +137,32 @@ function CardTerminarCaso(props) {
             if (verificarDiagnosticosMaquinas()) {
                 const caso_id = userData?.casoActivo?.caso_id || ''
                 if (caso_id != '') {
+                    const diagnosticos = []
+                    const equiposArray = Object.keys(equipos).map(Number)
+                    for (const maquina_id of equiposArray) {
+                        // indica cuando un pre-diagnostico no esta completo de la lista de maquinas
+                        const diagnostico = {};
+                        const caso = userData.casos[userData.casoActivo?.code];
+                        const diagnostico_json = caso.equipos[maquina_id].diagnostico;
+                        const prediagnostico = caso.equipos[maquina_id].prediagnostico;
+                        
 
+                        diagnostico.maquina_id = maquina_id;
+                        diagnostico.uuid = caso_id;
+                        diagnostico.diagnostico_tipo_ID = 2; // diagnostico pre
+                        diagnostico.asistencia_tipo_ID = prediagnostico.asistencia_tipo_ID;
+                        diagnostico.especialista_ID = prediagnostico.especialista_ID;
+                        diagnostico.description = decodeURIComponent(diagnostico_json.description);
+
+                        diagnosticos.push(diagnostico);
+                        
+                    }
+
+
+                   
                     const equipos_jsonstringify = JSON.stringify(equipos)
                     try {
-                        await stopCase(caso_id, km_final, estado_a_asignar, getCurrentDateTime(), equipos_jsonstringify)
+                        await stopCase(caso_id, km_final, estado_a_asignar, getCurrentDateTime(), equipos_jsonstringify,diagnosticos)
 
 
                         // sincronizar caso con rehidratación
@@ -153,11 +175,13 @@ function CardTerminarCaso(props) {
                     } catch (err) {
                         console.warn('Error al terminar el caso 07506205-36c1-4767-a2cc-1b5a301754bf', err)
                     }
+                
 
                     // Reiniciando el caso activo, para preparar para el siguiente caso
                     const newUserData = structuredClone(userData)
                     newUserData.casoActivo = structuredClone(newUserData.stuctures.casoActivo)
                     saveUserData(newUserData)
+                    
 
 
 

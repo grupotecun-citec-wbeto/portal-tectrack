@@ -150,7 +150,7 @@ function DiagnosticoBox({ onSearch }) {
       }
       run()
     }
-  }, [userData.casoActivo.code, changeReady])
+  }, [userData?.casoActivo?.code, changeReady])
 
   // Obtener la lista de generalmachinessystem, obtine todos los systemas
   useEffect(() => {
