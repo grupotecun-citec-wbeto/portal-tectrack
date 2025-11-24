@@ -499,27 +499,46 @@ const repository = {
 
     },
 
+    /**
+     * 
+     * @param {*} id 
+     * @param {*} kmFinal 
+     * @param {*} estado_a_asignar 
+     * @param {*} currentDateTime 
+     * @param {*} equipos 
+     */
     stop: async (id, kmFinal, estado_a_asignar, currentDateTime, equipos) => {
-        /*
-        // Actualizar estado del caso y agregar la lista de equipos
-                    db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, date_end = '${getCurrentDateTime()}' , equipos = '${JSON.stringify(equipos)}', syncStatus=1 where ID = '${caso_id}'`)
-                        
-                    // registrar el kilometraje final del caso
-                    const query = `UPDATE visita_v2 SET km_final = '${km_final}' where ID = (SELECT visita_ID FROM caso_visita_v2 WHERE caso_ID = '${caso_id}' LIMIT 1) `
-                    db.run(query) 
-        */
+       
 
         const db = getDB();
 
         try {
+            console.log("stop", "aad63b1a-7857-4245-b510-2ecc03039259")
             db.exec("BEGIN TRANSACTION")
-            const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ?, date_end = ? , equipos = ?, syncStatus=1 where ID = ?`);
-            //console.log([estado_a_asignar,currentDateTime,equipos,id], "b24a1fd5-9549-41b3-b865-63dd6fc84b14")
+            const stmt = db.prepare(`
+                UPDATE ${repository.tableName} 
+                SET 
+                    caso_estado_ID = ?, 
+                    date_end = ?, 
+                    equipos = ?, 
+                    syncStatus=1 
+                WHERE 
+                    ID = ?`);
             stmt.run([estado_a_asignar, currentDateTime, equipos, id]);
             stmt.free();
 
-            const stmt2 = db.prepare(`UPDATE ${repositoryVisita.tableName} SET km_final = ? where ID = (SELECT visita_ID FROM ${repositoryCasoVisita.tableName} WHERE caso_ID = ? LIMIT 1) `);
-            //console.log([kmFinal,id], "4baa164a-22f3-4497-9352-0d60abd5496a")
+            const stmt2 = db.prepare(`
+                UPDATE ${repositoryVisita.tableName} 
+                SET 
+                    km_final = ? 
+                WHERE ID = (
+                    SELECT 
+                        visita_ID 
+                    FROM 
+                        ${repositoryCasoVisita.tableName} 
+                    WHERE 
+                        caso_ID = ? 
+                    LIMIT 1) `);
             stmt2.run([kmFinal, id]);
             stmt2.free();
 
