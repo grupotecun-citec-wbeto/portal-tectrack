@@ -1,8 +1,22 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Tree, Input } from "antd";
 import "antd/dist/reset.css";
-import { Box, Tag, TagLabel, TagCloseButton, HStack, Text, VStack, Button } from "@chakra-ui/react";
+import { Box, Tag, TagLabel, TagCloseButton, HStack, Text, VStack, Button, Icon } from "@chakra-ui/react";
 import { isEmptyArray } from "formik";
+import {
+  FaTools,
+  FaBalanceScale,
+  FaClipboardCheck,
+  FaArrowUp,
+  FaMicrochip,
+  FaArrowDown,
+  FaChalkboardTeacher,
+  FaChartLine,
+  FaClipboardList,
+  FaCog,
+  FaTag,
+  FaSitemap
+} from "react-icons/fa";
 
 const { Search } = Input;
 
@@ -109,6 +123,34 @@ function findRelatedKeys(nodes, targetKey) {
  * @param {*} prop 
  * @returns 
  */
+const getIcon = (title) => {
+  const lowerTitle = title.toLowerCase();
+  if (lowerTitle.includes("instalación")) return <Icon as={FaTools} color="blue.500" />;
+  if (lowerTitle.includes("calibración")) return <Icon as={FaBalanceScale} color="orange.500" />;
+  if (lowerTitle.includes("inspección técnica")) return <Icon as={FaClipboardCheck} color="green.500" />;
+  if (lowerTitle.includes("actualización")) return <Icon as={FaArrowUp} color="cyan.500" />;
+  if (lowerTitle.includes("cambio de hardware")) return <Icon as={FaMicrochip} color="purple.500" />;
+  if (lowerTitle.includes("downgrade")) return <Icon as={FaArrowDown} color="red.500" />;
+  if (lowerTitle.includes("capacitación")) return <Icon as={FaChalkboardTeacher} color="yellow.500" />;
+  if (lowerTitle.includes("seguimiento")) return <Icon as={FaChartLine} color="teal.500" />;
+  if (lowerTitle.includes("evaluación")) return <Icon as={FaClipboardList} color="pink.500" />;
+  if (lowerTitle.includes("configuración")) return <Icon as={FaCog} color="gray.500" />;
+
+  // Heuristics for Brand and System if not explicitly matched above
+  // Assuming "Sistema" nodes might contain "Sistema" in title or be root
+  if (lowerTitle.includes("sistema")) return <Icon as={FaSitemap} color="blue.600" />;
+
+  // Default for others, potentially "Marca" if it's a brand node
+  // Since we don't have explicit "Marca" text in all brand nodes, we might use a generic tag icon
+  // for nodes that don't match the above but are likely brands (intermediate nodes)
+  return <Icon as={FaTag} color="gray.400" />;
+};
+
+/**
+ * 
+ * @param {*} prop 
+ * @returns 
+ */
 export default function AntdTreeLiveJSON(prop) {
   const [checkedKeys, setCheckedKeys] = useState([]); // solo los checked reales
   const [halfCheckedKeys, setHalfCheckedKeys] = useState([]); // semiseleccionados (padres)
@@ -200,6 +242,8 @@ export default function AntdTreeLiveJSON(prop) {
           }
         }}
         showLine
+        showIcon
+        icon={(node) => getIcon(node.title)}
       />
 
       <Box borderWidth="1px" borderRadius="lg" p={4} bg="white" shadow="sm">
