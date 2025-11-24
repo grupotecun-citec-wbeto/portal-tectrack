@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Tree, Input } from "antd";
 import "antd/dist/reset.css";
+import { Box, Tag, TagLabel, TagCloseButton, HStack, Text, VStack } from "@chakra-ui/react";
 import { isEmptyArray } from "formik";
 
 const { Search } = Input;
@@ -98,6 +99,32 @@ function getAllKeys(nodes) {
   return keys;
 }
 
+function findRelatedKeys(nodes, targetKey) {
+  const descendants = [];
+  const ancestors = [];
+
+  const traverse = (currentNodes, currentAncestors) => {
+    for (const node of currentNodes) {
+      if (node.key === targetKey) {
+        const collect = (n) => {
+          descendants.push(n.key);
+          if (n.children) n.children.forEach(collect);
+        }
+        collect(node);
+        ancestors.push(...currentAncestors);
+        return true;
+      }
+      if (node.children) {
+        if (traverse(node.children, [...currentAncestors, node.key])) return true;
+      }
+    }
+    return false;
+  };
+
+  traverse(nodes, []);
+  return { descendants, ancestors };
+}
+
 /**
  * 
  * @param {*} prop 
@@ -126,6 +153,35 @@ export default function AntdTreeLiveJSON(prop) {
     const halfSet = new Set(halfCheckedKeys);
     return buildSelectedTree(treeData, checkedSet, halfSet);
   }, [treeData, checkedKeys, halfCheckedKeys]);
+
+  const handleRemove = (key) => {
+    const { descendants, ancestors } = findRelatedKeys(treeData, key);
+    const keysToRemove = new Set([...descendants, ...ancestors]);
+    setCheckedKeys((prev) => prev.filter((k) => !keysToRemove.has(k)));
+  };
+
+  const renderSelectedNodes = (nodes) => {
+    return nodes.map((node) => (
+      <Box key={node.key} mb={2}>
+        <HStack spacing={2} mb={1}>
+          <Tag
+            size="md"
+            borderRadius="full"
+            variant="subtle"
+            colorScheme="blue"
+          >
+            <TagLabel>{node.title}</TagLabel>
+            <TagCloseButton onClick={() => handleRemove(node.key)} />
+          </Tag>
+        </HStack>
+        {node.children && node.children.length > 0 && (
+          <Box ml={6} borderLeft="2px solid" borderColor="gray.100" pl={2}>
+            {renderSelectedNodes(node.children)}
+          </Box>
+        )}
+      </Box>
+    ));
+  };
 
   return (
     <div style={{ display: "grid", gap: 12 }}>
@@ -157,16 +213,18 @@ export default function AntdTreeLiveJSON(prop) {
         showLine
       />
 
-      <div style={{ border: "1px solid #eee", borderRadius: 8, padding: 12 }}>
-        <div style={{ fontWeight: 600, marginBottom: 8 }}>Selección (JSON)</div>
-        <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>
-          {JSON.stringify(
-            selectedJson.filter((node) => node.key.startsWith("A-") && node.key.length !== 2),
-            null,
-            2
-          )}
-        </pre>
-      </div>
+      <Box borderWidth="1px" borderRadius="lg" p={4} bg="white" shadow="sm">
+        <Text fontWeight="bold" mb={3} fontSize="lg">
+          Selección
+        </Text>
+        {selectedJson.filter((node) => node.key.startsWith("A-") && node.key.length !== 2).length === 0 ? (
+          <Text color="gray.500" fontSize="sm">No hay elementos seleccionados</Text>
+        ) : (
+          <VStack align="stretch" spacing={1}>
+            {renderSelectedNodes(selectedJson.filter((node) => node.key.startsWith("A-") && node.key.length !== 2))}
+          </VStack>
+        )}
+      </Box>
     </div>
   );
 }
