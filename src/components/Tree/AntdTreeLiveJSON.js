@@ -191,7 +191,11 @@ export default function AntdTreeLiveJSON(prop) {
             borderRadius="full"
             variant="subtle"
             colorScheme="blue"
+            py={1}
           >
+            <Box as="span" mr={2} display="flex" alignItems="center">
+              {getIcon(node.title)}
+            </Box>
             <TagLabel>{node.title}</TagLabel>
             <TagCloseButton onClick={() => handleRemove(node.key)} />
           </Tag>
