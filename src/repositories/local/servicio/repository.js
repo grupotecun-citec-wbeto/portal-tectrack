@@ -132,7 +132,15 @@ const repository = {
         try {
             const placeholders = uuids.map(() => '?').join(', ');
             const stmt = db.prepare(`
-                SELECT * FROM ${repository.tableName} 
+                SELECT 
+                sistema_ID,
+                sistema_servicio_ID,
+                diagnostico_equipo_ID,
+                diagnostico_caso_ID,
+                diagnostico_diagnostico_tipo_ID,
+                "check",
+                sistema_marca_ID
+                FROM ${repository.tableName} 
                 WHERE diagnostico_caso_ID IN (${placeholders})
             `);
             stmt.bind(uuids);
