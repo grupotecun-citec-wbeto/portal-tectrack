@@ -1,8 +1,12 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { Tree, Input } from "antd";
 import "antd/dist/reset.css";
 import { Box, Tag, TagLabel, TagCloseButton, HStack, Text, VStack, Button, Icon } from "@chakra-ui/react";
 import { isEmptyArray } from "formik";
+
+// redux
+import { useSelector, useDispatch } from 'react-redux';
+
 import {
   FaTools,
   FaBalanceScale,
@@ -118,6 +122,24 @@ function findRelatedKeys(nodes, targetKey) {
   return { descendants, ancestors };
 }
 
+function extractKeysFromSavedTree(nodes) {
+  const checked = [];
+  const halfChecked = [];
+
+  const traverse = (list) => {
+    list.forEach((node) => {
+      if (node.checked) checked.push(node.key);
+      if (node.halfChecked) halfChecked.push(node.key);
+      if (node.children && node.children.length > 0) {
+        traverse(node.children);
+      }
+    });
+  };
+
+  traverse(nodes);
+  return { checked, halfChecked };
+}
+
 /**
  * 
  * @param {*} prop 
@@ -159,6 +181,46 @@ export default function AntdTreeLiveJSON(prop) {
 
   const filtered = useMemo(() => getAllKeys(filterTreeByText(treeData, search)), [treeData, search]);
 
+  /**************************** Block redux ****************************/
+  const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
+  const dispatch = useDispatch();
+
+  const lastSavedJsonString = useRef("");
+
+  // Load from Redux on mount or when Redux changes
+  useEffect(() => {
+    if (userData && userData.casoActivo && userData.casos) {
+      const caso = userData.casos[userData.casoActivo.code];
+      if (caso && caso.equipos) {
+        const equipo = caso.equipos[userData.casoActivo.maquina_id];
+        if (equipo && equipo.prediagnostico && equipo.prediagnostico.sistemasSelectedJson) {
+          const savedJson = equipo.prediagnostico.sistemasSelectedJson;
+
+          // Break loop: if the incoming data is exactly what we just saved, ignore it.
+          if (JSON.stringify(savedJson) === lastSavedJsonString.current) {
+            return;
+          }
+
+          const { checked, halfChecked } = extractKeysFromSavedTree(savedJson);
+
+          // Avoid setting state if it's effectively the same to prevent render loops
+          setCheckedKeys((prev) => {
+            const prevSorted = [...prev].sort();
+            const checkedSorted = [...checked].sort();
+            if (JSON.stringify(prevSorted) === JSON.stringify(checkedSorted)) return prev;
+            return checked;
+          });
+          setHalfCheckedKeys((prev) => {
+            const prevSorted = [...prev].sort();
+            const halfCheckedSorted = [...halfChecked].sort();
+            if (JSON.stringify(prevSorted) === JSON.stringify(halfCheckedSorted)) return prev;
+            return halfChecked;
+          });
+        }
+      }
+    }
+  }, [userData]);
+
   const [expandedKeys, setExpandedKeys] = useState([]);
 
   useEffect(() => {
@@ -174,6 +236,33 @@ export default function AntdTreeLiveJSON(prop) {
     const halfSet = new Set(halfCheckedKeys);
     return buildSelectedTree(treeData, checkedSet, halfSet);
   }, [treeData, checkedKeys, halfCheckedKeys]);
+
+  // Auto-save to Redux when selectedJson changes
+  useEffect(() => {
+    if (!userData || !userData.casoActivo || !userData.casos) return;
+
+    const caso = userData.casos[userData.casoActivo.code];
+    if (!caso || !caso.equipos) return;
+    const equipo = caso.equipos[userData.casoActivo.maquina_id];
+    if (!equipo || !equipo.prediagnostico) return;
+
+    const currentSaved = equipo.prediagnostico.sistemasSelectedJson;
+
+    // Only save if the data has actually changed
+    if (JSON.stringify(selectedJson) !== JSON.stringify(currentSaved)) {
+      // Use structuredClone if available, otherwise JSON parse/stringify
+      const newUserData = typeof structuredClone === 'function'
+        ? structuredClone(userData)
+        : JSON.parse(JSON.stringify(userData));
+
+      newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.sistemasSelectedJson = selectedJson;
+
+      // Update ref BEFORE dispatching to prevent the echo
+      lastSavedJsonString.current = JSON.stringify(selectedJson);
+
+      dispatch({ type: 'SET_USER_DATA', payload: newUserData });
+    }
+  }, [selectedJson, userData, dispatch]);
 
   const handleRemove = (key) => {
     const { descendants, ancestors } = findRelatedKeys(treeData, key);
