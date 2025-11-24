@@ -288,7 +288,7 @@ function DiagnosticoBox({ onSearch }) {
 
           </Flex>
           <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
-            <Card>
+            {/*<Card>
               <CardHeader>
                 <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}>¿El prediagnóstico fue atinado?</Heading>
               </CardHeader>
@@ -312,7 +312,7 @@ function DiagnosticoBox({ onSearch }) {
                 </Flex>
               </CardBody>
 
-            </Card>
+            </Card>*/}
             {!check && (
               <>
                 <Card>
