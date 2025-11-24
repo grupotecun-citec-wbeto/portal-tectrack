@@ -359,7 +359,7 @@ import {
                     ) : sistemasError ? (
                       <Text>Error al cargar los sistemas: {sistemasError.message}</Text>
                     ) : (
-                      <AntdTreeLiveJSON treeData={sistemasData} />
+                      <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="prediagnostico" />
                     )}
 
                   </CardBody>
