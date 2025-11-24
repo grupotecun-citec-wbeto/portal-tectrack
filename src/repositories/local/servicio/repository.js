@@ -120,6 +120,32 @@ const repository = {
             console.error(`${PACKAGE} deleteByCasoId`, err);
             throw err;
         }
+    },
+
+    /**
+     * Obtiene registros por una lista de diagnostico_caso_ID
+     * @param {Array<string>} uuids 
+     * @returns {Promise<Array>}
+     */
+    findByListCaseIds: async (uuids) => {
+        const db = await getDB();
+        try {
+            const placeholders = uuids.map(() => '?').join(', ');
+            const stmt = db.prepare(`
+                SELECT * FROM ${repository.tableName} 
+                WHERE diagnostico_caso_ID IN (${placeholders})
+            `);
+            stmt.bind(uuids);
+            const result = [];
+            while (stmt.step()) {
+                result.push(stmt.getAsObject());
+            }
+            stmt.free();
+            return result;
+        } catch (err) {
+            console.error(`${PACKAGE} findByListCaseIds`, err);
+            throw err;
+        }
     }
 };
 

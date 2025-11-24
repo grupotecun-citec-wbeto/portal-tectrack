@@ -209,7 +209,6 @@ const repository = {
                 const sistemasSelected = prediagnostico?.sistemasSelectedJson || [];
                 /** @type {Array<ServicioORM>} */
                 const servicios = getStuctureEntity(sistemasSelected, uuid, equipoId, "1")
-                console.log(servicios, 'servicios 03b98ea7-5304-40fa-b312-172a9953a88c')
                 for (const servicio of servicios) {
                     stmtServicio.run([
                         servicio.sistema_ID,
