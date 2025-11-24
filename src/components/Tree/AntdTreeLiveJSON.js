@@ -6,27 +6,6 @@ import { isEmptyArray } from "formik";
 
 const { Search } = Input;
 
-/*const treeData = [
-  {
-    title: "Sistema de Inspecciones",
-    key: "inspecciones",
-    children: [
-      { title: "DOA", key: "inspecciones-doa" },
-      { title: "SMC", key: "inspecciones-smc" },
-      { title: "PQC", key: "inspecciones-pqc" },
-    ],
-  },
-  {
-    title: "Sistema de Taller",
-    key: "taller",
-    children: [
-      { title: "Diagnóstico", key: "taller-diagnostico" },
-      { title: "Mantenimiento", key: "taller-mantenimiento" },
-      { title: "Reportes", key: "taller-reportes" },
-    ],
-  },
-];*/
-
 /** Construye un árbol SOLO con lo seleccionado/semiseleccionado */
 function buildSelectedTree(nodes, checkedSet, halfSet) {
   const walk = (arr) =>
