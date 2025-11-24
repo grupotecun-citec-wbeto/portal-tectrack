@@ -42,6 +42,7 @@ export function toOTree(systems, services, areas, marcas) {
             key: `A-${area.id.toString()}`,
             sistemaId: null,
             areaId: area.id,
+            marcaId: null,
             leafNode: true,
             children: systems
                 .filter(sistema => sistema.areaId === area.id)
