@@ -137,6 +137,7 @@ export default function AntdTreeLiveJSON(prop) {
     const { descendants, ancestors } = findRelatedKeys(treeData, key);
     const keysToRemove = new Set([...descendants, ...ancestors]);
     setCheckedKeys((prev) => prev.filter((k) => !keysToRemove.has(k)));
+    setHalfCheckedKeys((prev) => prev.filter((k) => !keysToRemove.has(k)));
   };
 
   const renderSelectedNodes = (nodes) => {
