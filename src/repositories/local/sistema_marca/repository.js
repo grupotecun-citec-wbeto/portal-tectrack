@@ -37,6 +37,9 @@ const repository = {
         await persistDatabase();
     },
     
+    /**
+     *  @return {Array<SistemaMarcaORM>}
+     */
     findAll: () => {
         const db = getDB();
         const stmt = db.prepare(`SELECT * FROM ${repository.tableName}`);

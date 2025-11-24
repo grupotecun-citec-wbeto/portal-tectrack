@@ -134,6 +134,8 @@ import { store, persistor } from './redux/store.js';
 
 import FullscreenLoader from "@components/Loaders/FullscreenLoader.jsx";
 
+import '@domain/dto';
+
 const UserProfile = () => {
   const { userId } = useParams();
 

@@ -37,6 +37,11 @@ const repository = {
         await persistDatabase();
     },
     
+    
+    /**
+     * 
+     * @returns {Array<AreaORM>}
+     */
     findAll: () => {
         const db = getDB();
         const stmt = db.prepare(`SELECT * FROM ${repository.tableName}`);

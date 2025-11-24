@@ -24,6 +24,8 @@ module.exports = function override(config) {
       "@hooks": path.resolve(__dirname, "src/hooks"),
       "@services": path.resolve(__dirname, "src/services"),
       "@types": path.resolve(__dirname, "src/types"),
+      "@application": path.resolve(__dirname, "src/application"),
+      "@domain": path.resolve(__dirname, "src/domain"),
     };
   
 
