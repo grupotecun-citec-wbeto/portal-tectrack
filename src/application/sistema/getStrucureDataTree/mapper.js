@@ -13,7 +13,24 @@ import { node } from "stylis";
  * 
  */
 export function toOTree(systems, services, areas, marcas) {
-    
+
+    /**
+     * Helper to parse MARCA names
+     * @param {string} rawName 
+     */
+    const parseMarca = (rawName) => {
+        if (typeof rawName === 'string' && rawName.startsWith("MARCA|")) {
+            const parts = rawName.split("|");
+            if (parts.length >= 3) {
+                return {
+                    name: `MARCA ${parts[1]}`,
+                    marcaId: parseInt(parts[2], 10)
+                };
+            }
+        }
+        return { name: rawName, marcaId: null };
+    };
+
     /**
      * 
      * @param {Array<SistemaDTO>} systems 
@@ -27,25 +44,29 @@ export function toOTree(systems, services, areas, marcas) {
             areaId: area.id,
             leafNode: true,
             children: systems
-            .filter(sistema => sistema.areaId === area.id)
-            .map(item => ({
-                title: item.id.toString() + " - " + item.name,
-                key: item.id.toString(),
-                sistemaId: item.sistemaId,
-                areaId: item.areaId,
-                leafNode: true,
-                children: []
-            }))
+                .filter(sistema => sistema.areaId === area.id)
+                .map(item => {
+                    const { name, marcaId } = parseMarca(item.name);
+                    return {
+                        title: item.id.toString() + " - " + name,
+                        key: item.id.toString(),
+                        sistemaId: item.sistemaId,
+                        areaId: item.areaId,
+                        marcaId: marcaId,
+                        leafNode: true,
+                        children: []
+                    };
+                })
         }));
     }
 
-    
-    
+
+
     /**
      * @type {Array<SystemNode>}
      */
     const systemLevel1 = buildSystemLevel1(systems);
-   
+
     const servicios = services;
     // Combine sistemas with their servicios
     /**
@@ -55,9 +76,9 @@ export function toOTree(systems, services, areas, marcas) {
      * @returns {Array<SystemNode> | undefined}
      */
     const buildHierarchy = (parent, allSystems) => {
-        
-        if(parent.leafNode){
-            const children = (!parent.key.startsWith('A-')) 
+
+        if (parent.leafNode) {
+            const children = (!parent.key.startsWith('A-'))
                 ? allSystems.filter(child => child.sistemaId === parseInt(parent.key))
                 : parent.children;
             return children.map(child => ({
@@ -65,13 +86,13 @@ export function toOTree(systems, services, areas, marcas) {
                 children: [
                     ...buildServices(child),
                     ...buildHierarchy(child, allSystems),
-                    
+
                 ]
             }));
-        }else{
+        } else {
             return [];
         }
-        
+
     };
 
     /**
@@ -83,14 +104,18 @@ export function toOTree(systems, services, areas, marcas) {
          * @type {Array<SistemaServicioDTO>}
          */
         const serviciosAux = servicios.filter(servicio => servicio.sistemaId == parseInt(child.key));
-        return serviciosAux.map(servicio => ({
-            title: servicio.name,
-            key: `S-${servicio.id.toString()}`,
-            sistemaId: servicio.sistemaId,
-            areaId: null,
-            leafNode: false,
-            children: []
-        }));
+        return serviciosAux.map(servicio => {
+            const { name, marcaId } = parseMarca(servicio.name);
+            return {
+                title: name,
+                key: `S-${servicio.id.toString()}`,
+                sistemaId: servicio.sistemaId,
+                areaId: null,
+                marcaId: marcaId,
+                leafNode: false,
+                children: []
+            };
+        });
     }
 
     /**
@@ -98,16 +123,20 @@ export function toOTree(systems, services, areas, marcas) {
      * @returns 
      */
     const buildAllSystems = (systems) => {
-        return systems.map(item => ({
-            title: item.id.toString() + " - " + item.name,  
-            key: item.id.toString(),
-            sistemaId: item.sistemaId,
-            areaId: item.areaId,
-            leafNode: true,
-            children: []
-        }));
+        return systems.map(item => {
+            const { name, marcaId } = parseMarca(item.name);
+            return {
+                title: item.id.toString() + " - " + name,
+                key: item.id.toString(),
+                sistemaId: item.sistemaId,
+                areaId: item.areaId,
+                marcaId: marcaId,
+                leafNode: true,
+                children: []
+            };
+        });
     }
-    
+
 
     const combinedData = systemLevel1.map(sistema => ({
         ...sistema,
@@ -115,7 +144,7 @@ export function toOTree(systems, services, areas, marcas) {
     }));
 
     return combinedData;
-    
+
     /*return entity.map(item => ({
         id: item.ID,
         areaId: item.area_ID,

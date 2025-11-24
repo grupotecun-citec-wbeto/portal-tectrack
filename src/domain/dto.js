@@ -28,6 +28,7 @@
  * @property {string} key - Clave única del nodo.
  * @property {number} sistemaId - Foreign key referencing the sistema table.
  * @property {number|null} areaId - Foreign key referencing the area table (optional).
+ * @property {number|null} marcaId - Foreign key referencing the marca table (optional).
  * @property {boolean} leafNode - Indica si el nodo es una hoja (sin hijos).
  * @property {Array<SystemNode>} [children] - Lista de nodos hijos (opcional).
  */

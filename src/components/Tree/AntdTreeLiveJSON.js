@@ -39,6 +39,7 @@ function buildSelectedTree(nodes, checkedSet, halfSet) {
           return {
             key: n.key,
             title: n.title,
+            ...(n.marcaId ? { marcaId: n.marcaId } : {}),
             checked,
             halfChecked,
             ...(children.length ? { children } : {}),
