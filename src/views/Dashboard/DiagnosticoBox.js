@@ -8,6 +8,9 @@ import {v4 as uuidv4} from 'uuid' // Importa la función para generar UUID
 =========================================================*/
 import { Link, useHistory   } from 'react-router-dom';
 
+
+import AntdTreeLiveJSON from "@components/Tree/AntdTreeLiveJSON";
+
 import CardGuardarDiagnostico from "components/Diagnostico/CardGuardarDiagnostico";
 
 import {
@@ -55,6 +58,7 @@ import {
   // base de datos
   import { useDataBaseContext } from "dataBaseContext";
   import useSistema from "hooks/sistema/useSistema";
+  import useSistemasChildrens from "@hooks/sistema/useSistemasChildrens";
 
   
   //*********************************************** FIN IMPORT ***************************************************** */
@@ -72,6 +76,8 @@ import {
     // dbReady
     const { dbReady } = useDataBaseContext();
     const { getNivel1 } = useSistema(dbReady,false);
+
+    const {loading: sistemasLoading, data: sistemasData, error: sistemasError} = useSistemasChildrens(dbReady)
     
     /*=======================================================
      BLOQUE: variable hitory
@@ -321,7 +327,7 @@ import {
                       </CardBody>
                       
                   </Card>
-                  <Card>
+                  {/*<Card>
                       <CardHeader>
                         <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
                       </CardHeader>
@@ -343,7 +349,24 @@ import {
                           
                       </CardBody>
                       
-                  </Card>
+                  </Card>*/}
+                  <Card>
+                    <CardHeader>
+                      <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Sistemas y servicios</Heading>
+                    </CardHeader>
+                    <CardBody mt={{xl:'10px'}}>
+
+                      {sistemasLoading ? (
+                        <Text>Cargando sistemas...</Text>
+                      ) : sistemasError ? (
+                        <Text>Error al cargar los sistemas: {sistemasError.message}</Text>
+                      ) : (
+                        <AntdTreeLiveJSON treeData={sistemasData} />
+                      )}
+
+                    </CardBody>
+                    
+                </Card>
 
                   <CardHerramientas title="¿Que herramientas utilizaste?"/>
                 </>

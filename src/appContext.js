@@ -91,7 +91,8 @@ export function AppProvider({ children }) {
               prioridad:0,//INTEGER NULL,
               herramientas:{/*equipamiento*/}, // Object
               sistemas:{/*servicio */},
-              isEqualPreDiagnostico:false // indica si un dianostico es igual a una predianostico
+              isEqualPreDiagnostico:false, // indica si un dianostico es igual a una predianostico
+              sistemasSelectedJson:[]
             }
 
             const programa = {
