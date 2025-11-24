@@ -1,11 +1,28 @@
+/**
+ * Structure
+ * ------------------------
+ * Imports
+ *  - React
+ *  - State Management(Redux)
+ *  - Repositories
+ *  - Context
+ * Component
+ *  - State Management(Redux)
+ *  - Hooks
+ *  - State Management(Local)
+ *  - Functions
+ *  - return
+ * Export
+ */
+
+
+// Imports React
 import { useState,useContext,useEffect } from 'react';
 
-//redux
+// Imports Redux
 import { useSelector, useDispatch } from 'react-redux';
 
-import { useDataBaseContext } from 'dataBaseContext';
-
-// repositorios de datos
+// Imports Repositories
 import syncRepository from 'repositories/api/syncRepository';
 import repositoryDiagnostico from 'repositories/local/diagnostico/repository';
 import repositoryVisita from 'repositories/local/visita/repository';
@@ -15,16 +32,10 @@ import repositoryCaso from 'repositories/local/caso/repository';
 
 function useCargarCaso(caso_id = false) {
   
-  // Preparar la base de datos
-  //const {dbReady} = useDataBaseContext()
-
-    // *********************************** HOOK CASO **************************************
-    // ************* HOOOK CASO *************************************HOOK CASO ************
-    // *********************************** HOOK CASO **************************************
   /*=======================================================
-     BLOQUE: REDUX-PERSIST
-     DESCRIPTION: 
-    =========================================================*/
+    BLOQUE: REDUX-PERSIST
+    DESCRIPTION: 
+  =========================================================*/
     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
     const dispatch = useDispatch();
 
@@ -36,13 +47,17 @@ function useCargarCaso(caso_id = false) {
         dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
     };
 
-    /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
+  /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
+  
+  // Component States Management(Local)
 
   const [times,setTimes] = useState({'caso':300000})
 
+  
+  // Component Functions
+  
   const loadCasoPromise = async() =>{
-    //rehidratarDb();
     if(caso_id == '') return;
     const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
     
@@ -52,10 +67,9 @@ function useCargarCaso(caso_id = false) {
         try {
           const casosNoSincronizados = await repositoryCaso.unsynchronizedCase(caso_id)
           
-          //console.log('casosNoSincronizados: 9ef51e92-feb1-4a2e-b178-8f9af10f7ed5', casosNoSincronizados,caso_id);
             
           if(casosNoSincronizados.length != 0){  
-            //console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
+            // List of uuids of unsynchronized cases
             const uuids = casosNoSincronizados.map(objeto => objeto.ID);
             
             const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
@@ -100,10 +114,15 @@ function useCargarCaso(caso_id = false) {
       
     });
 
+    
+    
+    // This block of code (fetchData and setInterval) is intentionally commented out.
+    // It was part of a previous implementation for automatic synchronization using intervals within the loadCaso function.
+    // It is being kept for potential future reference or re-activation if interval-based synchronization is reintroduced.
     // Llamar a la función de inmediato
-    //fetchData(codigo);
+    // fetchData(codigo);
     // Configurar un intervalo para que se ejecute cada 5 minutos (300000 ms)
-    //const intervalId = setInterval(() => fetchData(codigo), time);
+    // const intervalId = setInterval(() => fetchData(codigo), time);
 
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
@@ -114,21 +133,15 @@ function useCargarCaso(caso_id = false) {
    * Obtener lista de casos no sincronizados
    */
   const loadCaso = async() =>{
-    //rehidratarDb();
     if(caso_id == '') return;
     const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
     
 
     const fetchData = async (synctable_ID) => {
-      //if(dbReady){
         try {
           const casosNoSincronizados = await repositoryCaso.unsynchronizedCases(caso_id)
-          //const casosErrorSincronizados = await repositoryCaso.errorSynchronizedCases()
-          
-          //console.log('casosNoSincronizados: 90fc269c-e903-4dc6-a4fc-a73c7afa8d99', casosNoSincronizados,caso_id);
             
           if(casosNoSincronizados.length != 0){  
-            //console.log('loadCaso e91d3519-15d5-4d90-aa0d-1ae507eb6943', casosNoSincronizados); 
             const uuids = casosNoSincronizados.map(objeto => objeto.ID);
             
             const listaCasos = {casosNoSincronizados: casosNoSincronizados,uuids: uuids}
@@ -136,7 +149,6 @@ function useCargarCaso(caso_id = false) {
             try{
               await syncCloud(formDataMerge) // sincroniza con la nube
             }catch(err){
-              //await repositoryCaso.markAsErrorSynchronized(listaCasos)
               if(err.code != 'ERR_NETWORK'){
                 for (const uuid of uuids) {
                   await repositoryCaso.setAsUnSynchronized(uuid) // colocar en estado 1
@@ -165,11 +177,6 @@ function useCargarCaso(caso_id = false) {
           }
           console.error('Error fetching data: 70983d04-a730-4b3c-963d-e07872845b27', error);
         }
-        
-      /*}else{
-        console.log('cadb0a6c-385b-4caf-89e5-f79ed4b6fc27');
-        
-      }*/
     };
 
     // Llamar a la función de inmediato
@@ -183,11 +190,9 @@ function useCargarCaso(caso_id = false) {
 
 
   const loadCasos = async() =>{
-    //rehidratarDb();
     const codigo = 4, tabla = 'caso', setTime = setTimes, time = times[tabla]
 
     return new Promise(async(resolve, reject) => {
-      /*if(dbReady){*/
         try {
           const casosNoSincronizados = await repositoryCaso.unsynchronizedCases()
           
@@ -223,15 +228,6 @@ function useCargarCaso(caso_id = false) {
     // Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(intervalId);
   }
-
-
-
-
-
-
-
-  
-
 
   /**
    * Cargar datos hacia medio de datos enviado por repositorio de datos.

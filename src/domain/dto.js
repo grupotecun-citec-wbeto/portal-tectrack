@@ -30,6 +30,8 @@
  * @property {number|null} areaId - Foreign key referencing the area table (optional).
  * @property {number|null} marcaId - Foreign key referencing the marca table (optional).
  * @property {boolean} leafNode - Indica si el nodo es una hoja (sin hijos).
+ * @property {boolean} [checked] - Indica si el nodo está marcado.
+ * @property {boolean} [halfChecked] - Indica si el nodo está semiseleccionado.
  * @property {Array<SystemNode>} [children] - Lista de nodos hijos (opcional).
  */
 
@@ -51,4 +53,18 @@
  * @property {string|null} updatedAt - Timestamp when the record was last updated.
  */
 
+
+/**
+ * @typedef {Object} ServicioDTO
+ * @property {number} sistemaId - Foreign key referencing the sistema table.
+ * @property {number} sistemaServicioId - Foreign key referencing the sistema_servicio table.
+ * @property {number} diagnosticoEquipoId - Foreign key referencing the diagnostico_equipo table.
+ * @property {number} diagnosticoCasoId - Foreign key referencing the diagnostico_caso table.
+ * @property {number} diagnosticoDiagnosticoTipoId - Foreign key referencing the diagnostico_diagnostico_tipo table.
+ * @property {number} check - Check value.
+ * @property {number} sistemaMarcaId - Foreign key referencing the sistema_marca table.
+ * @property {string} createdAt - Timestamp when the record was created.
+ * @property {string|null} updatedAt - Timestamp when the record was last updated.
+ */
+            
 

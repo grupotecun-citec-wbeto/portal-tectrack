@@ -4,6 +4,10 @@
  * @author CITEC
  */
 
+
+/* import application   */
+import { getStuctureEntity } from '@application/servicio';
+
 const PACKAGE = 'repositories/local/caso';
 
 import { getDB, persistDatabase } from '../../../db/database';
@@ -12,9 +16,10 @@ import repositoryCasoVisita from '../caso_visita/repository';
 import repositoryPrograma from '../programa/repository';
 import repositoryDiagnostico from '../diagnostico/repository';
 import repositoryEquipo from '../equipo/repository';
+import repositoryServicio from '../servicio/repository';
 const repository = {
-    tableCode:4,
-    tableName:'caso',
+    tableCode: 4,
+    tableName: 'caso',
     /**
      * 
      * @param {string} id indentificator de categoria
@@ -23,18 +28,18 @@ const repository = {
      */
     createOrRemplace: async (json) => {
         const db = getDB();
-        try{
+        try {
             const stmt = db.prepare(`INSERT OR REPLACE INTO ${repository.tableName} (ID,syncStatus,caso_estado_ID,comunicacion_ID,date_end,description,equipos,fecha,prioridad,segmento_ID,start,usuario_ID,usuario_ID_assigned,uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
-            for (const {ID,caso_estado_ID,comunicacion_ID,date_end,description,equipos,fecha,prioridad,segmento_ID,start,usuario_ID,usuario_ID_assigned,uuid} of json) {
+            for (const { ID, caso_estado_ID, comunicacion_ID, date_end, description, equipos, fecha, prioridad, segmento_ID, start, usuario_ID, usuario_ID_assigned, uuid } of json) {
                 const syncStatus = 0; // 0 = Sincronizado, 1 = No sincronizado
-                stmt.run([ID,syncStatus,caso_estado_ID,comunicacion_ID,date_end,description,equipos,fecha,prioridad,segmento_ID,start,usuario_ID,usuario_ID_assigned,uuid]);
+                stmt.run([ID, syncStatus, caso_estado_ID, comunicacion_ID, date_end, description, equipos, fecha, prioridad, segmento_ID, start, usuario_ID, usuario_ID_assigned, uuid]);
             }
             stmt.free();
-        }catch(err){
+        } catch (err) {
             console.error(`[${PACKAGE}] Error al crear o reemplazar los datos:`, err);
         }
-        
+
         await persistDatabase();
     },
 
@@ -53,9 +58,9 @@ const repository = {
      * @param {number} catalogo_ID identifier of catalog
      * @param {string} name name of the case
      */
-    create: async (uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy,catalogo_ID,name) => {
+    create: async (uuid, usuario_ID, usuario_ID_assigned, comunicacion_ID, segmento_ID, caso_estado_ID, fecha, start, prioridad, programaSistemasIfy, catalogo_ID, name) => {
         const db = getDB();
-        try{
+        try {
             db.exec('BEGIN TRANSACTION');
             const stmt = db.prepare(`
             INSERT INTO ${repository.tableName} (
@@ -90,7 +95,7 @@ const repository = {
             )    
             `);
 
-            stmt.run([uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,programaSistemasIfy]);
+            stmt.run([uuid, usuario_ID, usuario_ID_assigned, comunicacion_ID, segmento_ID, caso_estado_ID, fecha, start, prioridad, programaSistemasIfy]);
             stmt.free();
 
             const stmt2 = db.prepare(`
@@ -107,12 +112,12 @@ const repository = {
                     ?,
                     ?)
             `);
-            stmt2.run([uuid,1,catalogo_ID,prioridad,name]);
+            stmt2.run([uuid, 1, catalogo_ID, prioridad, name]);
             stmt2.free();
 
             db.exec('COMMIT');
             await persistDatabase();
-        }catch(err){
+        } catch (err) {
             console.error(`[${PACKAGE}] Error al crear el caso:`, err);
             db.exec("ROLLBACK")
         }
@@ -132,7 +137,7 @@ const repository = {
         diagnosticos
     ) => {
         const db = getDB();
-        try{
+        try {
             db.exec('BEGIN TRANSACTION');
             const stmt = db.prepare(`
             INSERT INTO ${repository.tableName} (
@@ -168,7 +173,7 @@ const repository = {
             )    
             `);
 
-            stmt.run([uuid, usuario_ID,usuario_ID_assigned,comunicacion_ID,segmento_ID,caso_estado_ID,fecha,start,prioridad,equiposIfy]);
+            stmt.run([uuid, usuario_ID, usuario_ID_assigned, comunicacion_ID, segmento_ID, caso_estado_ID, fecha, start, prioridad, equiposIfy]);
             stmt.free();
             const stmt2 = db.prepare(`
                 INSERT INTO ${repositoryDiagnostico.tableName}
@@ -179,31 +184,66 @@ const repository = {
                     )
             `);
 
-            for (const { maquina_id, uuid, diagnostico_tipo_ID,asistencia_tipo_ID, especialista_ID, description } of diagnosticos) {
-                stmt2.run([maquina_id, uuid, diagnostico_tipo_ID,asistencia_tipo_ID, especialista_ID, description]);
+            for (const { maquina_id, uuid, diagnostico_tipo_ID, asistencia_tipo_ID, especialista_ID, description } of diagnosticos) {
+                stmt2.run([maquina_id, uuid, diagnostico_tipo_ID, asistencia_tipo_ID, especialista_ID, description]);
             }
             stmt2.free();
 
+            const equipos = JSON.parse(equiposIfy);
+            const stmtServicio = db.prepare(`
+                 INSERT INTO ${repositoryServicio.tableName} (
+                    sistema_ID,
+                    sistema_servicio_ID,
+                    diagnostico_equipo_ID,
+                    diagnostico_caso_ID,
+                    diagnostico_diagnostico_tipo_ID,
+                    "check",
+                    sistema_marca_ID
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            `);
+            Object.keys(equipos).map(equipoId => {
+                const equipo = equipos[equipoId]; // aquí ya tienes el objeto interno
+                const prediagnostico = equipo?.prediagnostico;
+
+                /** @type {Array<SystemNode>} */
+                const sistemasSelected = prediagnostico?.sistemasSelectedJson || [];
+                /** @type {Array<ServicioORM>} */
+                const servicios = getStuctureEntity(sistemasSelected, uuid, equipoId, "1")
+                console.log(servicios, 'servicios 03b98ea7-5304-40fa-b312-172a9953a88c')
+                for (const servicio of servicios) {
+                    stmtServicio.run([
+                        servicio.sistema_ID,
+                        servicio.sistema_servicio_ID,
+                        servicio.diagnostico_equipo_ID,
+                        servicio.diagnostico_caso_ID,
+                        servicio.diagnostico_diagnostico_tipo_ID,
+                        servicio.check,
+                        servicio.sistema_marca_ID
+                    ]);
+                }
+            });
+            stmtServicio.free();
+
             db.exec('COMMIT');
             await persistDatabase();
-        }catch(err){
+        } catch (err) {
             console.error(`[${PACKAGE}] Error al crear el caso:`, err);
             db.exec("ROLLBACK")
         }
     },
 
-    
+
     findAll: () => {
         const db = getDB();
         const stmt = db.prepare(`SELECT * FROM ${repository.tableName}`);
         const results = [];
         while (stmt.step()) {
-        results.push(stmt.getAsObject());
+            results.push(stmt.getAsObject());
         }
         stmt.free();
         return results;
     },
-    
+
     deleteById: async (id) => {
         const db = getDB();
         const stmt = db.prepare(`DELETE FROM ${repository.tableName} WHERE id = ?`);
@@ -236,9 +276,9 @@ const repository = {
         stmt.free();
         return results;
     },
-    findAllByFilters: async (userDataLogin,filters, estado = {operador:"<>", value:"6"}, config = {countOnly:false}) => {
-        
-        try{
+    findAllByFilters: async (userDataLogin, filters, estado = { operador: "<>", value: "6" }, config = { countOnly: false }) => {
+
+        try {
             const db = getDB();
             let query = ``
             //filtros
@@ -247,8 +287,8 @@ const repository = {
             const query_segmento = (filters.segmentoSelected != '') ? ` AND segmento_ID = ? ` : ''
             const query_cliente = (filters.clienteSelected != '') ? ` AND ${repositoryEquipo.tableName}.cliente_ID = ?` : ''
             const query_fecha = (filters.rangeFechaSelected.start != '' && filters.rangeFechaSelected.end != '') ? ` AND DATE(start) BETWEEN ? AND ?` : ''
-            const query_limit = ( filters.limitSelected != '') ? ` LIMIT ? ` : ''
-            const query_syncStatus = ( filters.syncStatusSelected != '') ? ` AND syncStatus = ? ` : ''
+            const query_limit = (filters.limitSelected != '') ? ` LIMIT ? ` : ''
+            const query_syncStatus = (filters.syncStatusSelected != '') ? ` AND syncStatus = ? ` : ''
 
             const select = []
             select.push(`${repository.tableName}.ID`)
@@ -262,70 +302,70 @@ const repository = {
             select.push(`${repository.tableName}.start`)
             select.push(`${repository.tableName}.date_end`)
             select.push(`${repository.tableName}.description`)
-            select.push(`${repository.tableName}.prioridad`)    
+            select.push(`${repository.tableName}.prioridad`)
             select.push(`${repository.tableName}.uuid`)
             select.push(`${repository.tableName}.equipos`)
 
             const from = []
             from.push(` ${repository.tableName} `)
-        
 
 
 
-            
+
+
 
             const estadoFilter = ` ${estado.operador} ? `;
 
             const parameters = []
-           
-            
-            
+
+
+
             // ${query_user} --2
-            if(query_user != ''){
+            if (query_user != '') {
                 parameters.push(filters.usuarioSelected)
             }
             // ${query_prioridad} --3
-            if(query_prioridad != ''){
+            if (query_prioridad != '') {
                 parameters.push(filters.prioridadSelected)
             }
             // ${query_segmento} 4
-            if(query_segmento != ''){
+            if (query_segmento != '') {
                 parameters.push(filters.segmentoSelected)
             }
 
             // ${query_cliente} -- 5
-            if(query_cliente != ''){ 
+            if (query_cliente != '') {
                 //console.log(filters,"c5e4a5db-0cc7-498d-b6f1-1482ddcbffb8") 
                 parameters.push(filters.clienteSelected)
-                from.push( ` INNER JOIN ${repositoryDiagnostico.tableName} ON ${repositoryDiagnostico.tableName}.caso_ID = ${repository.tableName}.ID `)
-                from.push( ` INNER JOIN ${repositoryEquipo.tableName} ON ${repositoryEquipo.tableName}.ID = ${repositoryDiagnostico.tableName}.equipo_ID `)
+                from.push(` INNER JOIN ${repositoryDiagnostico.tableName} ON ${repositoryDiagnostico.tableName}.caso_ID = ${repository.tableName}.ID `)
+                from.push(` INNER JOIN ${repositoryEquipo.tableName} ON ${repositoryEquipo.tableName}.ID = ${repositoryDiagnostico.tableName}.equipo_ID `)
             }
 
             // ${query_fecha} --6
-            if(query_fecha != ''){
+            if (query_fecha != '') {
                 parameters.push(filters.rangeFechaSelected.start)
                 parameters.push(filters.rangeFechaSelected.end)
             }
 
             // ${query_syncStatus} -- 7
-            if(query_syncStatus != ''){
+            if (query_syncStatus != '') {
                 parameters.push(filters.syncStatusSelected)
             }
 
-            
+
             //  ${query_limit} -- 8` 
-            if(query_limit != ''){
+            if (query_limit != '') {
                 parameters.push(filters.limitSelected)
             }
 
-            
+
 
             // definir si se necesita solo contar
             const query_count = (config.countOnly) ? ` COUNT(*) AS cantidad ` : ` ${select.join(', ')} `
 
             let results = [];
-            
-            switch(userDataLogin.perfil_ID){
+
+            switch (userDataLogin.perfil_ID) {
                 case 3: // perfil admin 
                     parameters.unshift(estado.value)  // --1
                     query = `
@@ -343,12 +383,12 @@ const repository = {
                             ${query_fecha} --6
                             ${query_syncStatus} -- 7
                         ORDER BY start DESC
-                        ${query_limit} -- 8` 
+                        ${query_limit} -- 8`
                     break;
                 default:
-                    
+
                     parameters.unshift(estado.value, userDataLogin.ID, userDataLogin.ID)
-                    
+
                     query = `
                         SELECT 
                             ${query_count} 
@@ -365,18 +405,18 @@ const repository = {
                             ${query_syncStatus} -- 7
                             ORDER BY start DESC
                             ${query_limit} -- 8`
-                break;
+                    break;
             }
 
             //console.log(query,parameters,filters,"41a08892-a9b1-4c91-8e44-e83ab9351a3b")
             const stmt = db.prepare(query);
 
-            if(config.countOnly) {
+            if (config.countOnly) {
                 stmt.bind(parameters)
                 //console.log(parameters,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c")
                 stmt.step()
                 results = stmt.getAsObject()
-            }else{
+            } else {
                 //console.log(parameters,"3ba24bb8-e09c-413b-9d4a-3c0700e7931c-2")
                 stmt.bind(parameters)
                 while (stmt.step()) {
@@ -385,14 +425,14 @@ const repository = {
             }
             stmt.free();
             return results;
-        }catch(err){
+        } catch (err) {
             console.error(`[${PACKAGE}] 3b0570ce-a7e3-4a88-9ef4-8084776ea409 Error al buscar los casos:`, err);
         }
 
-        
+
     },
 
-    updateStatus: async (id,status) => {
+    updateStatus: async (id, status) => {
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ${status}, syncStatus = 1 WHERE id = ?`);
         stmt.run([id]);
@@ -400,7 +440,7 @@ const repository = {
         await persistDatabase();
     },
 
-    updateOnlyStatus: async (id,status) => {
+    updateOnlyStatus: async (id, status) => {
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ${status} WHERE id = ?`);
         stmt.run([id]);
@@ -408,7 +448,7 @@ const repository = {
         await persistDatabase();
     },
 
-    assignTechnician: async (id,technicianID) =>{
+    assignTechnician: async (id, technicianID) => {
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 2, usuario_ID_assigned = ${technicianID}, syncStatus = 1 WHERE id = ?`);
         stmt.run([id]);
@@ -422,7 +462,7 @@ const repository = {
      * 
      * @var {integer} caso_estado_ID 1: Pendiente de asignación 
      */
-    unAssignTechnician : async (id) =>{
+    unAssignTechnician: async (id) => {
         const db = getDB();
         const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 1, usuario_ID_assigned = NULL WHERE id = ?`);
         stmt.run([id]);
@@ -430,37 +470,37 @@ const repository = {
         await persistDatabase();
     },
 
-    start: async (id,visita_ID,vehiculo_ID,userLogin,kmInicial) => {
+    start: async (id, visita_ID, vehiculo_ID, userLogin, kmInicial) => {
         const db = getDB();
-       
-        try{
+
+        try {
             db.exec("BEGIN TRANSACTION")
             const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 3,syncStatus=1 WHERE id = ?`);
             stmt.run([id]);
             stmt.free();
 
             const stmt2 = db.prepare(`INSERT INTO ${repositoryVisita.tableName} (ID,vehiculo_ID,usuario_ID,km_inicial) VALUES (?, ?, ?, ?)`);
-            stmt2.run([visita_ID,vehiculo_ID,userLogin.ID,kmInicial]);
+            stmt2.run([visita_ID, vehiculo_ID, userLogin.ID, kmInicial]);
             stmt2.free();
 
             //INSERT INTO caso_visita_v2 (caso_ID,visita_ID) VALUES ('${id}','${visita_ID}')
 
             const stmt3 = db.prepare(`INSERT INTO ${repositoryCasoVisita.tableName} (caso_ID,visita_ID) VALUES (?, ?)`);
-            stmt3.run([id,visita_ID]);
+            stmt3.run([id, visita_ID]);
             stmt3.free();
 
             db.exec("COMMIT")
             await persistDatabase();
-        }catch(error){
-            
+        } catch (error) {
+
             console.error(`[${PACKAGE}] 55ef495e-57dc-467e-a0b7-f0c8813f3f4a Error al iniciar el caso:`, error);
             db.exec("ROLLBACK")
         }
 
-        
+
     },
 
-    stop: async (id,kmFinal,estado_a_asignar,currentDateTime,equipos) => {
+    stop: async (id, kmFinal, estado_a_asignar, currentDateTime, equipos) => {
         /*
         // Actualizar estado del caso y agregar la lista de equipos
                     db.run(`UPDATE caso_v2 SET caso_estado_ID = ${estado_a_asignar}, date_end = '${getCurrentDateTime()}' , equipos = '${JSON.stringify(equipos)}', syncStatus=1 where ID = '${caso_id}'`)
@@ -472,53 +512,53 @@ const repository = {
 
         const db = getDB();
 
-        try{
+        try {
             db.exec("BEGIN TRANSACTION")
             const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = ?, date_end = ? , equipos = ?, syncStatus=1 where ID = ?`);
             //console.log([estado_a_asignar,currentDateTime,equipos,id], "b24a1fd5-9549-41b3-b865-63dd6fc84b14")
-            stmt.run([estado_a_asignar,currentDateTime,equipos,id]);
+            stmt.run([estado_a_asignar, currentDateTime, equipos, id]);
             stmt.free();
 
             const stmt2 = db.prepare(`UPDATE ${repositoryVisita.tableName} SET km_final = ? where ID = (SELECT visita_ID FROM ${repositoryCasoVisita.tableName} WHERE caso_ID = ? LIMIT 1) `);
             //console.log([kmFinal,id], "4baa164a-22f3-4497-9352-0d60abd5496a")
-            stmt2.run([kmFinal,id]);
+            stmt2.run([kmFinal, id]);
             stmt2.free();
 
             db.exec("COMMIT")
             await persistDatabase();
-        }catch(error){
-            
+        } catch (error) {
+
             console.error(`[${PACKAGE}] 55ef495e-57dc-467e-a0b7-f0c8813f3f4a Error al detener[stop] el caso:`, error);
             db.exec("ROLLBACK")
         }
     },
-    
-    endCaseWithoutDiagnosis: async (id,kmFinal,currentDateTime) => {
+
+    endCaseWithoutDiagnosis: async (id, kmFinal, currentDateTime) => {
         const db = getDB();
-        try{
+        try {
             db.exec("BEGIN TRANSACTION")
             const stmt = db.prepare(`UPDATE ${repository.tableName} SET caso_estado_ID = 5, date_end = ? ,syncStatus = 1 WHERE id = ?`);
-            stmt.run([currentDateTime,id]);
+            stmt.run([currentDateTime, id]);
             stmt.free();
 
             const stmt2 = db.prepare(`UPDATE ${repositoryVisita.tableName} SET km_final = ?  WHERE id = (SELECT visita_ID FROM ${repositoryCasoVisita.tableName} WHERE caso_ID = ? LIMIT 1)`);
-            stmt2.run([kmFinal,id]);
+            stmt2.run([kmFinal, id]);
             stmt2.free();
 
 
             db.exec("COMMIT")
             await persistDatabase();
-        }catch(error){
+        } catch (error) {
             console.error(`[${PACKAGE}] 1dc96abd-024c-412b-896f-8fcfb0868c8d Error al iniciar el caso:`, error);
             db.exec("ROLLBACK")
         }
 
-        
+
     },
-    
+
     unsynchronizedCase: async (id) => {
         const db = getDB();
-        const stmt = db.prepare( 
+        const stmt = db.prepare(
             `SELECT
                 ID,
                 usuario_ID,
@@ -551,7 +591,7 @@ const repository = {
 
     unsynchronizedCases: async () => {
         const db = getDB();
-        const stmt = db.prepare( 
+        const stmt = db.prepare(
             `SELECT
                 ID,
                 usuario_ID,
@@ -582,7 +622,7 @@ const repository = {
 
     errorSynchronizedCases: async () => {
         const db = getDB();
-        const stmt = db.prepare( 
+        const stmt = db.prepare(
             `SELECT
                 ID,
                 usuario_ID,
@@ -642,9 +682,9 @@ const repository = {
         await persistDatabase();
     }
 
-    
 
-    
+
+
 
 }
 
