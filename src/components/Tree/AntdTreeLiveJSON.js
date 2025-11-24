@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Tree, Input } from "antd";
 import "antd/dist/reset.css";
-import { Box, Tag, TagLabel, TagCloseButton, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, Tag, TagLabel, TagCloseButton, HStack, Text, VStack, Button } from "@chakra-ui/react";
 import { isEmptyArray } from "formik";
 
 const { Search } = Input;
@@ -171,6 +171,15 @@ export default function AntdTreeLiveJSON(prop) {
           setSearch(e.target.value)
         }}
       />
+      <Button
+        size="sm"
+        colorScheme="gray"
+        variant="outline"
+        onClick={() => setExpandedKeys([])}
+        width="fit-content"
+      >
+        Contraer todo
+      </Button>
       {console.log("filtered 62318ad4-9729-4e07-800e-79f02aad5bbb", filtered.length > 0)}
       <Tree
         checkable
