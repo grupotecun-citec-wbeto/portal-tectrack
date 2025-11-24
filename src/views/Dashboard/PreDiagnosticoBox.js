@@ -325,7 +325,7 @@ import {
                   </CardBody>
                   
               </Card>
-              <Card>
+              {/*<Card>
                   <CardHeader>
                     <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
                   </CardHeader>
@@ -347,10 +347,10 @@ import {
                       
                   </CardBody>
                   
-              </Card>
+              </Card>*/}
               <Card>
                   <CardHeader>
-                    <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
+                    <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>Sistemas y servicios</Heading>
                   </CardHeader>
                   <CardBody mt={{xl:'10px'}}>
 
@@ -359,7 +359,7 @@ import {
                     ) : sistemasError ? (
                       <Text>Error al cargar los sistemas: {sistemasError.message}</Text>
                     ) : (
-                      <AntdTreeLiveJSON treeData={sistemasData} />
+                      <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="prediagnostico" />
                     )}
 
                   </CardBody>

@@ -178,7 +178,7 @@ export default function AntdTreeLiveJSON(prop) {
   const [checkedKeys, setCheckedKeys] = useState([]); // solo los checked reales
   const [halfCheckedKeys, setHalfCheckedKeys] = useState([]); // semiseleccionados (padres)
   const [search, setSearch] = useState("");
-  const { treeData } = prop;
+  const { treeData, tipo_diagnostico } = prop;
 
   const filtered = useMemo(() => getAllKeys(filterTreeByText(treeData, search)), [treeData, search]);
 
@@ -194,8 +194,8 @@ export default function AntdTreeLiveJSON(prop) {
       const caso = userData.casos[userData.casoActivo.code];
       if (caso && caso.equipos) {
         const equipo = caso.equipos[userData.casoActivo.maquina_id];
-        if (equipo && equipo.prediagnostico && equipo.prediagnostico.sistemasSelectedJson) {
-          const savedJson = equipo.prediagnostico.sistemasSelectedJson;
+        if (equipo && equipo[tipo_diagnostico] && equipo[tipo_diagnostico].sistemasSelectedJson) {
+          const savedJson = equipo[tipo_diagnostico].sistemasSelectedJson;
 
           // Break loop: if the incoming data is exactly what we just saved, ignore it.
           if (JSON.stringify(savedJson) === lastSavedJsonString.current) {
@@ -245,9 +245,9 @@ export default function AntdTreeLiveJSON(prop) {
     const caso = userData.casos[userData.casoActivo.code];
     if (!caso || !caso.equipos) return;
     const equipo = caso.equipos[userData.casoActivo.maquina_id];
-    if (!equipo || !equipo.prediagnostico) return;
+    if (!equipo || !equipo[tipo_diagnostico]) return;
 
-    const currentSaved = equipo.prediagnostico.sistemasSelectedJson;
+    const currentSaved = equipo[tipo_diagnostico].sistemasSelectedJson;
 
     // Only save if the data has actually changed
     if (JSON.stringify(selectedJson) !== JSON.stringify(currentSaved)) {
@@ -256,7 +256,7 @@ export default function AntdTreeLiveJSON(prop) {
         ? structuredClone(userData)
         : JSON.parse(JSON.stringify(userData));
 
-      newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico.sistemasSelectedJson = selectedJson;
+      newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id][tipo_diagnostico].sistemasSelectedJson = selectedJson;
 
       // Update ref BEFORE dispatching to prevent the echo
       lastSavedJsonString.current = JSON.stringify(selectedJson);

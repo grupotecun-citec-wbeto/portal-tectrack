@@ -106,14 +106,14 @@ function SearchCard(props) {
         const run = async() =>{
             if(userData.casoActivo.code != '' && maquina_id){
                 
-                if(Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.prediagnostico?.sistemas || {}).length != 0){
+                if(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.prediagnostico?.sistemasSelectedJson.length != 0){
                     setIsCreatedPreDiagnostico(true)
                 }
 
-                const sistemas = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas
+                //const sistemas = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemasSelectedJson
                 //console.log(sistemas);
                 
-                if(Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas || {}).length != 0){
+                if(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemasSelectedJson.length != 0){
                     setIsCreatedDiagnostico(true)
                 }
 

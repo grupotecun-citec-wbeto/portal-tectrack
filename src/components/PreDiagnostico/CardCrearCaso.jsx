@@ -120,7 +120,7 @@ function CardCrearCaso({openAlert,key, openLoader}){
             suma_prioridad += parseInt(prediagnostico.prioridad);
 
             if (
-                Object.keys(prediagnostico.sistemas).length === 0 ||
+                prediagnostico.sistemasSelectedJson.length === 0 ||
                 Object.keys(prediagnostico.herramientas).length === 0 ||
                 prediagnostico.asistencia_tipo_ID == 0 ||
                 prediagnostico.prioridad == 0

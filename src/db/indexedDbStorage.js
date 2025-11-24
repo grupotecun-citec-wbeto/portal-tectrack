@@ -7,8 +7,9 @@ const DB_STORE_NAME = 'TECTRACK_STORE';
 //const DB_KEY = '20502aa4-d222-4f6a-89e1-766aaa42cde4';
 //const DB_KEY = '809bf071-c330-4453-9e18-f2e87be97150';
 //const DB_KEY = '257bb0e7-4359-45e5-aaec-443b4c803111';
-const DB_KEY = 'd22e2fc8-2db2-4ff4-b57b-6f804647f53a';
-const DB_VERSION = 2;
+//const DB_KEY = 'd22e2fc8-2db2-4ff4-b57b-6f804647f53a';
+const DB_KEY = '42be2b71-16e0-4f08-b56a-842bd075c772'
+const DB_VERSION = 3;
 
 function upgradeDatabase(db) {
   if (!db.objectStoreNames.contains(DB_STORE_NAME)) {
@@ -53,7 +54,7 @@ export async function saveToIndexedDB(data) {
         }
       }
       getRequest.onerror = () => reject(getRequest.error);*/
-      
+
     };
     request.onerror = () => reject(request.error);
   });
