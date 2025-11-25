@@ -18,8 +18,8 @@ import repositoryDepartamento from '../departamento/repository';
 
 
 const repository = {
-    tableCode:12,
-    tableName:'diagnostico',
+    tableCode: 12,
+    tableName: 'diagnostico',
     /**
      * 
      * @param {string} id indentificator de categoria
@@ -30,8 +30,8 @@ const repository = {
         const db = getDB();
         const stmt = db.prepare(`INSERT OR REPLACE INTO ${repository.tableName} (equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description) VALUES (?, ?, ?, ?, ?, ?)`);
 
-        for (const {equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description} of json) {
-            stmt.run([equipo_ID,caso_ID,diagnostico_tipo_ID,asistencia_tipo_ID,especialista_ID,description]);
+        for (const { equipo_ID, caso_ID, diagnostico_tipo_ID, asistencia_tipo_ID, especialista_ID, description } of json) {
+            stmt.run([equipo_ID, caso_ID, diagnostico_tipo_ID, asistencia_tipo_ID, especialista_ID, description]);
         }
         stmt.free();
         await persistDatabase();
@@ -45,18 +45,49 @@ const repository = {
         stmt.free();
         await persistDatabase();
     },
-    
+
     findAll: () => {
         const db = getDB();
         const stmt = db.prepare(`SELECT * FROM ${repository.tableName}`);
         const results = [];
         while (stmt.step()) {
-        results.push(stmt.getAsObject());
+            results.push(stmt.getAsObject());
         }
         stmt.free();
         return results;
     },
-    
+
+    /**
+     * 
+     * @param {string} casoId 
+     * @param {number} caso_estado_ID 
+     * @returns
+     */
+    findPreDiagnosticosByCasoId: (casoId,caso_estado_ID) => {
+        const db = getDB();
+        const targetDiagnosticoTipoID = (caso_estado_ID >= 1 && caso_estado_ID <= 3) ? 1 : ((caso_estado_ID === 4 || caso_estado_ID === 5) ? 2 : 1);
+        const stmt = db.prepare(`SELECT * FROM ${repository.tableName} where diagnostico_tipo_ID = ? and caso_ID = ?`);
+        const results = [];
+        stmt.bind([targetDiagnosticoTipoID, casoId]);
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
+    },
+
+    deleteById: async (id) => {
+        
+        const stmt = db.prepare(`SELECT * FROM ${repository.tableName} where diagnostico_tipo_ID = 1 and caso_ID = ?`);
+        const results = [];
+        stmt.bind([casoId]);
+        while (stmt.step()) {
+            results.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return results;
+    },
+
     deleteById: async (id) => {
         const db = getDB();
         const stmt = db.prepare(`DELETE FROM ${repository.tableName} WHERE id = ?`);
@@ -66,7 +97,7 @@ const repository = {
     },
 
     findByCasoId: (args) => {
-        const {casoId} = args;
+        const { casoId } = args;
         const db = getDB();
         const sql = `
             SELECT
@@ -92,7 +123,7 @@ const repository = {
                 INNER JOIN ${repositoryAsistenciaTipo.tableName} AT ON D.asistencia_tipo_ID = AT.ID
             WHERE caso_ID = ?
         `
-        
+
         const stmt = db.prepare(sql);
         const results = [];
         stmt.bind([casoId]);
@@ -102,12 +133,12 @@ const repository = {
         stmt.free();
         return results;
     },
-    
+
 
     findByListCaseIds: async (uuids) => {
         const db = getDB();
         const placeholders = uuids.map(() => '?').join(', '); // Genera "?, ?, ?" según la cantidad de UUIDs
-        
+
         //console.log('1462faa4-acd1-4728-b885-028c257f0e3f', placeholders);
 
         const stmt = db.prepare(
@@ -137,7 +168,7 @@ const repository = {
         return results;
     }
 
-    
+
 
 }
 
