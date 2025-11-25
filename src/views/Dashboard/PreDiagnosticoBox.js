@@ -275,11 +275,11 @@ import {
 
     /*====================FIN BLOQUE: FUNCTIONS        ==============*/
 
-    useEffect(() => {
+    /*useEffect(() => {
       if (!sistemasLoading) {
         console.log('Sistemas cargados: 9c058540-82eb-44b1-853b-228335acec63', sistemasData,sistemasError);
       }     
-    }, [sistemasLoading,sistemasData,sistemasError]);
+    }, [sistemasLoading,sistemasData,sistemasError]);*/
     
     return (
       <>
