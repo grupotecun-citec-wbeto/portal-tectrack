@@ -114,6 +114,18 @@ const repository = {
     findByCasoId: (args) => {
         const { casoId } = args;
         const db = getDB();
+        
+        let resultsDiagnostico = [];
+        const stmtDiagnostico = db.prepare(`SELECT * FROM ${repository.tableName} WHERE diagnostico_tipo_ID = 2 AND caso_ID = ?`);
+        stmtDiagnostico.bind([casoId]);
+        while (stmtDiagnostico.step()) {
+            resultsDiagnostico.push(stmtDiagnostico.getAsObject());
+        }
+        stmtDiagnostico.free();
+        
+        
+         // Si no hay diagnóstico completo, hacer fallback a prediagnóstico (casos viejos)
+        const diagnostico_tipo_ID = (resultsDiagnostico.length === 0) ? 1 : 2;
         const sql = `
             SELECT
                 AT.name as asistencia_tipo, 
@@ -136,12 +148,12 @@ const repository = {
                 INNER JOIN ${repositoryEquipo.tableName} E ON D.equipo_ID = E.ID
                 INNER JOIN ${repositoryCatalogo.tableName} C ON E.catalogo_ID = C.ID
                 INNER JOIN ${repositoryAsistenciaTipo.tableName} AT ON D.asistencia_tipo_ID = AT.ID
-            WHERE caso_ID = ?
+            WHERE caso_ID = ? AND diagnostico_tipo_ID = ?
         `
 
         const stmt = db.prepare(sql);
         const results = [];
-        stmt.bind([casoId]);
+        stmt.bind([casoId, diagnostico_tipo_ID]);
         while (stmt.step()) {
             results.push(stmt.getAsObject());
         }
