@@ -108,14 +108,16 @@ function SearchCard(props) {
             const diagnostico = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico
             if(userData.casoActivo.code != '' && maquina_id){
                 
-                if(prediagnostico?.sistemasSelectedJson?.length != 0){
+                if(typeof prediagnostico?.sistemasSelectedJson != 'undefined' && prediagnostico?.sistemasSelectedJson != null){
                     setIsCreatedPreDiagnostico(true)
                 }
 
                 //const sistemas = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemasSelectedJson
                 //console.log(sistemas);
                 
-                if(diagnostico?.sistemasSelectedJson?.length != 0){
+                console.log(diagnostico,'a3711df0-ea50-4a8f-aff0-0080becec917');
+
+                if(typeof diagnostico?.sistemasSelectedJson != 'undefined' && diagnostico?.sistemasSelectedJson != null){
                     setIsCreatedDiagnostico(true)
                 }
 
