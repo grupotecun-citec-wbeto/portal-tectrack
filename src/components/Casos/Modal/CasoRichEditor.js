@@ -197,8 +197,8 @@ const CasoRichEditor = ({ title, reference, placeholder }) => {
       >
         <ModalOverlay />
         <ModalContent
-          maxH={isMobile ? '100vh' : 'auto'}
-          h={isMobile ? '100vh' : 'auto'}
+          maxH={isMobile ? '100dvh' : 'auto'}
+          h={isMobile ? '100dvh' : 'auto'}
           display="flex"
           flexDirection="column"
         >
