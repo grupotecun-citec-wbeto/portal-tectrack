@@ -77,12 +77,6 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
         }
     }, [debouncedHallazgosValue]);
 
-    //HALLAZGOS
-    
-    /*const handleInputChangeHallazgos = (event) =>{
-        hallazgos.set(event.target.value)
-    }*/
-
     // ACCIONES EJECUTADAS
     const handleInputChangeAccionesEjecutadas = (event) =>{
         accionesEjecutadas.set(event.target.value)
@@ -154,16 +148,6 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
             const subdivision_names = diagnosticos.map(diagnostico => diagnostico.subdivision_name).join('; ')
             const proyectos_names = diagnosticos.map(diagnostico => diagnostico.proyecto_name).join('; ')
             
-            
-            /*db.exec(` 
-                SELECT 
-                    E.codigo_finca,E.ID,C.business_name,E.chasis,M.name as marca
-                FROM 
-                    equipo E
-                    INNER JOIN catalogo C ON E.catalogo_ID = C.ID
-                    INNER JOIN marca M ON C.marca_ID = M.ID
-                WHERE 
-                    E.ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}') `).toArray()*/
             const equiposData = []
             
             //console.log(diagnosticos,'9592847b-daea-4326-9e01-3df82bd61a8f')
@@ -185,14 +169,11 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
             
             
 
-            //const clientes = db.exec(` SELECT DISTINCT name FROM cliente where ID IN (SELECT cliente_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
             equipos.set({codigos:equiposData})
             nameUsuario.set((listClientes?.includes(';')) ? ['Ver detalle de equipos'] : listClientes)
 
-            //const departamentos = db.exec(` SELECT DISTINCT subdivision_name FROM departamento where code IN (SELECT departamento_code FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
             lugar.set((subdivision_names?.includes(';')) ? 'Ver detalle de equipos' : subdivision_names)
             
-            //const proyectos = db.exec(` SELECT DISTINCT name FROM proyecto where ID IN (SELECT proyecto_ID FROM equipo WHERE ID IN (SELECT equipo_ID FROM diagnostico_v2 WHERE caso_ID  = '${caso_ID}')) `).toArray()
             proyecto.set((proyectos_names?.includes(';')) ? 'Ver detalle de equipos' : proyectos_names)
 
             const data = JSON.parse(sCaso?.equipos)
@@ -230,18 +211,6 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
     useEffect( () =>{
         fecha.set( fecha.value ? fecha.value : formatInTimeZone ( toZonedTime(new Date(), timeZone), timeZone, 'yyyy-MM-dd HH:mm:ssXXX' ) )
     },[])
-    
-    /*useEffect(() =>{
-        if(Object.keys(sCaso).length == 0) return;
-        
-        if(sCaso.segmento_ID == 1){
-            const json = JSON.parse(sCaso?.equipos)
-            const equipos = Object.keys(json ?? {})
-            //setSListaEquipos(equipos)
-            //setSEquipos(json)
-        }
-        
-      },[sCaso,sEquipos])*/
     
     return(
         <>

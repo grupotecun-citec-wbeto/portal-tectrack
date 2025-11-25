@@ -317,7 +317,6 @@ export default function AntdTreeLiveJSON(prop) {
       >
         Contraer todo
       </Button>
-      {console.log("filtered 62318ad4-9729-4e07-800e-79f02aad5bbb", filtered.length > 0)}
       <Tree
         checkable
         expandedKeys={expandedKeys}
