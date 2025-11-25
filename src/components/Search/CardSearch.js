@@ -111,12 +111,7 @@ function SearchCard(props) {
                 if(typeof prediagnostico?.sistemasSelectedJson != 'undefined' && prediagnostico?.sistemasSelectedJson != null){
                     setIsCreatedPreDiagnostico(true)
                 }
-
-                //const sistemas = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemasSelectedJson
-                //console.log(sistemas);
                 
-                console.log(diagnostico,'a3711df0-ea50-4a8f-aff0-0080becec917');
-
                 if(typeof diagnostico?.sistemasSelectedJson != 'undefined' && diagnostico?.sistemasSelectedJson != null){
                     setIsCreatedDiagnostico(true)
                 }
