@@ -306,11 +306,12 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
         {/* Tercera Sección: Detalle de la Visita */}
         <View style={styles.section} wrap={false}>
           <Text style={styles.labelTitle}>DETALLE DE LA VISITA</Text>
-
           <View style={styles.separator} />
+        </View>
+        <View style={styles.section} wrap={false}>
 
           <View style={styles.sectionInput}>
-            <Text style={styles.labelInput}>Sistema del Equipo</Text>
+            <Text style={styles.labelInput}>Sistemas de los Equipos</Text>
           </View>
 
           <View style={styles.gridContainer}>
@@ -359,6 +360,9 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
                 })
             }
           </View>
+        </View>
+        <View style={styles.section} wrap={false}>
+
 
 
           <Text style={styles.labelSubTitle}>Hallazgos Encontrados</Text>
@@ -368,6 +372,8 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
               {parseHTMLtoReactPDF(hallazgos?.html)}
             </View>
           )}
+        </View>
+        <View style={styles.section} wrap={false}>
 
           <View style={styles.section}>
             <Text style={styles.labelSubTitle}>Acciones Ejecutadas</Text>
@@ -379,6 +385,8 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
               </View>
             )}
           </View>
+        </View>
+        <View style={styles.section} wrap={false}>  
 
           <View style={styles.section}>
             <Text style={styles.labelSubTitle}>Recomendaciones</Text>
@@ -391,6 +399,7 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
             )}
           </View>
         </View>
+      
 
         {/* Cuarta Sección Datos del Técnico */}
         <View style={styles.section} wrap={false} >
