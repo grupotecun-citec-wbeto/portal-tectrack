@@ -1,19 +1,19 @@
-import React,{useState,useContext, useEffect} from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
-  Box,
-  Heading,
-  Text,
-  Flex,
-  Grid,
-  Divider,
-  Tag,
-  VStack,
-  useColorModeValue,
-  Button,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  FormControl,
+    Box,
+    Heading,
+    Text,
+    Flex,
+    Grid,
+    Divider,
+    Tag,
+    VStack,
+    useColorModeValue,
+    Button,
+    Input,
+    InputGroup,
+    InputLeftElement,
+    FormControl,
 } from '@chakra-ui/react';
 
 // CSS
@@ -23,7 +23,7 @@ import { useDebounce } from 'use-debounce';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { format,parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
 // Custom components
@@ -57,18 +57,18 @@ import CasoRichEditor from './CasoRichEditor';
 
 
 
-const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubicacion,lugar,nameUsuario,codigo,fecha,celular,proyecto,equipos,sistemas,elaboradoPor,revisadoPor,fechaEmision,images,imagesRef,handle}) =>{
-    
+const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones, ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas, elaboradoPor, revisadoPor, fechaEmision, images, imagesRef, handle }) => {
+
     const timeZone = 'America/Guatemala'; // Define tu zona horaria
 
     const { dbReady } = useDataBaseContext(); // Obtener la base de datos desde el contexto
-    const { findById: findByCasoId } = useCaso(dbReady,false); // Obtener la función findAll desde el hook de usuario
-    const { findByCasoId : findDisnosticosByCasoId } = useDiagnostico(dbReady,false); // Obtener la función findAll desde el hook de usuario
-    
+    const { findById: findByCasoId } = useCaso(dbReady, false); // Obtener la función findAll desde el hook de usuario
+    const { findByCasoId: findDisnosticosByCasoId } = useDiagnostico(dbReady, false); // Obtener la función findAll desde el hook de usuario
 
-    const [sCaso,setScaso] = useState({})
-    const [sEquipos,setSEquipos] = useState({})
-    const [sListaEquipos,setSListaEquipos] = useState([])
+
+    const [sCaso, setScaso] = useState({})
+    const [sEquipos, setSEquipos] = useState({})
+    const [sListaEquipos, setSListaEquipos] = useState([])
 
     const [debouncedHallazgosValue] = useDebounce(hallazgos.value, 1000);
     useEffect(() => {
@@ -78,32 +78,32 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
     }, [debouncedHallazgosValue]);
 
     // ACCIONES EJECUTADAS
-    const handleInputChangeAccionesEjecutadas = (event) =>{
+    const handleInputChangeAccionesEjecutadas = (event) => {
         accionesEjecutadas.set(event.target.value)
     }
 
     // UBICACION
-    const handleInputChangeUbicacion = (event) =>{
+    const handleInputChangeUbicacion = (event) => {
         ubicacion.set(event.target.value)
     }
 
     // RECOMENDACIONES
-    const handleInputChangeRecomendaciones = (event) =>{
+    const handleInputChangeRecomendaciones = (event) => {
         recomendaciones.set(event.target.value)
     }
 
     // LUGAR   
-    const handleInputChangeLugar = (event) =>{
+    const handleInputChangeLugar = (event) => {
         lugar.set(event.target.value)
     }
 
     // NOMRE USUARIO
-    const handleInputChangeNameUsuario = (event) =>{
+    const handleInputChangeNameUsuario = (event) => {
         nameUsuario.set(event.target.value)
     }
 
     // FECHA
-    const handleInputChangeFecha = (date) =>{
+    const handleInputChangeFecha = (date) => {
         const zonedDate = toZonedTime(date, timeZone);
         const dateFormat = formatInTimeZone(zonedDate, timeZone, 'yyyy-MM-dd HH:mm:ssXXX');
         fecha.set(dateFormat)
@@ -114,11 +114,11 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
     const addImgLoader = () => {
         setImgLoaders([...imgLoaders, <ImgLoader key={imgLoaders.length} imagesRef={imagesRef} />]);
     };
-    
+
     // ************ useEffect ************
-    useEffect( () =>{
-        if(!dbReady) return;
-        
+    useEffect(() => {
+        if (!dbReady) return;
+
         const run = async () => {
             const caso = await findByCasoId(caso_ID)
             const shortUuid = caso_ID.substring(0, 8);
@@ -126,30 +126,30 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
             setScaso(caso)
         }
         run()
-    },[dbReady,caso_ID])
+    }, [dbReady, caso_ID])
 
-    useEffect( () =>{  
-        if(Object.keys(sCaso).length == 0) return;
+    useEffect(() => {
+        if (Object.keys(sCaso).length == 0) return;
         const shortUuid = caso_ID.substring(0, 8);
         codigo.set(sCaso.usuario_ID + '-' + shortUuid)  // cambiar estado de codigo
-    },[sCaso])
+    }, [sCaso])
 
 
-    useEffect( () =>{
-        if(!dbReady) return;
-        if(Object.keys(sCaso).length == 0) return;
-       
+    useEffect(() => {
+        if (!dbReady) return;
+        if (Object.keys(sCaso).length == 0) return;
+
         const run = async () => {
             ////findByCasoId = (args = { casoId :'', config: { countOnly : false } })
-            const diagnosticos = await findDisnosticosByCasoId({casoId: caso_ID, config: { countOnly : false }})
+            const diagnosticos = await findDisnosticosByCasoId({ casoId: caso_ID, config: { countOnly: false } })
 
             const listEquipos = diagnosticos.map(diagnostico => diagnostico.equipo_ID).join('; ')
             const listClientes = diagnosticos.map(diagnostico => diagnostico.cliente).join('; ')
             const subdivision_names = diagnosticos.map(diagnostico => diagnostico.subdivision_name).join('; ')
             const proyectos_names = diagnosticos.map(diagnostico => diagnostico.proyecto_name).join('; ')
-            
+
             const equiposData = []
-            
+
             //console.log(diagnosticos,'9592847b-daea-4326-9e01-3df82bd61a8f')
 
             diagnosticos.forEach(equipo => {
@@ -166,71 +166,86 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                 }
                 equiposData.push(equipoData)
             })
-            
-            
 
-            equipos.set({codigos:equiposData})
+
+
+            equipos.set({ codigos: equiposData })
             nameUsuario.set((listClientes?.includes(';')) ? ['Ver detalle de equipos'] : listClientes)
 
             lugar.set((subdivision_names?.includes(';')) ? 'Ver detalle de equipos' : subdivision_names)
-            
+
             proyecto.set((proyectos_names?.includes(';')) ? 'Ver detalle de equipos' : proyectos_names)
 
             const data = JSON.parse(sCaso?.equipos)
 
+            let isTree = false;
             const result = Object.keys(data).reduce((acc, equipoID) => {
-                // Agregar sistemas del prediagnostico
-                try{
-                    Object.keys(data[equipoID].prediagnostico?.sistemas).forEach(sistema => {
-                    acc.add(sistema);
-                    });
-                }catch(err){
-                    console.warn('Error al agregar sistemas del prediagnostico',err)
+                // Determinar si es caso nuevo o viejo basado en la existencia de diagnostico.sistemasSelectedJson
+                const diagnosticoSistemas = data[equipoID].diagnostico?.sistemasSelectedJson;
+                const prediagnosticoSistemas = data[equipoID].prediagnostico?.sistemas;
+
+                
+                // Si diagnostico.sistemasSelectedJson existe (casos nuevos), usarlo
+                if (typeof diagnosticoSistemas !== 'undefined' && diagnosticoSistemas !== null) {
+                    try {
+                        // Caso nuevo: usar sistemasSelectedJson del diagnóstico
+                        acc.add(diagnosticoSistemas);
+                        isTree = true
+                    } catch (err) {
+                        console.warn('Error al agregar sistemas del diagnostico (caso nuevo)', err);
+                    }
                 }
-            
-                // Agregar sistemas del diagnostico
-                try{
-                    Object.keys(data[equipoID].diagnostico?.sistemas).forEach(sistema => {
-                    acc.add(sistema);
-                });
-                }catch(err){
-                    console.warn('Error al agregar sistemas del diagnostico',err)
+                // Si no existe (casos viejos), hacer fallback a prediagnostico.sistemas
+                else if (typeof prediagnosticoSistemas !== 'undefined' && prediagnosticoSistemas !== null) {
+                    try {
+                        // Caso viejo: usar sistemas del prediagnóstico
+                        
+                        Object.keys(prediagnosticoSistemas).forEach(sistema => {
+                            acc.add(sistema);
+                        });
+                    } catch (err) {
+                        console.warn('Error al agregar sistemas del prediagnostico (caso viejo)', err);
+                    }
                 }
-            
+
                 return acc;
             }, new Set());
-            
-            const result2 = Array.from(result).join(", ")
-            sistemas.set(result2)
+
+            if (!isTree) {
+                const result2 = Array.from(result).join(", ")
+                sistemas.set({ isTree: false, equiposSistemas: result2 })
+            } else {
+                sistemas.set({ isTree: true, equiposSistemas: result })
+            }
         }
 
         run()
 
-    },[dbReady,sCaso])
-    
-    useEffect( () =>{
-        fecha.set( fecha.value ? fecha.value : formatInTimeZone ( toZonedTime(new Date(), timeZone), timeZone, 'yyyy-MM-dd HH:mm:ssXXX' ) )
-    },[])
-    
-    return(
+    }, [dbReady, sCaso])
+
+    useEffect(() => {
+        fecha.set(fecha.value ? fecha.value : formatInTimeZone(toZonedTime(new Date(), timeZone), timeZone, 'yyyy-MM-dd HH:mm:ssXXX'))
+    }, [])
+
+    return (
         <>
             <Card width="100%" maxWidth="1200px" boxShadow="xl" p="24px" >
                 <CardHeader>
-                <Heading size="lg">Creación de pdf</Heading>
-                <Text fontSize="sm" color="gray.500">
-                    A comprehensive overview of the case.
-                </Text>
+                    <Heading size="lg">Creación de pdf</Heading>
+                    <Text fontSize="sm" color="gray.500">
+                        A comprehensive overview of the case.
+                    </Text>
                 </CardHeader>
                 <Divider />
                 <CardBody>
-                    <CasoModalInput 
+                    <CasoModalInput
                         title="Ubicacion"
                         type="text"
                         handleInputChange={handleInputChangeUbicacion}
                         value={ubicacion.value}
                     />
-                    
-                    <CasoModalInput 
+
+                    <CasoModalInput
                         title="Lugar"
                         type="text"
                         handleInputChange={handleInputChangeLugar}
@@ -244,56 +259,56 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                         value={nameUsuario.value}
                     />
 
-                    
 
-                    
+
+
                     <Flex direction="column" align="left" justify="center" /*minH="100vh"*/>
                         <Box w="300px">
-                        <Text mb="2">Seleccionar fecha</Text>
-                        <FormControl>
-                            <InputGroup>
-                                <InputLeftElement
-                                    pointerEvents='none'
-                                    children={<FaRegCalendarAlt color='gray.300' />}
-                                    pe="26px"
-                                />
-                                <DatePicker
-                                    selected={fecha.value ? parseISO(fecha.value) : null}
-                                    onChange={(date) => handleInputChangeFecha(date)}
-                                    customInput={<Input />}
-                                    dateFormat="yyyy-MM-dd"
-                                />
-                            </InputGroup>
-                        </FormControl>
-                        
+                            <Text mb="2">Seleccionar fecha</Text>
+                            <FormControl>
+                                <InputGroup>
+                                    <InputLeftElement
+                                        pointerEvents='none'
+                                        children={<FaRegCalendarAlt color='gray.300' />}
+                                        pe="26px"
+                                    />
+                                    <DatePicker
+                                        selected={fecha.value ? parseISO(fecha.value) : null}
+                                        onChange={(date) => handleInputChangeFecha(date)}
+                                        customInput={<Input />}
+                                        dateFormat="yyyy-MM-dd"
+                                    />
+                                </InputGroup>
+                            </FormControl>
+
                         </Box>
                     </Flex>
-                    <CasoModalTextArea 
+                    <CasoModalTextArea
                         title="Hallazgos Encontrados"
                         reference={hallazgos}
                         placeholder="Ingresar los Hallazgos"
-                        
+
                     />
-                    <CasoModalTextArea 
-                        title="Acciones Ejecutadas" 
+                    <CasoModalTextArea
+                        title="Acciones Ejecutadas"
                         reference={accionesEjecutadas}
                         placeholder="Ingresar los Acciones ejecutadas"
                     />
-                    
-                    <CasoModalTextArea 
-                        title="Recomendaciones" 
+
+                    <CasoModalTextArea
+                        title="Recomendaciones"
                         reference={recomendaciones}
                         placeholder="Ingresar las Recomendaciones"
                     />
-                    
 
-                     
 
-                     
 
-                       
 
-                    
+
+
+
+
+
 
                     <Flex direction="column" align="left" justify="center">
                         <Text fontSize="sm">
@@ -307,7 +322,7 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                     <Flex direction="row" mt="10px">
                         <Button bg="green.300" _hover={{ bg: "green.600" }} onClick={() => handle.generarPdf()} mx="5px">Generar PDF</Button>
                     </Flex>
-                    
+
                 </CardBody>
             </Card>
         </>

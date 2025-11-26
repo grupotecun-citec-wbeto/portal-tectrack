@@ -197,6 +197,16 @@ const reportData = {
   },
 };
 
+const TreeItem = ({ item, level = 0 }) => (
+  <View style={{ marginLeft: level * 10 }}>
+    <Text style={styles.label}>• {item.title}</Text>
+
+    {item.children?.map(child => (
+      <TreeItem key={child.id} item={child} level={level + 1} />
+    ))}
+  </View>
+);
+
 // Componente de Documento
 const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones, ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas, elaboradoPor, revisadoPor, fechaEmision, images }) => {
 
@@ -304,13 +314,50 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
           </View>
 
           <View style={styles.gridContainer}>
-            {sistemas.value?.split(",")?.map((sistema) => {
-              return (
-                <Text style={styles.gridItem_sistema}>
-                  <Text>{sistema}</Text>
-                </Text>
-              )
-            })}
+            {
+              (!sistemas.value?.isTree) ?
+                sistemas.value?.equiposSistemas?.split(",")?.map((sistema) => {
+                  return (
+                    <Text style={styles.gridItem_sistema}>
+                      <Text>{sistema}</Text>
+                    </Text>
+                  )
+                })
+                :
+                Array.from(sistemas.value.equiposSistemas || [])?.map((equipoSistemas, index) => {
+                  return (
+                    <View key={index} style={{
+                      width: "48%",
+                      border: "1pt solid #000",
+                      marginLeft: 5,
+                      marginTop: 5,
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: 5,
+                      padding: 6,
+                    }}>
+                      {/* Nombre del Sistema */}
+                      <Text style={{
+                        fontSize: 11,
+                        fontWeight: "bold",
+                        marginBottom: 4,
+                        paddingBottom: 2,
+                        borderBottom: "0.5pt solid #ccc"
+                      }}>
+                        {equipoSistemas.title || equipoSistemas.sistema || "Sistema"}
+                      </Text>
+
+                      {/* Lista de Servicios */}
+                      {equipoSistemas && equipoSistemas?.length > 0 && (
+                        <View style={{ marginTop: 2 }}>
+                          {equipoSistemas?.map((servicio, sIndex) => (
+                            <TreeItem item={servicio} />
+                          ))}
+                        </View>
+                      )}
+                    </View>
+                  )
+                })
+            }
           </View>
 
 
