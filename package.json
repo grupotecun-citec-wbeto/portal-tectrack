@@ -1,6 +1,6 @@
 {
 	"name": "argon-dashboard-chakra",
-	"version": "1.7.0",
+	"version": "1.7.1",
 	"private": true,
 	"homepage": "https://demos.creative-tim.com/argon-dashboard-chakra/#/",
 	"dependencies": {
