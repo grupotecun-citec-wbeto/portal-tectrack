@@ -1,5 +1,5 @@
 /**
- * @package hooks/sistema
+ * @package Sistemas
  * @description Hook para manejar la sincronización de sistema
  * @author CITEC
  */

@@ -340,7 +340,7 @@ CREATE TABLE IF NOT EXISTS diagnostico (
     asistencia_tipo_ID INTEGER NOT NULL,
     especialista_ID INTEGER NULL, -- Es una usuario con el perfil de especialista que va acompañar
     description TEXT NULL,
-    PRIMARY KEY (equipo_ID, caso_ID),
+    PRIMARY KEY (equipo_ID, caso_ID,diagnostico_tipo_ID),
     FOREIGN KEY (asistencia_tipo_ID) REFERENCES asistencia_tipo(ID),
     FOREIGN KEY (diagnostico_tipo_ID) REFERENCES diagnostico_tipo(ID),
     FOREIGN KEY (equipo_ID) REFERENCES equipo(ID),

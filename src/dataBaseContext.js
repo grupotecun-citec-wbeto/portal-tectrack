@@ -87,8 +87,13 @@ export const DataBaseProvider = ({ children }) => {
         setData(newData);
     };
 
+    // Iniciar la base de datos
     useEffect(() => {
-        initDatabase().then(() => setDbReady(true));
+        const run = async () =>{
+            await initDatabase()
+            setDbReady(true)
+        }
+        run();
     }, []);
 
     return (

@@ -162,8 +162,8 @@ function useCaso(dbReady = false,syncActive = true) {
         return Items
     }
 
-    const stop = async (id,kmFinal,estado_a_asignar,currentDateTime,equipos) => {
-        const Items = repository.stop(id,kmFinal,estado_a_asignar,currentDateTime,equipos);
+    const stop = async (id,kmFinal,estado_a_asignar,currentDateTime,equipos,diagnosticos) => {
+        const Items = repository.stop(id,kmFinal,estado_a_asignar,currentDateTime,equipos,diagnosticos);
         setItems(Items);
         return Items
     }

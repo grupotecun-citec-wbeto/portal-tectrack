@@ -1,0 +1,1 @@
+export { default as getStuctureEntity } from './getStuctureEntity/service';

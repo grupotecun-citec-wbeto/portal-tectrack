@@ -3,7 +3,7 @@
     "target": "es6",
     "jsx": "react",
     "module": "commonjs",
-    "checkJs": false,
+    "checkJs": true,
     "baseUrl": "./src",
     "paths": {
       "@components/*": ["components/*"],
@@ -12,7 +12,9 @@
       "@services/*": ["services/*"],
       "@repositories/*":["repositories/*"],
       "@types/*":["types/*"],
-      "@db/*": ["db/*"]
+      "@db/*": ["db/*"],
+      "@domain/*": ["domain/*"],
+      "@application/*": ["application/*"]
     }
   }
 }

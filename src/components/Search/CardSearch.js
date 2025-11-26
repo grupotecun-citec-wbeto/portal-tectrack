@@ -104,16 +104,15 @@ function SearchCard(props) {
 
     useEffect( () =>{
         const run = async() =>{
+            const prediagnostico = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.prediagnostico
+            const diagnostico = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico
             if(userData.casoActivo.code != '' && maquina_id){
                 
-                if(Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.prediagnostico?.sistemas || {}).length != 0){
+                if(typeof prediagnostico?.sistemasSelectedJson != 'undefined' && prediagnostico?.sistemasSelectedJson != null){
                     setIsCreatedPreDiagnostico(true)
                 }
-
-                const sistemas = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas
-                //console.log(sistemas);
                 
-                if(Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico?.sistemas || {}).length != 0){
+                if(typeof diagnostico?.sistemasSelectedJson != 'undefined' && diagnostico?.sistemasSelectedJson != null){
                     setIsCreatedDiagnostico(true)
                 }
 

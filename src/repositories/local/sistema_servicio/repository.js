@@ -40,11 +40,11 @@ const repository = {
     
     /**
      * Consulta en sqlite la tabla sistema_servicio y retorna todos los registros
-     * @returns {Array} Retorna un array de objetos con los datos de la tabla sistema_servicio
+     * @returns {Array<SistemaServicioORM>} Retorna un array de objetos con los datos de la tabla sistema_servicio
      */
     findAll: () => {
         const db = getDB();
-        const stmt = db.prepare(`SELECT * FROM ${repository.tableName}`);
+        const stmt = db.prepare(`SELECT *,(SELECT name FROM ${repository_ServicioTipo.tableName} WHERE ID = servicio_tipo_ID ) as name FROM ${repository.tableName}`);
         const results = [];
         stmt.run();
         while (stmt.step()) {
