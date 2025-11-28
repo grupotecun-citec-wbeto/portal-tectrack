@@ -136,6 +136,9 @@ import FullscreenLoader from "@components/Loaders/FullscreenLoader.jsx";
 
 import '@domain/dto';
 
+import { I18nextProvider } from 'react-i18next';
+import i18n from './i18n.js';
+
 const UserProfile = () => {
   const { userId } = useParams();
 
@@ -157,34 +160,36 @@ const UserProfile = () => {
 
 
 ReactDOM.render(
-  <Provider store={store}>
-    <PersistGate loading={<FullscreenLoader visible={true} />} persistor={persistor}>
-      <ChakraProvider theme={theme} resetCss={false} position="relative">
-        <DataBaseProvider>
-          <AppProvider>
-              <UsuarioProvider>
-                <CasoProvider>
-                  <SqlProvider>
-                    <DisposalProvider>
-                      <HashRouter>
-                        <Switch>
-                          <Route path={`/auth`} component={AuthLayout} />
-                          <Route path={`/admin`} component={AdminLayout} />
-                          <Route path={`/user/:userId`} component={UserProfile} />
-                          <Route path={`/error`} component={Notfound404} />
-                          <Route path={`/rtl`} component={RTLLayout} />
-                          <Redirect from={`/`} to="/admin/dashboard" />
-                        </Switch>
-                      </HashRouter>
-                    </DisposalProvider>
-                  </SqlProvider>
-                </CasoProvider>
-              </UsuarioProvider>
-          </AppProvider>
-        </DataBaseProvider>
-      </ChakraProvider>
-    </PersistGate>
-  </Provider>,
+  <I18nextProvider i18n={i18n}>
+    <Provider store={store}>
+      <PersistGate loading={<FullscreenLoader visible={true} />} persistor={persistor}>
+        <ChakraProvider theme={theme} resetCss={false} position="relative">
+          <DataBaseProvider>
+            <AppProvider>
+                <UsuarioProvider>
+                  <CasoProvider>
+                    <SqlProvider>
+                      <DisposalProvider>
+                        <HashRouter>
+                          <Switch>
+                            <Route path={`/auth`} component={AuthLayout} />
+                            <Route path={`/admin`} component={AdminLayout} />
+                            <Route path={`/user/:userId`} component={UserProfile} />
+                            <Route path={`/error`} component={Notfound404} />
+                            <Route path={`/rtl`} component={RTLLayout} />
+                            <Redirect from={`/`} to="/admin/dashboard" />
+                          </Switch>
+                        </HashRouter>
+                      </DisposalProvider>
+                    </SqlProvider>
+                  </CasoProvider>
+                </UsuarioProvider>
+            </AppProvider>
+          </DataBaseProvider>
+        </ChakraProvider>
+      </PersistGate>
+    </Provider>
+  </I18nextProvider>,
   document.getElementById("root")
 );
 
