@@ -174,7 +174,7 @@ const dashRoutes = [
     component: Base64Image,
     layout: "/admin",
   },
-  {
+  /*{
     path: "/pages/searchbox",
     name: "Serach Box",
     rtlName: "لوحة القيادة",
@@ -183,7 +183,7 @@ const dashRoutes = [
     visible: false,
     component: SearchBox, 
     layout: "/admin",
-  },
+  },*/
   {
     path: "/pages/selectcaso",
     name: "Select Caso",
