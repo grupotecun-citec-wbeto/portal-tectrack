@@ -3,7 +3,8 @@ import React from "react";
 import SelectSegmentoDash from "./views/dashboard/SelectSegmentoDash";
 
 // icons 
-import { PiLineSegmentsThin } from "react-icons/pi";
+//import { PiLineSegmentsThin } from "react-icons/pi";
+import { MdSegment } from "react-icons/md";
 
 
 /** @type Feature */
@@ -15,7 +16,7 @@ export const SegmentsFeature = {
     path: "/pages/selectsegmento",
     name: "Segmentos",
     rtlName: "لوحة القيادة",
-    icon: <PiLineSegmentsThin color='inherit' />,
+    icon: <MdSegment color='inherit' />,
     secondaryNavbar: true,
     component: SelectSegmentoDash,
     layout: "/admin",

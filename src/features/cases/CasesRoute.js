@@ -3,7 +3,7 @@ import React from "react";
 import Casos from "./views/dashboard/Casos";
 
 // icons 
-import { IoBriefcaseOutline } from "react-icons/io5";
+import { FiGrid } from "react-icons/fi";
 
 
 /** @type Feature */
@@ -15,9 +15,13 @@ export const CasesFeature = {
         path: "/pages/casos",
         name: "Casos",
         rtlName: "لوحة القيادة",
-        icon: <IoBriefcaseOutline color='inherit' />,
+        icon: <FiGrid color='inherit' />,
         secondaryNavbar: true,
         component: Casos,
         layout: "/admin",
       },
 };
+
+/*
+NOTA: Si se quiere crear una categoria se agregar texto en category
+ */
