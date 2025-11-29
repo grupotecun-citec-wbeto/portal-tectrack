@@ -11,6 +11,7 @@ import {
 // TECTRACK CUSTOM
 //import useTransladoDb from "hookDB/transladoDB";
 
+import { buildRoutes } from "@core/buildRoutes";
 
 import Configurator from "components/Configurator/Configurator";
 import Footer from "components/Footer/Footer.js";
@@ -23,9 +24,9 @@ import {
 // Layout components
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Redirect, Route, Switch, useLocation } from "react-router-dom";
-import routes from "routes.js";
+//import routes from "routes.js";
 // Custom Chakra theme
 import FixedPlugin from "../components/FixedPlugin/FixedPlugin";
 // Custom components
@@ -45,10 +46,11 @@ import UserList from '../components/UserList';
 
 
 export default function Dashboard(props) {
+  const routes = buildRoutes();
   const { ...rest } = props;
 
-  
-  
+
+
 
   //useTransladoDb() // cargar correción de base de datos hacia base de datos distribuidas
 
@@ -123,8 +125,8 @@ export default function Dashboard(props) {
       }
       if (prop.layout === "/admin") {
         let params = ``
-        prop?.params?.map( (param) =>{
-            params += `/:${param}`
+        prop?.params?.map((param) => {
+          params += `/:${param}`
         })
         return (
           <Route
@@ -157,19 +159,19 @@ export default function Dashboard(props) {
         logo={
           <Stack direction='row' spacing='12px' align='center' justify='center'>
             {colorMode === "dark" ? (
-                <Image
-                  src={citec_png}
-                  alt="Imagen de ejemplo"
-                  borderRadius="lg"
-                  w={{xs:"75px",sm:"50px",md:"75px"}}
-                />
+              <Image
+                src={citec_png}
+                alt="Imagen de ejemplo"
+                borderRadius="lg"
+                w={{ xs: "75px", sm: "50px", md: "75px" }}
+              />
             ) : (
-                <Image
-                  src={citec_png}
-                  alt="Imagen de ejemplo"
-                  borderRadius="lg"
-                  w={{xs:"75px",sm:"50px",md:"75px"}}
-                />
+              <Image
+                src={citec_png}
+                alt="Imagen de ejemplo"
+                borderRadius="lg"
+                w={{ xs: "75px", sm: "50px", md: "75px" }}
+              />
             )}
             <Box
               w='1px'
@@ -181,14 +183,14 @@ export default function Dashboard(props) {
                 src={tecun_png}
                 alt="Imagen de ejemplo"
                 borderRadius="lg"
-                w={{xs:"75px",sm:"50px",md:"75px"}}
+                w={{ xs: "75px", sm: "50px", md: "75px" }}
               />
             ) : (
               <Image
                 src={medallon_naranja}
                 alt="Imagen de ejemplo"
                 borderRadius="lg"
-                w={{xs:"75px",sm:"50px",md:"75px"}}
+                w={{ xs: "75px", sm: "50px", md: "75px" }}
               />
             )}
           </Stack>
@@ -201,7 +203,7 @@ export default function Dashboard(props) {
           base: "100%",
           xl: "calc(100% - 275px)",
         }}>
-        
+
         <Portal>
           <AdminNavbar
             onOpen={onOpen}

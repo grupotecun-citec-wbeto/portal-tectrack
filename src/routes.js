@@ -44,6 +44,8 @@ import {
 } from "components/Icons/Icons";
 import CapacitacionDash from 'views/Dashboard/CapacitacionDash';
 
+
+/** @type {Array<Route>} */
 const dashRoutes = [
   {
     path: "/dashboard",
@@ -188,7 +190,7 @@ const dashRoutes = [
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
         visible: false,
-        component: SearchBox,
+        component: SearchBox, 
         layout: "/admin",
       },
       {
@@ -199,15 +201,6 @@ const dashRoutes = [
         secondaryNavbar: true,
         visible: false,
         component: SelectCasoBox,
-        layout: "/admin",
-      },
-      {
-        path: "/pages/selectsegmento",
-        name: "Segmentos",
-        rtlName: "لوحة القيادة",
-        icon: <PiLineSegmentsThin color='inherit' />,
-        secondaryNavbar: true,
-        component: SelectSegmentoDash,
         layout: "/admin",
       },
       {
@@ -275,6 +268,7 @@ const dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <IoBriefcaseOutline color='inherit' />,
         secondaryNavbar: true,
+        visible: false,
         component: TreeSistemas,
         layout: "/admin",
       },
@@ -361,6 +355,11 @@ const dashRoutes = [
     ],
   },
 ];
+
+/**
+ * Adds a route to the dashboard routes.
+ * @param {Route|Route[]} routes - The route or array of routes to add.
+ */
 export const addRoutes = (routes) => {
   if (Array.isArray(routes)) {
     routes.forEach(r => dashRoutes.push(r));
@@ -369,6 +368,11 @@ export const addRoutes = (routes) => {
   }
 };
 
+/**
+ * Adds a route to a specific category in the dashboard routes.
+ * @param {string} category - The category to which the route should be added.
+ * @param {Route} route - The route to add.
+ */
 export const addToCategory = (category, route) => {
   const categoryIndex = dashRoutes.findIndex(r => r.category === category);
   if (categoryIndex !== -1) {
