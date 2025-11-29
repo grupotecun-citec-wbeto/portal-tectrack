@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useContext } from "react";
+import React, { useState, useEffect, useContext, forwardRef, useImperativeHandle } from "react";
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -13,14 +13,14 @@ import {
     Heading,
     Select,
     Button,
-  } from '@chakra-ui/react';
-  // formularios
-  import {
+} from '@chakra-ui/react';
+// formularios
+import {
     FormControl,
     FormLabel,
     FormErrorMessage,
     FormHelperText,
-  } from '@chakra-ui/react'
+} from '@chakra-ui/react'
 
 
 // Custom components
@@ -41,18 +41,18 @@ import useCargarCaso from "hookDB/cargarCaso";
 
 //******************************************* FIN IMPORTS ************************** */
 
-function CardCrearCaso({openAlert,key, openLoader}){
+const CardCrearCaso = forwardRef(({ openAlert, openLoader }, ref) => {
 
-    const {casoActivo,setCasoActivo} = useContext(AppContext)
-   
+    const { casoActivo, setCasoActivo } = useContext(AppContext)
+
     const { dbReady } = useDataBaseContext()
-    const {createSupportItem: createSupportCaseItem,findById: findByCaseId} = useCaso(dbReady,false);
+    const { createSupportItem: createSupportCaseItem, findById: findByCaseId } = useCaso(dbReady, false);
 
     const history = useHistory()
 
-    const [caseId,setCaseId] = useState(0)
-    
-    
+    const [caseId, setCaseId] = useState(0)
+
+
     /*=======================================================
      BLOQUE: REDUX-PERSIST
      DESCRIPTION: 
@@ -62,15 +62,15 @@ function CardCrearCaso({openAlert,key, openLoader}){
 
     const saveUserData = (json) => {
         dispatch({ type: 'SET_USER_DATA', payload: json });
-      };
-  
+    };
+
     const getUserData = () => {
         dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
     };
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
-    const {loadCaso,loadCasoPromise} = useCargarCaso(userData?.casoActivo?.code)
+    const { loadCaso, loadCasoPromise } = useCargarCaso(userData?.casoActivo?.code)
 
     const getCurrentDateTime = () => {
         const now = new Date();
@@ -87,7 +87,7 @@ function CardCrearCaso({openAlert,key, openLoader}){
         return fechaDate.toUTCString(); // Devuelve la fecha en formato UTC
     };
 
-    const crearCaso = async() => {
+    const crearCaso = async () => {
         getUserData()
         // verificar si esta completo los predianostios
 
@@ -97,14 +97,14 @@ function CardCrearCaso({openAlert,key, openLoader}){
         let suma_prioridad = 0
         const diagnosticos = []
         const uuid = userData.casoActivo.code // uuid del caso es el que nos va servir para ver si ya esta sincronizado con mysql
-        
+
         for (const maquina_id of equiposArray) {
             // indica cuando un pre-diagnostico no esta completo de la lista de maquinas
             const diagnostico = {};
             const caso = userData.casos[userData.casoActivo?.code];
             const prediagnostico = caso.equipos[maquina_id].prediagnostico;
-            
-            if(caso.comunicacion_ID == 0){
+
+            if (caso.comunicacion_ID == 0) {
                 casoCompelto = false;
             }
 
@@ -116,23 +116,23 @@ function CardCrearCaso({openAlert,key, openLoader}){
             diagnostico.description = decodeURIComponent(prediagnostico.description);
 
             diagnosticos.push(diagnostico);
-            
+
             suma_prioridad += parseInt(prediagnostico.prioridad);
 
             if (
-                prediagnostico.sistemasSelectedJson.length === 0 ||
-                Object.keys(prediagnostico.herramientas).length === 0 ||
-                prediagnostico.asistencia_tipo_ID == 0 ||
-                prediagnostico.prioridad == 0
+                (prediagnostico?.sistemasSelectedJson?.length || 0) === 0 ||
+                Object.keys(prediagnostico?.herramientas || {}).length === 0 ||
+                prediagnostico?.asistencia_tipo_ID == 0 ||
+                prediagnostico?.prioridad == 0
             ) {
-            casoCompelto = false;
+                casoCompelto = false;
             }
         }
-        if(!casoCompelto){
+        if (!casoCompelto) {
             alert('Profavor terminar de llenar sus predianosticos, verificar equipos')
             return 0
         }
-        
+
         const usuario_ID = userData?.login?.ID || 1
         const usuario_ID_assigned = usuario_ID;
         const comunicacion_ID = userData?.casos[userData.casoActivo.code]?.comunicacion_ID || 'NULL'
@@ -142,22 +142,22 @@ function CardCrearCaso({openAlert,key, openLoader}){
         const start = getCurrentDateTime()
         const date_end = 'NULL'
         const description = ''
-       
-        const equiposIfy = JSON.stringify(userData?.casos[userData?.casoActivo?.code]?.equipos) 
-        
+
+        const equiposIfy = JSON.stringify(userData?.casos[userData?.casoActivo?.code]?.equipos)
+
         const sizeEquipos = equiposArray.length
         const prioridad = Math.ceil(suma_prioridad / sizeEquipos) // promedio ponderado de la prioridad de todos las maquinas
         let caseId = 0
-        
+
         const caso = await findByCaseId(uuid)
         if (Object.keys(caso).length === 0) {
-            
-            try{
-               
+
+            try {
+
                 caseId = uuid
-                
+
                 await createSupportCaseItem(
-                    uuid, 
+                    uuid,
                     usuario_ID,
                     usuario_ID_assigned,
                     comunicacion_ID,
@@ -171,49 +171,45 @@ function CardCrearCaso({openAlert,key, openLoader}){
                 ) // load case local
                 openLoader(true)
                 await loadCasoPromise()
-                try{
-                    openAlert(caseId,uuid,'success')
-                }catch(err){
-                    console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
+                try {
+                    openAlert(caseId, uuid, 'success')
+                } catch (err) {
+                    console.error('7575186c-9982-43b4-942a-81fe27cd22cc', err)
                 }
-            }catch(err){
-                console.error('5651c782-9238-46a2-884e-b35991ed7e5a',err)
-                try{
-                    openAlert(caseId,uuid,'error')
-                }catch(err){
-                    console.error('7575186c-9982-43b4-942a-81fe27cd22cc',err)
+            } catch (err) {
+                console.error('5651c782-9238-46a2-884e-b35991ed7e5a', err)
+                try {
+                    openAlert(caseId, uuid, 'error')
+                } catch (err) {
+                    console.error('7575186c-9982-43b4-942a-81fe27cd22cc', err)
                 }
             }
-            
-            
-        }else{
+
+
+        } else {
             alert('el caso ya existe')
         }
 
-        
 
-        
-
-    
-
-
-        
     }
 
-    return(
-        <Card key={key}>
-              <CardHeader>
-                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
-              </CardHeader>
-              <CardBody mt={{xl:'50px', sm:'50px'}}>
-                  <Button variant='dark' minW='145px' h='36px' fontSize={{xl:'2em',sm:'1em'}} onClick={crearCaso}>
-                    Crear caso
-                  </Button>
-                  
-              </CardBody>
-              
+    useImperativeHandle(ref, () => ({
+        crearCaso
+    }));
+
+    return (
+        <Card>
+            <CardHeader>
+                <Heading size='md'>Resumen del Caso</Heading>
+            </CardHeader>
+            <CardBody>
+                <Text fontSize='lg' color='gray.500' fontWeight='bold'>
+                    Listo para crear el caso. Haga clic en el botón flotante para confirmar.
+                </Text>
+            </CardBody>
+
         </Card>
     )
-}
+});
 
 export default CardCrearCaso

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useSelector, useDispatch, useStore } from 'react-redux';
 import axios from 'axios';
 import AppContext from "appContext";
@@ -40,7 +40,7 @@ import { useDebounce } from 'use-debounce';
 import { MdCheckCircle, MdSettings } from 'react-icons/md';
 
 //ICONOS
-import { FaCheck } from "react-icons/fa"; // Icono de check
+import { FaCheck, FaArrowLeft, FaClipboardCheck } from "react-icons/fa"; // Icono de check
 
 import { useHistory } from 'react-router-dom';
 
@@ -94,6 +94,8 @@ function SearchBox({ onSearch }) {
   const [isBusquedaTerminada, setIsBusquedaTerminada] = useState(false)
 
   const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
+
+  const crearCasoRef = useRef();
 
   // ************************** REDUX-PRESIST ****************************
   const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -216,6 +218,11 @@ function SearchBox({ onSearch }) {
     saveUserData(newUserData)
   }
 
+  const handleCrearCaso = () => {
+    if (crearCasoRef.current) {
+      crearCasoRef.current.crearCaso();
+    }
+  };
 
 
 
@@ -271,26 +278,18 @@ function SearchBox({ onSearch }) {
                   />
                 </InputGroup>
 
-                {Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos || {}).length >= 1 && (
-                  <Button
-                    colorScheme="green" // Verde para indicar que se ha completado exitosamente
-                    size="md" // Tamaño del botón
-                    onClick={() => busquedaTerminada(1)} // Acción al hacer clic
-                  >
-                    Búsqueda Terminada
-                  </Button>
-                )}
-
               </>
             ) : (
               <>
                 {!isPost && (
                   <Button
-                    colorScheme="blue" // Color azul para representar la acción de volver a buscar
-                    size="md" // Tamaño del botón
-                    onClick={() => busquedaTerminada(0)} // Acción al hacer clic
+                    leftIcon={<FaArrowLeft />}
+                    variant="ghost"
+                    colorScheme="blue"
+                    onClick={() => busquedaTerminada(0)}
+                    size="md"
                   >
-                    Regresar a Buscar
+                    Regresar a buscar
                   </Button>
                 )}
 
@@ -376,7 +375,7 @@ function SearchBox({ onSearch }) {
               {isOpenAlertCaso ? (
                 <AlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid} type={typeAlert} openLoader={setFullscreenLoaderVisible} />
               ) : (
-                <CardCrearCaso openAlert={openAlert} key='CardCrearCaso' openLoader={setFullscreenLoaderVisible} />
+                <CardCrearCaso ref={crearCasoRef} openAlert={openAlert} key='CardCrearCaso' openLoader={setFullscreenLoaderVisible} />
               )}
             </>
           ) : (
@@ -387,6 +386,47 @@ function SearchBox({ onSearch }) {
 
 
       <CardCommand />
+
+      {/* Floating Action Button (FAB) Section */}
+      <Box position="fixed" bottom="30px" right="30px" zIndex="999">
+        {!isBusquedaTerminada && Object.keys(userData?.casos[userData?.casoActivo?.code]?.equipos || {}).length >= 1 && (
+          <Tooltip label="Finalizar selección de equipos" placement="left">
+            <Button
+              leftIcon={<MdCheckCircle size="24px" />}
+              colorScheme="green"
+              onClick={() => busquedaTerminada(1)}
+              borderRadius="full"
+              boxShadow="lg"
+              size="lg"
+              height="60px"
+              px="30px"
+              _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+              transition="all 0.2s"
+            >
+              Búsqueda Terminada
+            </Button>
+          </Tooltip>
+        )}
+
+        {isBusquedaTerminada && !isPost && !isOpenAlertCaso && (
+          <Tooltip label="Crear nuevo caso" placement="left">
+            <Button
+              leftIcon={<FaClipboardCheck size="24px" />}
+              colorScheme="teal"
+              onClick={handleCrearCaso}
+              borderRadius="full"
+              boxShadow="lg"
+              size="lg"
+              height="60px"
+              px="30px"
+              _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+              transition="all 0.2s"
+            >
+              Crear Caso
+            </Button>
+          </Tooltip>
+        )}
+      </Box>
     </Flex>
   );
 }
