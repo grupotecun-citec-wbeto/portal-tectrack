@@ -1,5 +1,5 @@
 // import
-import React, { Component }  from 'react';
+import React from 'react';
 import Dashboard from "views/Dashboard/Dashboard.js";
 import Tables from "views/Dashboard/Tables.js";
 import Billing from "views/Dashboard/Billing.js";
@@ -44,14 +44,14 @@ import {
 } from "components/Icons/Icons";
 import CapacitacionDash from 'views/Dashboard/CapacitacionDash';
 
-var dashRoutes = [
+const dashRoutes = [
   {
     path: "/dashboard",
     name: "Dashboard",
     rtlName: "لوحة القيادة",
     icon: <HomeIcon color='inherit' />,
     component: Dashboard,
-    visible:false,
+    visible: false,
     layout: "/admin",
   },
   /*{
@@ -85,7 +85,7 @@ var dashRoutes = [
     rtlName: "صفحات",
     state: "pageCollapse",
     layout: "/admin",
-    visible:false,
+    visible: false,
     icon: <PersonIcon color='inherit' />,
     views: [
       {
@@ -122,7 +122,7 @@ var dashRoutes = [
     rtlName: "لوحة القيادة",
     icon: <StatsIcon color='inherit' />,
     component: Tables,
-    visible:false,
+    visible: false,
     layout: "/admin",
   },
   {
@@ -177,7 +177,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: Base64Image,
         layout: "/admin",
       },
@@ -187,7 +187,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: SearchBox,
         layout: "/admin",
       },
@@ -197,7 +197,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: SelectCasoBox,
         layout: "/admin",
       },
@@ -216,7 +216,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: CapacitacionDash,
         layout: "/admin",
       },
@@ -226,7 +226,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: CapacitacionDash,
         layout: "/admin",
       },
@@ -236,7 +236,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: ComunicationBox,
         layout: "/admin",
       },
@@ -246,7 +246,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: PreDiagnosticoBox,
         layout: "/admin",
       },
@@ -256,7 +256,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: DiagnosticoBox,
         layout: "/admin",
       },
@@ -284,7 +284,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: Form,
         layout: "/admin",
       },
@@ -294,7 +294,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: Formik,
         layout: "/admin",
       },
@@ -304,7 +304,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: SignInDash,
         layout: "/admin",
       },
@@ -314,7 +314,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
-        visible:false,
+        visible: false,
         component: ResultTableSqlite,
         layout: "/admin",
       },
@@ -325,9 +325,9 @@ var dashRoutes = [
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
         component: CasoInfo,
-        visible:false,
+        visible: false,
         layout: "/admin",
-        params:['id']
+        params: ['id']
       },
       {
         path: "/pages/pdf",
@@ -336,9 +336,9 @@ var dashRoutes = [
         icon: <PersonIcon color='inherit' />,
         secondaryNavbar: true,
         component: GenerarPDF,
-        visible:false,
+        visible: false,
         layout: "/admin",
-        params:['id'],
+        params: ['id'],
       },
       {
         path: "/signin",
@@ -346,7 +346,7 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <DocumentIcon color='inherit' />,
         component: SignIn,
-        visible:false,
+        visible: false,
         layout: "/auth",
       },
       {
@@ -355,10 +355,25 @@ var dashRoutes = [
         rtlName: "لوحة القيادة",
         icon: <RocketIcon color='inherit' />,
         component: SignUp,
-        visible:false,
+        visible: false,
         layout: "/auth",
       },
     ],
   },
 ];
+export const addRoutes = (routes) => {
+  if (Array.isArray(routes)) {
+    routes.forEach(r => dashRoutes.push(r));
+  } else {
+    dashRoutes.push(routes);
+  }
+};
+
+export const addToCategory = (category, route) => {
+  const categoryIndex = dashRoutes.findIndex(r => r.category === category);
+  if (categoryIndex !== -1) {
+    dashRoutes[categoryIndex].views.push(route);
+  }
+};
+
 export default dashRoutes;
