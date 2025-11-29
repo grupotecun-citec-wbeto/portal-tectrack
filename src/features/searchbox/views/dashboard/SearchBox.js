@@ -40,7 +40,7 @@ import { useDebounce } from 'use-debounce';
 import { MdCheckCircle, MdSettings } from 'react-icons/md';
 
 //ICONOS
-import { FaCheck, FaArrowLeft, FaClipboardCheck } from "react-icons/fa"; // Icono de check
+import { FaCheck, FaArrowLeft, FaClipboardCheck, FaFlagCheckered } from "react-icons/fa"; // Icono de check
 
 import { useHistory } from 'react-router-dom';
 
@@ -96,6 +96,7 @@ function SearchBox({ onSearch }) {
   const [fullscreenLoaderVisible, setFullscreenLoaderVisible] = useState(false);
 
   const crearCasoRef = useRef();
+  const terminarCasoRef = useRef();
 
   // ************************** REDUX-PRESIST ****************************
   const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -221,6 +222,12 @@ function SearchBox({ onSearch }) {
   const handleCrearCaso = () => {
     if (crearCasoRef.current) {
       crearCasoRef.current.crearCaso();
+    }
+  };
+
+  const handleTerminarCaso = () => {
+    if (terminarCasoRef.current) {
+      terminarCasoRef.current.changeEstadoCaso(5);
     }
   };
 
@@ -379,7 +386,7 @@ function SearchBox({ onSearch }) {
               )}
             </>
           ) : (
-            <CardTerminarCaso refresh={refresh} openLoader={setFullscreenLoaderVisible} />
+            <CardTerminarCaso ref={terminarCasoRef} refresh={refresh} openLoader={setFullscreenLoaderVisible} />
           )}
         </>
       )}
@@ -423,6 +430,25 @@ function SearchBox({ onSearch }) {
               transition="all 0.2s"
             >
               Crear Caso
+            </Button>
+          </Tooltip>
+        )}
+
+        {isBusquedaTerminada && isPost && (
+          <Tooltip label="Terminar caso" placement="left">
+            <Button
+              leftIcon={<FaFlagCheckered size="24px" />}
+              colorScheme="red"
+              onClick={handleTerminarCaso}
+              borderRadius="full"
+              boxShadow="lg"
+              size="lg"
+              height="60px"
+              px="30px"
+              _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+              transition="all 0.2s"
+            >
+              Terminar Caso
             </Button>
           </Tooltip>
         )}

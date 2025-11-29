@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, forwardRef, useImperativeHandle } from "react";
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -42,7 +42,7 @@ import { use } from "react";
 
 //******************************************* FIN IMPORTS ************************** */
 
-function CardTerminarCaso(props) {
+const CardTerminarCaso = forwardRef((props, ref) => {
 
 
     // iniciar base de datos
@@ -145,7 +145,7 @@ function CardTerminarCaso(props) {
                         const caso = userData.casos[userData.casoActivo?.code];
                         const diagnostico_json = caso.equipos[maquina_id].diagnostico;
                         const prediagnostico = caso.equipos[maquina_id].prediagnostico;
-                        
+
 
                         diagnostico.maquina_id = maquina_id;
                         diagnostico.uuid = caso_id;
@@ -155,14 +155,14 @@ function CardTerminarCaso(props) {
                         diagnostico.description = decodeURIComponent(diagnostico_json.description);
 
                         diagnosticos.push(diagnostico);
-                        
+
                     }
 
 
-                   
+
                     const equipos_jsonstringify = JSON.stringify(equipos)
                     try {
-                        await stopCase(caso_id, km_final, estado_a_asignar, getCurrentDateTime(), equipos_jsonstringify,diagnosticos)
+                        await stopCase(caso_id, km_final, estado_a_asignar, getCurrentDateTime(), equipos_jsonstringify, diagnosticos)
 
 
                         // sincronizar caso con rehidratación
@@ -175,13 +175,13 @@ function CardTerminarCaso(props) {
                     } catch (err) {
                         console.warn('Error al terminar el caso 07506205-36c1-4767-a2cc-1b5a301754bf', err)
                     }
-                
+
 
                     // Reiniciando el caso activo, para preparar para el siguiente caso
                     const newUserData = structuredClone(userData)
                     newUserData.casoActivo = structuredClone(newUserData.stuctures.casoActivo)
                     saveUserData(newUserData)
-                    
+
 
 
 
@@ -199,30 +199,23 @@ function CardTerminarCaso(props) {
         }
     }
 
+    useImperativeHandle(ref, () => ({
+        changeEstadoCaso
+    }));
+
     return (
         <Card>
             <CardHeader>
-                <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}></Heading>
+                <Heading size='md'>Finalizar Caso</Heading>
             </CardHeader>
-            <CardBody mt={{ xl: '50px', sm: '50px' }} w={{ xl: "35%", sm: "100%" }}>
-                <Grid templateColumns={{ sm: "1fr", md: "repeat(2, 1fr)", xl: "repeat(2, 1fr)" }} gap='22px'>
-                    <Button variant='dark' backgroundColor={"green.400"} minW='145px' h='36px' fontSize={{ xl: '2em', sm: '1em' }} onClick={() => changeEstadoCaso(5)}>
-                        Terminar Caso
-                    </Button>
-                    {/* Esta funcionalidad esta pendiente de Revisión*/}
-                    {false && (
-                        <Button variant='dark' backgroundColor={"red.400"} minW='145px' h='36px' fontSize={{ xl: '2em', sm: '1em' }} onClick={() => changeEstadoCaso(4)}>
-                            Detener caso
-                        </Button>
-                    )}
-                </Grid>
-
-
-
+            <CardBody>
+                <Text fontSize='lg' color='gray.500' fontWeight='bold'>
+                    Listo para terminar el caso. Haga clic en el botón flotante para confirmar.
+                </Text>
             </CardBody>
 
         </Card>
     )
-}
+});
 
 export default CardTerminarCaso
