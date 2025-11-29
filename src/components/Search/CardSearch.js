@@ -18,7 +18,15 @@ import {
     IconButton,
     Tooltip,
     SimpleGrid,
-    GridItem
+    GridItem,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    useDisclosure
 } from '@chakra-ui/react';
 
 import { FaPlus, FaTimes, FaClipboardList, FaEdit } from "react-icons/fa";
@@ -58,6 +66,7 @@ function SearchCard(props) {
     const history = useHistory();
 
     const { addToDeleteQueue } = useContext(DisposalContext);
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     // ************************** REDUX-PRESIST ****************************
     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -238,13 +247,25 @@ function SearchCard(props) {
                     display="flex"
                     flexDirection="column"
                 >
-                    <Heading size="md" mb={4}>
-                        Información General
-                    </Heading>
+                    <Flex justifyContent="space-between" alignItems="center" mb={4}>
+                        <Heading size="md">
+                            Información General
+                        </Heading>
+                        <Tooltip label="Ver detalles completos">
+                            <IconButton
+                                size="sm"
+                                icon={<FaClipboardList />}
+                                onClick={onOpen}
+                                colorScheme="blue"
+                                variant="ghost"
+                                aria-label="Ver detalles"
+                            />
+                        </Tooltip>
+                    </Flex>
 
                     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2} flex="1">
 
-                        {infosEsential.map((info) => (
+                        {infosEsential && infosEsential.map((info) => (
                             <GridItem key={info.title}>
                                 <CardBodyFlexText title={info.title} text={info.text} />
                             </GridItem>
@@ -313,6 +334,31 @@ function SearchCard(props) {
 
 
             </Flex>
+
+            <Modal isOpen={isOpen} onClose={onClose} size="xl">
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>{titulo}</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Box flex='1' textAlign='center' mb={6}>
+                            <CardBodyImg img={img} />
+                        </Box>
+                        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                            {infos && infos.map((info) => (
+                                <GridItem key={info.title}>
+                                    <CardBodyFlexText title={info.title} text={info.text} />
+                                </GridItem>
+                            ))}
+                        </SimpleGrid>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="blue" mr={3} onClick={onClose}>
+                            Cerrar
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </Card >
     );
 }

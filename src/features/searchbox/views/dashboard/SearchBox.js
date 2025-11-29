@@ -319,7 +319,7 @@ import {
                     {title:"Finca",text:maquina.codigo_finca},
                   ]}
                   infosEsential={[
-                    {title:"Estado",text:maquina.estado_maquinaria},
+                    {title:"Finca",text:maquina.codigo_finca},
                     {title:"Departamento",text:maquina.subdivision_name},
                     {title:"Proyecto",text:maquina.proyecto_name},
                     {title:"Cliente",text:maquina.cliente_name}
