@@ -225,16 +225,6 @@ const dashRoutes = [
     layout: "/admin",
   },
   {
-    path: "/pages/prediagnostico",
-    name: "Pre Diagnostico",
-    rtlName: "لوحة القيادة",
-    icon: <PersonIcon color='inherit' />,
-    secondaryNavbar: true,
-    visible: false,
-    component: PreDiagnosticoBox,
-    layout: "/admin",
-  },
-  {
     path: "/pages/diagnostico",
     name: "Diagnostico",
     rtlName: "لوحة القيادة",
