@@ -254,15 +254,6 @@ const dashRoutes = [
         layout: "/admin",
       },
       {
-        path: "/pages/casos",
-        name: "Casos",
-        rtlName: "لوحة القيادة",
-        icon: <IoBriefcaseOutline color='inherit' />,
-        secondaryNavbar: true,
-        component: Casos,
-        layout: "/admin",
-      },
-      {
         path: "/pages/tree-sistemas",
         name: "Tree sistemas",
         rtlName: "لوحة القيادة",
