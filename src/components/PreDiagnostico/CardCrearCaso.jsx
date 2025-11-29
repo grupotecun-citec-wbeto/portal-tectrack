@@ -13,6 +13,15 @@ import {
     Heading,
     Select,
     Button,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    useDisclosure,
+    Icon
 } from '@chakra-ui/react';
 // formularios
 import {
@@ -22,6 +31,7 @@ import {
     FormHelperText,
 } from '@chakra-ui/react'
 
+import { FaExclamationTriangle } from "react-icons/fa";
 
 // Custom components
 import Card from "components/Card/Card";
@@ -51,6 +61,8 @@ const CardCrearCaso = forwardRef(({ openAlert, openLoader }, ref) => {
     const history = useHistory()
 
     const [caseId, setCaseId] = useState(0)
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
 
     /*=======================================================
@@ -129,7 +141,8 @@ const CardCrearCaso = forwardRef(({ openAlert, openLoader }, ref) => {
             }
         }
         if (!casoCompelto) {
-            alert('Profavor terminar de llenar sus predianosticos, verificar equipos')
+            // alert('Profavor terminar de llenar sus predianosticos, verificar equipos')
+            onOpen();
             return 0
         }
 
@@ -198,17 +211,52 @@ const CardCrearCaso = forwardRef(({ openAlert, openLoader }, ref) => {
     }));
 
     return (
-        <Card>
-            <CardHeader>
-                <Heading size='md'>Resumen del Caso</Heading>
-            </CardHeader>
-            <CardBody>
-                <Text fontSize='lg' color='gray.500' fontWeight='bold'>
-                    Listo para crear el caso. Haga clic en el botón flotante para confirmar.
-                </Text>
-            </CardBody>
+        <>
+            <Card>
+                <CardHeader>
+                    <Heading size='md'>Resumen del Caso</Heading>
+                </CardHeader>
+                <CardBody>
+                    <Text fontSize='lg' color='gray.500' fontWeight='bold'>
+                        Listo para crear el caso. Haga clic en el botón flotante para confirmar.
+                    </Text>
+                </CardBody>
 
-        </Card>
+            </Card>
+
+            <Modal isOpen={isOpen} onClose={onClose} isCentered size="lg">
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader display="flex" alignItems="center" color="orange.500">
+                        <Icon as={FaExclamationTriangle} mr={3} w={6} h={6} />
+                        Información Incompleta
+                    </ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Text fontSize="md" mb={4} fontWeight="bold">
+                            No se puede crear el caso porque faltan datos obligatorios.
+                        </Text>
+                        <Text mb={2}>
+                            Por favor, verifique lo siguiente en cada equipo seleccionado:
+                        </Text>
+                        <Flex direction="column" ml={4} mb={4} as="ul" style={{ listStyleType: 'disc' }}>
+                            <Text as="li">Seleccionar al menos un <b>sistema</b>.</Text>
+                            <Text as="li">Seleccionar las <b>herramientas</b> necesarias.</Text>
+                            <Text as="li">Definir el <b>tipo de asistencia</b>.</Text>
+                            <Text as="li">Establecer la <b>prioridad</b>.</Text>
+                        </Flex>
+                        <Text fontSize="sm" color="gray.500">
+                            Revise los detalles de cada equipo (icono de lista) y complete la información faltante.
+                        </Text>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="blue" onClick={onClose}>
+                            Entendido
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     )
 });
 
