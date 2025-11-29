@@ -17,18 +17,14 @@ function CardBodyFlexText(props){
     const emailColor = useColorModeValue("gray.400", "gray.300");
 
     return(
-        <Flex align='center' mb='18px'>
-            <Text
-            fontSize='md'
-            color={textColor}
-            fontWeight='bold'
-            me='10px'>
+        <>
+            <Text fontSize="sm" color="gray.500" fontWeight="medium">
                 {title}
             </Text>
-            <Text fontSize='md' color='gray.400' fontWeight='400'>
-            {text}
+            <Text fontSize="md" fontWeight="bold">
+                {text}
             </Text>
-        </Flex> 
+        </>
     )
 }
 

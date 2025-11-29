@@ -311,7 +311,7 @@ import {
                     {title:"Departamento",text:maquina.subdivision_name},
                     {title:"Marca",text:maquina.marca_name},
                     {title:"Proyecto",text:maquina.proyecto_name},
-                    {title:"Cliene",text:maquina.cliente_name},
+                    {title:"Cliente",text:maquina.cliente_name},
                     {title:"Estado",text:maquina.estado_maquinaria},
                     {title:"Unidad Negocio",text:maquina.unidad_negocio},
                     {title:"Propietario",text:maquina.propietario_name},
