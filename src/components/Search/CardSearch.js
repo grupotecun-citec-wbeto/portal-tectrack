@@ -49,6 +49,7 @@ function SearchCard(props) {
         img,
         cliente_name,
         infos,
+        infosEsential,
         isSelected,
         isPost,
         isBusquedaTerminada,
@@ -243,7 +244,7 @@ function SearchCard(props) {
 
                     <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2} flex="1">
 
-                        {infos.map((info) => (
+                        {infosEsential.map((info) => (
                             <GridItem key={info.title}>
                                 <CardBodyFlexText title={info.title} text={info.text} />
                             </GridItem>

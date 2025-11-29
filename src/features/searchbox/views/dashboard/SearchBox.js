@@ -318,6 +318,12 @@ import {
                     {title:"Contrato",text:maquina.contrato},
                     {title:"Finca",text:maquina.codigo_finca},
                   ]}
+                  infosEsential={[
+                    {title:"Estado",text:maquina.estado_maquinaria},
+                    {title:"Departamento",text:maquina.subdivision_name},
+                    {title:"Proyecto",text:maquina.proyecto_name},
+                    {title:"Cliente",text:maquina.cliente_name}
+                  ]}
                 />
             ))}
             {datos.length == 0 && (
