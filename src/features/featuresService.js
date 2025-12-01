@@ -3,11 +3,13 @@ import { CasesFeature } from "./cases";
 import { SearchBoxFeature } from "./searchbox";
 import { PreDiagnosticoFeature } from "./prediagnostico";
 import { CapacitationFeature } from "./administrative";
+import { ProjectFeature } from "./administrative";
 
 export const FEATURES = [
   SegmentsFeature,
   CasesFeature,
   SearchBoxFeature,
   PreDiagnosticoFeature,
-  CapacitationFeature
+  CapacitationFeature,
+  ProjectFeature
 ];

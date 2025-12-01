@@ -204,7 +204,7 @@ const dashRoutes = [
     component: CapacitacionDash,
     layout: "/admin",
   },*/
-  {
+  /*{
     path: "/pages/programa/proyecto",
     name: "Proyecto",
     rtlName: "لوحة القيادة",
@@ -213,7 +213,7 @@ const dashRoutes = [
     visible: false,
     component: CapacitacionDash,
     layout: "/admin",
-  },
+  },*/
   {
     path: "/pages/comunication",
     name: "Comuniación",
