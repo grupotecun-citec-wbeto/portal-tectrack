@@ -118,20 +118,26 @@ function SearchCard(props) {
         const run = async () => {
             const prediagnostico = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.prediagnostico
             const diagnostico = userData?.casos[userData?.casoActivo?.code]?.equipos[maquina_id]?.diagnostico
+
+            let hasPre = false;
+            let hasDiag = false;
+
             if (userData.casoActivo.code != '' && maquina_id) {
 
-                if (typeof prediagnostico?.sistemasSelectedJson != 'undefined' && prediagnostico?.sistemasSelectedJson != null) {
-                    setIsCreatedPreDiagnostico(true)
+                if (typeof prediagnostico?.sistemasSelectedJson != 'undefined' && prediagnostico?.sistemasSelectedJson != null && prediagnostico?.sistemasSelectedJson.length > 0) {
+                    hasPre = true
                 }
 
-                if (typeof diagnostico?.sistemasSelectedJson != 'undefined' && diagnostico?.sistemasSelectedJson != null) {
-                    setIsCreatedDiagnostico(true)
+                if (typeof diagnostico?.sistemasSelectedJson != 'undefined' && diagnostico?.sistemasSelectedJson != null && diagnostico?.sistemasSelectedJson.length > 0) {
+                    hasDiag = true
                 }
 
             }
+            setIsCreatedPreDiagnostico(hasPre)
+            setIsCreatedDiagnostico(hasDiag)
         }
         run()
-    }, [])
+    }, [userData, maquina_id])
 
     useEffect(() => {
         if (isSelected == 1) {
