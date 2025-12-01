@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid' // Importa la función para generar UUID
@@ -21,12 +21,15 @@ import {
   Text,
   Flex,
   Grid,
+  GridItem,
   Switch,
   useColorMode,
   useColorModeValue,
   Heading,
   Image,
   Button,
+  Icon,
+  Tooltip,
 } from '@chakra-ui/react';
 
 // Custom components
@@ -48,7 +51,7 @@ import CardComunication from "@components/Comunication/CardComunication";
 import { SearchIcon } from '@chakra-ui/icons';
 import { useDebounce } from 'use-debounce';
 
-import { MdCheckCircle, MdSettings } from 'react-icons/md';
+import { MdCheckCircle, MdSettings, MdSave } from 'react-icons/md';
 
 import { Textarea } from '@chakra-ui/react'
 
@@ -84,6 +87,8 @@ function DiagnosticoBox({ onSearch }) {
    DESCRIPTION: 
   =========================================================*/
   const history = useHistory()
+
+  const guardarRef = useRef();
 
   const [descriptionValue, setDescriptionValue] = useState('');
   const [debouncedSearchValue] = useDebounce(descriptionValue, 500);
@@ -254,6 +259,12 @@ function DiagnosticoBox({ onSearch }) {
     history.push('/admin/pages/searchbox')
   }
 
+  const handleGuardar = () => {
+    if (guardarRef.current) {
+      guardarRef.current.guardar();
+    }
+  };
+
   /*====================FIN BLOQUE: FUNCTIONS        ==============*/
 
 
@@ -282,104 +293,86 @@ function DiagnosticoBox({ onSearch }) {
               textAlign={{ sm: "center", md: "start" }}
               p='24px'
             >
-              <Text fontSize={{ xl: '4em', sm: '3em' }}>Diagnostico</Text>
+              <Text fontSize={{ xl: '4em', sm: '3em' }}>Diagnóstico</Text>
 
             </Flex>
 
           </Flex>
-          <Grid templateColumns={{ sm: "1fr", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='22px'>
-            {/*<Card>
-              <CardHeader>
-                <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}>¿El prediagnóstico fue atinado?</Heading>
-              </CardHeader>
-              <CardBody mt={{ xl: '10px' }}>
-                <Flex>
-                  <Text
-                    noOfLines={1}
-                    fontSize='md'
-                    color='gray.400'
-                    fontWeight='400'>
-                    NO
-                  </Text>
-                  <Switch colorScheme='blue' me='10px' size="lg" isChecked={check} onChange={() => setCheck(!check)} />
-                  <Text
-                    noOfLines={1}
-                    fontSize='md'
-                    color='gray.400'
-                    fontWeight='400'>
-                    SI
-                  </Text>
-                </Flex>
-              </CardBody>
 
-            </Card>*/}
-            {!check && (
-              <>
-                <Card>
-                  <CardHeader>
-                    <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}>Explicación del problema</Heading>
-                  </CardHeader>
-                  <CardBody mt={{ xl: '10px' }}>
-                    <Textarea variant="dark" color='black' minH={{ xl: '200px', sm: '200px' }} fontSize={{ xl: '1.5em' }} placeholder='Explicación del problema'
-                      onChange={(e) => setDescriptionValue(e.target.value)}
-                      value={descriptionValue}
-                    />
-                  </CardBody>
-
-                </Card>
-                {/*<Card>
+          {/* MAIN CONTENT GRID - 2 COLUMNS */}
+          <Grid
+            templateColumns={{ base: "1fr", lg: "1fr 1fr" }}
+            gap={{ base: "20px", lg: "24px" }}
+          >
+            {/* LEFT COLUMN */}
+            <GridItem colSpan={1}>
+              <Flex direction="column" gap="24px">
+                {!check && (
+                  <>
+                    <Card>
                       <CardHeader>
-                        <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
+                        <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}>Explicación del problema</Heading>
                       </CardHeader>
-                      <CardBody mt={{xl:'10px'}}>
-                        
-                          
-                            {Object.keys(datos).map( (key) =>(
-                              <>
-                                <Text fontSize='sm' color='gray.400' fontWeight='600' mb='20px'>
-                                {key}
-                                </Text>
-                                <Grid templateColumns={{ sm: "1fr", md: "repeat(3, 1fr)", xl: "repeat(3, 1fr)" }} gap='22px'>
-                                  {datos[key].map( (element) =>(
-                                    <CheckboxDiagnostico name={element.system_name} id={element.ID} section={key}/>
-                                  ))}
-                                </Grid>
-                              </>
-                            ))}
-                          
+                      <CardBody mt={{ xl: '10px' }}>
+                        <Textarea variant="dark" color='black' minH={{ xl: '200px', sm: '200px' }} fontSize={{ xl: '1.5em' }} placeholder='Explicación del problema'
+                          onChange={(e) => setDescriptionValue(e.target.value)}
+                          value={descriptionValue}
+                        />
                       </CardBody>
-                      
-                  </Card>*/}
-                <Card>
-                  <CardHeader>
-                    <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}>Sistemas y servicios</Heading>
-                  </CardHeader>
-                  <CardBody mt={{ xl: '10px' }}>
+                    </Card>
 
-                    {sistemasLoading ? (
-                      <Text>Cargando sistemas...</Text>
-                    ) : sistemasError ? (
-                      <Text>Error al cargar los sistemas: {sistemasError.message}</Text>
-                    ) : (
-                      <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="diagnostico" />
-                    )}
+                    <Card>
+                      <CardHeader>
+                        <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}>Sistemas y servicios</Heading>
+                      </CardHeader>
+                      <CardBody mt={{ xl: '10px' }}>
+                        {sistemasLoading ? (
+                          <Text>Cargando sistemas...</Text>
+                        ) : sistemasError ? (
+                          <Text>Error al cargar los sistemas: {sistemasError.message}</Text>
+                        ) : (
+                          <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="diagnostico" />
+                        )}
+                      </CardBody>
+                    </Card>
+                  </>
+                )}
+              </Flex>
+            </GridItem>
 
-                  </CardBody>
-
-                </Card>
-
-                <CardHerramientas title="¿Que herramientas utilizaste?" />
-              </>
-            )}
-
-
-
-
-            <CardGuardarDiagnostico guardar={guardar} />
-            <CardCommand />
-
+            {/* RIGHT COLUMN */}
+            <GridItem colSpan={1}>
+              <Flex direction="column" gap="24px">
+                {!check && (
+                  <CardHerramientas title="¿Que herramientas utilizaste?" />
+                )}
+                <CardGuardarDiagnostico ref={guardarRef} guardar={guardar} />
+                <CardCommand />
+              </Flex>
+            </GridItem>
 
           </Grid>
+
+          {/* FAB for Save */}
+          <Box position="fixed" bottom="30px" right="30px" zIndex="999">
+            <Tooltip label="Guardar diagnóstico" placement="left" fontSize="sm">
+              <Button
+                leftIcon={<Icon as={MdSave} w={6} h={6} />}
+                colorScheme="blue"
+                onClick={handleGuardar}
+                borderRadius="full"
+                boxShadow="lg"
+                size="lg"
+                height="60px"
+                px="30px"
+                fontSize={{ base: "sm", md: "md" }}
+                _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+                transition="all 0.2s"
+              >
+                Guardar
+              </Button>
+            </Tooltip>
+          </Box>
 
         </Flex>
       ) : (
@@ -392,12 +385,3 @@ function DiagnosticoBox({ onSearch }) {
 }
 
 export default DiagnosticoBox;
-
-
-/*
-<Flex justifyContent='space-between'>
-                  <Button variant='dark' minW='110px' h='36px' onClick={() => setMachineID(rest.ID)}>
-                  CREAR CASO
-                  </Button>
-              </Flex>
-*/
