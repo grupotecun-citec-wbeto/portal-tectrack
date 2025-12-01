@@ -255,7 +255,6 @@ function PreDiagnosticoBox({ onSearch }) {
             {/* LEFT COLUMN: MAIN INFO */}
             <GridItem colSpan={1}>
               <Flex direction="column" gap="24px">
-                <CardComunication title="¿Por cuál canal te contactaron?" />
 
                 <Card>
                   <CardHeader display="flex" alignItems="center" gap="10px">
@@ -313,23 +312,25 @@ function PreDiagnosticoBox({ onSearch }) {
                     )}
                   </CardBody>
                 </Card>
+                <CardHerramientas title="¿Necesitas incluir a Herramientas?" />
               </Flex>
             </GridItem>
 
             {/* MIDDLE COLUMN: DETAILS */}
             <GridItem colSpan={1}>
               <Flex direction="column" gap="24px">
+                <CardComunication title="¿Por cuál canal te contactaron?" />
                 <CardEspecialista />
                 <CardAsistencia />
-                <CardHerramientas title="¿Necesitas incluir a Herramientas?" />
                 <CardPrioridad />
+                <CardGuardarDiagnosticoPre ref={guardarRef} />
               </Flex>
             </GridItem>
 
             {/* RIGHT COLUMN: ACTIONS (visible only on xl screens) */}
             <GridItem colSpan={1} display={{ base: "none", xl: "block" }}>
               <Flex direction="column" gap="24px">
-                <CardGuardarDiagnosticoPre ref={guardarRef} />
+                
                 <CardCommand />
               </Flex>
             </GridItem>
