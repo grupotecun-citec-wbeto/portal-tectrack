@@ -95,4 +95,11 @@
  */
 
 
-
+/**
+ * @typedef {Object} VehiculoDTO
+ * @property {number} id - Primary key of the vehiculo table.
+ * @property {string} code - Code of the vehiculo.
+ * @property {string} placa - Placa of the vehiculo.
+ * @property {string} year - Year of the vehiculo.
+ * @property {string} name - Name of the vehiculo.
+ */

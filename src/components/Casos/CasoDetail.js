@@ -75,6 +75,7 @@ import useDiagnostico from 'hooks/diagnostico/useDiagnostico';
 
 // import hooks
 import useGetPrediagnosticosByCasoId from '@hooks/diagnostico/useGetPrediagnosticosByCasoId';
+import useGetAllVehicles from '@hooks/vehiculo/useGetAllVehicles';
 
 
 
@@ -130,6 +131,14 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
   const { dbReady } = useDataBaseContext()
   const { estados, segmentos } = useCasoContext()
   const { usuarios, vehiculos } = useUsuarioContext();
+
+  /** 
+   * @typedef {Object} UseVehiclesResult
+   * @property {VehiculoDTO[]} data
+   * @property {boolean} loading
+   * @property {string} error
+   */
+  const {data: vehicles, loading: loadingVehicles, error: errorVehicles} = useGetAllVehicles(dbReady)
 
 
   // *********************************** HOOK CASO **************************************
@@ -628,12 +637,12 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
   const vehiculosList = useMemo(() => {
 
-    if (!vehiculos || vehiculos.length === 0) return; // Verificar si la lista de usuarios está disponible
-    return vehiculos.map((vehiculo) => (
-      <option key={vehiculo.ID} value={vehiculo.ID}>{vehiculo.code + '-' + vehiculo.name}</option>
+    if (!vehicles || vehicles.length === 0) return; // Verificar si la lista de usuarios está disponible
+    return vehicles.map((vehicle) => (
+      <option key={vehicle.id} value={vehicle.id}>{vehicle.code + '-' + vehicle.name}</option>
     ));
 
-  }, [vehiculos])
+  }, [vehicles])
 
   return (
     <Box
