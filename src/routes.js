@@ -194,7 +194,7 @@ const dashRoutes = [
     component: SelectCasoBox,
     layout: "/admin",
   },
-  {
+  /*{
     path: "/pages/programa/capacitacion",
     name: "Capacitacion",
     rtlName: "لوحة القيادة",
@@ -203,7 +203,7 @@ const dashRoutes = [
     visible: false,
     component: CapacitacionDash,
     layout: "/admin",
-  },
+  },*/
   {
     path: "/pages/programa/proyecto",
     name: "Proyecto",
