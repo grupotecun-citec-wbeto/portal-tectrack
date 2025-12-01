@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid'
@@ -21,6 +21,7 @@ import {
   Image,
   Button,
   Icon,
+  Tooltip,
 } from '@chakra-ui/react';
 
 // Custom components
@@ -43,7 +44,7 @@ import CardGuardarDiagnosticoPre from "components/PreDiagnostico/CardGuardarDiag
 import { SearchIcon } from '@chakra-ui/icons';
 import { useDebounce } from 'use-debounce';
 
-import { MdCheckCircle, MdSettings, MdDescription, MdBuild, MdPerson, MdPriorityHigh, MdHelp } from 'react-icons/md';
+import { MdCheckCircle, MdSettings, MdDescription, MdBuild, MdPerson, MdPriorityHigh, MdHelp, MdSave } from 'react-icons/md';
 import { FaNetworkWired } from "react-icons/fa";
 
 import { Textarea } from '@chakra-ui/react'
@@ -90,6 +91,8 @@ function PreDiagnosticoBox({ onSearch }) {
   const [datos, setDatos] = useState([]);
 
   const { casoActivo, setCasoActivo } = useContext(AppContext)
+
+  const guardarRef = useRef();
 
   // ************************** REDUX-PRESIST ****************************
   const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -180,6 +183,12 @@ function PreDiagnosticoBox({ onSearch }) {
     setIsSuccessAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
   };
 
+  const handleGuardar = () => {
+    if (guardarRef.current) {
+      guardarRef.current.guardar();
+    }
+  };
+
   /*====================FIN BLOQUE: FUNCTIONS        ==============*/
 
 
@@ -219,19 +228,27 @@ function PreDiagnosticoBox({ onSearch }) {
                 <Icon as={MdDescription} w={8} h={8} color="white" />
               </Box>
               <Box>
-                <Text fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold" color={textColor}>
+                {/* H1 - Título principal de página */}
+                <Heading
+                  as="h1"
+                  fontSize={{ base: "xl", md: "2xl", lg: "3xl" }}
+                  fontWeight="bold"
+                  color={textColor}
+                  lineHeight="shorter"
+                >
                   Pre Diagnóstico
-                </Text>
-                <Text fontSize="sm" color="gray.500" mt="4px">
+                </Heading>
+                {/* Texto descriptivo pequeño */}
+                <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500" mt="4px">
                   Complete la información inicial del caso
                 </Text>
               </Box>
             </Flex>
           </Flex>
 
-          {/* MAIN CONTENT GRID */}
+          {/* MAIN CONTENT GRID - 3 COLUMNS ON XL */}
           <Grid
-            templateColumns={{ base: "1fr", xl: "2fr 1fr" }} // 2 columnas en pantallas grandes
+            templateColumns={{ base: "1fr", md: "2fr 1fr", xl: "2fr 1fr 1fr" }}
             gap={{ base: "20px", xl: "24px" }}
           >
 
@@ -242,8 +259,16 @@ function PreDiagnosticoBox({ onSearch }) {
 
                 <Card>
                   <CardHeader display="flex" alignItems="center" gap="10px">
-                    <Icon as={MdDescription} color={iconColor} w={6} h={6} />
-                    <Heading size='md' fontSize={{ base: "lg", md: "xl" }}>Explicación del problema</Heading>
+                    <Icon as={MdDescription} color={iconColor} w={5} h={5} />
+                    {/* H2 - Títulos de sección */}
+                    <Heading
+                      as="h2"
+                      fontSize={{ base: "md", md: "lg" }}
+                      fontWeight="semibold"
+                      color={textColor}
+                    >
+                      Explicación del problema
+                    </Heading>
                   </CardHeader>
                   <CardBody mt='10px'>
                     <Textarea
@@ -253,7 +278,7 @@ function PreDiagnosticoBox({ onSearch }) {
                       _focus={{ bg: "transparent", borderColor: iconColor }}
                       color={textColor}
                       minH='200px'
-                      fontSize={{ base: "md", md: "lg" }}
+                      fontSize={{ base: "sm", md: "md" }}
                       placeholder='Describa el problema detalladamente...'
                       onChange={(e) => setDescriptionValue(e.target.value)}
                       value={descriptionValue}
@@ -265,14 +290,24 @@ function PreDiagnosticoBox({ onSearch }) {
 
                 <Card>
                   <CardHeader display="flex" alignItems="center" gap="10px">
-                    <Icon as={FaNetworkWired} color={iconColor} w={6} h={6} />
-                    <Heading size='md' fontSize={{ base: "lg", md: "xl" }}>Sistemas y servicios</Heading>
+                    <Icon as={FaNetworkWired} color={iconColor} w={5} h={5} />
+                    {/* H2 - Títulos de sección */}
+                    <Heading
+                      as="h2"
+                      fontSize={{ base: "md", md: "lg" }}
+                      fontWeight="semibold"
+                      color={textColor}
+                    >
+                      Sistemas y servicios
+                    </Heading>
                   </CardHeader>
                   <CardBody mt='10px'>
                     {sistemasLoading ? (
-                      <Text>Cargando sistemas...</Text>
+                      <Text fontSize={{ base: "sm", md: "md" }}>Cargando sistemas...</Text>
                     ) : sistemasError ? (
-                      <Text color="red.500">Error al cargar los sistemas: {sistemasError.message}</Text>
+                      <Text fontSize={{ base: "sm", md: "md" }} color="red.500">
+                        Error al cargar los sistemas: {sistemasError.message}
+                      </Text>
                     ) : (
                       <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="prediagnostico" />
                     )}
@@ -281,35 +316,65 @@ function PreDiagnosticoBox({ onSearch }) {
               </Flex>
             </GridItem>
 
-            {/* RIGHT COLUMN: DETAILS & ACTIONS */}
+            {/* MIDDLE COLUMN: DETAILS */}
             <GridItem colSpan={1}>
               <Flex direction="column" gap="24px">
-
-                {/* Agrupamos tarjetas pequeñas visualmente */}
                 <CardEspecialista />
                 <CardAsistencia />
                 <CardHerramientas title="¿Necesitas incluir a Herramientas?" />
                 <CardPrioridad />
+              </Flex>
+            </GridItem>
 
-                {/* Actions Sticky on Desktop if needed, or just at bottom */}
-                <Box position="sticky" bottom="20px" zIndex="10">
-                  <CardGuardarDiagnosticoPre />
-                  <Box mt="20px">
-                    <CardCommand />
-                  </Box>
-                </Box>
-
+            {/* RIGHT COLUMN: ACTIONS (visible only on xl screens) */}
+            <GridItem colSpan={1} display={{ base: "none", xl: "block" }}>
+              <Flex direction="column" gap="24px">
+                <CardGuardarDiagnosticoPre ref={guardarRef} />
+                <CardCommand />
               </Flex>
             </GridItem>
 
           </Grid>
 
+          {/* FAB for Save - Always visible */}
+          <Box position="fixed" bottom="30px" right="30px" zIndex="999">
+            <Tooltip label="Guardar y continuar" placement="left" fontSize="sm">
+              <Button
+                leftIcon={<Icon as={MdSave} w={5} h={5} />}
+                colorScheme="teal"
+                onClick={handleGuardar}
+                borderRadius="full"
+                boxShadow="lg"
+                size="lg"
+                height="60px"
+                px="30px"
+                fontSize={{ base: "sm", md: "md" }}
+                _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+                transition="all 0.2s"
+              >
+                Guardar
+              </Button>
+            </Tooltip>
+          </Box>
+
         </Flex>
       ) : (
         <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }} align="center" justify="center" minH="50vh">
           <Icon as={MdDescription} w={20} h={20} color="gray.300" mb="20px" />
-          <Text fontSize="2xl" fontWeight="bold" color="gray.500">No hay un caso activo seleccionado</Text>
-          <Text color="gray.400">Seleccione o cree un caso para comenzar el pre-diagnóstico.</Text>
+          {/* Estado vacío - Título */}
+          <Heading
+            as="h2"
+            fontSize={{ base: "lg", md: "xl" }}
+            fontWeight="bold"
+            color="gray.500"
+            mb="8px"
+          >
+            No hay un caso activo seleccionado
+          </Heading>
+          {/* Estado vacío - Descripción */}
+          <Text fontSize={{ base: "sm", md: "md" }} color="gray.400">
+            Seleccione o cree un caso para comenzar el pre-diagnóstico.
+          </Text>
         </Flex>
       )}
     </>
