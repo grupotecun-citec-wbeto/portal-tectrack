@@ -224,7 +224,7 @@ const dashRoutes = [
     component: ComunicationBox,
     layout: "/admin",
   },
-  {
+  /*{
     path: "/pages/diagnostico",
     name: "Diagnostico",
     rtlName: "لوحة القيادة",
@@ -233,7 +233,7 @@ const dashRoutes = [
     visible: false,
     component: DiagnosticoBox,
     layout: "/admin",
-  },
+  },*/
   {
     path: "/pages/tree-sistemas",
     name: "Tree sistemas",
