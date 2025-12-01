@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid' // Importa la función para generar UUID
@@ -27,6 +27,7 @@ import {
   Image,
   Button,
   Icon,
+  Tooltip,
 } from '@chakra-ui/react';
 
 // Custom components
@@ -51,7 +52,7 @@ import FullscreenLoader from "@components/Loaders/FullscreenLoader";
 import { SearchIcon } from '@chakra-ui/icons';
 import { useDebounce } from 'use-debounce';
 
-import { MdCheckCircle, MdSettings, MdSchool, MdWork } from 'react-icons/md';
+import { MdCheckCircle, MdSettings, MdSchool, MdWork, MdAddCircle } from 'react-icons/md';
 
 import { Textarea } from '@chakra-ui/react'
 
@@ -91,6 +92,8 @@ function AdministrativeDash({ onSearch }) {
    DESCRIPTION: 
   =========================================================*/
   const history = useHistory()
+
+  const crearCasoRef = useRef();
 
   const [descriptionValue, setDescriptionValue] = useState('');
   const [debouncedSearchValue] = useDebounce(descriptionValue, 500);
@@ -228,7 +231,11 @@ function AdministrativeDash({ onSearch }) {
     setIsOpenAlertCaso(true); // Cerramos la alerta cuando se hace clic en el botón de cerrar
   };
 
-
+  const handleCrearCaso = () => {
+    if (crearCasoRef.current) {
+      crearCasoRef.current.crearCaso();
+    }
+  };
 
 
 
@@ -334,7 +341,7 @@ function AdministrativeDash({ onSearch }) {
                 {isOpenAlertCaso ? (
                   <AlertCaso closeAlert={closeAlert} caseId={caseId} uuid={caseUuid} type={typeAlert} openLoader={setFullscreenLoaderVisible} />
                 ) : (
-                  <CardCrearCasoPrograma openAlert={openAlert} openLoader={setFullscreenLoaderVisible} />
+                  <CardCrearCasoPrograma ref={crearCasoRef} openAlert={openAlert} openLoader={setFullscreenLoaderVisible} />
                 )}
 
                 <CardCommand />
@@ -342,6 +349,29 @@ function AdministrativeDash({ onSearch }) {
             </GridItem>
 
           </Grid>
+
+          {/* FAB for Create Case */}
+          {!isOpenAlertCaso && (
+            <Box position="fixed" bottom="30px" right="30px" zIndex="999">
+              <Tooltip label="Crear caso" placement="left" fontSize="sm">
+                <Button
+                  leftIcon={<Icon as={MdAddCircle} w={6} h={6} />}
+                  colorScheme="teal"
+                  onClick={handleCrearCaso}
+                  borderRadius="full"
+                  boxShadow="lg"
+                  size="lg"
+                  height="60px"
+                  px="30px"
+                  fontSize={{ base: "sm", md: "md" }}
+                  _hover={{ transform: "scale(1.05)", boxShadow: "xl" }}
+                  transition="all 0.2s"
+                >
+                  Crear Caso
+                </Button>
+              </Tooltip>
+            </Box>
+          )}
 
         </Flex>
       ) : (
