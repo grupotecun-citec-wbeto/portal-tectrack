@@ -273,30 +273,49 @@ function DiagnosticoBox({ onSearch }) {
       {Object.keys((typeof userData?.casos === 'undefined') ? {} : userData?.casos).length !== 0 ? (
         <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
           <Flex
-            direction={{ sm: "column", md: "row" }}
+            direction={{ base: "column", md: "row" }}
             mb='24px'
-            maxH='330px'
-            justifyContent={{ sm: "center", md: "space-between" }}
+            justifyContent={{ base: "center", md: "space-between" }}
             align='center'
             backdropFilter='blur(21px)'
-            boxShadow='0px 2px 5.5px rgba(0, 0, 0, 0.02)'
-            border='1.5px solid'
+            boxShadow='0px 4px 12px rgba(0, 0, 0, 0.05)'
+            border='1px solid'
             borderColor={borderProfileColor}
             bg={bgProfile}
-            p='24px'
+            p={{ base: "20px", md: "30px" }}
             borderRadius='20px'>
             <Flex
-              align="left"
-              mb={{ sm: "10px", md: "0px" }}
-              direction={{ sm: "column", md: "row" }}
-              w={{ sm: "100%", md: "50%" }}
-              textAlign={{ sm: "center", md: "start" }}
-              p='24px'
+              align="center"
+              mb={{ base: "10px", md: "0px" }}
+              direction={{ base: "column", md: "row" }}
+              w={{ base: "100%", md: "50%" }}
+              textAlign={{ base: "center", md: "start" }}
             >
-              <Text fontSize={{ xl: '4em', sm: '3em' }}>Diagnóstico</Text>
-
+              <Box
+                bg={iconColor}
+                p="12px"
+                borderRadius="14px"
+                mr={{ base: "0px", md: "20px" }}
+                mb={{ base: "10px", md: "0px" }}
+                boxShadow="lg"
+              >
+                <Icon as={MdCheckCircle} w={8} h={8} color="white" />
+              </Box>
+              <Box>
+                <Heading
+                  as="h1"
+                  fontSize={{ base: "xl", md: "2xl", lg: "3xl" }}
+                  fontWeight="bold"
+                  color={textColor}
+                  lineHeight="shorter"
+                >
+                  Diagnóstico
+                </Heading>
+                <Text fontSize={{ base: "xs", md: "sm" }} color="gray.500" mt="4px">
+                  Complete la información del diagnóstico del equipo
+                </Text>
+              </Box>
             </Flex>
-
           </Flex>
 
           {/* MAIN CONTENT GRID - 2 COLUMNS */}
@@ -311,25 +330,39 @@ function DiagnosticoBox({ onSearch }) {
                   <>
                     <Card>
                       <CardHeader>
-                        <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}>Explicación del problema</Heading>
+                        <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">
+                          Explicación del problema
+                        </Heading>
                       </CardHeader>
-                      <CardBody mt={{ xl: '10px' }}>
-                        <Textarea variant="dark" color='black' minH={{ xl: '200px', sm: '200px' }} fontSize={{ xl: '1.5em' }} placeholder='Explicación del problema'
+                      <CardBody mt='20px'>
+                        <Textarea
+                          variant="filled"
+                          bg={useColorModeValue("gray.50", "navy.700")}
+                          _hover={{ bg: useColorModeValue("gray.100", "navy.600") }}
+                          _focus={{ bg: "transparent", borderColor: iconColor }}
+                          color={textColor}
+                          minH='150px'
+                          fontSize={{ base: "sm", md: "md" }}
+                          placeholder='Explicación del problema'
                           onChange={(e) => setDescriptionValue(e.target.value)}
                           value={descriptionValue}
+                          borderRadius="15px"
+                          p="20px"
                         />
                       </CardBody>
                     </Card>
 
                     <Card>
                       <CardHeader>
-                        <Heading size='md' fontSize={{ xl: '3em', sm: '2em' }}>Sistemas y servicios</Heading>
+                        <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">
+                          Sistemas y servicios
+                        </Heading>
                       </CardHeader>
-                      <CardBody mt={{ xl: '10px' }}>
+                      <CardBody mt='20px'>
                         {sistemasLoading ? (
-                          <Text>Cargando sistemas...</Text>
+                          <Text fontSize={{ base: "sm", md: "md" }} color="gray.500">Cargando sistemas...</Text>
                         ) : sistemasError ? (
-                          <Text>Error al cargar los sistemas: {sistemasError.message}</Text>
+                          <Text fontSize={{ base: "sm", md: "md" }} color="red.500">Error al cargar los sistemas: {sistemasError.message}</Text>
                         ) : (
                           <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="diagnostico" />
                         )}
@@ -376,8 +409,20 @@ function DiagnosticoBox({ onSearch }) {
 
         </Flex>
       ) : (
-        <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
-          <>No se tiene caso activo</>
+        <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }} align="center" justify="center" minH="50vh">
+          <Icon as={MdSettings} w={20} h={20} color="gray.300" mb="20px" />
+          <Heading
+            as="h2"
+            fontSize={{ base: "lg", md: "xl" }}
+            fontWeight="bold"
+            color="gray.500"
+            mb="8px"
+          >
+            No hay un caso activo seleccionado
+          </Heading>
+          <Text fontSize={{ base: "sm", md: "md" }} color="gray.400">
+            Seleccione o cree un caso para comenzar el diagnóstico.
+          </Text>
         </Flex>
       )}
     </>
