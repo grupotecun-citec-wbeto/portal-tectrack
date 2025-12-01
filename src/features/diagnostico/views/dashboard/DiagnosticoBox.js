@@ -97,8 +97,6 @@ function DiagnosticoBox({ onSearch }) {
   const [caseId, setCaseId] = useState(0)
 
   const [datos, setDatos] = useState([]);
-
-  const [check, setCheck] = useState(false)
   const [changeReady, setChangeReady] = useState(false)
 
   const { casoActivo, setCasoActivo } = useContext(AppContext)
@@ -143,95 +141,70 @@ function DiagnosticoBox({ onSearch }) {
 
 
   useEffect(() => {
-    if (!check) {
-      const run = async () => {
-        if (userData.casoActivo.code) {
-          if (userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.hasOwnProperty("description")) {
-            if (userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description != '') {
-              setDescriptionValue(decodeURIComponent(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description))
-            }
-          }
+    const run = async () => {
+      if (userData.casoActivo.code) {
+        const diagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico;
+        const prediagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico;
+
+        // Si la descripción del diagnóstico está vacía y existe prediagnóstico, copiamos los datos
+        if ((!diagnostico.description || diagnostico.description === '') && prediagnostico && prediagnostico.description) {
+          const newUserData = structuredClone(userData);
+          // Copiamos todo el objeto prediagnóstico al diagnóstico
+          newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico = structuredClone(prediagnostico);
+          saveUserData(newUserData);
+
+          setDescriptionValue(decodeURIComponent(prediagnostico.description));
+          setChangeReady(prev => !prev); // Forzar actualización
+        } else if (diagnostico.description) {
+          setDescriptionValue(decodeURIComponent(diagnostico.description));
         }
       }
-      run()
     }
-  }, [userData?.casoActivo?.code, changeReady])
+    run()
+  }, [userData?.casoActivo?.code])
 
   // Obtener la lista de generalmachinessystem, obtine todos los systemas
   useEffect(() => {
     if (!dbReady) return; // Esperar a que la base de datos esté lista
-    if (!check) {
-      //onSearch(debouncedSearchValue);
-      setDatos([])
-      const fetchData = async () => {
-        try {
-          const response = await getNivel1()
+    //onSearch(debouncedSearchValue);
+    setDatos([])
+    const fetchData = async () => {
+      try {
+        const response = await getNivel1()
 
-          let data = response;
+        let data = response;
 
-          const groupedData = {};
+        const groupedData = {};
 
-          data.forEach(item => {
-            const { area_name, ID, system_name } = item;
-            if (!groupedData[area_name]) {
-              groupedData[area_name] = [];
-            }
-            groupedData[area_name].push({ ID: ID, system_name: system_name });
-          });
+        data.forEach(item => {
+          const { area_name, ID, system_name } = item;
+          if (!groupedData[area_name]) {
+            groupedData[area_name] = [];
+          }
+          groupedData[area_name].push({ ID: ID, system_name: system_name });
+        });
 
-          setDatos(groupedData);
-        } catch (error) {
-          setDatos([])
-          console.error('Error al obtener datos:', error, '34655dd1-6604-48fc-bc1f-b44c1017eb15');
+        setDatos(groupedData);
+      } catch (error) {
+        setDatos([])
+        console.error('Error al obtener datos:', error, '34655dd1-6604-48fc-bc1f-b44c1017eb15');
 
-        }
-      };
-      fetchData();
-    } else {
-      setDatos([])
-    }
+      }
+    };
+    fetchData();
 
   }, [changeReady, dbReady]);
 
   useEffect(() => {
-    if (!check) {
-      if (debouncedSearchValue) {
-        if (userData.casoActivo.code != '') {
-          const newUserData = structuredClone(userData);
-          newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description = encodeURIComponent(descriptionValue)
-          saveUserData(newUserData)
-        }
+    if (debouncedSearchValue) {
+      if (userData.casoActivo.code != '') {
+        const newUserData = structuredClone(userData);
+        newUserData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico.description = encodeURIComponent(descriptionValue)
+        saveUserData(newUserData)
       }
     }
-  }, [debouncedSearchValue, changeReady])
+  }, [debouncedSearchValue])
 
-  useEffect(() => {
-    const isEqualPreDiagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico?.isEqualPreDiagnostico || false
-    if (isEqualPreDiagnostico) {
-      setCheck(true)
-    } else {
-      setCheck(false)
-    }
-  }, [])
-
-  useEffect(() => {
-
-    if (check) {
-      const newUserData = structuredClone(userData)
-      newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico = newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].prediagnostico
-      newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico.isEqualPreDiagnostico = true
-      saveUserData(newUserData)
-      setChangeReady(!changeReady)
-    } else {
-      const assingDianostico = (Object.keys(userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id]?.diagnostico_cpy || {}).length == 0)
-        ? structuredClone(userData.stuctures.diagnostico)
-        : userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id]?.diagnostico_cpy
-      const newUserData = structuredClone(userData)
-      newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico = assingDianostico
-      saveUserData(newUserData)
-      setChangeReady(!changeReady)
-    }
-  }, [check])
 
   /*====================FIN BLOQUE: useEfect        ==============*/
 
@@ -250,12 +223,11 @@ function DiagnosticoBox({ onSearch }) {
   };
 
   const guardar = () => {
-    if (!check) {
-      const diagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico
-      const newUserData = structuredClone(userData)
-      newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico_cpy = diagnostico
-      saveUserData(newUserData)
-    }
+    const diagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].diagnostico
+    const newUserData = structuredClone(userData)
+    newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico_cpy = diagnostico
+    saveUserData(newUserData)
+
     history.push('/admin/pages/searchbox')
   }
 
@@ -326,59 +298,55 @@ function DiagnosticoBox({ onSearch }) {
             {/* LEFT COLUMN */}
             <GridItem colSpan={1}>
               <Flex direction="column" gap="24px">
-                {!check && (
-                  <>
-                    <Card>
-                      <CardHeader>
-                        <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">
-                          Explicación del problema
-                        </Heading>
-                      </CardHeader>
-                      <CardBody mt='20px'>
-                        <Textarea
-                          variant="filled"
-                          bg={useColorModeValue("gray.50", "navy.700")}
-                          _hover={{ bg: useColorModeValue("gray.100", "navy.600") }}
-                          _focus={{ bg: "transparent", borderColor: iconColor }}
-                          color={textColor}
-                          minH='150px'
-                          fontSize={{ base: "sm", md: "md" }}
-                          placeholder='Explicación del problema'
-                          onChange={(e) => setDescriptionValue(e.target.value)}
-                          value={descriptionValue}
-                          borderRadius="15px"
-                          p="20px"
-                        />
-                      </CardBody>
-                    </Card>
+                <>
+                  <Card>
+                    <CardHeader>
+                      <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">
+                        Explicación del problema
+                      </Heading>
+                    </CardHeader>
+                    <CardBody mt='20px'>
+                      <Textarea
+                        variant="filled"
+                        bg={useColorModeValue("gray.50", "navy.700")}
+                        _hover={{ bg: useColorModeValue("gray.100", "navy.600") }}
+                        _focus={{ bg: "transparent", borderColor: iconColor }}
+                        color={textColor}
+                        minH='150px'
+                        fontSize={{ base: "sm", md: "md" }}
+                        placeholder='Explicación del problema'
+                        onChange={(e) => setDescriptionValue(e.target.value)}
+                        value={descriptionValue}
+                        borderRadius="15px"
+                        p="20px"
+                      />
+                    </CardBody>
+                  </Card>
 
-                    <Card>
-                      <CardHeader>
-                        <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">
-                          Sistemas y servicios
-                        </Heading>
-                      </CardHeader>
-                      <CardBody mt='20px'>
-                        {sistemasLoading ? (
-                          <Text fontSize={{ base: "sm", md: "md" }} color="gray.500">Cargando sistemas...</Text>
-                        ) : sistemasError ? (
-                          <Text fontSize={{ base: "sm", md: "md" }} color="red.500">Error al cargar los sistemas: {sistemasError.message}</Text>
-                        ) : (
-                          <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="diagnostico" />
-                        )}
-                      </CardBody>
-                    </Card>
-                  </>
-                )}
+                  <Card>
+                    <CardHeader>
+                      <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">
+                        Sistemas y servicios
+                      </Heading>
+                    </CardHeader>
+                    <CardBody mt='20px'>
+                      {sistemasLoading ? (
+                        <Text fontSize={{ base: "sm", md: "md" }} color="gray.500">Cargando sistemas...</Text>
+                      ) : sistemasError ? (
+                        <Text fontSize={{ base: "sm", md: "md" }} color="red.500">Error al cargar los sistemas: {sistemasError.message}</Text>
+                      ) : (
+                        <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="diagnostico" />
+                      )}
+                    </CardBody>
+                  </Card>
+                </>
               </Flex>
             </GridItem>
 
             {/* RIGHT COLUMN */}
             <GridItem colSpan={1}>
               <Flex direction="column" gap="24px">
-                {!check && (
-                  <CardHerramientas title="¿Que herramientas utilizaste?" />
-                )}
+                <CardHerramientas title="¿Que herramientas utilizaste?" />
                 <CardGuardarDiagnostico ref={guardarRef} guardar={guardar} />
                 <CardCommand />
               </Flex>
