@@ -2,9 +2,9 @@ import { Input, FormControl, FormLabel, InputGroup, InputLeftElement, Icon } fro
 //import { FaUser } from "react-icons/fa";
 import { FaTruckPickup } from "react-icons/fa";
 
-function InputKm({kmInicial, setKmInicial}) {
+function InputKm({ kmInicial, setKmInicial }) {
   return (
-    <FormControl id="username" isRequired maxW={{xl:'250px'}}>
+    <FormControl id="username" isRequired maxW={{ xl: '250px' }}>
       <InputGroup>
         <InputLeftElement pointerEvents="none">
           <Icon as={FaTruckPickup} color="gray.500" />
@@ -24,8 +24,14 @@ function InputKm({kmInicial, setKmInicial}) {
           }}
           _placeholder={{ color: "gray.400" }}
           size="md"
-          min={0} // Valor mínimo opcional para evitar negativos
-          onChange={(e) => setKmInicial(e.target.value)}
+          min={0}
+          max={2147483647}
+          onChange={(e) => {
+            const value = parseInt(e.target.value);
+            if (value <= 2147483647 || e.target.value === '') {
+              setKmInicial(e.target.value);
+            }
+          }}
           value={kmInicial}
         />
       </InputGroup>
