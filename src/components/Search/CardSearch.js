@@ -67,6 +67,7 @@ function SearchCard(props) {
 
     const { addToDeleteQueue } = useContext(DisposalContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const { isOpen: isOpenWarning, onOpen: onOpenWarning, onClose: onCloseWarning } = useDisclosure();
 
     // ************************** REDUX-PRESIST ****************************
     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -174,6 +175,13 @@ function SearchCard(props) {
     }
 
     const eliminarEquipo = async () => {
+        const casoCode = userData?.casoActivo?.code;
+        const equipos = userData?.casos[casoCode]?.equipos || {};
+
+        if (Object.keys(equipos).length <= 1) {
+            onOpenWarning();
+            return;
+        }
 
         const newUserData = { ...userData }
 
@@ -187,8 +195,6 @@ function SearchCard(props) {
             setIsSelectedEquipo(false)
 
         }
-
-
 
     }
 
@@ -293,18 +299,16 @@ function SearchCard(props) {
                     />
                 ) : (
                     <>
-                        {(!isPost) && (
-                            <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
-                                <IconButton
-                                    icon={<FaTimes />} // Icono para quitar selección
-                                    aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
-                                    colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
-                                    size="md" // Tamaño del botón
-                                    style={{ width: !isBusquedaTerminada ? "100%" : "0%" }}
-                                    onClick={(!isPost) ? eliminarEquipoEnBusqueda : eliminarEquipo} // Acción al hacer clic
-                                />
-                            </Tooltip>
-                        )}
+                        <Tooltip label="Quitar equipo" aria-label="Tooltip para el botón">
+                            <IconButton
+                                icon={<FaTimes />} // Icono para quitar selección
+                                aria-label="Quitar selección" // Etiqueta accesible para lectores de pantalla
+                                colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
+                                size="md" // Tamaño del botón
+                                style={{ width: !isBusquedaTerminada ? "100%" : "0%" }}
+                                onClick={(!isPost) ? eliminarEquipoEnBusqueda : eliminarEquipo} // Acción al hacer clic
+                            />
+                        </Tooltip>
 
 
                         {isBusquedaTerminada && (
@@ -340,6 +344,27 @@ function SearchCard(props) {
 
 
             </Flex>
+
+            <Modal isOpen={isOpenWarning} onClose={onCloseWarning} isCentered>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader color="red.500">No se puede eliminar</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Text fontWeight="bold">
+                            Debe quedar al menos un equipo en el caso.
+                        </Text>
+                        <Text mt={2} color="gray.600">
+                            No es posible dejar el caso sin equipos.
+                        </Text>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="blue" onClick={onCloseWarning}>
+                            Entendido
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
 
             <Modal isOpen={isOpen} onClose={onClose} size="xl">
                 <ModalOverlay />
