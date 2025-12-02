@@ -102,6 +102,8 @@ function PreDiagnosticoBox({ onSearch }) {
   const { casoActivo, setCasoActivo } = useContext(AppContext)
 
   const guardarRef = useRef();
+  const [missingFields, setMissingFields] = useState([]);
+  const [isValidationModalOpen, setValidationModalOpen] = useState(false);
 
   // ************************** REDUX-PRESIST ****************************
   const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -195,30 +197,56 @@ function PreDiagnosticoBox({ onSearch }) {
   const handleGuardar = () => {
     const casoCode = userData?.casoActivo?.code;
     const maquinaId = userData?.casoActivo?.maquina_id;
+    const equipos = userData?.casos?.[casoCode]?.equipos || {};
+    const currentPre = equipos?.[maquinaId]?.prediagnostico || {};
 
+    // Validation logic
+    const missing = [];
+    if (!currentPre.description || decodeURIComponent(currentPre.description).trim() === "") {
+      missing.push("Explicación del problema");
+    }
+    if (!currentPre.sistemasSelectedJson || currentPre.sistemasSelectedJson.length === 0) {
+      missing.push("Sistemas y servicios (al menos uno)");
+    }
+    if (!currentPre.herramientas || currentPre.herramientas.length === 0) {
+      missing.push("Herramientas");
+    }
+    // Comunicación: revisar comunicacion_ID en el caso
+    if (!userData?.casos?.[casoCode]?.comunicacion_ID || userData.casos[casoCode].comunicacion_ID === "") {
+      missing.push("¿Por cuál canal te contactaron?");
+    }
+    // Tipo de asistencia: revisar asistencia_tipo_ID en prediagnostico
+    if (!currentPre.asistencia_tipo_ID || currentPre.asistencia_tipo_ID === "") {
+      missing.push("Tipo de Asistencia");
+    }
+    if (!currentPre.prioridad || currentPre.prioridad.trim() === "") {
+      missing.push("Prioridad del caso");
+    }
+
+    if (missing.length > 0) {
+      setMissingFields(missing);
+      setValidationModalOpen(true);
+      return;
+    }
+
+    // ...existing code...
     if (casoCode && maquinaId) {
-      const equipos = userData.casos[casoCode]?.equipos || {};
       const equiposKeys = Object.keys(equipos);
-
       if (equiposKeys.length > 1) {
-        const currentPre = equipos[maquinaId]?.prediagnostico;
         // Check if current has data (sistemasSelectedJson is the key indicator of a filled pre-diagnosis)
         const hasData = currentPre && currentPre.sistemasSelectedJson && currentPre.sistemasSelectedJson.length > 0;
-
         // Check if all others are empty
         const othersEmpty = equiposKeys.every(key => {
           if (key == maquinaId) return true;
           const otherPre = equipos[key]?.prediagnostico;
           return !otherPre || !otherPre.sistemasSelectedJson || otherPre.sistemasSelectedJson.length === 0;
         });
-
         if (hasData && othersEmpty) {
           onOpenCopy();
           return;
         }
       }
     }
-
     if (guardarRef.current) {
       guardarRef.current.guardar();
     }
@@ -460,6 +488,27 @@ function PreDiagnosticoBox({ onSearch }) {
             </Button>
             <Button colorScheme="blue" onClick={confirmCopy}>
               Sí, aplicar a todos
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {/* Modal for missing required fields */}
+      <Modal isOpen={isValidationModalOpen} onClose={() => setValidationModalOpen(false)} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Campos obligatorios faltantes</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text mb={2}>Por favor complete los siguientes campos antes de guardar el pre-diagnóstico:</Text>
+            <Box as="ul" pl={4}>
+              {missingFields.map((field, idx) => (
+                <Text as="li" key={idx} color="red.500">{field}</Text>
+              ))}
+            </Box>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={() => setValidationModalOpen(false)}>
+              Cerrar
             </Button>
           </ModalFooter>
         </ModalContent>
