@@ -1,17 +1,8 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import axios from 'axios';
 import { useSelector, useDispatch } from 'react-redux';
-import { v4 as uuidv4 } from 'uuid' // Importa la función para generar UUID
-/*=======================================================
- BLOQUE: rourte-dom
- DESCRIPTION: Para navegar entre las pantallas
-=========================================================*/
+import { v4 as uuidv4 } from 'uuid'
 import { Link, useHistory } from 'react-router-dom';
-
-
-import AntdTreeLiveJSON from "@components/Tree/AntdTreeLiveJSON";
-
-import CardGuardarDiagnostico from "@components/Diagnostico/CardGuardarDiagnostico";
 
 import {
   Input,
@@ -41,25 +32,31 @@ import CardHeader from "@components/Card/CardHeader";
 import CheckboxDiagnostico from "@components/Diagnostico/CheckboxDiagnostico";
 import CardEspecialista from "@components/PreDiagnostico/CardEspcialista";
 import CardAsistencia from "@components/PreDiagnostico/CardAsistencia";
-//import CardTerminarCaso from "@components/Diagnostico/CardTerminarCaso";
+import CardCrearCaso from "@components/PreDiagnostico/CardCrearCaso";
 import SuccessAlertCaso from "@components/PreDiagnostico/AlertCrearCaso";
 import CardHerramientas from "@components/Diagnostico/CardHerramientas";
 import CardCommand from "@components/PreDiagnostico/CadCommand";
 import CardPrioridad from "@components/PreDiagnostico/CardPrioridad";
 import CardComunication from "@components/Comunication/CardComunication";
+import CardGuardarDiagnostico from "@components/Diagnostico/CardGuardarDiagnostico";
 
 import { SearchIcon } from '@chakra-ui/icons';
 import { useDebounce } from 'use-debounce';
 
-import { MdCheckCircle, MdSettings, MdSave } from 'react-icons/md';
+import { MdCheckCircle, MdSettings, MdDescription, MdSave } from 'react-icons/md';
+import { FaNetworkWired } from "react-icons/fa";
 
 import { Textarea } from '@chakra-ui/react'
 
 import AppContext from "appContext";
 
+// TREE SYSTEM
+import AntdTreeLiveJSON from "@components/Tree/AntdTreeLiveJSON";
 
 // base de datos
 import { useDataBaseContext } from "dataBaseContext";
+
+// hook
 import useSistema from "hooks/sistema/useSistema";
 import useSistemasChildrens from "@hooks/sistema/useSistemasChildrens";
 
@@ -82,10 +79,6 @@ function DiagnosticoBox({ onSearch }) {
 
   const { loading: sistemasLoading, data: sistemasData, error: sistemasError } = useSistemasChildrens(dbReady)
 
-  /*=======================================================
-   BLOQUE: variable hitory
-   DESCRIPTION: 
-  =========================================================*/
   const history = useHistory()
 
   const guardarRef = useRef();
@@ -114,25 +107,6 @@ function DiagnosticoBox({ onSearch }) {
   };
 
   // ************************** REDUX-PRESIST ****************************
-  const columns = [
-    {
-      name: 'Name',
-      selector: row => row.name,
-      sortable: true,
-    },
-    {
-      name:
-        'Age',
-      selector: row => row.age,
-      sortable: true,
-
-    },
-  ];
-
-  const data = [
-    { id: 1, name: 'John Doe', age: 30 },
-    { id: 2, name: 'Jane Smith', age: 25 },
-  ];
 
   /*=======================================================
    BLOQUE: useEfect
@@ -147,26 +121,34 @@ function DiagnosticoBox({ onSearch }) {
         const prediagnostico = userData.casos[userData.casoActivo.code].equipos[userData.casoActivo.maquina_id].prediagnostico;
 
         // Si la descripción del diagnóstico está vacía y existe prediagnóstico, copiamos los datos
-        if ((!diagnostico.description || diagnostico.description === '') && prediagnostico && prediagnostico.description) {
+        // O si el diagnóstico está vacío en general (podríamos chequear sistemasSelectedJson también)
+        // Aquí asumimos que si description está vacío, es un diagnóstico nuevo o no iniciado.
+        // También verificamos si prediagnostico tiene datos útiles.
+        if ((!diagnostico.description || diagnostico.description === '') && prediagnostico && (prediagnostico.description || prediagnostico.sistemasSelectedJson?.length > 0)) {
           const newUserData = structuredClone(userData);
+
           // Copiamos todo el objeto prediagnóstico al diagnóstico
+          // Esto incluye description, sistemasSelectedJson, herramientas, especialista_ID, asistencia_tipo_ID, etc.
           newUserData.casos[newUserData.casoActivo.code].equipos[newUserData.casoActivo.maquina_id].diagnostico = structuredClone(prediagnostico);
+
+          // Aseguramos que el tipo de diagnóstico sea correcto si es necesario, aunque aquí copiamos todo.
+          // Si hay campos específicos de diagnóstico que difieren, deberían setearse aquí.
+
           saveUserData(newUserData);
 
-          setDescriptionValue(decodeURIComponent(prediagnostico.description));
-          setChangeReady(prev => !prev); // Forzar actualización
+          setDescriptionValue(decodeURIComponent(prediagnostico.description || ''));
+          setChangeReady(prev => !prev); // Forzar actualización de componentes dependientes
         } else if (diagnostico.description) {
           setDescriptionValue(decodeURIComponent(diagnostico.description));
         }
       }
     }
     run()
-  }, [userData?.casoActivo?.code])
+  }, [userData?.casoActivo?.code, userData?.casoActivo?.maquina_id]) // Agregué maquina_id para re-ejecutar al cambiar de equipo
 
   // Obtener la lista de generalmachinessystem, obtine todos los systemas
   useEffect(() => {
     if (!dbReady) return; // Esperar a que la base de datos esté lista
-    //onSearch(debouncedSearchValue);
     setDatos([])
     const fetchData = async () => {
       try {
@@ -244,6 +226,8 @@ function DiagnosticoBox({ onSearch }) {
     <>
       {Object.keys((typeof userData?.casos === 'undefined') ? {} : userData?.casos).length !== 0 ? (
         <Flex direction='column' pt={{ base: "120px", md: "75px", lg: "100px" }}>
+
+          {/* HEADER SECTION */}
           <Flex
             direction={{ base: "column", md: "row" }}
             mb='24px'
@@ -290,75 +274,99 @@ function DiagnosticoBox({ onSearch }) {
             </Flex>
           </Flex>
 
-          {/* MAIN CONTENT GRID - 2 COLUMNS */}
+          {/* MAIN CONTENT GRID - 3 COLUMNS ON XL (Igual que PreDiagnostico) */}
           <Grid
-            templateColumns={{ base: "1fr", lg: "1fr 1fr" }}
-            gap={{ base: "20px", lg: "24px" }}
+            templateColumns={{ base: "1fr", md: "2fr 1fr", xl: "2fr 1fr 1fr" }}
+            gap={{ base: "20px", xl: "24px" }}
           >
-            {/* LEFT COLUMN */}
+
+            {/* LEFT COLUMN: MAIN INFO */}
             <GridItem colSpan={1}>
               <Flex direction="column" gap="24px">
-                <>
-                  <Card>
-                    <CardHeader>
-                      <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">
-                        Explicación del problema
-                      </Heading>
-                    </CardHeader>
-                    <CardBody mt='20px'>
-                      <Textarea
-                        variant="filled"
-                        bg={useColorModeValue("gray.50", "navy.700")}
-                        _hover={{ bg: useColorModeValue("gray.100", "navy.600") }}
-                        _focus={{ bg: "transparent", borderColor: iconColor }}
-                        color={textColor}
-                        minH='150px'
-                        fontSize={{ base: "sm", md: "md" }}
-                        placeholder='Explicación del problema'
-                        onChange={(e) => setDescriptionValue(e.target.value)}
-                        value={descriptionValue}
-                        borderRadius="15px"
-                        p="20px"
-                      />
-                    </CardBody>
-                  </Card>
 
-                  <Card>
-                    <CardHeader>
-                      <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">
-                        Sistemas y servicios
-                      </Heading>
-                    </CardHeader>
-                    <CardBody mt='20px'>
-                      {sistemasLoading ? (
-                        <Text fontSize={{ base: "sm", md: "md" }} color="gray.500">Cargando sistemas...</Text>
-                      ) : sistemasError ? (
-                        <Text fontSize={{ base: "sm", md: "md" }} color="red.500">Error al cargar los sistemas: {sistemasError.message}</Text>
-                      ) : (
-                        <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="diagnostico" />
-                      )}
-                    </CardBody>
-                  </Card>
-                </>
+                <Card>
+                  <CardHeader display="flex" alignItems="center" gap="10px">
+                    <Icon as={MdDescription} color={iconColor} w={5} h={5} />
+                    <Heading
+                      as="h2"
+                      fontSize={{ base: "md", md: "lg" }}
+                      fontWeight="semibold"
+                      color={textColor}
+                    >
+                      Explicación del problema
+                    </Heading>
+                  </CardHeader>
+                  <CardBody mt='10px'>
+                    <Textarea
+                      variant="filled"
+                      bg={useColorModeValue("gray.50", "navy.700")}
+                      _hover={{ bg: useColorModeValue("gray.100", "navy.600") }}
+                      _focus={{ bg: "transparent", borderColor: iconColor }}
+                      color={textColor}
+                      minH='200px'
+                      fontSize={{ base: "sm", md: "md" }}
+                      placeholder='Describa el problema detalladamente...'
+                      onChange={(e) => setDescriptionValue(e.target.value)}
+                      value={descriptionValue}
+                      borderRadius="15px"
+                      p="20px"
+                    />
+                  </CardBody>
+                </Card>
+
+                <Card>
+                  <CardHeader display="flex" alignItems="center" gap="10px">
+                    <Icon as={FaNetworkWired} color={iconColor} w={5} h={5} />
+                    <Heading
+                      as="h2"
+                      fontSize={{ base: "md", md: "lg" }}
+                      fontWeight="semibold"
+                      color={textColor}
+                    >
+                      Sistemas y servicios
+                    </Heading>
+                  </CardHeader>
+                  <CardBody mt='10px'>
+                    {sistemasLoading ? (
+                      <Text fontSize={{ base: "sm", md: "md" }}>Cargando sistemas...</Text>
+                    ) : sistemasError ? (
+                      <Text fontSize={{ base: "sm", md: "md" }} color="red.500">
+                        Error al cargar los sistemas: {sistemasError.message}
+                      </Text>
+                    ) : (
+                      <AntdTreeLiveJSON treeData={sistemasData} tipo_diagnostico="diagnostico" />
+                    )}
+                  </CardBody>
+                </Card>
+                <CardHerramientas title="¿Que herramientas utilizaste?" />
               </Flex>
             </GridItem>
 
-            {/* RIGHT COLUMN */}
+            {/* MIDDLE COLUMN: DETAILS */}
             <GridItem colSpan={1}>
               <Flex direction="column" gap="24px">
-                <CardHerramientas title="¿Que herramientas utilizaste?" />
+                <CardComunication title="¿Por cuál canal te contactaron?" />
+                <CardEspecialista />
+                <CardAsistencia />
+                <CardPrioridad />
                 <CardGuardarDiagnostico ref={guardarRef} guardar={guardar} />
+              </Flex>
+            </GridItem>
+
+            {/* RIGHT COLUMN: ACTIONS (visible only on xl screens) */}
+            <GridItem colSpan={1} display={{ base: "none", xl: "block" }}>
+              <Flex direction="column" gap="24px">
                 <CardCommand />
               </Flex>
             </GridItem>
 
           </Grid>
 
-          {/* FAB for Save */}
+          {/* FAB for Save - Always visible */}
           <Box position="fixed" bottom="30px" right="30px" zIndex="999">
             <Tooltip label="Guardar diagnóstico" placement="left" fontSize="sm">
               <Button
-                leftIcon={<Icon as={MdSave} w={6} h={6} />}
+                leftIcon={<Icon as={MdSave} w={5} h={5} />}
                 colorScheme="blue"
                 onClick={handleGuardar}
                 borderRadius="full"
