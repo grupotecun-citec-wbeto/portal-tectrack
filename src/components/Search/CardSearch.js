@@ -68,6 +68,7 @@ function SearchCard(props) {
     const { addToDeleteQueue } = useContext(DisposalContext);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { isOpen: isOpenWarning, onOpen: onOpenWarning, onClose: onCloseWarning } = useDisclosure();
+    const { isOpen: isOpenConfirmDelete, onOpen: onOpenConfirmDelete, onClose: onCloseConfirmDelete } = useDisclosure();
 
     // ************************** REDUX-PRESIST ****************************
     const userData = useSelector((state) => state.userData);  // Acceder al JSON desde el estado
@@ -183,19 +184,18 @@ function SearchCard(props) {
             return;
         }
 
+        onOpenConfirmDelete();
+    }
+
+    const confirmarEliminacion = async () => {
         const newUserData = { ...userData }
-
-        if (window.confirm("¿Está seguro que quiere eliminar este equipo?")) {
-            // Acción a realizar si el usuario confirma
-            const caso_ID = userData?.casoActivo?.code
-            addToDeleteQueue(caso_ID, maquina_id, 'diagnostico_v2', `/api/v1/disposal/diagnostico/${caso_ID}/${maquina_id}`)
-            delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
-            saveUserData(newUserData)
-            props.onRefresh.set(!props.onRefresh.get);
-            setIsSelectedEquipo(false)
-
-        }
-
+        const caso_ID = userData?.casoActivo?.code
+        addToDeleteQueue(caso_ID, maquina_id, 'diagnostico_v2', `/api/v1/disposal/diagnostico/${caso_ID}/${maquina_id}`)
+        delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
+        saveUserData(newUserData)
+        props.onRefresh.set(!props.onRefresh.get);
+        setIsSelectedEquipo(false)
+        onCloseConfirmDelete();
     }
 
     const eliminarEquipoEnBusqueda = async () => {
@@ -344,6 +344,28 @@ function SearchCard(props) {
 
 
             </Flex>
+
+            <Modal isOpen={isOpenConfirmDelete} onClose={onCloseConfirmDelete} isCentered>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Confirmar Eliminación</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Text>¿Está seguro que quiere eliminar este equipo?</Text>
+                        <Text mt={2} fontSize="sm" color="gray.600">
+                            Esta acción no se puede deshacer.
+                        </Text>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="gray" mr={3} onClick={onCloseConfirmDelete}>
+                            Cancelar
+                        </Button>
+                        <Button colorScheme="red" onClick={confirmarEliminacion}>
+                            Eliminar
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
 
             <Modal isOpen={isOpenWarning} onClose={onCloseWarning} isCentered>
                 <ModalOverlay />
