@@ -495,20 +495,35 @@ function PreDiagnosticoBox({ onSearch }) {
       {/* Modal for missing required fields */}
       <Modal isOpen={isValidationModalOpen} onClose={() => setValidationModalOpen(false)} isCentered>
         <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Campos obligatorios faltantes</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Text mb={2}>Por favor complete los siguientes campos antes de guardar el pre-diagnóstico:</Text>
-            <Box as="ul" pl={4}>
+        <ModalContent maxW="420px">
+          <ModalHeader pb={0} pt={4} display="flex" alignItems="center">
+            <Icon viewBox="0 0 24 24" color="orange.400" boxSize={6} mr={2} as={require('react-icons/md').MdWarning} />
+            <Text fontSize="lg" fontWeight="bold" color="orange.500">Información Incompleta</Text>
+          </ModalHeader>
+          <ModalCloseButton mt={2} />
+          <ModalBody pb={2} pt={2}>
+            <Text fontWeight="bold" mb={2} fontSize="md">No se puede crear el caso porque faltan datos obligatorios.</Text>
+            <Text mb={3} fontSize="sm">Por favor, verifique lo siguiente:</Text>
+            <Box as="ul" pl={5} mb={3}>
               {missingFields.map((field, idx) => (
-                <Text as="li" key={idx} color="red.500">{field}</Text>
+                <Text as="li" key={idx} mb={1} fontSize="md">
+                  {(() => {
+                    // Palabras clave a resaltar
+                    if (field.toLowerCase().includes('sistema')) return <>Seleccionar al menos un <b>sistema</b>.</>;
+                    if (field.toLowerCase().includes('herramienta')) return <>Seleccionar las <b>herramientas</b> necesarias.</>;
+                    if (field.toLowerCase().includes('asistencia')) return <>Definir el <b>tipo de asistencia</b>.</>;
+                    if (field.toLowerCase().includes('prioridad')) return <>Establecer la <b>prioridad</b>.</>;
+                    if (field.toLowerCase().includes('explicación')) return <>Agregar la <b>explicación del problema</b>.</>;
+                    if (field.toLowerCase().includes('canal')) return <>Seleccionar el <b>canal de contacto</b>.</>;
+                    return <>{field}</>;
+                  })()}
+                </Text>
               ))}
             </Box>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" onClick={() => setValidationModalOpen(false)}>
-              Cerrar
+            <Button colorScheme="blue" onClick={() => setValidationModalOpen(false)} px={8} fontWeight="bold">
+              Entendido
             </Button>
           </ModalFooter>
         </ModalContent>
