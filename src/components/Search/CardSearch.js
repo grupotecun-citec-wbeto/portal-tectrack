@@ -196,10 +196,26 @@ function SearchCard(props) {
         props.onRefresh.set(!props.onRefresh.get);
         setIsSelectedEquipo(false)
         onCloseConfirmDelete();
+
     }
 
-    const eliminarEquipoEnBusqueda = async () => {
+    const eliminarEquipoEnBusquedaTerminada = async () => {
+        const newUserData = { ...userData }
 
+        delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
+
+        setIsSelectedEquipo(false)
+        saveUserData(newUserData)
+
+        // Si está en modo búsqueda terminada, eliminar la tarjeta completamente
+        if (props.isBusquedaTerminada && props.onRemove) {
+            props.onRemove(maquina_id);
+        }
+
+    }
+
+
+    const eliminarEquipoEnBusqueda = async () => {
         const newUserData = { ...userData }
 
         delete newUserData.casos[userData?.casoActivo?.code]?.equipos[maquina_id];
@@ -306,7 +322,7 @@ function SearchCard(props) {
                                 colorScheme="red" // Cambia el esquema de color a rojo para indicar acción de eliminación
                                 size="md" // Tamaño del botón
                                 style={{ width: !isBusquedaTerminada ? "100%" : "0%" }}
-                                onClick={(!isPost) ? eliminarEquipoEnBusqueda : eliminarEquipo} // Acción al hacer clic
+                                onClick={(!isPost) ? (!isBusquedaTerminada) ? eliminarEquipoEnBusqueda : eliminarEquipoEnBusquedaTerminada : eliminarEquipo} // Acción al hacer clic
                             />
                         </Tooltip>
 

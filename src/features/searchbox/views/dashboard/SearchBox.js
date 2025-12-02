@@ -231,6 +231,10 @@ function SearchBox({ onSearch }) {
     }
   };
 
+  // Asegurar que el equipo se elimine completamente del estado local 'datos'
+  const handleRemoveEquipo = (maquina_id) => {
+    setDatos(prevDatos => prevDatos.filter(equipo => equipo.ID !== maquina_id));
+  };
 
 
 
@@ -319,6 +323,7 @@ function SearchBox({ onSearch }) {
               isPost={isPost}
               isBusquedaTerminada={isBusquedaTerminada}
               onRefresh={{ set: setRefresh, get: refresh }}
+              onRemove={isBusquedaTerminada ? handleRemoveEquipo : undefined}
               infos={[
                 { title: "Categoria", text: maquina.categoria_name },
                 { title: "Departamento", text: maquina.subdivision_name },
