@@ -22,14 +22,6 @@ import {
   Button,
   Icon,
   Tooltip,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
 } from '@chakra-ui/react';
 
 // Custom components
@@ -95,7 +87,6 @@ function PreDiagnosticoBox({ onSearch }) {
   const [searchResults, setSearchResults] = useState([{ 'id': 1, 'name': 'humberto' }])
   const [isSuccessAlertCaso, setIsSuccessAlertCaso] = useState(false)
   const [caseId, setCaseId] = useState(0)
-  const { isOpen: isOpenCopy, onOpen: onOpenCopy, onClose: onCloseCopy } = useDisclosure();
 
   const [datos, setDatos] = useState([]);
 
@@ -193,68 +184,14 @@ function PreDiagnosticoBox({ onSearch }) {
   };
 
   const handleGuardar = () => {
-    const casoCode = userData?.casoActivo?.code;
-    const maquinaId = userData?.casoActivo?.maquina_id;
-
-    if (casoCode && maquinaId) {
-      const equipos = userData.casos[casoCode]?.equipos || {};
-      const equiposKeys = Object.keys(equipos);
-
-      if (equiposKeys.length > 1) {
-        const currentPre = equipos[maquinaId]?.prediagnostico;
-        // Check if current has data (sistemasSelectedJson is the key indicator of a filled pre-diagnosis)
-        const hasData = currentPre && currentPre.sistemasSelectedJson && currentPre.sistemasSelectedJson.length > 0;
-
-        // Check if all others are empty
-        const othersEmpty = equiposKeys.every(key => {
-          if (key == maquinaId) return true;
-          const otherPre = equipos[key]?.prediagnostico;
-          return !otherPre || !otherPre.sistemasSelectedJson || otherPre.sistemasSelectedJson.length === 0;
-        });
-
-        if (hasData && othersEmpty) {
-          onOpenCopy();
-          return;
-        }
-      }
-    }
-
-    if (guardarRef.current) {
-      guardarRef.current.guardar();
-    }
-  };
-
-  const confirmCopy = () => {
-    const casoCode = userData?.casoActivo?.code;
-    const maquinaId = userData?.casoActivo?.maquina_id;
-    const equipos = userData.casos[casoCode]?.equipos || {};
-    const equiposKeys = Object.keys(equipos);
-    const prediagnosticoOrigen = equipos[maquinaId]?.prediagnostico;
-
-    const newUserData = structuredClone(userData);
-
-    equiposKeys.forEach(key => {
-      if (key != maquinaId) {
-        newUserData.casos[casoCode].equipos[key].prediagnostico = structuredClone(prediagnosticoOrigen);
-      }
-    });
-
-    saveUserData(newUserData);
-    onCloseCopy();
-
-    if (guardarRef.current) {
-      guardarRef.current.guardar();
-    }
-  };
-
-  const cancelCopy = () => {
-    onCloseCopy();
     if (guardarRef.current) {
       guardarRef.current.guardar();
     }
   };
 
   /*====================FIN BLOQUE: FUNCTIONS        ==============*/
+
+
   return (
     <>
       {Object.keys((typeof userData?.casos === 'undefined') ? {} : userData?.casos).length !== 0 ? (
@@ -393,7 +330,7 @@ function PreDiagnosticoBox({ onSearch }) {
             {/* RIGHT COLUMN: ACTIONS (visible only on xl screens) */}
             <GridItem colSpan={1} display={{ base: "none", xl: "block" }}>
               <Flex direction="column" gap="24px">
-
+                
                 <CardCommand />
               </Flex>
             </GridItem>
@@ -441,29 +378,6 @@ function PreDiagnosticoBox({ onSearch }) {
           </Text>
         </Flex>
       )}
-
-      <Modal isOpen={isOpenCopy} onClose={onCloseCopy} isCentered closeOnOverlayClick={false}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Aplicar a todos los equipos</ModalHeader>
-          <ModalBody>
-            <Text>
-              ¿Desea aplicar este pre-diagnóstico a todos los demás equipos del caso?
-            </Text>
-            <Text fontSize="sm" color="gray.500" mt={2}>
-              Esto copiará la información ingresada a los equipos restantes que aún no tienen pre-diagnóstico.
-            </Text>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="gray" mr={3} onClick={cancelCopy}>
-              No, solo guardar este
-            </Button>
-            <Button colorScheme="blue" onClick={confirmCopy}>
-              Sí, aplicar a todos
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </>
   );
 }
