@@ -116,7 +116,7 @@ export default function HeaderLinks(props) {
     if (Object.keys(userData?.login || {}).length == 0) {
       history.push('/auth/signin')
     }
-  }, [userData])
+  }, [userData, history])
 
   useEffect(() => {
     // Update the initial online status
@@ -253,29 +253,21 @@ export default function HeaderLinks(props) {
           </NavLink>
         ) : (
           <Menu>
-            <MenuButton>
-              <Button
-                ms='0px'
-                px='0px'
-                me={{ sm: "2px", md: "16px" }}
-                color={navbarIcon}
-                variant='no-effects'
-                rightIcon={
-                  document.documentElement.dir ? (
-                    ""
-                  ) : (
-                    <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
-                  )
-                }
-                leftIcon={
-                  document.documentElement.dir ? (
-                    <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
-                  ) : (
-                    ""
-                  )
-                }>
+            <MenuButton
+              ms='0px'
+              px='0px'
+              me={{ sm: "2px", md: "16px" }}
+              color={navbarIcon}
+            >
+              <Flex alignItems="center" gap="8px">
+                {document.documentElement.dir ? (
+                  <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
+                ) : null}
                 <Text display={{ xs: "none", sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
-              </Button>
+                {!document.documentElement.dir ? (
+                  <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
+                ) : null}
+              </Flex>
             </MenuButton>
             <MenuList p='16px 8px' bg={menuBg}>
               <Flex flexDirection='column'>

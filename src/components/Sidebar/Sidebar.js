@@ -107,10 +107,11 @@ function Sidebar(props) {
         //itemsAccordion = itemsAccordion + 1
         var st = {};
         st[prop["state"]] = !state[prop.state];
+        if (!(prop?.visible ?? true)) {
+          return null;
+        }
         return (
-            <>
-            {(prop?.visible ?? true) && (
-              <AccordionItem key={`${ruta}-${key}-${prop.name}`} isCollapsed borderWidth={0} >
+              <AccordionItem key={`${ruta}-${key}-${prop.name}`} borderWidth={0} >
                 <h2>
                   
                     {activeRoute(prop.layout + prop.path,prop.category) === "active" ? (
@@ -229,14 +230,12 @@ function Sidebar(props) {
                   {createLinks(prop.views)}
                 </AccordionPanel>
               </AccordionItem>
-            )}
-            </>
-            
         );
       }
+      if (!(prop?.visible ?? true)) {
+        return null;
+      }
       return (
-        <>
-          {(prop?.visible ?? true) && (
             <NavLink key={`${prop.layout + prop.path}-${key}-${prop.name}`} to={prop.layout + prop.path} >
               {activeRoute(prop.layout + prop.path) === "active" ? (
                 <Button
@@ -344,9 +343,7 @@ function Sidebar(props) {
                 </Button>
               )}
             </NavLink>
-          )}
-        </>
-      );
+        );
     });
   };
   const { logo, routes } = props;
@@ -394,8 +391,10 @@ function Sidebar(props) {
           ps="20px"
           pe="20px"
           m={sidebarMargins}
-          filter="drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05))"
           borderRadius={sidebarRadius}
+          sx={{
+            filter: "drop-shadow(0px 5px 14px rgba(0, 0, 0, 0.05))"
+          }}
         >
           <Scrollbars
             autoHide

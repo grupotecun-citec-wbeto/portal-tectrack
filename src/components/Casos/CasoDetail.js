@@ -733,89 +733,79 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
       <Grid templateColumns={{ sm: "repeat(2, 1fr)", md: "repeat(2, 1fr)", xl: "repeat(3, 1fr)" }} gap='2px'>
 
-        <Tooltip label="Estado de sincronización" aria-label="A tooltip" >
-          <Badge
-            bg={"green.400"}
-            color={"white"}
-            fontSize="0.8em"
-            p="3px 10px"
-            borderRadius="8px"
-          >
-            <Flex align="center" direction={{ sm: "row", lg: "row" }}>
-              {syncStatusDetail == 0 && (
-                <>
-                  <Icon as={MdOutlineWbCloudy} color="white" boxSize={{ sm: "24px", lg: "24px" }} />
-                  {"Sync"}
-                </>
-              )}
-              {syncStatusDetail == 1 && (
-                <>
-                  <Icon as={MdSync} color="white" boxSize={{ sm: "24px", lg: "24px" }} />
-                  {"Sincronizando"}
-                </>
-              )}
-              {syncStatusDetail == 3 && (
-                <>
-                  <Icon as={MdOutlineSyncProblem} color="white" boxSize={{ sm: "24px", lg: "24px" }} />
-                  {"Con problema"}
-                </>
-              )}
-            </Flex>
+        <Badge
+          bg={"green.400"}
+          color={"white"}
+          fontSize="0.8em"
+          p="3px 10px"
+          borderRadius="8px"
+          title="Estado de sincronización"
+        >
+          <Flex align="center" direction={{ sm: "row", lg: "row" }}>
+            {syncStatusDetail == 0 && (
+              <>
+                <Icon as={MdOutlineWbCloudy} color="white" boxSize={{ sm: "24px", lg: "24px" }} />
+                {"Sync"}
+              </>
+            )}
+            {syncStatusDetail == 1 && (
+              <>
+                <Icon as={MdSync} color="white" boxSize={{ sm: "24px", lg: "24px" }} />
+                {"Sincronizando"}
+              </>
+            )}
+            {syncStatusDetail == 3 && (
+              <>
+                <Icon as={MdOutlineSyncProblem} color="white" boxSize={{ sm: "24px", lg: "24px" }} />
+                {"Con problema"}
+              </>
+            )}
+          </Flex>
+        </Badge>
 
-          </Badge>
-        </Tooltip>
+        <Badge
+          bg={statusColor}
+          color={"white"}
+          fontSize="0.8em"
+          p="3px 10px"
+          borderRadius="8px"
+          title="Estado del caso"
+        >
+          <Flex align="center" direction={{ sm: "row", lg: "row" }}>
+            <Icon as={FcLowPriority} color="gray.500" boxSize={{ sm: "24px", lg: "24px" }} />
+            {prioridadName}
+          </Flex>
+        </Badge>
 
-        <Tooltip label="Estado del caso" aria-label="A tooltip" >
-          <Badge
-            bg={statusColor}
-            color={"white"}
-            fontSize="0.8em"
-            p="3px 10px"
-            borderRadius="8px"
-          >
-            <Flex align="center" direction={{ sm: "row", lg: "row" }}>
-              <Icon as={FcLowPriority} color="gray.500" boxSize={{ sm: "24px", lg: "24px" }} />
-              {prioridadName}
-            </Flex>
-
-          </Badge>
-        </Tooltip>
-        <Tooltip label="Segmento del caso" aria-label="A tooltip" >
-          <Badge
-            bg="yellow.400"
-            color={"black"}
-            fontSize="0.8em"
-            p="3px 10px"
-            borderRadius="8px"
-          >
-            <Flex align="center" direction={{ sm: "row", lg: "row" }}>
-              <Icon as={MdWorkspaces} color="blackAlpha.400" boxSize={{ sm: "24px", lg: "24px" }} />
-              {segmentoName}
-            </Flex>
-
-          </Badge>
-        </Tooltip>
+        <Badge
+          bg="yellow.400"
+          color={"black"}
+          fontSize="0.8em"
+          p="3px 10px"
+          borderRadius="8px"
+          title="Segmento del caso"
+        >
+          <Flex align="center" direction={{ sm: "row", lg: "row" }}>
+            <Icon as={MdWorkspaces} color="blackAlpha.400" boxSize={{ sm: "24px", lg: "24px" }} />
+            {segmentoName}
+          </Flex>
+        </Badge>
 
         <Timer createdAt={createdAt} closedAt={closedAt} id={id} />
 
-        <Tooltip label="Cantidad de equipos" aria-label="A tooltip" >
-          <Badge
-            bg="yellow.400"
-            color={"black"}
-            fontSize="0.8em"
-            p="3px 10px"
-            borderRadius="8px"
-          >
-            <Flex align="center" direction={{ sm: "row", lg: "row" }}>
-              <Icon as={LiaTractorSolid} color="blackAlpha.400" boxSize={{ sm: "24px", lg: "24px" }} />
-              {cantEquipos}
-
-            </Flex>
-
-          </Badge>
-        </Tooltip>
-
-
+        <Badge
+          bg="yellow.400"
+          color={"black"}
+          fontSize="0.8em"
+          p="3px 10px"
+          borderRadius="8px"
+          title="Cantidad de equipos"
+        >
+          <Flex align="center" direction={{ sm: "row", lg: "row" }}>
+            <Icon as={LiaTractorSolid} color="blackAlpha.400" boxSize={{ sm: "24px", lg: "24px" }} />
+            {cantEquipos}
+          </Flex>
+        </Badge>
 
       </Grid>
       <Stack spacing={4}>
@@ -839,7 +829,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                       </Tooltip>
 
 
-                    ) : [
+                    ) : (
                       <>
 
                         <Tooltip label="Cambiar Técnico" aria-label="A tooltip">
@@ -858,10 +848,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
                         )}
                       </>
-
-
-
-                    ]}
+                    )}
 
 
                     <Tooltip label="Detalles del caso" aria-label="A tooltip" >
@@ -878,7 +865,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                       </Button>
                     </Tooltip>
                   </>
-                ) : [
+                ) : (
                   <>
 
 
@@ -889,9 +876,9 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                     </Tooltip>
 
                   </>
-                ]}
+                )}
               </>
-            ) : [
+            ) : (
               <>
                 <Tooltip label="Detalles del caso" aria-label="A tooltip" >
                   <NavLink to={`/admin/pages/casoinfo/${id}`} >
@@ -912,7 +899,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                   fontSize="lg"
                   fontWeight="bold"
                   color={"green.500"}
-                  textAlign={"Center"}
+                  textAlign={"center"}
                 >
                   <Flex align="center" justify="center">
                     <Icon as={FaRegWindowClose} color="green.500" boxSize="6" mr={2} />
@@ -920,9 +907,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                   </Flex>
                 </Text>
               </>
-
-            ]}
-
+            )}
 
 
 
@@ -931,7 +916,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
         </Grid>
         {!isEmpezado && estado != 3 && estado != 5 && !isEditTecnico ? (
           <>
-            <Flex direction={'columns'} >
+            <Flex direction={'column'} >
               <FormControl maxW={{ xl: '250px' }} key={id}>
                 <Select id='country' placeholder='Seleccionar Vehiculo' onChange={(e) => setIsVehiculoSelected(e.target.value)} value={isVehiculoSelected}>
                   {vehiculosList}
@@ -996,6 +981,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
                       <Box key={diagnostico.ID} border="1px" borderColor={borderColor} p={3} rounded="md">
                         <Grid templateColumns={{ sm: "repeat(1, 1fr)", md: "repeat(1, 1fr)", xl: "repeat(1, 1fr)" }} gap='5px'>
                           <Badge
+                            key={`catalogo-${diagnostico.ID}`}
                             bg="yellow.400"
                             color={"black"}
                             fontSize="0.8em"
@@ -1011,6 +997,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
                           </Badge>
                           <Badge
+                            key={`finca-${diagnostico.ID}`}
                             bg="yellow.400"
                             color={"black"}
                             fontSize="0.8em"
@@ -1025,6 +1012,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
                           </Badge>
                           <Badge
+                            key={`asistencia-${diagnostico.ID}`}
                             bg="green.400"
                             color={"black"}
                             fontSize="0.8em"
@@ -1039,6 +1027,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
                           </Badge>
                           <Badge
+                            key={`cliente-${diagnostico.ID}`}
                             bg="green.400"
                             color={"black"}
                             fontSize="0.8em"
@@ -1054,7 +1043,7 @@ const CasoDetail = React.memo(({ caseData, openLoader }) => {
 
                           </Badge>
                         </Grid>
-                        <Text fontSize="10px" fontWeight="bold" key={diagnostico.ID}>
+                        <Text fontSize="10px" fontWeight="bold">
                           {/*decodeURIComponent(diagnostico?.description || 'Sin%20data')*/}
                         </Text>
                       </Box>
