@@ -210,6 +210,11 @@ const TreeItem = ({ item, level = 0 }) => (
 // Componente de Documento
 const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones, ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas, mostrarArbolSistemas, elaboradoPor, revisadoPor, fechaEmision, images }) => {
 
+  // Función para obtener el código de finca del equipo
+  const getCodigoFincaForSystem = (index) => {
+    return equipos?.value?.codigos?.[index]?.codigo_finca || "N/D";
+  };
+
 
   return (
     <Document minPresenceAhead={100}>
@@ -327,6 +332,7 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
                   })
                   :
                   Array.from(sistemas.value.equiposSistemas || [])?.map((equipoSistemas, index) => {
+                    const codigoFinca = getCodigoFincaForSystem(index);
                     return (
                       <View key={index} style={{
                         width: "48%",
@@ -337,12 +343,25 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
                         borderRadius: 5,
                         padding: 6,
                       }}>
+                        {/* Código de Finca del Equipo */}
+                        <Text style={{
+                          fontSize: 9,
+                          fontStyle: "italic",
+                          marginBottom: 3,
+                          color: "#666",
+                          paddingBottom: 2,
+                          borderBottom: "0.5pt solid #ddd"
+                        }}>
+                          Código: {codigoFinca}
+                        </Text>
+
                         {/* Nombre del Sistema */}
                         <Text style={{
                           fontSize: 11,
                           fontWeight: "bold",
                           marginBottom: 4,
                           paddingBottom: 2,
+                          marginTop: 3,
                           borderBottom: "0.5pt solid #ccc"
                         }}>
                           {equipoSistemas.title || equipoSistemas.sistema || "Sistema"}
