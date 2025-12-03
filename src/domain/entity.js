@@ -48,3 +48,13 @@
  * @property {string} [created_at] - Timestamp when the record was created.
  * @property {string|null} [updated_at] - Timestamp when the record was last updated.
  */
+
+
+/**
+ * @typedef {Object} VehiculoORM
+ * @property {number} ID - Primary key of the vehiculo table.
+ * @property {string} code - Code of the vehiculo.
+ * @property {string} placa - Placa of the vehiculo.
+ * @property {string} year - Year of the vehiculo.
+ * @property {string} name - Name of the vehiculo.
+ */

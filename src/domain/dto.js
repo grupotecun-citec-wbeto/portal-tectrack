@@ -66,5 +66,40 @@
  * @property {string} createdAt - Timestamp when the record was created.
  * @property {string|null} updatedAt - Timestamp when the record was last updated.
  */
-            
 
+
+/**
+ * @typedef {Object} Route
+ * @property {string} path - The URL path for the route.
+ * @property {string} name - The display name for the route.
+ * @property {string} rtlName - The RTL (right-to-left) display name for the route.
+ * @property {React.ReactNode} [icon] - The icon component to display for the route.
+ * @property {boolean} [secondaryNavbar] - Indicates if the route should appear in a secondary navigation bar.
+ * @property {React.ComponentType<any>} [component] - The React component to render for this route.
+ * @property {string} layout - The layout path where this route belongs.
+ * @property {boolean} [visible] - Indicates if the route should be visible in the navigation bar.
+ * @property {string} [category] - The category of the route, e.g., "account".
+ * @property {string} [state] - The state of the route, e.g., "pageCollapse".
+ * @property {Route[]} [views] - An array of nested routes.
+ * @property {string} [redirect] - A URL to redirect to, often used for routes not visible in the sidebar.
+ * @property {Array<string>} [params] - Array of parameters for the route.
+ */
+
+
+/**
+ * @typedef {Object} Feature
+ * @property {boolean} enabled - Whether the feature is enabled.
+ * @property {Route} route - The route configuration for the feature.
+ * @property {string} category - The category of the feature, e.g., "pages".
+ * @property {number} [order] - The order of the feature.
+ */
+
+
+/**
+ * @typedef {Object} VehiculoDTO
+ * @property {number} id - Primary key of the vehiculo table.
+ * @property {string} code - Code of the vehiculo.
+ * @property {string} placa - Placa of the vehiculo.
+ * @property {string} year - Year of the vehiculo.
+ * @property {string} name - Name of the vehiculo.
+ */

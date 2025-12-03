@@ -1,5 +1,5 @@
 // Chakra Icons
-import { BellIcon } from "@chakra-ui/icons";
+import { BellIcon, RepeatIcon } from "@chakra-ui/icons";
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 // Chakra Imports
@@ -11,7 +11,14 @@ import {
   MenuItem,
   MenuList, Stack, Text, useColorMode,
   useColorModeValue,
-  Image
+  Image,
+  IconButton,
+  Spinner,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody
 } from "@chakra-ui/react";
 
 // ACCORDION
@@ -63,6 +70,9 @@ export default function HeaderLinks(props) {
 
 
   const [onLine, setOnLine] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [versionUpdated, setVersionUpdated] = useState(false);
 
   /*=======================================================
      BLOQUE: REDUX-PERSIST
@@ -106,17 +116,53 @@ export default function HeaderLinks(props) {
     if (Object.keys(userData?.login || {}).length == 0) {
       history.push('/auth/signin')
     }
-  }, [userData])
+  }, [userData, history])
 
   useEffect(() => {
-    if (!navigator.onLine) {
-      setOnLine(false);
-    } else {
-      setOnLine(true);
+    // Update the initial online status
+    setOnLine(navigator.onLine);
+
+    // Define event listeners for online and offline events
+    const handleOnline = () => setOnLine(true);
+    const handleOffline = () => setOnLine(false);
+
+    // Attach event listeners
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Cleanup event listeners on component unmount
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  const openSyncModal = () => setIsOpen(true);
+  const closeSyncModal = () => setIsOpen(false);
+
+  const forceServiceWorkerUpdate = async () => {
+    setLoading(true);
+    setVersionUpdated(false);
+
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      let updated = false;
+
+      for (const registration of registrations) {
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+          window.location.reload();
+          updated = true;
+        }
+      }
+
+      setLoading(false);
+      setVersionUpdated(!updated);
+
+      // Close the modal automatically after 3 seconds
+      setTimeout(() => closeSyncModal(), 3000);
     }
-
-  }, [navigator.onLine]);
-
+  };
 
   const handleLogout = async () => {
     const newUserData = structuredClone(userData)
@@ -130,17 +176,28 @@ export default function HeaderLinks(props) {
     }
   }
 
-
-
-
   return (
     <Flex
       pe={{ sm: "0px", md: "16px" }}
       w={{ xs: "100%", sm: "100%", md: "auto" }}
-      alignItems='center'
-      flexDirection='row'>
+      alignItems="center"
+      flexDirection="row"
+    >
+      {onLine && (
+        <IconButton
+          aria-label="Sincronizar versión"
+          icon={<RepeatIcon />}
+          onClick={() => {
+            openSyncModal();
+            forceServiceWorkerUpdate();
+          }}
+          variant="solid"
+          colorScheme="teal"
+          size="sm"
+          mr="10px"
+        />
+      )}
 
-      {/*<SearchBar me='18px' w={{xs:"auto", sm:"auto"}} display={{xs:"block",sm:"block"}} />*/}
       <Box
         bg={onLine ? "green.500" : "red.500"}
         color="white"
@@ -196,29 +253,21 @@ export default function HeaderLinks(props) {
           </NavLink>
         ) : (
           <Menu>
-            <MenuButton>
-              <Button
-                ms='0px'
-                px='0px'
-                me={{ sm: "2px", md: "16px" }}
-                color={navbarIcon}
-                variant='no-effects'
-                rightIcon={
-                  document.documentElement.dir ? (
-                    ""
-                  ) : (
-                    <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
-                  )
-                }
-                leftIcon={
-                  document.documentElement.dir ? (
-                    <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
-                  ) : (
-                    ""
-                  )
-                }>
+            <MenuButton
+              ms='0px'
+              px='0px'
+              me={{ sm: "2px", md: "16px" }}
+              color={navbarIcon}
+            >
+              <Flex alignItems="center" gap="8px">
+                {document.documentElement.dir ? (
+                  <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
+                ) : null}
                 <Text display={{ xs: "none", sm: "none", md: "flex" }}>{userData?.login?.display_name || ''}</Text>
-              </Button>
+                {!document.documentElement.dir ? (
+                  <ProfileIcon color={navbarIcon} w='22px' h='22px' me='0px' />
+                ) : null}
+              </Flex>
             </MenuButton>
             <MenuList p='16px 8px' bg={menuBg}>
               <Flex flexDirection='column'>
@@ -345,6 +394,26 @@ export default function HeaderLinks(props) {
       />
 
 
+      <Modal isOpen={isOpen} onClose={closeSyncModal} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Actualización de Versión</ModalHeader>
+          <ModalBody pb={6}>
+            {loading ? (
+              <Flex alignItems="center" justifyContent="center">
+                <Spinner size="xl" color="teal" />
+                <Box ml="10px">Cargando la versión más actual...</Box>
+              </Flex>
+            ) : (
+              <Box textAlign="center">
+                {versionUpdated
+                  ? "La versión ya está actualizada."
+                  : "La versión se ha actualizado correctamente."}
+              </Box>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 }

@@ -56,7 +56,7 @@ function CardComunication(props) {
     return (
         <Card>
             <CardHeader>
-                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}>{(caseType == Enums.CORRECTIVO) ? title : '¿Por cuál canal lo identificaste?'}</Heading>
+                <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold">{(caseType == Enums.CORRECTIVO) ? title : '¿Por cuál canal lo identificaste?'}</Heading>
                 
             </CardHeader>
             <CardBody>

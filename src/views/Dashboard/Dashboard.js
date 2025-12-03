@@ -41,6 +41,8 @@ import {
 } from "variables/charts";
 import { pageVisits, socialTraffic } from "variables/general";
 
+
+
 export default function Dashboard() {
   // Chakra Color Mode
   const iconBlue = useColorModeValue("blue.500", "blue.500");
