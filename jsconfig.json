@@ -14,7 +14,10 @@
       "@types/*":["types/*"],
       "@db/*": ["db/*"],
       "@domain/*": ["domain/*"],
-      "@application/*": ["application/*"]
+      "@application/*": ["application/*"],
+      "@routes/*": ["routes/*"],
+      "@features/*": ["features/*"],
+      "@core/*": ["core/*"]
     }
   }
 }

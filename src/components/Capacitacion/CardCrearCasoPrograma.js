@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useContext } from "react";
+import React, { useState, useEffect, useContext, forwardRef, useImperativeHandle } from "react";
 //redux
 import { useSelector, useDispatch } from 'react-redux';
 
@@ -13,14 +13,14 @@ import {
     Heading,
     Select,
     Button,
-  } from '@chakra-ui/react';
-  // formularios
-  import {
+} from '@chakra-ui/react';
+// formularios
+import {
     FormControl,
     FormLabel,
     FormErrorMessage,
     FormHelperText,
-  } from '@chakra-ui/react'
+} from '@chakra-ui/react'
 
 
 // Custom components
@@ -40,24 +40,24 @@ import useCargarCaso from "hookDB/cargarCaso";
 
 //******************************************* FIN IMPORTS ************************** */
 
-function CardCrearCasoPrograma({openAlert, openLoader}){
+const CardCrearCasoPrograma = forwardRef(({ openAlert, openLoader }, ref) => {
 
-    const {casoActivo,setCasoActivo} = useContext(AppContext)
-    
+    const { casoActivo, setCasoActivo } = useContext(AppContext)
 
-    const {dbReady} = useDataBaseContext()
-    const { createItem: createCaso, findById: findByCaseId} = useCaso(dbReady,false)
 
-    
+    const { dbReady } = useDataBaseContext()
+    const { createItem: createCaso, findById: findByCaseId } = useCaso(dbReady, false)
+
+
     // Rehidratar la base de dato
     /*useEffect( () =>{
         if(!db) rehidratarDb()
     },[db,rehidratarDb])*/
     const history = useHistory()
 
-    const [caseId,setCaseId] = useState(0)
-    
-    
+    const [caseId, setCaseId] = useState(0)
+
+
     /*=======================================================
      BLOQUE: REDUX-PERSIST
      DESCRIPTION: 
@@ -67,15 +67,15 @@ function CardCrearCasoPrograma({openAlert, openLoader}){
 
     const saveUserData = (json) => {
         dispatch({ type: 'SET_USER_DATA', payload: json });
-      };
-  
+    };
+
     const getUserData = () => {
         dispatch({ type: 'GET_USER_DATA' });  // Despachar la acción para obtener datos
     };
 
     /*====================FIN BLOQUE: REDUX-PERSIST ==============*/
 
-    const {loadCaso} = useCargarCaso(userData?.casoActivo?.code)
+    const { loadCaso } = useCargarCaso(userData?.casoActivo?.code)
     const getCurrentDateTime = () => {
         const now = new Date();
         return format(now.toUTCString(), 'yyyy-MM-dd HH:mm:ss');
@@ -91,7 +91,7 @@ function CardCrearCasoPrograma({openAlert, openLoader}){
         return fechaDate.toUTCString(); // Devuelve la fecha en formato UTC
     };
 
-    const crearCaso = async() => {
+    const crearCaso = async () => {
         getUserData()
         // verificar si esta completo los predianostios
 
@@ -99,18 +99,18 @@ function CardCrearCasoPrograma({openAlert, openLoader}){
         const equiposArray = Object.keys(userData?.casos[userData.casoActivo?.code]?.equipos).map(Number)
         let casoCompelto = true
         let suma_prioridad = 0
-        equiposArray.forEach((maquina_id) =>{
+        equiposArray.forEach((maquina_id) => {
             // indica cuando un pre-diagnostico no esta completo de la lista de maquinas
             suma_prioridad += parseInt(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.prioridad)
-            if( Object.keys(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.sistemas) == 0 
-                || Object.keys(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.herramientas) == 0) 
+            if (Object.keys(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.sistemas) == 0
+                || Object.keys(userData.casos[userData.casoActivo?.code].equipos[maquina_id].prediagnostico.herramientas) == 0)
                 casoCompelto = false
         })
-        if(!casoCompelto){
+        if (!casoCompelto) {
             alert('Profavor terminar de llenar sus predianosticos, verificar equipos')
             return 0
         }
-        
+
         const usuario_ID = userData?.login?.ID
         const usuario_ID_assigned = usuario_ID
         const comunicacion_ID = userData?.casos[userData.casoActivo.code]?.comunicacion_ID || 1
@@ -123,15 +123,15 @@ function CardCrearCasoPrograma({openAlert, openLoader}){
         const uuid = userData.casoActivo.code // uuid del caso es el que nos va servir para ver si ya esta sincronizado con mysql
         const catalogo_ID = userData?.casos[userData.casoActivo.code]?.programa?.catalogo_ID
         const name = decodeURIComponent(userData?.casos[userData.casoActivo.code]?.programa?.description)
-        
+
         const programaSistemasIfy = JSON.stringify(userData?.casos[userData.casoActivo.code]?.programa.sistemas)
         const prioridad = 3
         let caseId = 0
-        
-        
+
+
         const caso = await findByCaseId(uuid)
         if (Object.keys(caso).length === 0) {
-            
+
             try {
                 await createCaso(uuid, usuario_ID, usuario_ID_assigned, comunicacion_ID, segmento_ID, caso_estado_ID, fecha, start, prioridad, programaSistemasIfy, catalogo_ID, name);
                 openLoader(true)
@@ -156,31 +156,25 @@ function CardCrearCasoPrograma({openAlert, openLoader}){
         } else {
             alert('El caso ya existe');
         }
-
-        
-
-        
-
-        
-
-
-        
     }
 
-    return(
+    // Exponer la función crearCaso al componente padre
+    useImperativeHandle(ref, () => ({
+        crearCaso
+    }));
+
+    return (
         <Card>
-              <CardHeader>
-                <Heading size='md' fontSize={{xl:'3em',sm:'2em'}}></Heading>
-              </CardHeader>
-              <CardBody mt={{xl:'50px', sm:'50px'}}>
-                  <Button variant='dark' minW='145px' h='36px' fontSize={{xl:'2em',sm:'1em'}} onClick={crearCaso}>
-                    Crear caso
-                  </Button>
-                  
-              </CardBody>
-              
-          </Card>
+            <CardHeader>
+                <Heading as="h2" fontSize={{ base: "md", md: "lg" }} fontWeight="semibold"></Heading>
+            </CardHeader>
+            <CardBody mt='20px'>
+                <Text fontSize={{ base: "sm", md: "md" }} color='gray.500' fontWeight='bold'>
+                    Use el botón flotante para crear el caso.
+                </Text>
+            </CardBody>
+        </Card>
     )
-}
+});
 
 export default CardCrearCasoPrograma
