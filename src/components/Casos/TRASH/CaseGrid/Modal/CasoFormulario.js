@@ -14,6 +14,7 @@ import {
   InputGroup,
   InputLeftElement,
   FormControl,
+  Checkbox,
 } from '@chakra-ui/react';
 
 import { useDebounce } from 'use-debounce';
@@ -46,7 +47,7 @@ import ImgLoader from "./ImgLoader";
 
 
 
-const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubicacion,lugar,nameUsuario,codigo,fecha,celular,proyecto,equipos,sistemas,elaboradoPor,revisadoPor,fechaEmision,images,imagesRef,handle}) =>{
+const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ubicacion,lugar,nameUsuario,codigo,fecha,celular,proyecto,equipos,sistemas,mostrarArbolSistemas,elaboradoPor,revisadoPor,fechaEmision,images,imagesRef,handle}) =>{
     
     const timeZone = 'America/Guatemala'; // Define tu zona horaria
     const {db,rehidratarDb,saveToIndexedDB} = useContext(SqlContext)
@@ -261,7 +262,15 @@ const CasoFormulario = ({caso_ID,hallazgos,accionesEjecutadas,recomendaciones,ub
                         placeholder="Ingresar las Recomendaciones"
                     />
 
-                    
+                    <Flex direction="row" align="center" justify="flex-start" mt="15px">
+                        <Checkbox 
+                            isChecked={mostrarArbolSistemas.value}
+                            onChange={(e) => mostrarArbolSistemas.set(e.target.checked)}
+                        />
+                        <Text ml="10px" fontSize="sm">
+                            Mostrar árbol de sistemas y servicios en el PDF
+                        </Text>
+                    </Flex>
 
                     <Flex direction="column" align="left" justify="center">
                         <Text fontSize="sm">

@@ -208,7 +208,7 @@ const TreeItem = ({ item, level = 0 }) => (
 );
 
 // Componente de Documento
-const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones, ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas, elaboradoPor, revisadoPor, fechaEmision, images }) => {
+const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones, ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas, mostrarArbolSistemas, elaboradoPor, revisadoPor, fechaEmision, images }) => {
 
 
   return (
@@ -308,59 +308,61 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
           <Text style={styles.labelTitle}>DETALLE DE LA VISITA</Text>
           <View style={styles.separator} />
         </View>
-        <View style={styles.section} wrap={false}>
+        {mostrarArbolSistemas.value && (
+          <View style={styles.section} wrap={false}>
 
-          <View style={styles.sectionInput}>
-            <Text style={styles.labelInput}>Sistemas de los Equipos</Text>
-          </View>
+            <View style={styles.sectionInput}>
+              <Text style={styles.labelInput}>Sistemas de los Equipos</Text>
+            </View>
 
-          <View style={styles.gridContainer}>
-            {
-              (!sistemas.value?.isTree) ?
-                sistemas.value?.equiposSistemas?.split(",")?.map((sistema) => {
-                  return (
-                    <Text style={styles.gridItem_sistema}>
-                      <Text>{sistema}</Text>
-                    </Text>
-                  )
-                })
-                :
-                Array.from(sistemas.value.equiposSistemas || [])?.map((equipoSistemas, index) => {
-                  return (
-                    <View key={index} style={{
-                      width: "48%",
-                      border: "1pt solid #000",
-                      marginLeft: 5,
-                      marginTop: 5,
-                      backgroundColor: "#FFFFFF",
-                      borderRadius: 5,
-                      padding: 6,
-                    }}>
-                      {/* Nombre del Sistema */}
-                      <Text style={{
-                        fontSize: 11,
-                        fontWeight: "bold",
-                        marginBottom: 4,
-                        paddingBottom: 2,
-                        borderBottom: "0.5pt solid #ccc"
-                      }}>
-                        {equipoSistemas.title || equipoSistemas.sistema || "Sistema"}
+            <View style={styles.gridContainer}>
+              {
+                (!sistemas.value?.isTree) ?
+                  sistemas.value?.equiposSistemas?.split(",")?.map((sistema) => {
+                    return (
+                      <Text style={styles.gridItem_sistema}>
+                        <Text>{sistema}</Text>
                       </Text>
+                    )
+                  })
+                  :
+                  Array.from(sistemas.value.equiposSistemas || [])?.map((equipoSistemas, index) => {
+                    return (
+                      <View key={index} style={{
+                        width: "48%",
+                        border: "1pt solid #000",
+                        marginLeft: 5,
+                        marginTop: 5,
+                        backgroundColor: "#FFFFFF",
+                        borderRadius: 5,
+                        padding: 6,
+                      }}>
+                        {/* Nombre del Sistema */}
+                        <Text style={{
+                          fontSize: 11,
+                          fontWeight: "bold",
+                          marginBottom: 4,
+                          paddingBottom: 2,
+                          borderBottom: "0.5pt solid #ccc"
+                        }}>
+                          {equipoSistemas.title || equipoSistemas.sistema || "Sistema"}
+                        </Text>
 
-                      {/* Lista de Servicios */}
-                      {equipoSistemas && equipoSistemas?.length > 0 && (
-                        <View style={{ marginTop: 2 }}>
-                          {equipoSistemas?.map((servicio, sIndex) => (
-                            <TreeItem item={servicio} />
-                          ))}
-                        </View>
-                      )}
-                    </View>
-                  )
-                })
-            }
+                        {/* Lista de Servicios */}
+                        {equipoSistemas && equipoSistemas?.length > 0 && (
+                          <View style={{ marginTop: 2 }}>
+                            {equipoSistemas?.map((servicio, sIndex) => (
+                              <TreeItem item={servicio} />
+                            ))}
+                          </View>
+                        )}
+                      </View>
+                    )
+                  })
+              }
+            </View>
           </View>
-        </View>
+        )}
         <View style={styles.section} wrap={false}>
 
 
@@ -545,6 +547,9 @@ const GenerarPDF = () => {
   //sistemas
   const [sistemasValue, setSistemasValue] = useState('')
 
+  // mostrar árbol de sistemas
+  const [mostrarArbolSistemas, setMostrarArbolSistemas] = useState(true)
+
   // revisadoPor
   const [revisadoPorValue, setRevisadoPorValue] = useState('Jefatura de CITEC')
 
@@ -592,6 +597,7 @@ const GenerarPDF = () => {
         proyecto={{ value: proyectoValue, set: setProyectoValue }}
         equipos={{ value: equiposValue, set: setEquiposValue }}
         sistemas={{ value: sistemasValue, set: setSistemasValue }}
+        mostrarArbolSistemas={{ value: mostrarArbolSistemas, set: setMostrarArbolSistemas }}
         elaboradoPor={{ value: elaboradoPorValue, set: setElaboradoPorValue }}
         revisadoPor={{ value: revisadoPorValue, set: setRevisadoPorValue }}
         fechaEmision={{ value: fechaEmisionValue, set: setFechaEmisionValue }}
@@ -620,6 +626,7 @@ const GenerarPDF = () => {
                 proyecto={{ value: proyectoValue, set: setProyectoValue }}
                 equipos={{ value: equiposValue, set: setEquiposValue }}
                 sistemas={{ value: sistemasValue, set: setSistemasValue }}
+                mostrarArbolSistemas={{ value: mostrarArbolSistemas, set: setMostrarArbolSistemas }}
                 elaboradoPor={{ value: elaboradoPorValue, set: setElaboradoPorValue }}
                 revisadoPor={{ value: revisadoPorValue, set: setRevisadoPorValue }}
                 fechaEmision={{ value: fechaEmisionValue, set: setFechaEmisionValue }}
@@ -658,6 +665,7 @@ const GenerarPDF = () => {
           proyecto={{ value: proyectoValue, set: setProyectoValue }}
           equipos={{ value: equiposValue, set: setEquiposValue }}
           sistemas={{ value: sistemasValue, set: setSistemasValue }}
+          mostrarArbolSistemas={{ value: mostrarArbolSistemas, set: setMostrarArbolSistemas }}
           elaboradoPor={{ value: elaboradoPorValue, set: setElaboradoPorValue }}
           revisadoPor={{ value: revisadoPorValue, set: setRevisadoPorValue }}
           fechaEmision={{ value: fechaEmisionValue, set: setFechaEmisionValue }}
