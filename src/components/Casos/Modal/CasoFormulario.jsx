@@ -14,6 +14,7 @@ import {
     InputGroup,
     InputLeftElement,
     FormControl,
+    Checkbox,
 } from '@chakra-ui/react';
 
 // CSS
@@ -57,7 +58,7 @@ import CasoRichEditor from './CasoRichEditor';
 
 
 
-const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones, ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas, elaboradoPor, revisadoPor, fechaEmision, images, imagesRef, handle }) => {
+const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones, ubicacion, lugar, nameUsuario, codigo, fecha, celular, proyecto, equipos, sistemas, mostrarArbolSistemas, elaboradoPor, revisadoPor, fechaEmision, images, imagesRef, handle }) => {
 
     const timeZone = 'America/Guatemala'; // Define tu zona horaria
 
@@ -300,6 +301,29 @@ const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendacione
                         reference={recomendaciones}
                         placeholder="Ingresar las Recomendaciones"
                     />
+
+                    <Flex 
+                        direction="row" 
+                        align="center" 
+                        justify="flex-start" 
+                        mt="25px"
+                        mb="25px"
+                        p="15px"
+                        bg="blue.50"
+                        borderRadius="lg"
+                        borderLeft="4px solid"
+                        borderColor="blue.500"
+                    >
+                        <Checkbox 
+                            isChecked={mostrarArbolSistemas.value}
+                            onChange={(e) => mostrarArbolSistemas.set(e.target.checked)}
+                            size="lg"
+                            colorScheme="blue"
+                        />
+                        <Text ml="15px" fontSize="md" fontWeight="500" color="gray.800">
+                            Mostrar árbol de sistemas y servicios en el PDF
+                        </Text>
+                    </Flex>
 
 
 
