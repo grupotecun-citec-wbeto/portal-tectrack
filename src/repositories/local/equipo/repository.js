@@ -73,6 +73,51 @@ const repository = {
             OR UPPER(serie_extra) LIKE UPPER('%${cadena}%')
             OR UPPER(chasis) LIKE UPPER('%${cadena}%')
             OR UPPER(E.codigo_finca) LIKE UPPER('%${cadena}%')
+            OR UPPER(
+                (
+                    -- Normalizar PR-xxxx o QR-xxxx
+                    CASE
+                        WHEN E.codigo_finca GLOB 'PR-*' OR E.codigo_finca GLOB 'QR-*' OR E.codigo_finca GLOB 'AZUD-*'
+                            THEN SUBSTR(E.codigo_finca, 1, INSTR(E.codigo_finca, '-') - 1)
+
+                        -- Normalizar códigos que comienzan con letra T...
+                        WHEN E.codigo_finca GLOB 'T*-*'
+                            THEN SUBSTR(E.codigo_finca, 1, 1) ||
+                                CAST(SUBSTR(E.codigo_finca, 2, INSTR(E.codigo_finca, '-') - 2) AS INTEGER)
+
+                        -- Normalizar códigos numéricos: 01-053-1209 → 1-53-1209
+                        WHEN E.codigo_finca GLOB '[0-9]*-*'
+                            THEN CAST(SUBSTR(E.codigo_finca, 1, INSTR(E.codigo_finca, '-') - 1) AS INTEGER)
+                        WHEN E.codigo_finca GLOB '[0]*'
+                            THEN CAST( E.codigo_finca AS INTEGER)
+
+                        ELSE E.codigo_finca
+                    END
+
+                    -- Normalizar segunda parte
+                    ||
+                    CASE
+                        WHEN INSTR(E.codigo_finca, '-') > 0 and E.codigo_finca GLOB '[0-9]*'
+                        THEN '-' || CAST(SUBSTR(E.codigo_finca, INSTR(E.codigo_finca, '-') + 1) AS INTEGER)
+                        ELSE ''
+                    END
+                    
+
+                    -- Si tiene tercera parte, concatenarla normalizada
+                    ||
+                    CASE
+                        WHEN INSTR(SUBSTR(E.codigo_finca, INSTR(E.codigo_finca, '-') + 1), '-') > 0 and E.codigo_finca GLOB '[0-9]*'
+                        THEN '-' ||
+                            CAST(
+                                    SUBSTR(
+                                        SUBSTR(E.codigo_finca, INSTR(E.codigo_finca, '-') + 1),
+                                        INSTR(SUBSTR(E.codigo_finca, INSTR(E.codigo_finca, '-') + 1), '-') + 1
+                                    ) AS INTEGER
+                                )
+                        ELSE ''
+                    END
+                )
+            ) LIKE UPPER('%${cadena}%')
             OR UPPER(CL.name) LIKE UPPER('%${cadena}%')
             OR UPPER(P.name) LIKE UPPER('%${cadena}%'))`
             : seleccionadosCondition;
