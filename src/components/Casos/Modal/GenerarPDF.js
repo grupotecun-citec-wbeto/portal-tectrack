@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 //redux
 import { useSelector, useDispatch } from 'react-redux';
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Image, PDFViewer } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Image, PDFViewer, pdf } from "@react-pdf/renderer";
 import { useParams } from "react-router-dom";
 import { format } from "date-fns";
+import { v4 as uuidv4 } from 'uuid';
 // Chakra imports
 import {
   Flex,
@@ -13,7 +14,20 @@ import {
   Th,
   Thead,
   Tr,
-  useColorModeValue
+  useColorModeValue,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Input,
+  Checkbox,
+  FormControl,
+  FormLabel,
+  useDisclosure
 } from "@chakra-ui/react";
 
 //images
@@ -486,38 +500,9 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
   )
 };
 
-const GenerarPDF2 = () => {
-
-
-  return (
-    <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
-
-      <div>
-        <h1>Generador de PDF en ReactJS</h1>
-        <PDFDownloadLink
-          document={<MyPDFDocument />}
-          fileName="reporte.pdf"
-          style={{
-            textDecoration: "none",
-            padding: "10px 20px",
-            color: "#fff",
-            backgroundColor: "#007bff",
-            borderRadius: "5px",
-          }}
-        >
-          {({ blob, url, loading, error }) =>
-            loading ? "Generando documento..." : "Descargar PDF"
-          }
-        </PDFDownloadLink>
-      </div>
-    </Flex>
-  );
-};
-
 const GenerarPDF = () => {
-
   const { id } = useParams();
-  const timeZone = 'America/Guatemala'; // Define tu zona horaria
+  const timeZone = 'America/Guatemala';
 
   /*=======================================================
    BLOQUE: REDUX-PERSIST
@@ -599,6 +584,11 @@ const GenerarPDF = () => {
   //trigger Generar PDF
   const [triggerGenerarPdf, setTriggerGenerarPdf] = useState(false)
 
+  // Modal control
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [fileName, setFileName] = useState('');
+  const [useDefaultName, setUseDefaultName] = useState(false);
+
   // ************** functions **************
 
   const handleGenerarPdf = () => {
@@ -610,8 +600,74 @@ const GenerarPDF = () => {
     //console.log("Guardar")
   }
 
+  const handleCheckboxChange = (e) => {
+    const isChecked = e.target.checked;
+    setUseDefaultName(isChecked);
+    if (isChecked) {
+      const dateStr = format(new Date(), 'yyyy-MM-dd');
+      const defaultName = `${dateStr}-${uuidv4()}`;
+      setFileName(defaultName);
+    } else {
+      setFileName('');
+    }
+  };
 
+  const handleInputChange = (e) => {
+    setFileName(e.target.value);
+    if (useDefaultName) {
+      setUseDefaultName(false);
+    }
+  };
 
+  const executeDownloadPDF = async () => {
+    setImagesValue(imagesRef.current);
+
+    let finalName = fileName.trim();
+    if (!finalName) {
+      alert("Por favor ingrese un nombre para el archivo.");
+      return;
+    }
+    if (!finalName.toLowerCase().endsWith('.pdf')) {
+      finalName += '.pdf';
+    }
+
+    const doc = <MyPDFDocument
+      caso_ID={id}
+      hallazgos={hallazgos}
+      accionesEjecutadas={accionesEjecutadas}
+      recomendaciones={recomendaciones}
+      ubicacion={{ value: ubicacionValue, set: setUbicacionValue }}
+      lugar={{ value: lugarValue, set: setLugarValue }}
+      nameUsuario={{ value: nameUsuarioValue, set: setNameUsuarioValue }}
+      codigo={{ value: codigoValue, set: setCodigoValue }}
+      fecha={{ value: fechaValue, set: setFechaValue }}
+      celular={{ value: celularValue, set: setCelularValue }}
+      proyecto={{ value: proyectoValue, set: setProyectoValue }}
+      equipos={{ value: equiposValue, set: setEquiposValue }}
+      sistemas={{ value: sistemasValue, set: setSistemasValue }}
+      mostrarArbolSistemas={{ value: mostrarArbolSistemas, set: setMostrarArbolSistemas }}
+      elaboradoPor={{ value: elaboradoPorValue, set: setElaboradoPorValue }}
+      revisadoPor={{ value: revisadoPorValue, set: setRevisadoPorValue }}
+      fechaEmision={{ value: fechaEmisionValue, set: setFechaEmisionValue }}
+      images={{ value: imagesRef.current, set: setImagesValue }}
+    />;
+
+    try {
+      const blob = await pdf(doc).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = finalName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      onClose();
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+      alert("Hubo un error al generar el PDF.");
+    }
+  };
 
   return (
     <Flex direction="column" pt={{ base: "120px", md: "75px" }}>
@@ -642,43 +698,18 @@ const GenerarPDF = () => {
       <Flex direction="column" pt={{ base: "120px", md: "75px" }} mb="20px">
 
         <div>
-          <PDFDownloadLink
-            document={
-              <MyPDFDocument
-                caso_ID={id}
-                hallazgos={hallazgos}
-                accionesEjecutadas={accionesEjecutadas}
-                recomendaciones={recomendaciones}
-                ubicacion={{ value: ubicacionValue, set: setUbicacionValue }}
-                lugar={{ value: lugarValue, set: setLugarValue }}
-                nameUsuario={{ value: nameUsuarioValue, set: setNameUsuarioValue }}
-                codigo={{ value: codigoValue, set: setCodigoValue }}
-                fecha={{ value: fechaValue, set: setFechaValue }}
-                celular={{ value: celularValue, set: setCelularValue }}
-                proyecto={{ value: proyectoValue, set: setProyectoValue }}
-                equipos={{ value: equiposValue, set: setEquiposValue }}
-                sistemas={{ value: sistemasValue, set: setSistemasValue }}
-                mostrarArbolSistemas={{ value: mostrarArbolSistemas, set: setMostrarArbolSistemas }}
-                elaboradoPor={{ value: elaboradoPorValue, set: setElaboradoPorValue }}
-                revisadoPor={{ value: revisadoPorValue, set: setRevisadoPorValue }}
-                fechaEmision={{ value: fechaEmisionValue, set: setFechaEmisionValue }}
-                images={{ value: imagesValue, set: setImagesValue }}
-
-              />
-            }
-            fileName="reporte.pdf"
+          <Button
+            colorScheme="blue"
+            onClick={onOpen}
             style={{
               textDecoration: "none",
               padding: "10px 20px",
               color: "#fff",
-              backgroundColor: "#007bff",
               borderRadius: "5px",
             }}
           >
-            {({ blob, url, loading, error }) =>
-              loading ? "Generando documento..." : "Descargar PDF"
-            }
-          </PDFDownloadLink>
+            Descargar PDF
+          </Button>
         </div>
       </Flex>
 
@@ -706,6 +737,40 @@ const GenerarPDF = () => {
         />
       </PDFViewer>
 
+      {/* Modal para ingresar nombre del archivo */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Descargar PDF</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl>
+              <FormLabel>Nombre del archivo</FormLabel>
+              <Input
+                placeholder="Ingrese el nombre del archivo"
+                value={fileName}
+                onChange={handleInputChange}
+              />
+            </FormControl>
+            <Checkbox
+              mt={4}
+              isChecked={useDefaultName}
+              onChange={handleCheckboxChange}
+            >
+              Usar nombre generado automáticamente ({format(new Date(), 'yyyy-MM-dd')}-...)
+            </Checkbox>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="red" mr={3} onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button colorScheme="blue" onClick={executeDownloadPDF}>
+              Descargar
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
     </Flex>
   )
