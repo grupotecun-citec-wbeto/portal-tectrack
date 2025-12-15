@@ -44,7 +44,7 @@ import { se } from 'date-fns/locale';
 // CUSTOM IMPORT
 import CasoModalTextArea from './CasoModalTextArea'
 import CasoModalInput from './CasoModalInput'
-import ImgLoader from "./ImgLoader";
+import CasoImageManager from "./CasoImageManager";
 
 
 import { useDataBaseContext } from 'dataBaseContext';
@@ -110,11 +110,7 @@ const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendacione
         fecha.set(dateFormat)
     }
 
-    const [imgLoaders, setImgLoaders] = useState([<ImgLoader key={0} imagesRef={imagesRef} />]);
 
-    const addImgLoader = () => {
-        setImgLoaders([...imgLoaders, <ImgLoader key={imgLoaders.length} imagesRef={imagesRef} />]);
-    };
 
     // ************ useEffect ************
     useEffect(() => {
@@ -185,7 +181,7 @@ const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendacione
                 const diagnosticoSistemas = data[equipoID].diagnostico?.sistemasSelectedJson;
                 const prediagnosticoSistemas = data[equipoID].prediagnostico?.sistemas;
 
-                
+
                 // Si diagnostico.sistemasSelectedJson existe (casos nuevos), usarlo
                 if (typeof diagnosticoSistemas !== 'undefined' && diagnosticoSistemas !== null) {
                     try {
@@ -200,7 +196,7 @@ const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendacione
                 else if (typeof prediagnosticoSistemas !== 'undefined' && prediagnosticoSistemas !== null) {
                     try {
                         // Caso viejo: usar sistemas del prediagnóstico
-                        
+
                         Object.keys(prediagnosticoSistemas).forEach(sistema => {
                             acc.add(sistema);
                         });
@@ -302,10 +298,10 @@ const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendacione
                         placeholder="Ingresar las Recomendaciones"
                     />
 
-                    <Flex 
-                        direction="row" 
-                        align="center" 
-                        justify="flex-start" 
+                    <Flex
+                        direction="row"
+                        align="center"
+                        justify="flex-start"
                         mt="25px"
                         mb="25px"
                         p="15px"
@@ -314,7 +310,7 @@ const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendacione
                         borderLeft="4px solid"
                         borderColor="blue.500"
                     >
-                        <Checkbox 
+                        <Checkbox
                             isChecked={mostrarArbolSistemas.value}
                             onChange={(e) => mostrarArbolSistemas.set(e.target.checked)}
                             size="lg"
@@ -334,13 +330,9 @@ const CasoFormulario = ({ caso_ID, hallazgos, accionesEjecutadas, recomendacione
 
 
 
-                    <Flex direction="column" align="left" justify="center">
-                        <Text fontSize="sm">
-                            Sección de imágenes
-                        </Text>
-                        {imgLoaders}
-                        <Button onClick={addImgLoader} mt="10px" bg="blue.500" _hover={{ bg: "blue.600" }}>Agregar Imagen</Button>
-                    </Flex>
+                    <Box mt={4}>
+                        <CasoImageManager imagesRef={imagesRef} />
+                    </Box>
 
 
                     <Flex direction="row" mt="10px">
