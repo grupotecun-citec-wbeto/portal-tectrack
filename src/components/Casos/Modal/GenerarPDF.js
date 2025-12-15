@@ -167,9 +167,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#FFFFFF",
     padding: 2,
-    //marginBottom: 5,
+    marginBottom: 10, // Added margin bottom for spacing between images in a pair
   },
 });
+
+// Helper to chunk array
+const chunkArray = (array, size) => {
+  const chunked_arr = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunked_arr.push(array.slice(i, i + size));
+  }
+  return chunked_arr;
+}
 
 // Datos de ejemplo
 const reportData = {
@@ -215,6 +224,7 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
     return equipos?.value?.codigos?.[index]?.codigo_finca || "N/D";
   };
 
+  const imageChunks = chunkArray(images.value, 2);
 
   return (
     <Document minPresenceAhead={100}>
@@ -407,7 +417,7 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
             )}
           </View>
         </View>
-        <View style={styles.section} wrap={false}>  
+        <View style={styles.section} wrap={false}>
 
           <View style={styles.section}>
             <Text style={styles.labelSubTitle}>Recomendaciones</Text>
@@ -420,7 +430,7 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
             )}
           </View>
         </View>
-      
+
 
         {/* Cuarta Sección Datos del Técnico */}
         <View style={styles.section} wrap={false} >
@@ -446,27 +456,27 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
 
         <View style={styles.separator} />
 
-        {images.value.map((image, index) => (
-          <View style={{ flexDirection: "column", alignItems: "center", paddingTop: "10px" }} wrap={false} minPresenceAhead={100}>
-
-            <View key={index} style={styles.imageContent} >
-              <Image
-                key={index}
-                src={image.src}
-                style={{
-                  width: 570,
-                  height: 375,
-                  objectFit: "contain"
-                }}
-
-              />
-            </View>
-
+        {imageChunks.map((chunk, chunkIndex) => (
+          <View key={chunkIndex} break={chunkIndex > 0} wrap={false} style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+            {chunk.map((image, imgIndex) => (
+              <View key={imgIndex} style={styles.imageContent}>
+                <Image
+                  src={image.src}
+                  style={{
+                    width: 570,
+                    height: 320, // Reduced height to fit 2 per page
+                    objectFit: "contain"
+                  }}
+                />
+                {image.description?.html && (
+                  <View style={{ marginTop: 2, paddingTop: 4, borderTop: "1pt solid #eee", width: 570 }}>
+                    {parseHTMLtoReactPDF(image.description.html)}
+                  </View>
+                )}
+              </View>
+            ))}
           </View>
         ))}
-
-
-
 
       </Page>
     </Document>
