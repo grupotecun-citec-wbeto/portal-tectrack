@@ -407,7 +407,7 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
             )}
           </View>
         </View>
-        <View style={styles.section} wrap={false}>  
+        <View style={styles.section} wrap={false}>
 
           <View style={styles.section}>
             <Text style={styles.labelSubTitle}>Recomendaciones</Text>
@@ -420,7 +420,7 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
             )}
           </View>
         </View>
-      
+
 
         {/* Cuarta Sección Datos del Técnico */}
         <View style={styles.section} wrap={false} >
@@ -458,8 +458,12 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
                   height: 375,
                   objectFit: "contain"
                 }}
-
               />
+              {image.description?.html && (
+                <View style={{ marginTop: 2, paddingTop: 4, borderTop: "1pt solid #eee", width: 570 }}>
+                  {parseHTMLtoReactPDF(image.description.html)}
+                </View>
+              )}
             </View>
 
           </View>
