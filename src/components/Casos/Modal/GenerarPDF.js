@@ -224,7 +224,7 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
     return equipos?.value?.codigos?.[index]?.codigo_finca || "N/D";
   };
 
-  const imageChunks = chunkArray(images.value, 2);
+  //const imageChunks = chunkArray(images.value, 2);
 
   return (
     <Document minPresenceAhead={100}>
@@ -456,27 +456,30 @@ const MyPDFDocument = ({ caso_ID, hallazgos, accionesEjecutadas, recomendaciones
 
         <View style={styles.separator} />
 
-        {imageChunks.map((chunk, chunkIndex) => (
-          <View key={chunkIndex} break={chunkIndex > 0} wrap={false} style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
-            {chunk.map((image, imgIndex) => (
-              <View key={imgIndex} style={styles.imageContent}>
-                <Image
-                  src={image.src}
-                  style={{
-                    width: 570,
-                    height: 320, // Reduced height to fit 2 per page
-                    objectFit: "contain"
-                  }}
-                />
-                {image.description?.html && (
-                  <View style={{ marginTop: 2, paddingTop: 4, borderTop: "1pt solid #eee", width: 570 }}>
-                    {parseHTMLtoReactPDF(image.description.html)}
-                  </View>
-                )}
-              </View>
-            ))}
+        {images.value.map((image, index) => (
+          <View key={index} wrap={false} style={{ flexDirection: "column", alignItems: "center", paddingTop: "10px" }}>
+
+            <View style={styles.imageContent} >
+              <Image
+                src={image.src}
+                style={{
+                  width: 570,
+                  height: 320,
+                  objectFit: "contain"
+                }}
+              />
+              {image.description?.html && (
+                <View style={{ marginTop: 2, paddingTop: 4, borderTop: "1pt solid #eee", width: 570 }}>
+                  {parseHTMLtoReactPDF(image.description.html)}
+                </View>
+              )}
+            </View>
+
           </View>
         ))}
+
+
+
 
       </Page>
     </Document>
